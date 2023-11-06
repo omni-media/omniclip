@@ -1,0 +1,36 @@
+{
+  "name": "omni-clip",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "run-s clean && run-p typescript importmap",
+    "clean": "rm -rf x && mkdir -p x",
+    "bundle": "rollup x/main.js -p @rollup/plugin-node-resolve --format es --file x/main.bundle.js",
+    "importmap": "importly --host=node_modules < package-lock.json > x/importmap.json",
+    "http": "http-server",
+    "start": "run-p http watch",
+    "typescript": "tsc",
+    "watch": "run-p watch-typescript",
+    "watch-typescript": "tsc -w",
+    "importly": "importly --host=node_modules < package-lock.json > x/importmap.json"
+  },
+  "author": "zenkyuv",
+  "license": "ISC",
+  "devDependencies": {
+    "@benev/turtle": "^0.5.1",
+    "http-server": "^14.1.1",
+    "importly": "^0.2.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "@benev/construct": "^0.0.0-x.4",
+    "@benev/slate": "^0.0.0-dev.20",
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "es-module-shims": "^1.7.0",
+    "lit": "^2.6.1",
+    "rollup": "^3.24.0"
+  }
+}

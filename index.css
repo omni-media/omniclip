@@ -1,0 +1,30 @@
+* {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 1em; }
+::-webkit-scrollbar-thumb:hover { background: #444; }
+
+html, body {
+	font-size: 16px;
+	min-height: 100%;
+
+	color: gray;
+	background: black;
+}
+
+construct-editor {
+	width: 100vw;
+	height: 100vh;
+
+	--alpha: yellow;
+	--bravo: lime;
+	--bg-a: #181818;
+	--bg-b: #000;
+	--bg-c: #333;
+	--taskbar-size: 1em;
+}

@@ -1,0 +1,24 @@
+{
+	"compilerOptions": {
+		"strict": true,
+		"rootDir": "s",
+		"outDir": "x",
+		"target": "es2019",
+		"lib": ["esnext", "dom", "webworker"],
+		"module": "esnext",
+		"moduleResolution": "node",
+		"experimentalDecorators": true,
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"sourceMap": true,
+		"declaration": true,
+		"skipLibCheck": true,
+	},
+	"include": [
+		"s/**/*.ts",
+		"s/**/*.js"
+	],
+	"exclude": [
+		"s/**/_*"
+	],
+}
