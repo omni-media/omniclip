@@ -3,10 +3,13 @@ import {ConstructEditor, single_panel_layout} from "@benev/construct/x/mini.js"
 
 import {omnislate, OmniContext} from "./slate.js"
 import {AboutPanel} from "./panels/about/panel.js"
+import {TimelinePanel} from "./components/omni-timeline/panel.js"
+import {OmniTimeline} from "./components/omni-timeline/component.js"
 
 omnislate.context = new OmniContext({
 	panels: {
-		AboutPanel
+		AboutPanel,
+		TimelinePanel
 	},
 	layouts: {
 		empty: single_panel_layout("AboutPanel"),
@@ -14,4 +17,4 @@ omnislate.context = new OmniContext({
 	},
 })
 
-register_to_dom({ConstructEditor})
+register_to_dom({ConstructEditor, OmniTimeline})
