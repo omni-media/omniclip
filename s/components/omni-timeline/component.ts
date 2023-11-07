@@ -10,7 +10,7 @@ export const OmniTimeline = omnislate.shadow_component({styles}, use => {
 		for(const track of timeline) {
 			return html`
 				<div>
-					${track.map(item => html`${item.media.type}`)}
+					${track.map(t => html`${t.item}`)}
 				</div>`
 		}
 	}
@@ -21,3 +21,4 @@ export const OmniTimeline = omnislate.shadow_component({styles}, use => {
 		</div>
 	`
 })
+
