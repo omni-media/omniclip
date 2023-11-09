@@ -1,7 +1,7 @@
 import {svg, html} from "@benev/slate"
 import {standard_panel_styles as styles, panel} from "@benev/construct"
 
-import {shadow_view} from "../../slate.js"
+import {shadow_view} from "../../context/slate.js"
 
 export const TimelinePanel = panel({
 	label: "timeline",

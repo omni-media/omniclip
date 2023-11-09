@@ -5,7 +5,7 @@
 		"outDir": "x",
 		"target": "ESNext",
 		"lib": ["esnext", "dom", "webworker"],
-		"module": "ESNext",,
+		"module": "ESNext",
 		"moduleResolution": "node",
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true,
