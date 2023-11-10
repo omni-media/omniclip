@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "cynic node ./x/context/controllers/timeline/controller.test.js",
+    "test": "cynic node ./x/tests.test.js",
     "build": "run-s clean && run-p typescript importmap",
     "clean": "rm -rf x && mkdir -p x",
     "bundle": "rollup x/main.js -p @rollup/plugin-node-resolve --format es --file x/main.bundle.js",

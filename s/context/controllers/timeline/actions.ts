@@ -1,7 +1,10 @@
-import {generate_id, ZipAction} from "@benev/slate"
-import {actionize} from "../../../main.js"
+import {ZipAction} from "@benev/slate/x/watch/zip/action.js"
+import {generate_id} from "@benev/slate/x/tools/generate_id.js"
+
 import {TimelineHelpers} from "./helpers.js"
+import {actionize} from "../../../utils/actionize.js"
 import {Track, TrackItem} from "../../../components/omni-timeline/types.js"
+
 export const timeline_actions = actionize({
 	add_track_item: state => (item: TrackItem, {id}: Track) =>  {
 		const helper = new TimelineHelpers(state.timeline)

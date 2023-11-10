@@ -1,4 +1,4 @@
-import {generate_id} from "@benev/slate"
+import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 
 import {TimelineState} from "../../../types.js"
 
