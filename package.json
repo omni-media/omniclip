@@ -7,7 +7,7 @@
   "scripts": {
     "test": "cynic node ./x/tests.test.js",
     "build": "run-s clean && run-p typescript importmap",
-    "clean": "rm -rf x && mkdir -p x",
+    "clean": "rm -rf x && mkdir x",
     "bundle": "rollup x/main.js -p @rollup/plugin-node-resolve --format es --file x/main.bundle.js",
     "importmap": "importly --host=node_modules < package-lock.json > x/importmap.json",
     "http": "http-server",
