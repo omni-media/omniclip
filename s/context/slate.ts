@@ -1,4 +1,4 @@
-import {SlateFor, ZipAction} from "@benev/slate"
+import {Slate, ZipAction, watch} from "@benev/slate"
 import {slate, Context} from "@benev/construct/x/mini.js"
 
 import {OmniState} from "../types.js"
@@ -7,7 +7,7 @@ import {timeline_state} from "./controllers/timeline/state.js"
 import {timeline_actions} from "./controllers/timeline/actions.js"
 
 export class OmniContext extends Context {
-	#state = this.watch.stateTree<OmniState>({
+	#state =  watch.stateTree<OmniState>({
 		timeline: timeline_state
 	})
 
@@ -24,5 +24,5 @@ export class OmniContext extends Context {
 	}
 }
 
-export const omnislate = slate as SlateFor<OmniContext>
-export const {shadow_component, shadow_view} = omnislate
+export const omnislate = slate as Slate<OmniContext>
+export const {shadow_component, shadow_view, light_view} = omnislate
