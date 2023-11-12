@@ -1,12 +1,17 @@
 import {css} from "@benev/slate"
 
 export const styles = css`
-  input[type="text"]
+  .text-input
   {
     background: transparent;
     border: none;
   }
-  *{
-    color: white;
+  .text-input:focus
+  {
+   outline: none;
+  }
+  .text-editor{
+    border: solid white 1px;
+    padding: 0.5rem;
   }
 `
