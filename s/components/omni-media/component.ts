@@ -1,7 +1,7 @@
 import {html} from "@benev/slate"
 
+import {Media} from "./types.js"
 import {styles} from "./styles.js"
-import {Media} from "../../types.js"
 import {shadow_component} from "../../context/slate.js"
 
 export const OmniMedia = shadow_component({styles}, use => {

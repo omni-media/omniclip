@@ -1,14 +1,5 @@
-import {Track} from "./components/omni-timeline/types.js"
-
-export type MediaType = "Audio" | "Video" | "Image"
+import {Timeline} from "./context/controllers/timeline/types.js"
 
 export interface OmniState {
-	timeline: TimelineState
+	timeline: Timeline
 }
-
-export interface Media {
-	type: MediaType
-	source: string
-}
-
-export type TimelineState = Track[]

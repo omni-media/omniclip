@@ -1,13 +1,14 @@
-import {TimelineState} from "../../../types.js"
+import {XClip} from "./types.js"
+import {Timeline} from "./types.js"
 
 export class TimelineHelpers {
-	constructor(private timeline_state: TimelineState) {}
+	constructor(private timeline: Timeline) {}
 
-	get_track(track_id: string) {
-		return this.timeline_state.find(track => track.id === track_id)
+	get_clip(clip: XClip) {
+		return this.timeline.clips.find(({id}) => id === clip.id)
 	}
 
-	get_track_items(track_id: string) {
-		return this.get_track(track_id)?.track_items
+	get_clips() {
+		return this.timeline.clips
 	}
 }
