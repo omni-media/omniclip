@@ -1,12 +1,13 @@
 import {html} from "@benev/slate"
 
+import {styles} from "./styles.js"
 import {V2} from "../../utils/coordinates_in_rect.js"
-import {light_view} from "../../../../context/slate.js"
+import {shadow_view} from "../../../../context/slate.js"
 import {XClip} from "../../../../context/controllers/timeline/types.js"
 import {calculate_track_clip_length} from "../../utils/calculate_track_clip_length.js"
 import {calculate_closest_track_place} from "../../utils/calculate_closest_track_place.js"
 
-export const Clip = light_view(use => (clip: XClip) => {
+export const Clip = shadow_view({styles}, use => (clip: XClip) => {
 	const {drag, on_drop} = use.context.controllers.timeline
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
 	const {grabbed, hovering} = drag

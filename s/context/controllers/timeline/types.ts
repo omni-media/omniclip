@@ -26,9 +26,11 @@ export interface XClip {
 
 export interface At {
 	coordinates: V2
-	indicator: Element | undefined
+	indicator: Indicator
 }
 
 export interface XTrack {
 	id: string
 }
+
+export type Indicator = "add-track-indicator"

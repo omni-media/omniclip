@@ -1,0 +1,18 @@
+import {css} from "@benev/slate"
+
+export const styles = css`
+	.clip {
+		display: flex;
+		z-index: 1;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5em;
+		background: #201f1f;
+		border-radius: 5px;
+		outline: 1px solid gray;
+		cursor: pointer;
+		position: absolute;
+		top: 0;
+		height: 40px;
+	}
+`
