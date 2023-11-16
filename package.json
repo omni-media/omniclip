@@ -33,6 +33,8 @@
   "dependencies": {
     "@benev/construct": "^0.0.0-x.6",
     "@benev/slate": "^0.0.0-dev.24",
+    "@ffmpeg/ffmpeg": "^0.12.7",
+    "@ffmpeg/util": "^0.12.1",
     "@rollup/plugin-node-resolve": "^15.1.0",
     "es-module-shims": "^1.7.0",
     "lit": "^2.6.1",
