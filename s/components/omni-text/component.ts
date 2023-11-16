@@ -18,7 +18,7 @@ export const OmniText = shadow_component({styles}, use => {
     }
 
 
-    let add_text = function (e: Event): void {
+    let add_text = (e: Event): void => {
         set_text_list(
             [...text_list, base_text]
         )
@@ -26,32 +26,37 @@ export const OmniText = shadow_component({styles}, use => {
     }
 
 
-    let render_editor = function (): TemplateResult {
+    let render_editor = (): TemplateResult => {
         if (!is_active) {
             return html``
         }
         return html`
             <div>
-                    ${TextEditor([{...text_list[active_text]}, update_active_text])}
+                ${TextEditor([{...text_list[active_text]}, update_active_text])}
             </div>
         `
     }
 
-    let update_active_text = function (text: Text): void {
+    let update_active_text = (text: Text): void => {
         let new_text_list = [...text_list]
         new_text_list[active_text] = text
         set_text_list(new_text_list)
     }
 
-    let on_text_input = (e :Event) =>{
-        let new_text : Text = {...text_list[active_text]}
+    let on_text_input = (e: Event) => {
+        let new_text: Text = {...text_list[active_text]}
         let target = e.currentTarget as HTMLFormElement
         new_text['content'] = target.value as string
         update_active_text((new_text))
     }
 
+
     let texts_html = text_list.map((text: Text, index: number) => {
-        let style_string: String = `color:${text.color}; font-size:${text.size}px;width:${text.content.length}ch;`
+        let style_string: String = `color:${text.color};
+                                    font-size:${text.size}px;
+                                    width:${text.content.length}ch;
+                                    left:${text.position_x}px;
+                                    bottom:${text.position_y}px;`
         return html`
             <input type="text"
                    class="text-input"
@@ -68,8 +73,10 @@ export const OmniText = shadow_component({styles}, use => {
     return html`
         <div>
             <button @click="${add_text}" style="color:white;">Add text</button>
+            <div class="video-canvas">
                 ${texts_html}
-                ${render_editor()}
+            </div>
+            ${render_editor()}
         </div>
     `
 })
@@ -87,12 +94,26 @@ const TextEditor = slate.shadow_view({styles}, use => (text: Text, onChange: Fun
         onChange(text)
     }
 
+    let on_property_change = <Key extends keyof Text>(e: Event, attribute: Key) => {
+        let target = e.currentTarget as HTMLFormElement
+        let old_value = text[attribute]
+        text[attribute] = target.value as typeof old_value
+        onChange(text)
+    }
+
     return html`
         <div class="text-editor">
             Color:
-            <input @change="${on_color_change}" type="color" value="${text.color}">
+            <input @input="${on_color_change}" type="color" .value=${text.color}>
             Size
-            <input @change="${on_size_change}" type="number" value="${text.size}">
+            <input @input="${on_size_change}" type="number" .value=${text.size}>
+            X-pos
+            <input @input="${(e: Event) => on_property_change(e, "position_x")}" type="number"
+                   .value=${text.position_x}>
+            Y-pos
+            <input @input="${(e: Event) => on_property_change(e, "position_y")}" type="number"
+                   .value=${text.position_y}>
+
         </div>
     `
 })
