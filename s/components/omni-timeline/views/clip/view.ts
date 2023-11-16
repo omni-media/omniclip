@@ -20,27 +20,31 @@ export const Clip = shadow_view({styles}, use => (clip: XClip) => {
 		})
 	)
 
-	const clip_is_dragged = hovering?.coordinates && grabbed?.id === clip.id
-	if(clip_is_dragged) {
-		const center_of_clip: V2 = [
-			hovering.coordinates[0] - calculate_track_clip_length(clip) / 2,
-			hovering.coordinates[1] - 20
-		]
-		setCords(center_of_clip)
-	}
-
-	const augmented_drop = (e: DragEvent) => {
-		if(hovering) {
-			drag.dropzone.drop(hovering)(e)
+	const drag_events = {
+		clip_drag_listener() {
+			const clip_is_dragged = hovering?.coordinates && grabbed?.id === clip.id
+			if(clip_is_dragged) {
+				const center_of_clip: V2 = [
+					hovering.coordinates[0] - calculate_track_clip_length(clip) / 2,
+					hovering.coordinates[1] - 20
+				]
+				setCords(center_of_clip)
+			}
+		},
+		start(event: DragEvent) {
+			const img = new Image()
+			img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
+			event.dataTransfer?.setDragImage(img, 0, 0)
+			drag.dragzone.dragstart(clip)(event)
+		},
+		drop(event: DragEvent) {
+			if(hovering) {
+				drag.dropzone.drop(hovering)(event)
+			}
 		}
 	}
-	
-	const augmented_drag_start = (event: DragEvent) => {
-		const img = new Image()
-		img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
-		event.dataTransfer?.setDragImage(img, 0, 0)
-		drag.dragzone.dragstart(clip)(event)
-	}
+
+	drag_events.clip_drag_listener()
 
 	return html`
 		<span
@@ -51,8 +55,8 @@ export const Clip = shadow_view({styles}, use => (clip: XClip) => {
 				transform: translate(${x ? x : clip.start_at_position}px, ${y ? y : 0}px);
 			"
 			draggable="true"
-			@drop=${augmented_drop}
-			@dragstart=${augmented_drag_start}
+			@drop=${drag_events.drop}
+			@dragstart=${drag_events.start}
 		>
 			${clip.item.type}
 		</span>
