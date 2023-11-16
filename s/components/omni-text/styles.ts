@@ -5,7 +5,7 @@ export const styles = css`
   {
     background: transparent;
     border: none;
-    position: relative;
+    position: absolute;
   }
   .text-input:focus
   {
@@ -16,6 +16,7 @@ export const styles = css`
     padding: 0.5rem;
   }
   .video-canvas{
+    position: relative;
     width: 600px;
     height: 400px;
     border: 0.25em solid red;
