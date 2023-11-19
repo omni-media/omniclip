@@ -5,20 +5,15 @@ import {V2} from "../../utils/coordinates_in_rect.js"
 import {shadow_view} from "../../../../context/slate.js"
 import {XClip} from "../../../../context/controllers/timeline/types.js"
 import {calculate_track_clip_length} from "../../utils/calculate_track_clip_length.js"
-import {calculate_closest_track_place} from "../../utils/calculate_closest_track_place.js"
+import {calculate_clip_track_placement} from "../../utils/calculate_clip_track_placement.js"
 
 export const Clip = shadow_view({styles}, use => (clip: XClip) => {
 	const {drag, on_drop} = use.context.controllers.timeline
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
 	const {grabbed, hovering} = drag
 
-	use.setup(() => on_drop(({clip: {id}, dropped_at}) => {
-			if(id === clip.id) {
-				const drop_position = calculate_closest_track_place(clip, dropped_at.coordinates, 40)
-				setCords(drop_position!)
-			}
-		})
-	)
+	use.prepare(() => use.element.setAttribute("clip-id", clip.id))
+	use.setup(() => on_drop(() => setCords([null, null])))
 
 	const drag_events = {
 		clip_drag_listener() {
@@ -52,7 +47,7 @@ export const Clip = shadow_view({styles}, use => (clip: XClip) => {
 			?data-grabbed=${grabbed === clip}
 			style="
 				width: ${calculate_track_clip_length(clip)}px;
-				transform: translate(${x ? x : clip.start_at_position}px, ${y ? y : 0}px);
+				transform: translate(${x ? x : clip.start_at_position}px, ${y ? y : calculate_clip_track_placement(clip.track, 40)}px);
 			"
 			draggable="true"
 			@drop=${drag_events.drop}

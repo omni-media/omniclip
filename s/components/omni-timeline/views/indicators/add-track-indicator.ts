@@ -25,7 +25,7 @@ export const AddTrackIndicator = light_view(use => () => {
 			<span class="plus">+</span>
 		</div>
 		<div
-			part="add-track-indicator"
+			data-indicator="add-track"
 			@dragenter=${drag_events.enter}
 			@dragleave=${drag_events.leave}
 			@drop=${drag_events.drop}

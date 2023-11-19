@@ -4,9 +4,9 @@ import {styles} from "./styles.js"
 import {Clip} from "./views/clip/view.js"
 import {Track} from "./views/track/view.js"
 import {shadow_component} from "../../context/slate.js"
-import {DropIndicator} from "./views/indicators/drop-indicator.js"
 import {Indicator} from "../../context/controllers/timeline/types.js"
 import {coordinates_in_rect, V2} from "./utils/coordinates_in_rect.js"
+import {ProposalIndicator} from "./views/indicators/proposal-indicator.js"
 
 export const OmniTimeline = shadow_component({styles}, use => {
 	use.watch(() => use.context.state.timeline)
@@ -14,14 +14,20 @@ export const OmniTimeline = shadow_component({styles}, use => {
 	const dnd = use.context.controllers.timeline.drag
 
 	const augmented_dragover = (event: DragEvent) => {
+		
 		const {clientX, clientY} = event
 		const pointerCoordinates:V2 = [clientX, clientY]
 		const indicator = (event.target as HTMLElement).part.value as Indicator
+		const elements_underneath_hovered_clip = use.shadow.elementsFromPoint(clientX, clientY)
+		const hovered_clip_element = elements_underneath_hovered_clip.find(e => e.getAttribute("clip-id") !== dnd.grabbed?.id)
+		const clip_id = hovered_clip_element ? hovered_clip_element.getAttribute("clip-id") : null
 		const coordinates = coordinates_in_rect(pointerCoordinates, use.element.getBoundingClientRect())
+		const hovered_clip = state.clips.find(({id}) => id === clip_id)
 
 		dnd.dropzone.dragover({
 			coordinates: coordinates!,
-			indicator: indicator
+			indicator: indicator,
+			clip: hovered_clip
 		})(event)
 	}
 
@@ -35,7 +41,7 @@ export const OmniTimeline = shadow_component({styles}, use => {
 		>
 			${render_tracks()}
 			${render_clips()}
-			${DropIndicator()}
+			${ProposalIndicator()}
 		</div>
 	`
 })

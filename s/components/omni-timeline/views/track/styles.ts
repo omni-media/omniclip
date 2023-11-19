@@ -17,7 +17,7 @@ export const styles = css`
 			width: 100%;
 			height: 14px;
 			top: -7px;
-			z-index: 2;
+			z-index: 3;
 		}
 
 		& .indicator {

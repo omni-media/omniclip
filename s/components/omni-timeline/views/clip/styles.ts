@@ -14,5 +14,9 @@ export const styles = css`
 		position: absolute;
 		top: 0;
 		height: 40px;
+
+		&[data-grabbed] {
+			z-index: 2;
+		}
 	}
 `

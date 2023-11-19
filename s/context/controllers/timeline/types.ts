@@ -27,6 +27,7 @@ export interface XClip {
 export interface At {
 	coordinates: V2
 	indicator: Indicator
+	clip: XClip | undefined
 }
 
 export interface XTrack {

@@ -8,7 +8,12 @@ import {actionize} from "../../../utils/actionize.js"
 export const timeline_actions = actionize({
 	set_clip_track: state => (clip: XClip, track: number) => {
 		const helper = new TimelineHelpers(state.timeline)
-		helper.get_clip(clip)!.track = track
+		helper.get_clip(clip.id)!.track = track
+	},
+	set_clip_start_position: state => ({id}: XClip, x: number) => {
+		const helper = new TimelineHelpers(state.timeline)
+		const clip = helper.get_clip(id)
+		clip!.start_at_position = x
 	},
 	add_track: state => () => {
 		state.timeline.tracks.push({id: generate_id()})
