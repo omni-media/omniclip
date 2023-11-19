@@ -23,19 +23,25 @@ export const OmniText = shadow_component({styles}, use => {
         position_y: 0
     }
 
-    const transcode = async () =>{
-        const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/umd'
-        ffmpeg.on('log', ({ message }) => {
-            console.log(message);
-        });
+    const load = async  () =>{
+        const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/esm'
         await ffmpeg.load({
             coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
             wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
         });
-        await ffmpeg.exec(['-t', '10', '-f' ,'lavfi', '-i', 'color=c=black:s=640x480',
-            'libx264', 'output.mp4'])
-        const data : FileData = await ffmpeg.readFile('output.mp4')
-        console.log(URL.createObjectURL(new Blob([Buffer.from(data)], {type: 'video/mp4'})))
+    }
+    const transcode = async () =>{
+        await load()
+        try{
+            await ffmpeg.exec(['-t', '10', '-f' ,'lavfi', '-i', 'color=c=black:s=640x480',
+                'libx264', 'output.mp4'])
+            const data : FileData = await ffmpeg.readFile('output.mp4')
+            // console.log(URL.createObjectURL(new Blob([Buffer.from(data)], {type: 'video/mp4'})))
+        }
+        catch (err){
+            console.log(err)
+        }
+
     }
 
     let add_text = (e: Event): void => {
@@ -93,7 +99,7 @@ export const OmniText = shadow_component({styles}, use => {
     })
     return html`
         <div>
-            Test:
+            <button @click="${load}">Load core</button><br/>
             <button @click="${transcode}" style="color:white;" >Generate blank video url</button><br/>
             <button @click="${add_text}" style="color:white;">Add text</button>
             <div class="video-canvas">
