@@ -31,7 +31,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@benev/construct": "^0.0.0-x.9",
+    "@benev/construct": "^0.0.0-x.13",
     "@benev/slate": "^0.0.0-dev.25",
     "@rollup/plugin-node-resolve": "^15.1.0",
     "es-module-shims": "^1.7.0",
