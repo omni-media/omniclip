@@ -12,7 +12,6 @@ export const Clip = shadow_view({styles}, use => (clip: XClip) => {
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
 	const {grabbed, hovering} = drag
 
-	use.prepare(() => use.element.setAttribute("clip-id", clip.id))
 	use.setup(() => on_drop(() => setCords([null, null])))
 
 	const drag_events = {

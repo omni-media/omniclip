@@ -20,7 +20,7 @@ export class OmniContext extends Context {
 	})
 
 	controllers = {
-		timeline: new Timeline(this.actions.timeline_actions, this.state.timeline)
+		timeline: new Timeline(this.actions.timeline_actions)
 	}
 }
 

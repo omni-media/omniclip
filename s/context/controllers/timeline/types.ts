@@ -1,5 +1,6 @@
 import {Media} from "../../../components/omni-media/types.js"
-import {V2} from "../../../components/omni-timeline/utils/coordinates_in_rect.js"
+
+export type V2 = [number, number]
 
 export interface Timeline {
 	length: number
@@ -18,16 +19,21 @@ export interface XClip {
 	id: string
 	item: Media | Text
 	start_at_position: number
-	length: number
+	duration: number
 	start: number
 	end: number
+	track: number
+}
+
+export interface Timecode {
+	timeline_start: number
+	timeline_end: number
 	track: number
 }
 
 export interface At {
 	coordinates: V2
 	indicator: Indicator
-	clip: XClip | undefined
 }
 
 export interface XTrack {

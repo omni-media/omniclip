@@ -10,6 +10,12 @@ export const timeline_actions = actionize({
 		const helper = new TimelineHelpers(state.timeline)
 		helper.get_clip(clip.id)!.track = track
 	},
+	set_clip_duration: state => ({id}: XClip, duration: number) => {
+		const helper = new TimelineHelpers(state.timeline)
+		const clip = helper.get_clip(id)
+		clip!.duration = duration
+		clip!.end = clip!.start + duration
+	},
 	set_clip_start_position: state => ({id}: XClip, x: number) => {
 		const helper = new TimelineHelpers(state.timeline)
 		const clip = helper.get_clip(id)
