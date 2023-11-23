@@ -6,6 +6,7 @@ export interface Timeline {
 	length: number
 	clips: XClip[]
 	tracks: XTrack[]
+	zoom: number
 }
 
 export interface Text {

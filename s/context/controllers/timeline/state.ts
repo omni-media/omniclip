@@ -4,6 +4,7 @@ import {Timeline} from "./types.js"
 
 export const timeline_state: Timeline = {
 	length: 1000,
+	zoom: 0,
 	tracks: [
 		{id: generate_id()},
 		{id: generate_id()},
@@ -12,22 +13,22 @@ export const timeline_state: Timeline = {
 	],
 	clips: [
 		{id: generate_id(), item: {type: "Audio", source: ""},
-			start: 10, end: 70, track: 0, start_at_position: 50, duration: 60
+			start: 1000, end: 7000, track: 0, start_at_position: 5000, duration: 6000
 		},
 		{id: generate_id(),item: {type: "Audio", source: ""}, 
-			start: 70, end: 150, track: 0, start_at_position: 120, duration: 80
+			start: 7000, end: 15000, track: 0, start_at_position: 12000, duration: 8000
 		},
 		{id: generate_id(),item: {type: "Text", content: "", color: "", size: 4},
-			start: 70, end: 120, track: 1, start_at_position: 0, duration: 50
+			start: 7000, end: 12000, track: 1, start_at_position: 0, duration: 5000
 		},
 		{id: generate_id(),item: {type: "Video", source: ""},
-			start: 0, end: 60, track: 1, start_at_position: 50, duration: 60
+			start: 0, end: 6000, track: 1, start_at_position: 5000, duration: 6000
 		},
 		{id: generate_id(),item: {type: "Image", source: ""},
-			start: 200, end: 300, track: 2, start_at_position: 200, duration: 100
+			start: 20000, end: 30000, track: 2, start_at_position: 20000, duration: 10000
 		},
 		{id: generate_id(),item: {type: "Video", source: ""},
-			start: 400, end: 450, track: 2, start_at_position: 350, duration: 50
+			start: 40000, end: 45000, track: 2, start_at_position: 35000, duration: 5000
 		}
 	]
 }
