@@ -1,11 +1,12 @@
 import {V2} from "./coordinates_in_rect.js"
+import {calculate_clip_width} from "./calculate_clip_width.js"
 import {XClip} from "../../../context/controllers/timeline/types.js"
-import {calculate_track_clip_length} from "./calculate_track_clip_length.js"
 
 export function calculate_closest_track_place(
 	clip: XClip,
 	cords: V2,
-	track_height: number
+	track_height: number,
+	zoom: number
 ): V2 {
 
 	const [x, y] = cords
@@ -13,7 +14,7 @@ export function calculate_closest_track_place(
 	const track_index = Math.floor(y / 40)
 	const track_start = track_index * track_height
 
-	const width = calculate_track_clip_length(clip)
+	const width = calculate_clip_width(clip, zoom)
 	const position = {
 		y: track_start,
 		x: x - width / 2
