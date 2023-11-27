@@ -1,0 +1,62 @@
+name: 🚀 release to github pages
+on:
+  push:
+    branches: ["release"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: 🔔 checkout
+      uses: actions/checkout@v3
+
+    - name: 🔧 setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: 📦 install dependencies
+      run: npm ci
+
+    - name: 🔨 build
+      run: npm run build
+
+    - name: 🚚 tracking ignored stuff
+      run: |
+        sed -i.bak -e '/^\/node_modules$/d' .gitignore
+        sed -i.bak -e '/^\/x$/d' .gitignore
+
+    - name: 🗃️ reconstitute node_modules for production
+      run: |
+        rm -rf node_modules
+        npm ci --omit=dev
+
+    - name: 📝 configure pages
+      uses: actions/configure-pages@v2
+
+    - name: 📤 upload pages artifact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: './dist'
+
+    - name: 🚀 deploy to github pages
+      id: deployment
+      uses: actions/deploy-pages@v1

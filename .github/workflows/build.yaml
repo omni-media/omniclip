@@ -1,0 +1,29 @@
+name: build
+on:
+  push:
+    branches:
+    - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: 🔔 checkout
+      uses: actions/checkout@v3
+
+    - name: 🔧 setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: 📦 install dependencies
+      run: npm ci
+
+    - name: 🔨 build
+      run: npm run build
