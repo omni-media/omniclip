@@ -8,7 +8,7 @@ on:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -32,7 +32,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18'
-    
+
     - name: 📦 install dependencies
       run: npm ci
 
@@ -49,13 +49,19 @@ jobs:
         rm -rf node_modules
         npm ci --omit=dev
 
+    - name: 🗃️ copy files
+      run: |
+        rm -rf x/node_modules x/s
+        cp -r node_modules/ x/
+        cp -r s/ x/
+
     - name: 📝 configure pages
       uses: actions/configure-pages@v2
 
     - name: 📤 upload pages artifact
       uses: actions/upload-pages-artifact@v1
       with:
-        path: './dist'
+        path: '.'
 
     - name: 🚀 deploy to github pages
       id: deployment
