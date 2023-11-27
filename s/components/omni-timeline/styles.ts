@@ -11,7 +11,7 @@ export const styles = css`
 		display: flex;
 		flex-direction: column;
 
-		& .box-relative {
+		& .timeline-relative {
 			position: relative;
 		}
 

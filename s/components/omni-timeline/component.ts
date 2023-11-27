@@ -3,6 +3,7 @@ import {html} from "@benev/slate"
 import {styles} from "./styles.js"
 import {Clip} from "./views/clip/view.js"
 import {Track} from "./views/track/view.js"
+import {Toolbar} from "./views/toolbar/view.js"
 import {TimeRuler} from "./views/time-ruler/view.js"
 import {shadow_component} from "../../context/slate.js"
 import {Indicator} from "../../context/controllers/timeline/types.js"
@@ -19,7 +20,7 @@ export const OmniTimeline = shadow_component({styles}, use => {
 		const {clientX, clientY} = event
 		const pointerCoordinates:V2 = [clientX, clientY]
 		const indicator = (event.target as HTMLElement).part.value as Indicator
-		const timeline = use.shadow.querySelector(".timeline")
+		const timeline = use.shadow.querySelector(".timeline-relative")
 		const coordinates = coordinates_in_rect(pointerCoordinates, timeline!.getBoundingClientRect())
 
 		dnd.dropzone.dragover({
@@ -35,12 +36,12 @@ export const OmniTimeline = shadow_component({styles}, use => {
 		<div
 			@dragover=${augmented_dragover}
 			class="timeline"
-			style="width: ${calculate_timeline_width(state.clips)}px"
 		>
+			${Toolbar([])}
 			${TimeRuler([])}
 			<div
 				style="width: ${calculate_timeline_width(state.clips)}px"
-				class=box-relative>
+				class=timeline-relative>
 				${render_tracks()}
 				${render_clips()}
 				${ProposalIndicator()}

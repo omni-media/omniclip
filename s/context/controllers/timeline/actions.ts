@@ -24,6 +24,12 @@ export const timeline_actions = actionize({
 	add_track: state => () => {
 		state.timeline.tracks.push({id: generate_id()})
 	},
+	zoom_in: state => () => {
+		state.timeline.zoom += 1
+	},
+	zoom_out: state => () => {
+		state.timeline.zoom -= 1
+	}
 })
 
 export type TimelineActions = ZipAction.Callable<typeof timeline_actions>
