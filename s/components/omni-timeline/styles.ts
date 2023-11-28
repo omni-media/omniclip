@@ -22,6 +22,12 @@ export const styles = css`
 			background: #0080002e;
 			border-radius: 5px;
 			top: 0;
+			
+			&[data-push-clips] {
+				width: 10px;
+				z-index: 1;
+				outline: 1px green solid;
+			}
 		}
 	}
 `

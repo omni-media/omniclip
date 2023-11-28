@@ -17,6 +17,7 @@ export const styles = css`
 
 		&[data-grabbed] {
 			z-index: 2;
+			opacity: 0.5;
 		}
 	}
 `

@@ -41,4 +41,13 @@ export interface XTrack {
 	id: string
 }
 
+export interface ProposedTimecode {
+	proposed_place: {
+		start_at_position: number
+		track: number
+	}
+	duration: number | null
+	clips_to_push: XClip[] | null
+}
+
 export type Indicator = "add-track-indicator"

@@ -1,19 +1,21 @@
 import {html} from "@benev/slate"
 
-import {V2} from "../../utils/coordinates_in_rect.js"
 import {light_view} from "../../../../context/slate.js"
 import {calculate_clip_width} from "../../utils/calculate_clip_width.js"
-import {At, XClip} from "../../../../context/controllers/timeline/types.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
 import {calculate_clip_track_placement} from "../../utils/calculate_clip_track_placement.js"
+import {At, ProposedTimecode, XClip} from "../../../../context/controllers/timeline/types.js"
 
 export const ProposalIndicator = light_view(use => () => {
 	const controller = use.context.controllers.timeline
 	const actions = use.context.actions.timeline_actions
 	const zoom = use.context.state.timeline.zoom
 	const {drag: {hovering, grabbed}, on_drop} = controller
-	const [[start_position, track], setProposedPlace, getProposedPlace] = use.state<V2>([0, 0])
-	const [shrinkedSize, setShrinkedSize, getShrinkedSize] = use.state<null | number>(null)
+	const [proposedTimecode, setProposedTimecode, getProposedTimecode] = use.state<ProposedTimecode>({
+		proposed_place: {track: 0, start_at_position: 0},
+		duration: null,
+		clips_to_push: null
+	})
 
 	function translate_to_timecode(grabbed: XClip, hovering: At) {
 		const baseline_zoom = use.context.state.timeline.zoom
@@ -30,31 +32,40 @@ export const ProposalIndicator = light_view(use => () => {
 	}
 
 	use.setup(() => on_drop(({grabbed, dropped_at}) => {
-		const [start_position, track] = getProposedPlace()
-		const shrinkedSize = getShrinkedSize()
-		controller.set_clip_timecode(grabbed, start_position, track)
+		const proposed_timecode = getProposedTimecode()
+		controller.set_proposed_timecode(grabbed, proposed_timecode)
 		if(dropped_at.indicator === "add-track-indicator") {actions.add_track()}
-		if(shrinkedSize) {actions.set_clip_duration(grabbed, shrinkedSize)}
 	}))
 
 	if(hovering && grabbed) {
 		const timecode = translate_to_timecode(grabbed, hovering)
-		const {start_position, track, shrinked_size} = use.context.controllers.timeline
-		.calculate_proposed_clip_placement(
+		const proposed_timecode = use.context.controllers.timeline
+		.calculate_proposed_timecode(
 			timecode,
 			grabbed!.id,
 			use.context.state.timeline
 		)
-		setShrinkedSize(shrinked_size)
-		setProposedPlace([start_position, track])
+		setProposedTimecode(proposed_timecode)
 	}
 
 	return html`
 		<div
+			?data-push-clips=${proposedTimecode?.clips_to_push}
 			style="
 				display: ${grabbed ? "block" : "none"};
-				width: ${shrinkedSize ? shrinkedSize * Math.pow(2, zoom) : grabbed ? calculate_clip_width(grabbed, zoom) : 0}px;
-				transform: translate(${calculate_start_position(start_position, zoom)}px, ${calculate_clip_track_placement(track, 40)}px);
+				width: ${
+					proposedTimecode.clips_to_push
+					? 0
+					: proposedTimecode.duration
+					? proposedTimecode.duration * Math.pow(2, zoom)
+					: grabbed
+					? calculate_clip_width(grabbed, zoom)
+					: 0
+				}px;
+				transform: translate(
+					${calculate_start_position(proposedTimecode.proposed_place.start_at_position, zoom)}px,
+					${calculate_clip_track_placement(proposedTimecode!.proposed_place.track, 40)}px
+				);
 			"
 			data-indicator="drop-indicator"
 			class="drop-indicator">
