@@ -40,7 +40,7 @@ export const OmniTimeline = shadow_component({styles}, use => {
 			${Toolbar([])}
 			${TimeRuler([])}
 			<div
-				style="width: ${calculate_timeline_width(state.clips)}px"
+				style="width: ${calculate_timeline_width(state.clips, state.zoom)}px"
 				class=timeline-relative>
 				${render_tracks()}
 				${render_clips()}

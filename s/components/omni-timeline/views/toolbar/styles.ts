@@ -18,4 +18,12 @@ export const styles = css`
 		height: 15px;
 		cursor: pointer;
 	}
+
+	button[disabled] {
+		opacity: 0.5;
+
+		& svg {
+			cursor: not-allowed;
+		}
+	}
 `

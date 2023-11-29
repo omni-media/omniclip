@@ -17,7 +17,7 @@ export const styles = css`
 
 		& .drop-indicator {
 			height: 40px;
-			outline: green dotted 2px;
+			border: green dotted 2px;
 			position: absolute;
 			background: #0080002e;
 			border-radius: 5px;
@@ -26,7 +26,8 @@ export const styles = css`
 			&[data-push-clips] {
 				width: 10px;
 				z-index: 1;
-				outline: 1px green solid;
+				border: 1px green solid;
+				left: -0.5px;
 			}
 		}
 	}

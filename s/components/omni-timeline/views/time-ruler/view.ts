@@ -6,13 +6,14 @@ import {convert_ms_to_hms} from "./utils/convert_ms_to_hms.js"
 import {calculate_timeline_width} from "../../utils/calculate_timeline_width.js"
 
 export const TimeRuler = shadow_view({styles}, use => () => {
-	const timeline_width = calculate_timeline_width(use.context.state.timeline.clips)
 	const zoom = use.context.state.timeline.zoom
+	const timeline_width = calculate_timeline_width(use.context.state.timeline.clips, zoom)
 
 	const generate_time_codes = () => {
 		const time_codes = []
 		const second = 1000
-		const offset = second * Math.pow(2, zoom)
+		let offset = second * Math.pow(2, zoom)
+		offset += Math.pow(2, -zoom)
 
 		for(let time_code = 0; time_code <= timeline_width; time_code+=offset) {
 			time_codes.push({

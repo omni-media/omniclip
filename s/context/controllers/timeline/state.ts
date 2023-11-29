@@ -4,7 +4,7 @@ import {Timeline} from "./types.js"
 
 export const timeline_state: Timeline = {
 	length: 1000,
-	zoom: -4,
+	zoom: -3,
 	tracks: [
 		{id: generate_id()},
 		{id: generate_id()},
