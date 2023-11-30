@@ -6,36 +6,31 @@
   "type": "module",
   "scripts": {
     "test": "cynic node ./x/tests.test.js",
-    "build": "run-s clean && run-p typescript importmap",
-    "clean": "rm -rf x && mkdir -p x",
-    "bundle": "rollup x/main.js -p @rollup/plugin-node-resolve --format es --file x/main.bundle.js",
-    "importmap": "importly --host=node_modules < package-lock.json > x/importmap.json",
-    "http": "http-server",
-    "start": "run-p http watch",
-    "typescript": "tsc",
-    "watch": "run-p watch-typescript",
-    "watch-typescript": "tsc -w",
-    "importly": "importly --host=node_modules < package-lock.json > x/importmap.json"
+    "build": "turtle-standard",
+    "start": "turtle-standard-watch"
   },
   "author": "zenkyuv",
   "license": "ISC",
   "devDependencies": {
     "@benev/turtle": "^0.5.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
     "@types/chai": "^4.3.10",
     "chai": "^4.3.10",
+    "chokidar": "^3.5.3",
+    "chokidar-cli": "^3.0.0",
     "cynic": "^0.2.1",
     "http-server": "^14.1.1",
-    "importly": "^0.2.0",
+    "importly": "^0.2.3",
     "jest": "^29.7.0",
     "npm-run-all": "^4.1.5",
-    "typescript": "^4.9.5"
+    "rollup": "^4.6.1",
+    "terser": "^5.24.0",
+    "typescript": "^5.3.2"
   },
   "dependencies": {
     "@benev/construct": "^0.0.0-x.13",
     "@benev/slate": "^0.0.0-dev.25",
-    "@rollup/plugin-node-resolve": "^15.1.0",
-    "es-module-shims": "^1.7.0",
-    "lit": "^2.6.1",
-    "rollup": "^3.24.0"
+    "es-module-shims": "^1.8.2",
+    "lit": "^2.6.1"
   }
 }

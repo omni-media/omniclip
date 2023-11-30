@@ -9,5 +9,6 @@ export function calculate_timeline_width (clips: XClip[], zoom: number) {
 		}
 	})[0]
 	const length = ((last_clip.start_at_position + last_clip.duration) * Math.pow(2, zoom)) * -zoom + last_clip.duration / 5
+	//if length is already 3x the last clip position then stop zoom out
 	return length
 }
