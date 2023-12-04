@@ -51,3 +51,4 @@ export interface ProposedTimecode {
 }
 
 export type Indicator = "add-track-indicator"
+export type Status = "render" | "decode" | "demux" | "fetch"
