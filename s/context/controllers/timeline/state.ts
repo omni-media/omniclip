@@ -3,6 +3,12 @@ import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 import {Timeline} from "./types.js"
 
 export const timeline_state: Timeline = {
+	timecode: {
+		hours: 0,
+		minutes: 0,
+		seconds: 0,
+		milliseconds: 0
+	},
 	length: 1000,
 	zoom: -3,
 	tracks: [

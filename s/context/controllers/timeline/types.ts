@@ -3,6 +3,7 @@ import {Media} from "../../../components/omni-media/types.js"
 export type V2 = [number, number]
 
 export interface Timeline {
+	timecode: Timecode
 	length: number
 	clips: XClip[]
 	tracks: XTrack[]
@@ -27,6 +28,13 @@ export interface XClip {
 }
 
 export interface Timecode {
+	milliseconds: number
+	seconds: number
+	minutes: number
+	hours: number
+}
+
+export interface ClipTimecode {
 	timeline_start: number
 	timeline_end: number
 	track: number

@@ -5,10 +5,37 @@ import {shadow_view} from "../../../../context/slate.js"
 import {Status} from "../../../../context/controllers/timeline/types.js"
 
 export const MediaPlayer = shadow_view({styles}, use => () => {
+	use.watch(() => use.context.state.timeline)
 	const [videoCodec, setVideoCodec] = use.state("avc")
 	const [rendererName, setRendererName] = use.state("2d")
+	const [isVideoPlaying, setIsVideoPlaying] = use.state(false)
+	const [isVideoMuted, setIsVideoMuted] = use.state(false)
 
-	const {canvasElement, status} = use.init(() => {
+	const {canvasElement, status, video} = use.init(() => {
+		const video = document.createElement("video")
+		video.src = `${new URL("./bbb_video_avc_frag.mp4", import.meta.url)}`
+		video.innerHTML = `
+			<source
+				type="video/mp4"
+				src="${new URL("./bbb_video_avc_frag.mp4", import.meta.url)}" 
+			/>
+		`
+		video.addEventListener(
+			"play",
+			() => {
+				changeButtonState("playpause")
+			},
+			false,
+		)
+
+		video.addEventListener(
+			"pause",
+			() => {
+				changeButtonState("playpause")
+			},
+			false,
+		)
+
 		const canvasElement = document.createElement("canvas")
 		const fetch = document.createElement("tr")
 		fetch.innerHTML = `
@@ -36,7 +63,7 @@ export const MediaPlayer = shadow_view({styles}, use => () => {
 			decode,
 			render
 		}
-		return [{canvasElement, status}, () => {}]
+		return [{canvasElement, status, video}, () => {}]
 	})
 
 	const setStatus = (message: MessageEvent<any>) => {
@@ -52,6 +79,28 @@ export const MediaPlayer = shadow_view({styles}, use => () => {
 		worker.addEventListener("message", setStatus)
 		worker.postMessage({dataUri, rendererName, canvas}, [canvas])
 	}
+
+	const changeButtonState = (type: "playpause" | "mute") => {
+		if (type === "playpause") {
+			if (video.paused || video.ended) {
+				setIsVideoPlaying(false)
+			} else {
+				setIsVideoPlaying(true)
+			}
+		} else if (type === "mute") {
+			setIsVideoMuted(video.muted ? true : false)
+		}
+	}
+	
+	const play_or_pause = () => {
+		if (video.paused || video.ended) {
+			video.play()
+		} else {
+			video.pause()
+		}
+	}
+
+	video.currentTime = use.context.state.timeline.timecode.seconds
 
 	return html`
 		<p>
@@ -144,7 +193,18 @@ export const MediaPlayer = shadow_view({styles}, use => () => {
 			${status.decode}
 			${status.render}
 		</table>
-
+		<figure>
+			${video}
+			<div id="video-controls" class="controls">
+				<button @click=${play_or_pause} id="playpause" type="button" data-state="${isVideoPlaying ? 'pause' : 'play'}">Play/Pause</button>
+				<button id="stop" type="button" data-state="stop">Stop</button>
+				<button id="mute" type="button" data-state="${isVideoMuted ? 'unmute' : 'mute'}">Mute/Unmute</button>
+				<button id="volinc" type="button" data-state="volup">Vol+</button>
+				<button id="voldec" type="button" data-state="voldown">Vol-</button>
+				<button id="fs" type="button" data-state="go-fullscreen">Fullscreen</button>
+			</div>
+		</figure>
 		${canvasElement}
+		<div>${use.context.state.timeline.timecode}</div>
 	`
 })
