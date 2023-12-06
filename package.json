@@ -28,8 +28,8 @@
     "typescript": "^5.3.2"
   },
   "dependencies": {
-    "@benev/construct": "^0.0.0-x.13",
-    "@benev/slate": "^0.0.0-dev.25",
+    "@benev/construct": "^0.0.0-x.14",
+    "@benev/slate": "^0.0.0",
     "es-module-shims": "^1.8.2",
     "lit": "^2.6.1",
     "mp4box": "^0.5.2"
