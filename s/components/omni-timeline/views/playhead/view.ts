@@ -10,23 +10,43 @@ export const Playhead = shadow_view({styles}, use => (coordinates: V2) => {
 	const state = use.context.state.timeline
 	const actions = use.context.actions.timeline_actions
 	const playhead_drag = use.context.controllers.timeline.playhead_drag
-	const [onPlayingLoop, setOnPlayingLoop] = use.state<number>(0)
 	const [_lastTime, setLastTime, getLastTime] = use.state(0)
 
-	const publish_on_playing_loop = () => {
-		const clip_relative_to_timecode = controller.get_clip_relative_to_timecode(state)
-		const lastTime = getLastTime()
-		const now = performance.now()
-		const elapsed_time = now - lastTime
-		actions.increase_timecode(elapsed_time)
-		controller.on_playing.publish(clip_relative_to_timecode)
-		setOnPlayingLoop(requestAnimationFrame(publish_on_playing_loop))
-		setLastTime(now)
-	}
+	use.setup(() => {
+		let on_playing_active = true
+		let on_playhead_drag_active = true
 
-	if(state.is_playing) {
-		publish_on_playing_loop()
-	} else cancelAnimationFrame(onPlayingLoop)
+		const on_playing_loop = () => {
+			if(use.context.state.timeline.is_playing) {
+				const clip_relative_to_timecode = controller.get_clip_relative_to_timecode(state)
+				const lastTime = getLastTime()
+				const now = performance.now()
+				const elapsed_time = now - lastTime
+				actions.increase_timecode(elapsed_time)
+				controller.on_playing.publish(clip_relative_to_timecode)
+				setLastTime(now)
+			}
+			if(on_playing_active)
+				requestAnimationFrame(on_playing_loop)
+		}
+
+		const on_playhead_drag = () => {
+			if(use.context.controllers.timeline.playhead_drag.hovering) {
+				controller.on_playhead_drag.publish(0)
+			}
+			if(on_playhead_drag_active) {
+				requestAnimationFrame(() => setTimeout(on_playhead_drag, 100))
+			}
+		}
+
+		on_playing_loop()
+		on_playhead_drag()
+
+		return () => {
+			on_playing_active = false
+			on_playhead_drag_active = false
+		}
+	})
 
 	const translate_to_timecode = (x: number) => {
 		const zoom = use.context.state.timeline.zoom
