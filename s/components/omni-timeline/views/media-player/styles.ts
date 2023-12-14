@@ -2,8 +2,7 @@ import {css} from "@benev/slate"
 
 export const styles = css`
 	canvas {
-		width: 640px;
-		height: 360px;
+		width: 100%;
 	}
 
 	figure {

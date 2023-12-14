@@ -2,16 +2,23 @@ import {pub} from "@benev/slate/x/tools/pub.js"
 import {ShockDragDrop} from "@benev/construct/x/tools/shockdrop/drag_drop.js"
 
 import {TimelineActions} from "./actions.js"
-import {Timeline as TimelineState} from "./types.js"
-import {At, ProposedTimecode, Timecode, XClip} from "./types.js"
+import {At, ProposedTimecode, V2, XClip} from "./types.js"
+import {VideoOrchestrator} from "./tools/video-orchestrator.js"
+import {ClipTimecode, XTimeline as TimelineState} from "./types.js"
 
 export class Timeline {
 	drag = new ShockDragDrop<XClip, At> ({handle_drop: (_event: DragEvent, grabbed, dropped_at) => this.on_drop.publish({grabbed, dropped_at})})
+	playhead_drag = new ShockDragDrop<boolean, V2>({handle_drop: (_event: DragEvent) => {}})
 	on_drop = pub<{grabbed: XClip, dropped_at: At}>()
+	on_playhead_drag = pub()
+	
+	VideoOrchestrator: VideoOrchestrator
+	
+	constructor(private timeline_actions: TimelineActions) {
+		this.VideoOrchestrator = new VideoOrchestrator(timeline_actions)
+	}
 
-	constructor(private timeline_actions: TimelineActions) {}
-
-	calculate_proposed_timecode({timeline_end, timeline_start, track}: Timecode, grabbed_clip_id: string, state: TimelineState) {
+	calculate_proposed_timecode({timeline_end, timeline_start, track}: ClipTimecode, grabbed_clip_id: string, state: TimelineState) {
 		const clips_to_propose_to = this.#exclude_grabbed_clip_from_proposals(grabbed_clip_id, state.clips)
 		const track_clips = clips_to_propose_to.filter(clip => clip.track === track)
 		const clip_before = this.#get_clips_positioned_before_grabbed_clip(track_clips, timeline_start)[0]

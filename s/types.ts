@@ -1,5 +1,5 @@
-import {Timeline} from "./context/controllers/timeline/types.js"
+import {XTimeline} from "./context/controllers/timeline/types.js"
 
 export interface OmniState {
-	timeline: Timeline
+	timeline: XTimeline
 }

@@ -29,6 +29,18 @@ export const timeline_actions = actionize({
 	},
 	zoom_out: state => () => {
 		state.timeline.zoom -= 0.5
+	},
+	set_timecode: state => (timecode: number) => {
+		state.timeline.timecode = timecode
+	},
+	increase_timecode: state => (by_milliseconds: number) => {
+		state.timeline.timecode += by_milliseconds
+	},
+	set_is_playing: state => (is_playing: boolean) => {
+		state.timeline.is_playing = is_playing
+	},
+	toggle_is_playing: state => () => {
+		state.timeline.is_playing = !state.timeline.is_playing
 	}
 })
 

@@ -1,7 +1,7 @@
-import {Timeline} from "./types.js"
+import {XTimeline} from "./types.js"
 
 export class TimelineHelpers {
-	constructor(private timeline: Timeline) {}
+	constructor(private timeline: XTimeline) {}
 
 	get_clip(id: string) {
 		return this.timeline.clips.find(clip => clip.id === id)
