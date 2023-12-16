@@ -6,6 +6,23 @@ import {TimelineHelpers} from "./helpers.js"
 import {actionize} from "../../../utils/actionize.js"
 
 export const timeline_actions = actionize({
+	add_text_clip: state => () => {
+		const clip: XClip = {
+			id: generate_id(),
+			item: {
+				type: "Text",
+				content: "something",
+				size: 5,
+				color: "white"
+			},
+			start_at_position: 1000,
+			duration: 5000,
+			start: 0,
+			end: 5000,
+			track: 0
+		}
+		state.timeline.clips.push(clip)
+	},
 	set_clip_track: state => (clip: XClip, track: number) => {
 		const helper = new TimelineHelpers(state.timeline)
 		helper.get_clip(clip.id)!.track = track
