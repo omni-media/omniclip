@@ -6,8 +6,9 @@
   "type": "module",
   "scripts": {
     "test": "cynic node ./x/tests.test.js",
-    "build": "turtle-standard",
-    "start": "turtle-standard-watch"
+    "build": "turtle-standard && run-p copy-coi",
+    "start": "turtle-standard-watch",
+		"copy-coi": "cp node_modules/coi-serviceworker/coi-serviceworker.js x/"
   },
   "author": "zenkyuv",
   "license": "ISC",
@@ -30,6 +31,9 @@
   "dependencies": {
     "@benev/construct": "^0.0.0-x.14",
     "@benev/slate": "^0.0.0",
+    "@ffmpeg/ffmpeg": "^0.12.9",
+    "@ffmpeg/util": "^0.12.1",
+    "coi-serviceworker": "^0.1.7",
     "es-module-shims": "^1.8.2",
     "lit": "^2.6.1",
     "mp4box": "^0.5.2"

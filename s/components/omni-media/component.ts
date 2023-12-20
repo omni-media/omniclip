@@ -5,7 +5,7 @@ import {styles} from "./styles.js"
 import {shadow_component} from "../../context/slate.js"
 
 export const OmniMedia = shadow_component({styles}, use => {
-	const raw_media = use.state<Media[]>([{type: "Audio", source: ""}])
+	const raw_media = use.state<Media[]>([{type: "Audio", uri: ""}])
 	return html`
 		<div>
 			IMPORT FILE
