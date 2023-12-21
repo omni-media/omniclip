@@ -8,7 +8,7 @@
     "test": "cynic node ./x/tests.test.js",
     "build": "turtle-standard && run-p copy-coi",
     "start": "turtle-standard-watch",
-		"copy-coi": "cp node_modules/coi-serviceworker/coi-serviceworker.js x/"
+    "copy-coi": "cp node_modules/coi-serviceworker/coi-serviceworker.js x/"
   },
   "author": "zenkyuv",
   "license": "ISC",
@@ -16,6 +16,7 @@
     "@benev/turtle": "^0.5.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@types/chai": "^4.3.10",
+    "@types/wicg-file-system-access": "^2023.10.4",
     "chai": "^4.3.10",
     "chokidar": "^3.5.3",
     "chokidar-cli": "^3.0.0",

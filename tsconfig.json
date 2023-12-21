@@ -13,6 +13,7 @@
 		"sourceMap": true,
 		"declaration": true,
 		"skipLibCheck": true,
+		"types": ["@types/wicg-file-system-access"]
 	},
 	"include": [
 		"s/**/*.ts",
