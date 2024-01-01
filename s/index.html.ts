@@ -7,7 +7,10 @@ export default template(async basic => {
 		path,
 		css: "index.css",
 		title: "omni-clip",
-		head: startup_scripts_with_dev_mode(path),
+		head: html`
+			<script src="coi-serviceworker.js"></script>
+			${startup_scripts_with_dev_mode(path)}
+		`,
 		body: html`
 			<construct-editor></construct-editor>
 		`,
