@@ -1,7 +1,7 @@
 import {css} from "@benev/slate"
 
 export const styles = css`
-	.clip {
+	.effect {
 		display: flex;
 		z-index: 1;
 		align-items: center;

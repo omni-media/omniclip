@@ -2,63 +2,58 @@ import {pub} from "@benev/slate/x/tools/pub.js"
 import {ShockDragDrop} from "@benev/construct/x/tools/shockdrop/drag_drop.js"
 
 import {TimelineActions} from "./actions.js"
-import {At, ProposedTimecode, V2, XClip} from "./types.js"
-import {VideoOrchestrator} from "./tools/video-orchestrator.js"
-import {ClipTimecode, XTimeline as TimelineState} from "./types.js"
+import {At, ProposedTimecode, V2, AnyEffect} from "./types.js"
+import {EffectTimecode, XTimeline as TimelineState} from "./types.js"
 
 export class Timeline {
-	drag = new ShockDragDrop<XClip, At> ({handle_drop: (_event: DragEvent, grabbed, dropped_at) => this.on_drop.publish({grabbed, dropped_at})})
+	drag = new ShockDragDrop<AnyEffect, At> ({handle_drop: (_event: DragEvent, grabbed, dropped_at) => this.on_drop.publish({grabbed, dropped_at})})
 	playhead_drag = new ShockDragDrop<boolean, V2>({handle_drop: (_event: DragEvent) => {}})
-	on_drop = pub<{grabbed: XClip, dropped_at: At}>()
+	on_drop = pub<{grabbed: AnyEffect, dropped_at: At}>()
 	on_playhead_drag = pub()
 	
-	VideoOrchestrator: VideoOrchestrator
-	
-	constructor(private timeline_actions: TimelineActions) {
-		this.VideoOrchestrator = new VideoOrchestrator(timeline_actions)
-	}
+	constructor(private timeline_actions: TimelineActions) {}
 
-	calculate_proposed_timecode({timeline_end, timeline_start, track}: ClipTimecode, grabbed_clip_id: string, state: TimelineState) {
-		const clips_to_propose_to = this.#exclude_grabbed_clip_from_proposals(grabbed_clip_id, state.clips)
-		const track_clips = clips_to_propose_to.filter(clip => clip.track === track)
-		const clip_before = this.#get_clips_positioned_before_grabbed_clip(track_clips, timeline_start)[0]
-		const clip_after = this.#get_clips_positioned_after_grabbed_clip(track_clips, timeline_start)[0]
-		const grabbed_clip_length = timeline_end - timeline_start
+	calculate_proposed_timecode({timeline_end, timeline_start, track}: EffectTimecode, grabbed_effect_id: string, state: TimelineState) {
+		const effects_to_propose_to = this.#exclude_grabbed_effect_from_proposals(grabbed_effect_id, state.effects)
+		const track_effects = effects_to_propose_to.filter(effect => effect.track === track)
+		const effect_before = this.#get_effects_positioned_before_grabbed_effect(track_effects, timeline_start)[0]
+		const effect_after = this.#get_effects_positioned_after_grabbed_effect(track_effects, timeline_start)[0]
+		const grabbed_effect_length = timeline_end - timeline_start
 
 		let start_position = timeline_start
 		let shrinked_size = null
-		let push_clips_forward = null
+		let push_effects_forward = null
 
-		if(clip_before && clip_after) {
+		if(effect_before && effect_after) {
 			const no_space = 0
-			const space_between_clip_after_and_before_grabbed_clip = 
-				this.#calculate_space_between_clip_after_and_before_grabbed_clip(clip_before, clip_after)
-			if(space_between_clip_after_and_before_grabbed_clip < grabbed_clip_length && space_between_clip_after_and_before_grabbed_clip > no_space) {
-				shrinked_size = space_between_clip_after_and_before_grabbed_clip
+			const space_between_effect_after_and_before_grabbed_effect =
+				this.#calculate_space_between_effect_after_and_before_grabbed_effect(effect_before, effect_after)
+			if(space_between_effect_after_and_before_grabbed_effect < grabbed_effect_length && space_between_effect_after_and_before_grabbed_effect > no_space) {
+				shrinked_size = space_between_effect_after_and_before_grabbed_effect
 			}
-			else if(space_between_clip_after_and_before_grabbed_clip === no_space) {
-				const clips_after = this.#get_clips_positioned_after_grabbed_clip(track_clips, timeline_start)
-				push_clips_forward = clips_after
-			}
-		}
-
-		if(clip_before) {
-			const distance_between_grabbed_clip_and_clip_before_it =
-				this.#calculate_distance_between_grabbed_clip_and_clip_before_it(clip_before, timeline_start)
-			if(distance_between_grabbed_clip_and_clip_before_it < 0) {
-				start_position = clip_before.start_at_position + clip_before.duration
+			else if(space_between_effect_after_and_before_grabbed_effect === no_space) {
+				const effects_after = this.#get_effects_positioned_after_grabbed_effect(track_effects, timeline_start)
+				push_effects_forward = effects_after
 			}
 		}
 
-		if(clip_after) {
-			const distance_between_grabbed_clip_and_clip_after_it =
-				this.#calculate_distance_between_grabbed_clip_and_clip_after_it(clip_after, timeline_end)
-			if(distance_between_grabbed_clip_and_clip_after_it < 0) {
-				start_position = push_clips_forward
-					? clip_after.start_at_position
+		if(effect_before) {
+			const distance_between_grabbed_effect_and_effect_before_it =
+				this.#calculate_distance_between_grabbed_effect_and_effect_before_it(effect_before, timeline_start)
+			if(distance_between_grabbed_effect_and_effect_before_it < 0) {
+				start_position = effect_before.start_at_position + effect_before.duration
+			}
+		}
+
+		if(effect_after) {
+			const distance_between_grabbed_effect_and_effect_after_it =
+				this.#calculate_distance_between_grabbed_effect_and_effect_after_it(effect_after, timeline_end)
+			if(distance_between_grabbed_effect_and_effect_after_it < 0) {
+				start_position = push_effects_forward
+					? effect_after.start_at_position
 					: shrinked_size
-					? clip_after.start_at_position - shrinked_size
-					: clip_after.start_at_position - grabbed_clip_length
+					? effect_after.start_at_position - shrinked_size
+					: effect_after.start_at_position - grabbed_effect_length
 			}
 		}
 
@@ -68,61 +63,61 @@ export class Timeline {
 				track
 			},
 			duration: shrinked_size,
-			clips_to_push: push_clips_forward
+			effects_to_push: push_effects_forward
 		}
 	}
 
-	#push_clips_forward(clips_to_push: XClip[], push_by: number) {
-		clips_to_push.forEach(c => this.timeline_actions.set_clip_start_position(c, c.start_at_position + push_by)
+	#push_effects_forward(effects_to_push: AnyEffect[], push_by: number) {
+		effects_to_push.forEach(c => this.timeline_actions.set_effect_start_position(c, c.start_at_position + push_by)
 		)
 	}
 
-	#calculate_space_between_clip_after_and_before_grabbed_clip(clip_before: XClip, clip_after: XClip) {
-		const space = clip_after.start_at_position - (clip_before.start_at_position + clip_before.duration)
+	#calculate_space_between_effect_after_and_before_grabbed_effect(effect_before: AnyEffect, effect_after: AnyEffect) {
+		const space = effect_after.start_at_position - (effect_before.start_at_position + effect_before.duration)
 		return space
 	}
 
-	#calculate_distance_between_grabbed_clip_and_clip_after_it(clip_after: XClip, timeline_end: number) {
-		const distance = clip_after.start_at_position - timeline_end
+	#calculate_distance_between_grabbed_effect_and_effect_after_it(effect_after: AnyEffect, timeline_end: number) {
+		const distance = effect_after.start_at_position - timeline_end
 		return distance
 	}
 
-	#calculate_distance_between_grabbed_clip_and_clip_before_it(clip_before: XClip, timeline_start: number) {
-		const distance = timeline_start - (clip_before.start_at_position + clip_before.duration)
+	#calculate_distance_between_grabbed_effect_and_effect_before_it(effect_before: AnyEffect, timeline_start: number) {
+		const distance = timeline_start - (effect_before.start_at_position + effect_before.duration)
 		return distance
 	}
 
-	#get_clips_positioned_before_grabbed_clip(clips: XClip[], timeline_start: number) {
-		const clips_before = clips.filter(clip => clip.start_at_position < timeline_start).sort((a, b) => {
+	#get_effects_positioned_before_grabbed_effect(effects: AnyEffect[], timeline_start: number) {
+		const effects_before = effects.filter(effect => effect.start_at_position < timeline_start).sort((a, b) => {
 			if(a.start_at_position > b.start_at_position)
 				return -1
 			else return 1
 		})
-		return clips_before
+		return effects_before
 	}
 
-	#get_clips_positioned_after_grabbed_clip(clips: XClip[], timeline_start: number) {
-		const clips_after = clips.filter(clip => clip.start_at_position > timeline_start).sort((a, b) => {
+	#get_effects_positioned_after_grabbed_effect(effects: AnyEffect[], timeline_start: number) {
+		const effects_after = effects.filter(effect => effect.start_at_position > timeline_start).sort((a, b) => {
 			if(a.start_at_position < b.start_at_position)
 				return -1
 			else return 1
 		})
-		return clips_after
+		return effects_after
 	}
 
-	set_proposed_timecode(clip: XClip, {proposed_place, duration, clips_to_push}: ProposedTimecode) {
-		this.timeline_actions.set_clip_start_position(clip, proposed_place.start_at_position)
-		this.timeline_actions.set_clip_track(clip, proposed_place.track)
-		if(duration && clip.duration !== duration) {
-			this.timeline_actions.set_clip_duration(clip, duration)
+	set_proposed_timecode(effect: AnyEffect, {proposed_place, duration, effects_to_push}: ProposedTimecode) {
+		this.timeline_actions.set_effect_start_position(effect, proposed_place.start_at_position)
+		this.timeline_actions.set_effect_track(effect, proposed_place.track)
+		if(duration && effect.duration !== duration) {
+			this.timeline_actions.set_effect_duration(effect, duration)
 		}
-		if(clips_to_push) {
-			this.#push_clips_forward(clips_to_push, clip.duration)
+		if(effects_to_push) {
+			this.#push_effects_forward(effects_to_push, effect.duration)
 		}
 	}
 
-	#exclude_grabbed_clip_from_proposals(clip_to_exclude: string, clips: XClip[]) {
-		const excluded = clips.filter(clip => clip.id !== clip_to_exclude)
+	#exclude_grabbed_effect_from_proposals(effect_to_exclude: string, effects: AnyEffect[]) {
+		const excluded = effects.filter(effect => effect.id !== effect_to_exclude)
 		return excluded
 	}
 }

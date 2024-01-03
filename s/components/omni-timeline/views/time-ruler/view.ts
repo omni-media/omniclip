@@ -7,7 +7,7 @@ import {calculate_timeline_width} from "../../utils/calculate_timeline_width.js"
 
 export const TimeRuler = shadow_view({styles}, use => () => {
 	const zoom = use.context.state.timeline.zoom
-	const timeline_width = calculate_timeline_width(use.context.state.timeline.clips, zoom)
+	const timeline_width = calculate_timeline_width(use.context.state.timeline.effects, zoom)
 
 	const generate_time_codes = () => {
 		const time_codes = []

@@ -1,10 +1,10 @@
 import {html} from "@benev/slate"
 
 import {light_view} from "../../../../context/slate.js"
-import {calculate_clip_width} from "../../utils/calculate_clip_width.js"
+import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
-import {calculate_clip_track_placement} from "../../utils/calculate_clip_track_placement.js"
-import {At, ProposedTimecode, XClip} from "../../../../context/controllers/timeline/types.js"
+import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
+import {At, ProposedTimecode, AnyEffect} from "../../../../context/controllers/timeline/types.js"
 
 export const ProposalIndicator = light_view(use => () => {
 	const controller = use.context.controllers.timeline
@@ -14,14 +14,14 @@ export const ProposalIndicator = light_view(use => () => {
 	const [proposedTimecode, setProposedTimecode, getProposedTimecode] = use.state<ProposedTimecode>({
 		proposed_place: {track: 0, start_at_position: 0},
 		duration: null,
-		clips_to_push: null
+		effects_to_push: null
 	})
 
-	function translate_to_timecode(grabbed: XClip, hovering: At) {
+	function translate_to_timecode(grabbed: AnyEffect, hovering: At) {
 		const baseline_zoom = use.context.state.timeline.zoom
 		const [x, y] = hovering.coordinates
-		const timeline_start = (x * Math.pow(2, -baseline_zoom)) - calculate_clip_width(grabbed, 0) / 2
-		const timeline_end = (x * Math.pow(2, -baseline_zoom)) - calculate_clip_width(grabbed, 0) / 2 + grabbed.duration
+		const timeline_start = (x * Math.pow(2, -baseline_zoom)) - calculate_effect_width(grabbed, 0) / 2
+		const timeline_end = (x * Math.pow(2, -baseline_zoom)) - calculate_effect_width(grabbed, 0) / 2 + grabbed.duration
 		const track = Math.floor(y / 40)
 
 		return {
@@ -50,21 +50,21 @@ export const ProposalIndicator = light_view(use => () => {
 
 	return html`
 		<div
-			?data-push-clips=${proposedTimecode?.clips_to_push}
+			?data-push-effects=${proposedTimecode?.effects_to_push}
 			style="
 				display: ${grabbed ? "block" : "none"};
 				width: ${
-					proposedTimecode.clips_to_push
+					proposedTimecode.effects_to_push
 					? 0
 					: proposedTimecode.duration
 					? proposedTimecode.duration * Math.pow(2, zoom)
 					: grabbed
-					? calculate_clip_width(grabbed, zoom)
+					? calculate_effect_width(grabbed, zoom)
 					: 0
 				}px;
 				transform: translate(
 					${calculate_start_position(proposedTimecode.proposed_place.start_at_position, zoom)}px,
-					${calculate_clip_track_placement(proposedTimecode!.proposed_place.track, 40)}px
+					${calculate_effect_track_placement(proposedTimecode!.proposed_place.track, 40)}px
 				);
 			"
 			data-indicator="drop-indicator"

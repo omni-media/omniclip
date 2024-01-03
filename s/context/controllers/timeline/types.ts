@@ -1,31 +1,42 @@
-import {Media} from "../../../components/omni-media/types.js"
-
 export type V2 = [number, number]
 
 export interface XTimeline {
 	is_playing: boolean
 	timecode: number
 	length: number
-	clips: XClip[]
+	effects: AnyEffect[]
 	tracks: XTrack[]
 	zoom: number
 }
 
-export interface Text {
-	type: "Text"
-	content: string
-	size: number
-	color: string
-}
-
-export interface XClip {
+export interface Effect {
 	id: string
-	item: Media | Text
 	start_at_position: number
 	duration: number
 	start: number
 	end: number
 	track: number
+}
+
+export interface VideoEffect extends Effect {
+	kind: "video"
+	src: string
+}
+
+export interface TextEffect extends Effect {
+	kind: "text"
+	content: string
+	color: string
+	size: number
+}
+
+export type AnyEffect = (
+	| VideoEffect
+	| TextEffect
+)
+
+export type Timeline = {
+  effects: AnyEffect[]
 }
 
 export interface Timecode {
@@ -35,7 +46,7 @@ export interface Timecode {
 	hours: number
 }
 
-export interface ClipTimecode {
+export interface EffectTimecode {
 	timeline_start: number
 	timeline_end: number
 	track: number
@@ -56,7 +67,7 @@ export interface ProposedTimecode {
 		track: number
 	}
 	duration: number | null
-	clips_to_push: XClip[] | null
+	effects_to_push: AnyEffect[] | null
 }
 
 export type Indicator = "add-track-indicator"
