@@ -2,6 +2,7 @@ import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../context/slate.js"
+import rotateSvg from "../../icons/material-design-icons/rotate.svg.js"
 
 export const TextPositioner = shadow_view({styles}, use => () => {
 	use.watch(() => use.context.state.timeline)
@@ -28,6 +29,7 @@ export const TextPositioner = shadow_view({styles}, use => () => {
 				transform: rotate(${compositor.TextManager.rotate}rad);
 				top: ${(selected_effect.rect.position_on_canvas.y - selected_effect.rect.height) / scaleY}px;
 			" class="text-rect">
+				<span class="rotate">${rotateSvg}</span>
 			</div>
 		`
 		: null}
