@@ -9,12 +9,23 @@ export class TextManager {
 	#centerY = 0
 	#clicked_effect: TextEffect | null = null
 	rotate: null | number = null
+	#pointer_down = false
 
 	constructor(private compositor: Compositor, private actions: TimelineActions) {
-		window.addEventListener("pointerdown", (e) => this.#set_clicked_effect(e))
-		window.addEventListener("pointerup", () => this.#clicked_effect = null)
+		window.addEventListener("pointerdown", (e) => {
+			const rotate_indicator = e.composedPath().find((e) => (e as HTMLElement).className === "rotate")
+			const rect = e.composedPath().find((e) => (e as HTMLElement).className === "text-rect")
+			if(rotate_indicator) {
+				this.#pointer_down = true
+			} else if(!rect) {
+				this.#clicked_effect = null
+			}
+			if(!rotate_indicator)
+				this.#set_clicked_effect(e)
+		})
+		window.addEventListener("pointerup", () => this.#pointer_down = false)
 		window.addEventListener("pointermove", (e) => {
-			if(this.#clicked_effect) {
+			if(this.#clicked_effect && this.#pointer_down) {
 				this.#rotate_clicked_effect(e, this.#clicked_effect)
 			}
 		})
@@ -53,7 +64,7 @@ export class TextManager {
 		const dy = adjustedY - this.#centerY
 		const result = Math.atan2(dy, dx)
 
-		this.rotate = result
+		this.rotate = Math.PI / 2 + result
 		this.compositor.draw_effects(true)
 	}
 
@@ -91,7 +102,7 @@ export class TextManager {
 
 	#rotate_text(effect: TextEffect) {
 		this.compositor.ctx!.translate(this.#centerX, this.#centerY)
-		 //this.ctx!.rotate(-Math.PI / 2);  // correction for image starting position
+		// this.compositor.ctx!.rotate(Math.PI / 2);  // correction for image starting position
 		this.actions.set_text_rotation(effect, this.rotate!)
 		this.compositor.ctx!.rotate(this.rotate!)
 	}
