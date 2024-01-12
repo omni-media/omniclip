@@ -1,18 +1,16 @@
 import {ZipAction} from "@benev/slate/x/watch/zip/action.js"
 import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 
-import {AnyEffect} from "./types.js"
 import {TimelineHelpers} from "./helpers.js"
 import {actionize} from "../../../utils/actionize.js"
+import {AnyEffect, TextEffect, TextEffectProps, TextRect} from "./types.js"
 
 export const timeline_actions = actionize({
-	add_text_effect: state => () => {
+	add_text_effect: state => (text_props: TextEffectProps) => {
 		const effect: AnyEffect = {
+			...text_props,
 			id: generate_id(),
 			kind: "text",
-			content: "something",
-			size: 5,
-			color: "white",
 			start_at_position: 1000,
 			duration: 5000,
 			start: 0,
@@ -20,6 +18,36 @@ export const timeline_actions = actionize({
 			track: 0
 		}
 		state.timeline.effects.push(effect)
+	},
+	update_text_effect: state => (text_props: TextEffectProps, id: string) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
+		for(const prop in text_props) {
+			//@ts-ignore
+			effect[prop] = text_props[prop]
+		}
+	},
+	set_text_rect: state => ({id}: TextEffect, rect: TextRect) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
+		effect.rect = rect
+	},
+	set_text_rotation: state => ({id}: TextEffect, rotation: number) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
+		effect.rect.rotation = rotation
+	},
+	set_selected_effect: state => (effect: AnyEffect | null) => {
+		state.timeline.selected_effect = effect
+	},
+	set_text_position_on_canvas: state => ({id}: TextEffect, x: number, y: number) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
+		effect.rect.position_on_canvas = {
+			x,
+			y
+		}
+		if(state.timeline.selected_effect?.kind === "text")
+			state.timeline.selected_effect.rect.position_on_canvas = {
+				x,
+				y
+			}
 	},
 	set_effect_track: state => (effect: AnyEffect, track: number) => {
 		const helper = new TimelineHelpers(state.timeline)
