@@ -3,6 +3,7 @@ import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 import {XTimeline} from "./types.js"
 
 export const timeline_state: XTimeline = {
+	selected_effect: null,
 	is_playing: false,
 	timecode: 0,
 	length: 1000,

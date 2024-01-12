@@ -2,6 +2,7 @@ export type V2 = [number, number]
 
 export interface XTimeline {
 	is_playing: boolean
+	selected_effect: AnyEffect | null
 	timecode: number
 	length: number
 	effects: AnyEffect[]
@@ -23,11 +24,30 @@ export interface VideoEffect extends Effect {
 	src: string
 }
 
+export type TextEffectProps = Omit<TextEffect, keyof Effect | "kind">
+export type FontStyle = "italic" | "bold" | "normal"
+export type Font = "Arial" | "Lato"
+export type TextAlign = "left" | "right" | "center"
+
+export interface TextRect {
+	width: number
+	height: number
+	position_on_canvas: {
+		x: number
+		y: number
+	}
+	rotation: number
+}
+
 export interface TextEffect extends Effect {
 	kind: "text"
+	font: Font
 	content: string
 	color: string
 	size: number
+	style: FontStyle
+	align: TextAlign
+	rect: TextRect
 }
 
 export type AnyEffect = (
