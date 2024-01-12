@@ -21,15 +21,17 @@ export const TextPositioner = shadow_view({styles}, use => () => {
 		${selected_effect
 		? html`
 			<div
-			style="
-				width: ${selected_effect?.rect?.width / scaleX}px;
-				height: ${selected_effect?.rect.height / scaleY}px;
-				position: absolute;
-				left: ${selected_effect.rect.position_on_canvas.x / scaleX}px;
-				transform: rotate(${compositor.TextManager.rotate}rad);
-				top: ${(selected_effect.rect.position_on_canvas.y - selected_effect.rect.height) / scaleY}px;
-			" class="text-rect">
+				class="box"
+				style="
+					width: ${selected_effect?.rect?.width / scaleX}px;
+					height: ${selected_effect?.rect.height / scaleY}px;
+					left: ${selected_effect.rect.position_on_canvas.x / scaleX}px;
+					transform: rotate(${compositor.TextManager.rotate}rad);
+					top: ${(selected_effect.rect.position_on_canvas.y - selected_effect.rect.height) / scaleY}px;
+				"
+			>
 				<span class="rotate">${rotateSvg}</span>
+				<div class="text-rect"></div>
 			</div>
 		`
 		: null}

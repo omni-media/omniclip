@@ -1,3 +1,5 @@
+import {coordinates_in_rect} from "@benev/construct"
+
 import {Compositor} from "../controller.js"
 import {TextEffect} from "../../timeline/types.js"
 import {TimelineActions} from "../../timeline/actions.js"
@@ -9,26 +11,59 @@ export class TextManager {
 	#centerY = 0
 	#clicked_effect: TextEffect | null = null
 	rotate: null | number = null
-	#pointer_down = false
+	#on_rect_pointer_down = false
+	#on_rotate_indicator_pointer_down = false
 
 	constructor(private compositor: Compositor, private actions: TimelineActions) {
 		window.addEventListener("pointerdown", (e) => {
 			const rotate_indicator = e.composedPath().find((e) => (e as HTMLElement).className === "rotate")
 			const rect = e.composedPath().find((e) => (e as HTMLElement).className === "text-rect")
-			if(rotate_indicator) {
-				this.#pointer_down = true
-			} else if(!rect) {
-				this.#clicked_effect = null
-			}
-			if(!rotate_indicator)
-				this.#set_clicked_effect(e)
+			if(rotate_indicator) {this.#on_rotate_indicator_pointer_down = true}
+				else {this.#set_clicked_effect(e)}
+			if(rect) {this.#on_rect_pointer_down = true}
 		})
-		window.addEventListener("pointerup", () => this.#pointer_down = false)
+		window.addEventListener("pointerup", () => {
+			this.#on_rotate_indicator_pointer_down = false
+			this.#on_rect_pointer_down = false
+		})
 		window.addEventListener("pointermove", (e) => {
-			if(this.#clicked_effect && this.#pointer_down) {
+			if(this.#clicked_effect && this.#on_rotate_indicator_pointer_down) {
 				this.#rotate_clicked_effect(e, this.#clicked_effect)
 			}
+			if(this.#on_rect_pointer_down && this.#clicked_effect) {
+				this.#move_selected_effect(e, this.#clicked_effect)
+			}
 		})
+	}
+
+	#move_selected_effect(e: PointerEvent, effect: TextEffect) {
+		const canvasRect = this.compositor.canvas.getBoundingClientRect()
+
+		const scaleX = this.compositor.canvas.width / canvasRect.width
+		const scaleY = this.compositor.canvas.height / canvasRect.height
+
+		const coordinates = coordinates_in_rect([e.clientX, e.clientY], canvasRect)
+		if(!coordinates)
+			return
+	
+		const x = coordinates[0] * scaleX
+		const y = coordinates[1] * scaleY
+
+		this.actions.set_text_position_on_canvas(effect, x - effect.rect.width / 2, y + effect.rect.height / 2)
+		const updated_effect: TextEffect = {...effect, rect: {
+			...effect.rect,
+			position_on_canvas: {
+				x: x - effect.rect.width / 2,
+				y: y + effect.rect.height / 2
+			}
+		}}
+		this.#clicked_effect = updated_effect
+
+		this.#centerX = x
+		this.#centerY = y
+
+		this.compositor.update_currently_played_effect(updated_effect)
+		this.compositor.draw_effects(true)
 	}
 
 	#set_clicked_effect(e: PointerEvent) {
@@ -42,7 +77,6 @@ export class TextManager {
 
 		const clicked = this.#find_effect_at(clickedX, clickedY)
 		this.actions.set_selected_effect(clicked)
-		console.log(this.compositor.currently_played_effects, "effects played")
 		this.#clicked_effect = clicked
 		if(!clicked)
 			this.compositor.draw_effects(true)
