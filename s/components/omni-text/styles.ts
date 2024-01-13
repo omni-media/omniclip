@@ -88,15 +88,23 @@ export const styles = css`
 		& .color-picker {
 			display: flex;
 			gap: 0.5em;
+			padding: 0.5em;
+
 			& span {
 				font-weight: bold;
+				width: 65px;
 			}
+
 			& .picker {
-				width: 40px;
-				height: 40px;
-				border: 1px solid gray;
-				border-radius: 5px;
+				width: 25px;
+				height: 25px;
+				border-radius: 100%;
 				background: blue;
+				cursor: pointer;
+				
+				&::-webkit-color-swatch {
+					border: none;
+				}
 			}
 		}
 	}

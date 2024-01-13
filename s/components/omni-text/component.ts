@@ -25,7 +25,7 @@ export const OmniText = shadow_component({styles}, use => {
 		content: selected_effect?.content ?? "example",
 		style: selected_effect?.style ?? "normal",
 		font: selected_effect?.font ?? "Lato",
-		color: selected_effect?.color ?? "blue",
+		color: selected_effect?.color ?? "#e66465",
 		align: selected_effect?.align ?? "center",
 		rect: {
 			position_on_canvas: {
@@ -71,7 +71,18 @@ export const OmniText = shadow_component({styles}, use => {
 				<div ?data-selected=${text.align === "center"} @click=${() => set_text_align("center")} class="align">${alignCenterSvg}</div>
 				<div ?data-selected=${text.align === "right"} @click=${() => set_text_align("right")} class="align">${alignRightSvg}</div>
 			</div>
-			<div class="color-picker flex"><span>${text.color}</span><div class="picker"></div></div>
+			<div class="color-picker flex">
+				<span>${text.color}</span>
+				<input
+					@input=${(e: InputEvent) => setTextEffectProps({...text, color: (e.target as HTMLInputElement).value})}
+					class="picker"
+					type="color"
+					id="head"
+					name="head"
+					value=${text.color} 
+					style="background: ${text.color};"
+				>
+			</div>
 			${selected_effect
 			? html`
 				<button class="add-text" @click=${() => {
