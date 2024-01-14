@@ -26,7 +26,7 @@ export const TextPositioner = shadow_view({styles}, use => () => {
 					width: ${selected_effect?.rect?.width / scaleX}px;
 					height: ${selected_effect?.rect.height / scaleY}px;
 					left: ${selected_effect.rect.position_on_canvas.x / scaleX}px;
-					transform: rotate(${compositor.TextManager.rotate}rad);
+					transform: rotate(${selected_effect.rect.rotation}rad);
 					top: ${(selected_effect.rect.position_on_canvas.y - selected_effect.rect.height) / scaleY}px;
 				"
 			>

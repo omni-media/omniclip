@@ -7,10 +7,7 @@ import {is_point_inside_rectangle} from "../utils/is_point_inside_rectangle.js"
 
 export class TextManager {
 
-	#centerX = 0
-	#centerY = 0
 	#clicked_effect: TextEffect | null = null
-	rotate: null | number = null
 	#on_rect_pointer_down = false
 	#on_rotate_indicator_pointer_down = false
 
@@ -18,8 +15,13 @@ export class TextManager {
 		window.addEventListener("pointerdown", (e) => {
 			const rotate_indicator = e.composedPath().find((e) => (e as HTMLElement).className === "rotate")
 			const rect = e.composedPath().find((e) => (e as HTMLElement).className === "text-rect")
+			const omni_text_panel =	e.composedPath().find((e: any) => e.getAttribute ? e.getAttribute("view") === "text" : null)
 			if(rotate_indicator) {this.#on_rotate_indicator_pointer_down = true}
-				else {this.#set_clicked_effect(e)}
+				else {
+					if(this.#clicked_effect && omni_text_panel)
+						return
+					this.#set_clicked_effect(e)
+				}
 			if(rect) {this.#on_rect_pointer_down = true}
 		})
 		window.addEventListener("pointerup", () => {
@@ -58,12 +60,9 @@ export class TextManager {
 			}
 		}}
 		this.#clicked_effect = updated_effect
-
-		this.#centerX = x
-		this.#centerY = y
-
 		this.compositor.update_currently_played_effect(updated_effect)
-		this.compositor.draw_effects(true)
+
+		requestAnimationFrame(() => this.compositor.draw_effects(true))
 	}
 
 	#set_clicked_effect(e: PointerEvent) {
@@ -79,14 +78,18 @@ export class TextManager {
 		this.actions.set_selected_effect(clicked)
 		this.#clicked_effect = clicked
 		if(!clicked)
-			this.compositor.draw_effects(true)
+			requestAnimationFrame(() => this.compositor.draw_effects(true))
+	}
+	
+	#calculate_center_of_effect(effect: TextEffect) {
+		return {
+			centerX: effect.rect.position_on_canvas.x + effect.rect.width / 2,
+			centerY: effect.rect.position_on_canvas.y - effect.rect.height / 2
+		}
 	}
 
 	#rotate_clicked_effect(e: PointerEvent, effect: TextEffect) {
 		const canvasRect = this.compositor.canvas.getBoundingClientRect()
-
-		this.#centerX = effect.rect.position_on_canvas.x + effect.rect.width / 2
-		this.#centerY = effect.rect.position_on_canvas.y - effect.rect.height / 2
 
 		const scaleX = this.compositor.canvas.width / canvasRect.width
 		const scaleY = this.compositor.canvas.height / canvasRect.height
@@ -94,12 +97,22 @@ export class TextManager {
 		const adjustedX = (e.pageX - canvasRect.left) * scaleX
 		const adjustedY = (e.pageY - canvasRect.top) * scaleY
 
-		const dx = adjustedX - this.#centerX
-		const dy = adjustedY - this.#centerY
+		const {centerX, centerY} = this.#calculate_center_of_effect(effect)
+		const dx = adjustedX - centerX
+		const dy = adjustedY - centerY
 		const result = Math.atan2(dy, dx)
 
-		this.rotate = Math.PI / 2 + result
-		this.compositor.draw_effects(true)
+		// this.rotate = Math.PI / 2 + result
+		const rotate = Math.PI / 2 + result
+		const updated_effect: TextEffect = {...effect, rect: {
+			...effect.rect,
+			rotation: rotate
+		}}
+		effect = updated_effect
+		this.#clicked_effect = updated_effect
+		this.compositor.update_currently_played_effect(updated_effect)
+		this.actions.set_text_rotation(effect, rotate)
+		requestAnimationFrame(() => this.compositor.draw_effects(true))
 	}
 
 	#find_effect_at(clickedX: number, clickedY: number) {
@@ -112,7 +125,7 @@ export class TextManager {
 					effect.rect.position_on_canvas.y - effect.rect.height,
 					effect.rect.width,
 					effect.rect.height,
-					this.rotate!
+					effect.rect.rotation!
 				)
 				if (is_inside) {return effect}
 			}
@@ -124,7 +137,7 @@ export class TextManager {
 		const {size, color, content} = source
 		this.compositor.ctx!.fillStyle = color
 		this.compositor.ctx!.font = `${size}px Lato`
-		if(this.rotate) {
+		if(source.rect.rotation) {
 			this.compositor.ctx!.save()
 			this.#rotate_text(source)
 			this.compositor.ctx!.fillText(content, -source.rect.width/2, source.rect.height/2)
@@ -135,10 +148,10 @@ export class TextManager {
 	}
 
 	#rotate_text(effect: TextEffect) {
-		this.compositor.ctx!.translate(this.#centerX, this.#centerY)
+		const {centerX, centerY} = this.#calculate_center_of_effect(effect)
+		this.compositor.ctx!.translate(centerX, centerY)
 		// this.compositor.ctx!.rotate(Math.PI / 2);  // correction for image starting position
-		this.actions.set_text_rotation(effect, this.rotate!)
-		this.compositor.ctx!.rotate(this.rotate!)
+		this.compositor.ctx!.rotate(effect.rect.rotation)
 	}
 
 	measure_text_width (effect: TextEffect) {
