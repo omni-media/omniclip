@@ -2,17 +2,21 @@ import {css} from "@benev/slate"
 
 export const styles = css`
 	canvas {
-		width: 100%;
+		width: 500px;
+		height: 300px;
+		background: rgb(32, 31, 31);
+		position: absolute;
 	}
 
 	figure {
-		max-width: 640px;
-		width: 100%;
-		max-height: 360px;
-		height: 100%;
+		position: relative;
+		display: flex;
+		justify-content: center;
+		flex-direction: column;
+		width: 500px;
+		height: 300px;
 		margin: 1.25rem auto;
-		padding: 1.051%;
-		background-color: #666;
+		overflow: hidden;
 	}
 	
 	video {
@@ -22,9 +26,10 @@ export const styles = css`
 	.controls {
 		width: 100%;
 		height: 8.0971659919028340080971659919028%; /* of figure's height */
-		position: relative;
 		display: flex;
 		justify-content: space-evenly;
+		position: absolute;
+		bottom: 0;
 	}
 
 	.controls[data-state="hidden"] {
