@@ -1,38 +1,35 @@
-import {html} from "@benev/slate"
+import {html, reactor} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
+import {TextPositioner} from "../../../../views/text-positioner/view.js"
 
 export const MediaPlayer = shadow_view({styles}, use => () => {
 	use.watch(() => use.context.state.timeline)
 	const state = use.context.state.timeline
-	const video = use.prepare(() => use.context.controllers.timeline.VideoOrchestrator)
+	const compositor = use.prepare(() => use.context.controllers.compositor)
 	const playhead = use.context.controllers.timeline
 	const [isVideoMuted, setIsVideoMuted] = use.state(false)
 
-	video.on_playing(() => {
-		const current_played_media_source = video.get_clip_relative_to_timecode(use.context.state.timeline)
-		if(current_played_media_source?.item.type !== "Text")
-			video.set_video_source(current_played_media_source?.item)
-	})
-
-	playhead.on_playhead_drag(() => {
-		if(use.context.state.timeline.is_playing) {video.set_video_playing(false)}
-		const current_played_media_source = video.get_clip_relative_to_timecode(use.context.state.timeline)
-		const video_current_timecode = video.get_clip_current_time_relative_to_timecode(use.context.state.timeline)
-		if(current_played_media_source?.item.type !== "Text") {
-			video.set_video_source(current_played_media_source?.item)
-			if(video_current_timecode) {
-				video.draw_video_frame_at_certain_timecode(video_current_timecode)
-			}
-		}
+	use.setup(() => {
+		const unsub_onplayhead = playhead.on_playhead_drag(() => {
+			if(use.context.state.timeline.is_playing) {compositor.set_video_playing(false)}
+			compositor.update_currently_played_effects(use.context.state.timeline)
+			compositor.draw_effects(true, use.context.state.timeline.timecode)
+		})
+		reactor.reaction(
+			() => use.context.state.timeline,
+			(timeline) => compositor.update_currently_played_effects(timeline))
+		const unsub_on_playing = compositor.on_playing(() => compositor.update_currently_played_effects(use.context.state.timeline))
+		return () => {unsub_on_playing(), unsub_onplayhead()}
 	})
 
 	return html`
 		<figure>
-			${video.canvas}
+			${TextPositioner([])}
+			${compositor.canvas}
 			<div id="video-controls" class="controls">
-				<button @click=${video.toggle_video_playing} id="playpause" type="button" data-state="${state.is_playing ? 'pause' : 'play'}">Play/Pause</button>
+				<button @click=${compositor.toggle_video_playing} id="playpause" type="button" data-state="${state.is_playing ? 'pause' : 'play'}">Play/Pause</button>
 				<button id="stop" type="button" data-state="stop">Stop</button>
 				<button id="mute" type="button" data-state="${isVideoMuted ? 'unmute' : 'mute'}">Mute/Unmute</button>
 				<button id="volinc" type="button" data-state="volup">Vol+</button>

@@ -9,20 +9,25 @@ export const Playhead = shadow_view({styles}, use => (coordinates: V2) => {
 	const controller = use.context.controllers.timeline
 	const actions = use.context.actions.timeline_actions
 	const playhead_drag = use.context.controllers.timeline.playhead_drag
+	const [_pauseTime, setPauseTime, getPauseTime] = use.state(0)
+	const [_lastTime, setLastTime, getLastTime] = use.state(0)
 
 	use.setup(() => {
 		let on_playhead_drag_active = true
 
-		const on_playhead_drag = () => {
+		const on_playhead_drag = (now: number) => {
 			if(use.context.controllers.timeline.playhead_drag.hovering) {
-				controller.on_playhead_drag.publish(0)
-			}
-			if(on_playhead_drag_active) {
-				requestAnimationFrame(() => setTimeout(on_playhead_drag, 100))
-			}
+				const time = now - getPauseTime()
+				const wait_time = time - getLastTime()
+				if(wait_time > 100) {
+					controller.on_playhead_drag.publish(0)
+					setLastTime(time)
+				}
+			} else setPauseTime(now - getLastTime())
+			if(on_playhead_drag_active) {requestAnimationFrame(on_playhead_drag)}
 		}
 
-		on_playhead_drag()
+		on_playhead_drag(0)
 
 		return () => {
 			on_playhead_drag_active = false

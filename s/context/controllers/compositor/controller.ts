@@ -68,7 +68,7 @@ export class Compositor {
 		return sorted_effects
 	}
 
-	async draw_effects(redraw?: boolean) {
+	async draw_effects(redraw?: boolean, timecode?: number) {
 		if(redraw) {this.clear_canvas()}
 		const effects_sorted_by_track = this.#sort_effects_by_track(this.currently_played_effects!)
 		if(this.currently_played_effects) {
@@ -76,6 +76,10 @@ export class Compositor {
 				if(effect.kind === "video") {
 					const video = this.#VideoManager.get(effect.id)
 					if(!redraw && video?.paused) {await video.play()}
+					if(redraw && timecode) {
+						const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
+						video!.currentTime = current_time
+					}
 					try {
 						const frame = new VideoFrame(video!)
 						this.#VideoManager.draw_video_frame(frame)
@@ -96,13 +100,18 @@ export class Compositor {
 		this.ctx?.clearRect(0, 0, 1280, 720)
 	}
 
+	get_effect_current_time_relative_to_timecode(effect: AnyEffect, timecode: number) {
+		const current_time = timecode - effect.start_at_position
+		return current_time / 1000
+	}
+
 	get_effects_relative_to_timecode(state: XTimeline) {
 		const timecode = state.timecode
 		const effects = state.effects.filter(effect => effect.start_at_position <= timecode && effect.start_at_position + effect.duration >= timecode)
 		return effects.length > 0 ? effects : undefined
 	}
 
-	set_currently_played_effects(timeline: XTimeline) {
+	update_currently_played_effects(timeline: XTimeline) {
 		const effects_relative_to_timecode = this.get_effects_relative_to_timecode(timeline)
 		if(effects_relative_to_timecode)
 		this.currently_played_effects = effects_relative_to_timecode
