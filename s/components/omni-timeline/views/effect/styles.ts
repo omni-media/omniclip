@@ -9,7 +9,7 @@ export const styles = css`
 		padding: 0.5em;
 		background: #201f1f;
 		border-radius: 5px;
-		outline: 1px solid gray;
+		border: 1px solid #181818;
 		cursor: pointer;
 		position: absolute;
 		top: 0;

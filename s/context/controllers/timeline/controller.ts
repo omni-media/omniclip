@@ -2,13 +2,13 @@ import {pub} from "@benev/slate/x/tools/pub.js"
 import {ShockDragDrop} from "@benev/construct/x/tools/shockdrop/drag_drop.js"
 
 import {TimelineActions} from "./actions.js"
-import {At, ProposedTimecode, V2, AnyEffect} from "./types.js"
 import {EffectTimecode, XTimeline as TimelineState} from "./types.js"
+import {Grabbed, At, ProposedTimecode, V2, AnyEffect} from "./types.js"
 
 export class Timeline {
-	drag = new ShockDragDrop<AnyEffect, At> ({handle_drop: (_event: DragEvent, grabbed, dropped_at) => this.on_drop.publish({grabbed, dropped_at})})
+	drag = new ShockDragDrop<Grabbed, At> ({handle_drop: (_event: DragEvent, grabbed, dropped_at) => this.on_drop.publish({grabbed, dropped_at})})
 	playhead_drag = new ShockDragDrop<boolean, V2>({handle_drop: (_event: DragEvent) => {}})
-	on_drop = pub<{grabbed: AnyEffect, dropped_at: At}>()
+	on_drop = pub<{grabbed: Grabbed, dropped_at: At}>()
 	on_playhead_drag = pub()
 	
 	constructor(private timeline_actions: TimelineActions) {}

@@ -18,11 +18,11 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
 
 	const drag_events = {
 		effect_drag_listener() {
-			const effect_is_dragged = hovering?.coordinates && grabbed?.id === effect.id
+			const effect_is_dragged = hovering?.coordinates && grabbed?.effect.id === effect.id
 			if(effect_is_dragged) {
 				const center_of_effect: V2 = [
-					hovering.coordinates[0] - calculate_effect_width(effect, zoom) / 2,
-					hovering.coordinates[1] - 20
+					hovering.coordinates[0] - grabbed.offset.x,
+					hovering.coordinates[1] - grabbed.offset.y
 				]
 				setCords(center_of_effect)
 		}
@@ -31,7 +31,7 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
 			const img = new Image()
 			img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
 			event.dataTransfer?.setDragImage(img, 0, 0)
-			drag.dragzone.dragstart(effect)(event)
+			drag.dragzone.dragstart({effect, offset: {x: event.offsetX, y: event.offsetY}})(event)
 		},
 		drop(event: DragEvent) {
 			if(hovering) {
@@ -45,7 +45,7 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
 	return html`
 		<span
 			class="effect"
-			?data-grabbed=${grabbed === effect}
+			?data-grabbed=${grabbed?.effect === effect}
 			style="
 				width: ${calculate_effect_width(effect, zoom)}px;
 				transform: translate(${x ? x : calculate_start_position(effect.start_at_position, zoom)}px, ${y ? y : calculate_effect_track_placement(effect.track, 40)}px);
@@ -53,6 +53,7 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
 			draggable="true"
 			@drop=${drag_events.drop}
 			@dragstart=${drag_events.start}
+			@click=${() => use.context.actions.timeline_actions.set_selected_effect(effect)}
 		>
 			${effect.kind}
 		</span>

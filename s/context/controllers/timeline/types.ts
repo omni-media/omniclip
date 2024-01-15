@@ -81,6 +81,14 @@ export interface XTrack {
 	id: string
 }
 
+export interface Grabbed {
+	effect: AnyEffect
+	offset: {
+		x: number
+		y: number
+	}
+}
+
 export interface ProposedTimecode {
 	proposed_place: {
 		start_at_position: number
