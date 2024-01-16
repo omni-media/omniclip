@@ -2,10 +2,10 @@ import {css} from "@benev/slate"
 
 export const styles = css`
 	.track {
-		background: #0a0a0a;
+		background: rgb(15 15 15);
 		display: flex;
 		height: 40px;
-		outline: 1px solid gray;
+		outline: 1px solid #181818;
 	}
 
 	.indicators {
