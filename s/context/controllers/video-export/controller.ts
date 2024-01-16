@@ -11,7 +11,6 @@ export class VideoExport {
 	constructor() {
 		this.#worker.addEventListener("message", async (msg: MessageEvent<{chunks: Uint8Array, type: string}>) => {
 			if(msg.data.type === "export-end") {
-				console.log(msg.data.chunks.length)
 				const binary_container_name = "raw.h264"
 				await this.#FFmpegHelper.write_binary_into_container(msg.data.chunks, binary_container_name)
 				await this.#FFmpegHelper.mux(binary_container_name, "test.mp4")
@@ -26,14 +25,12 @@ export class VideoExport {
 		await this.#FileSystemHelper.writeFile(handle, this.#file!)
 	}
 
-	async export_start(timeline: XTimeline) {
-		console.log(timeline.effects)
+	export_start(timeline: XTimeline) {
 		const sorted_effects = this.#sort_effects_by_track(timeline.effects)
 		this.#worker.postMessage({effects: sorted_effects})
 	}
 
 	#sort_effects_by_track(effects: AnyEffect[]) {
-		console.log(effects)
 		const sorted_effects = [...effects].sort((a, b) => {
 			if(a.track < b.track) return 1
 				else return -1
