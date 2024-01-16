@@ -15,7 +15,6 @@ import {calculate_timeline_width} from "./utils/calculate_timeline_width.js"
 export const OmniTimeline = shadow_component({styles}, use => {
 	use.watch(() => use.context.state.timeline)
 	const state = use.context.state.timeline
-	const video_export = use.context.controllers.video_export
 	const dnd = use.context.controllers.timeline.drag
 	const playhead_drag = use.context.controllers.timeline.playhead_drag
 	const [coordinates, setCoordinates] = use.state<V2>([0, 0])
@@ -43,7 +42,6 @@ export const OmniTimeline = shadow_component({styles}, use => {
 			@dragover=${augmented_dragover}
 			class="timeline"
 		>
-			<button class="export-button" @click=${() => video_export.export_start(state)}>Export</button>
 			${Toolbar([])}
 			${TimeRuler([])}
 			<div

@@ -11,11 +11,6 @@ export const styles = css`
 		display: flex;
 		flex-direction: column;
 		
-		& .export-button {
-			display: flex;
-			cursor: pointer;
-		}
-
 		& .timeline-relative {
 			position: relative;
 		}
