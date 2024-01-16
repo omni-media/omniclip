@@ -3,6 +3,8 @@ export type V2 = [number, number]
 export interface XTimeline {
 	is_playing: boolean
 	selected_effect: AnyEffect | null
+	is_exporting: boolean,
+	export_progress: number,
 	timecode: number
 	length: number
 	effects: AnyEffect[]

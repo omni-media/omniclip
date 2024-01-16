@@ -4,6 +4,8 @@ import {XTimeline} from "./types.js"
 
 export const timeline_state: XTimeline = {
 	selected_effect: null,
+	is_exporting: false,
+	export_progress: 0,
 	is_playing: false,
 	timecode: 0,
 	length: 1000,

@@ -1,3 +1,4 @@
+import {TimelineActions} from "../timeline/actions.js"
 import {AnyEffect, XTimeline} from "../timeline/types.js"
 import {FFmpegHelper} from "./helpers/FFmpegHelper/helper.js"
 import {FileSystemHelper} from "./helpers/FileSystemHelper/helper.js"
@@ -7,15 +8,19 @@ export class VideoExport {
 	#file: Uint8Array | null = null
 	#FFmpegHelper = new FFmpegHelper()
 	#FileSystemHelper = new FileSystemHelper()
+	readonly canvas = document.createElement("canvas")
 
-	constructor() {
-		this.#worker.addEventListener("message", async (msg: MessageEvent<{chunks: Uint8Array, type: string}>) => {
+	constructor(private actions: TimelineActions) {
+		this.#worker.addEventListener("message", async (msg: MessageEvent<{chunks: Uint8Array, progress: number, type: string}>) => {
 			if(msg.data.type === "export-end") {
 				const binary_container_name = "raw.h264"
 				await this.#FFmpegHelper.write_binary_into_container(msg.data.chunks, binary_container_name)
 				await this.#FFmpegHelper.mux(binary_container_name, "test.mp4")
 				const muxed_file = await this.#FFmpegHelper.get_muxed_file()
 				this.#file = muxed_file
+			}
+			if(msg.data.type === "progress") {
+				actions.set_export_progress(msg.data.progress)
 			}
 		})
 	}
@@ -27,7 +32,9 @@ export class VideoExport {
 
 	export_start(timeline: XTimeline) {
 		const sorted_effects = this.#sort_effects_by_track(timeline.effects)
-		this.#worker.postMessage({effects: sorted_effects})
+		const offscreen = this.canvas.transferControlToOffscreen()
+		this.#worker.postMessage({effects: sorted_effects, canvas: offscreen}, [offscreen])
+		this.actions.set_is_exporting(true)
 	}
 
 	#sort_effects_by_track(effects: AnyEffect[]) {

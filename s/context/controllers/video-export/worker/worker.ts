@@ -13,17 +13,21 @@ let timestamp_end: number
 let exported_frame: VideoFrame | null = null
 let current_frame: VideoFrame | null = null
 
-const canvas = new OffscreenCanvas(1280, 720)
-const ctx = canvas.getContext("2d")
+let canvas: OffscreenCanvas
+let ctx: OffscreenCanvasRenderingContext2D
 
-async function export_start(effects: AnyEffect[]) {
-	console.log("export")
+async function export_start(effects: AnyEffect[], offscreen_canvas: OffscreenCanvas) {
+	canvas = offscreen_canvas
+	ctx = canvas.getContext("2d")!
+	canvas.width = 1280
+	canvas.height = 720
 	timestamp_end = Math.max(...effects.map(effect => effect.start_at_position + effect.duration))
 	export_process(effects)
 }
 
 async function export_process(effects: AnyEffect[]) {
 	const progress = timestamp / timestamp_end * 100 // for progress bar
+	self.postMessage({progress: progress, type: "progress"})
 
 	const effects_at_timestamp = get_effects_at_timestamp(effects, timestamp)
 	if(effects_at_timestamp) {
@@ -142,7 +146,7 @@ const decoder = new VideoDecoder({
 })
 
 self.addEventListener("message", message => {
-	export_start(message.data.effects)
+	export_start(message.data.effects, message.data.canvas)
 })
 
 function draw_text(source: TextEffect, ctx: OffscreenCanvasRenderingContext2D) {

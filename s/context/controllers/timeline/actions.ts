@@ -26,6 +26,12 @@ export const timeline_actions = actionize({
 			effect[prop] = text_props[prop]
 		}
 	},
+	set_is_exporting: state => (is_exporting) => {
+		state.timeline.is_exporting = is_exporting
+	},
+	set_export_progress: state => (progress: number) => {
+		state.timeline.export_progress = progress
+	},
 	set_text_rect: state => ({id}: TextEffect, rect: TextRect) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
 		effect.rect = rect

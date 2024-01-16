@@ -24,7 +24,7 @@ export class OmniContext extends Context {
 	controllers = {
 		timeline: new Timeline(this.actions.timeline_actions),
 		compositor: new Compositor(this.actions.timeline_actions),
-		video_export: new VideoExport()
+		video_export: new VideoExport(this.actions.timeline_actions)
 	}
 }
 
