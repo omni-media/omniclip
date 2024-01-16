@@ -87,7 +87,7 @@ export const OmniText = shadow_component({styles}, use => {
 			? html`
 				<button class="add-text" @click=${() => {
 					actions.timeline_actions.update_text_effect(text, selected_effect.id)
-					use.context.controllers.compositor.set_currently_played_effects(use.context.state.timeline)
+					use.context.controllers.compositor.update_currently_played_effects(use.context.state.timeline)
 					use.context.controllers.compositor.draw_effects(true)
 				}}>
 					Update text
