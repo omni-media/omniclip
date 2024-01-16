@@ -10,6 +10,11 @@ export const styles = css`
 	.timeline {
 		display: flex;
 		flex-direction: column;
+		
+		& .export-button {
+			display: flex;
+			cursor: pointer;
+		}
 
 		& .timeline-relative {
 			position: relative;
@@ -23,7 +28,7 @@ export const styles = css`
 			border-radius: 5px;
 			top: 0;
 			
-			&[data-push-clips] {
+			&[data-push-effects] {
 				width: 10px;
 				z-index: 1;
 				border: 1px green solid;
