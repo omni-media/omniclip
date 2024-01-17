@@ -42,6 +42,9 @@ export const Playhead = shadow_view({styles}, use => (coordinates: V2) => {
 
 	const drag_events = {
 		start(e: DragEvent) {
+			const img = new Image()
+			img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
+			e.dataTransfer.setDragImage(img, 0, 0)
 			actions.set_is_playing(false)
 			playhead_drag.dragzone.dragstart(true)(e)
 		},
