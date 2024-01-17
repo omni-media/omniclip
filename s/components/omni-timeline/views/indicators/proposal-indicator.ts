@@ -10,7 +10,7 @@ export const ProposalIndicator = light_view(use => () => {
 	const controller = use.context.controllers.timeline
 	const actions = use.context.actions.timeline_actions
 	const zoom = use.context.state.timeline.zoom
-	const {drag: {hovering, grabbed}, on_drop} = controller
+	const {effect_drag: {hovering, grabbed}, on_drop} = controller
 	const [proposedTimecode, setProposedTimecode, getProposedTimecode] = use.state<ProposedTimecode>({
 		proposed_place: {track: 0, start_at_position: 0},
 		duration: null,
@@ -20,7 +20,8 @@ export const ProposalIndicator = light_view(use => () => {
 	function translate_to_timecode(grabbed: Grabbed, hovering: At) {
 		const baseline_zoom = use.context.state.timeline.zoom
 		const [x, y] = hovering.coordinates
-		const timeline_start = ((x - grabbed.offset.x) * Math.pow(2, -baseline_zoom))
+		const start = ((x - grabbed.offset.x) * Math.pow(2, -baseline_zoom))
+		const timeline_start = start >= 0 ? start : 0
 		const timeline_end = ((x - grabbed.offset.x) * Math.pow(2, -baseline_zoom)) + grabbed.effect.duration
 		const track = Math.floor(y / 40)
 

@@ -8,30 +8,43 @@ import {Playhead} from "./views/playhead/view.js"
 import {TimeRuler} from "./views/time-ruler/view.js"
 import {shadow_component} from "../../context/slate.js"
 import {Indicator} from "../../context/controllers/timeline/types.js"
-import {coordinates_in_rect, V2} from "./utils/coordinates_in_rect.js"
 import {ProposalIndicator} from "./views/indicators/proposal-indicator.js"
 import {calculate_timeline_width} from "./utils/calculate_timeline_width.js"
 
 export const OmniTimeline = shadow_component({styles}, use => {
 	use.watch(() => use.context.state.timeline)
 	const state = use.context.state.timeline
-	const dnd = use.context.controllers.timeline.drag
+	const effect_drag = use.context.controllers.timeline.effect_drag
 	const playhead_drag = use.context.controllers.timeline.playhead_drag
-	const [coordinates, setCoordinates] = use.state<V2>([0, 0])
+	use.setup(() => {
+		window.addEventListener("dragover", augmented_dragover)
+		return () => removeEventListener("dragover", augmented_dragover)
+	})
 
-	const augmented_dragover = (event: DragEvent) => {
-		const {clientX, clientY} = event
-		const pointerCoordinates:V2 = [clientX, clientY]
-		const indicator = (event.target as HTMLElement).part.value as Indicator
+	const playhead_drag_over = (event: DragEvent) => {
 		const timeline = use.shadow.querySelector(".timeline-relative")
-		const coordinates = coordinates_in_rect(pointerCoordinates, timeline!.getBoundingClientRect())
-		dnd.dropzone.dragover({
-			coordinates: coordinates!,
+		const bounds = timeline?.getBoundingClientRect()
+		const x = event.clientX - bounds!.left
+		if(x >= 0) {
+			playhead_drag.dropzone.dragover({x})(event)
+		} else playhead_drag.dropzone.dragover({x: 0})(event)
+	}
+
+	const effect_drag_over = (event: DragEvent) => {
+		const timeline = use.shadow.querySelector(".timeline-relative")
+		const indicator = (event.target as HTMLElement).part.value as Indicator
+		const bounds = timeline?.getBoundingClientRect()
+		const x = event.clientX - bounds!.left
+		const y = event.clientY - bounds!.top
+		effect_drag.dropzone.dragover({
+			coordinates: [x >= 0 ? x : 0, y >= 0 ? y : 0],
 			indicator: indicator,
 		})(event)
-		playhead_drag.dropzone.dragover(coordinates!)(event)
-		if(coordinates)
-			setCoordinates(coordinates)
+	}
+
+	function augmented_dragover(event: DragEvent) {
+		playhead_drag_over(event)
+		effect_drag_over(event)
 	}
 
 	const render_tracks = () => state.tracks.map((_track) => Track([], {attrs: {part: "add-track-indicator"}}))
@@ -39,7 +52,6 @@ export const OmniTimeline = shadow_component({styles}, use => {
 
 	return html`
 		<div
-			@dragover=${augmented_dragover}
 			class="timeline"
 		>
 			${Toolbar([])}
@@ -47,7 +59,7 @@ export const OmniTimeline = shadow_component({styles}, use => {
 			<div
 				style="width: ${calculate_timeline_width(state.effects, state.zoom)}px"
 				class=timeline-relative>
-				${Playhead([coordinates])}
+				${Playhead([])}
 				${render_tracks()}
 				${render_effects()}
 				${ProposalIndicator()}

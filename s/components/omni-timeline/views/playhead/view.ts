@@ -1,10 +1,9 @@
 import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
-import {V2} from "../../utils/coordinates_in_rect.js"
 import {shadow_view} from "../../../../context/slate.js"
 
-export const Playhead = shadow_view({styles}, use => (coordinates: V2) => {
+export const Playhead = shadow_view({styles}, use => () => {
 	use.watch(() => use.context.state.timeline)
 	const controller = use.context.controllers.timeline
 	const actions = use.context.actions.timeline_actions
@@ -44,7 +43,7 @@ export const Playhead = shadow_view({styles}, use => (coordinates: V2) => {
 		start(e: DragEvent) {
 			const img = new Image()
 			img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
-			e.dataTransfer.setDragImage(img, 0, 0)
+			e.dataTransfer?.setDragImage(img, 0, 0)
 			actions.set_is_playing(false)
 			playhead_drag.dragzone.dragstart(true)(e)
 		},
@@ -53,7 +52,7 @@ export const Playhead = shadow_view({styles}, use => (coordinates: V2) => {
 	}
 
 	if(playhead_drag.hovering) {
-		translate_to_timecode(coordinates[0])
+		translate_to_timecode(playhead_drag.hovering.x)
 	}
 
 	return html`

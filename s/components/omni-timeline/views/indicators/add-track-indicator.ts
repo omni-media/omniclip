@@ -3,7 +3,7 @@ import {html} from "@benev/slate"
 import {light_view} from "../../../../context/slate.js"
 
 export const AddTrackIndicator = light_view(use => () => {
-	const drag = use.context.controllers.timeline.drag
+	const drag = use.context.controllers.timeline.effect_drag
 	const [indicator, setIndicator] = use.state(false)
 
 	const drag_events = {

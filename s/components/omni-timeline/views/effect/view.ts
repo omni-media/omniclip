@@ -9,10 +9,10 @@ import {calculate_start_position} from "../../utils/calculate_start_position.js"
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
 
 export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
-	const {drag, on_drop} = use.context.controllers.timeline
+	const {effect_drag, on_drop} = use.context.controllers.timeline
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
 	const zoom = use.context.state.timeline.zoom
-	const {grabbed, hovering} = drag
+	const {grabbed, hovering} = effect_drag
 
 	use.setup(() => on_drop(() => setCords([null, null])))
 
@@ -31,15 +31,20 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
 			const img = new Image()
 			img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
 			event.dataTransfer?.setDragImage(img, 0, 0)
-			drag.dragzone.dragstart({effect, offset: {x: event.offsetX, y: event.offsetY}})(event)
+			effect_drag.dragzone.dragstart({effect, offset: {x: event.offsetX, y: event.offsetY}})(event)
 		},
 		drop(event: DragEvent) {
+			const hovering = use.context.controllers.timeline.effect_drag.hovering
 			if(hovering) {
-				drag.dropzone.drop(hovering)(event)
+				effect_drag.dropzone.drop(hovering)(event)
 			}
 		}
 	}
 
+	use.setup(() => {
+		window.addEventListener("drop", (e) => drag_events.drop(e))
+		return () => removeEventListener("drop", drag_events.drop)
+	})
 	drag_events.effect_drag_listener()
 
 	return html`
@@ -51,7 +56,6 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
 				transform: translate(${x ? x : calculate_start_position(effect.start_at_position, zoom)}px, ${y ? y : calculate_effect_track_placement(effect.track, 40)}px);
 			"
 			draggable="true"
-			@drop=${drag_events.drop}
 			@dragstart=${drag_events.start}
 			@click=${() => use.context.actions.timeline_actions.set_selected_effect(effect)}
 		>
