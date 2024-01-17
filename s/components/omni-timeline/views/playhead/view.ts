@@ -2,6 +2,7 @@ import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
+import playheadSvg from "../../../../icons/remix-icon/playhead.svg.js"
 
 export const Playhead = shadow_view({styles}, use => () => {
 	use.watch(() => use.context.state.timeline)
@@ -63,7 +64,7 @@ export const Playhead = shadow_view({styles}, use => () => {
 			@dragend=${drag_events.end}
 			style="transform: translateX(${use.context.state.timeline.timecode * Math.pow(2, use.context.state.timeline.zoom)}px);"
 			class="playhead">
-			<div class="head"></div>
+			<div class="head">${playheadSvg}</div>
 		</div>
 	`
 })

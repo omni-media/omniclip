@@ -13,24 +13,11 @@ export const styles = css`
 
 		& .head {
 			transform: rotate(180deg);
-			background: var(--alpha);
-			display: inline-block;
-			height: 10px;
-			position: relative;
-			width: 20px;
+			height: 8px;
+			width: 16px;
+			top: 5px;
+			color: var(--alpha);
 			position: absolute;
-
-			&:before {
-				border-bottom: 10px solid var(--alpha);
-				border-left: 10px solid transparent;
-				border-right: 10px solid transparent;
-				content: "";
-				height: 0;
-				left: 0;
-				position: absolute;
-				top: -10px;
-				width: 0;
-			}
 		}
 	}
 `
