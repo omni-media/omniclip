@@ -2,7 +2,10 @@ import {html, reactor} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
+import playSvg from "../../../../icons/gravity-ui/play.svg.js"
+import pauseSvg from "../../../../icons/gravity-ui/pause.svg.js"
 import {TextPositioner} from "../../../../views/text-positioner/view.js"
+import fullscreenSvg from "../../../../icons/gravity-ui/fullscreen.svg.js"
 
 export const MediaPlayer = shadow_view({styles}, use => () => {
 	use.watch(() => use.context.state.timeline)
@@ -25,18 +28,22 @@ export const MediaPlayer = shadow_view({styles}, use => () => {
 	})
 
 	return html`
-		<figure>
-			${TextPositioner([])}
-			${compositor.canvas}
+		<div class="flex">
+			<figure>
+				${TextPositioner([])}
+				${compositor.canvas}
+			</figure>
 			<div id="video-controls" class="controls">
-				<button @click=${compositor.toggle_video_playing} id="playpause" type="button" data-state="${state.is_playing ? 'pause' : 'play'}">Play/Pause</button>
-				<button id="stop" type="button" data-state="stop">Stop</button>
-				<button id="mute" type="button" data-state="${isVideoMuted ? 'unmute' : 'mute'}">Mute/Unmute</button>
-				<button id="volinc" type="button" data-state="volup">Vol+</button>
-				<button id="voldec" type="button" data-state="voldown">Vol-</button>
-				<button id="fs" type="button" data-state="go-fullscreen">Fullscreen</button>
+				<button
+					@click=${compositor.toggle_video_playing}
+					id="playpause"
+					type="button"
+					data-state="${state.is_playing ? 'pause' : 'play'}"
+				>
+					${state.is_playing ? pauseSvg : playSvg}
+				</button>
+				<button class="fs" type="button" data-state="go-fullscreen">${fullscreenSvg}</button>
 			</div>
-		</figure>
-		<div>${use.context.state.timeline.timecode}</div>
+		</div>
 	`
 })

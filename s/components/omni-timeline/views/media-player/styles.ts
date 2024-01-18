@@ -1,9 +1,26 @@
 import {css} from "@benev/slate"
 
 export const styles = css`
+	:host {
+		display: flex;
+		width: 100%;
+		height: 100%;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+	}
+
+	.flex {
+		display: flex;
+		justify-content: center;
+		aspect-ratio: 16/9;
+		height: 100%;
+		flex-direction: column;
+	}
+
 	canvas {
-		width: 500px;
-		height: 300px;
+		height: 100%;
+		width: 100%;
 		background: rgb(32, 31, 31);
 		position: absolute;
 	}
@@ -13,9 +30,8 @@ export const styles = css`
 		display: flex;
 		justify-content: center;
 		flex-direction: column;
-		width: 500px;
-		height: 300px;
-		margin: 1.25rem auto;
+		height: 100%;
+		aspect-ratio: 16/9;
 		overflow: hidden;
 	}
 	
@@ -24,12 +40,20 @@ export const styles = css`
 	}
 
 	.controls {
-		width: 100%;
-		height: 8.0971659919028340080971659919028%; /* of figure's height */
 		display: flex;
-		justify-content: space-evenly;
-		position: absolute;
-		bottom: 0;
+		justify-content: center;
+		position: relative;
+		margin: 0.5em;
+
+		& button {
+			display: flex;
+			align-items: center;
+		}
+
+		& .fs {
+			position: absolute;
+			right: 0;
+		}
 	}
 
 	.controls[data-state="hidden"] {

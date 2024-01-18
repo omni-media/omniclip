@@ -5,6 +5,7 @@ import {shadow_view} from "../../../../context/slate.js"
 import exportSvg from "../../../../icons/gravity-ui/export.svg.js"
 import zoomInSvg from "../../../../icons/material-design-icons/zoom-in.svg.js"
 import zoomOutSvg from "../../../../icons/material-design-icons/zoom-out.svg.js"
+import {convert_ms_to_hmsms} from "../time-ruler/utils/convert_ms_to_hmsms.js"
 
 export const Toolbar = shadow_view({styles}, use => () => {
 	use.watch(() => use.context.state.timeline)
@@ -38,6 +39,7 @@ export const Toolbar = shadow_view({styles}, use => () => {
 				</div>
 			</dialog>
 			<button class="export-button" @click=${() => video_export.export_start(use.context.state.timeline)}>${exportSvg}<span>Export</span></button>
+			<div>${convert_ms_to_hmsms(use.context.state.timeline.timecode)}</div>
 			<div class="zoom">
 				<button ?disabled=${zoom === -1} @click=${actions.zoom_in} class="zoom-in">${zoomInSvg}</button>
 				<button @click=${actions.zoom_out} class="zoom-out">${zoomOutSvg}</button>
