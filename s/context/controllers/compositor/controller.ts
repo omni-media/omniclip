@@ -29,12 +29,10 @@ export class Compositor {
 			id: "252", kind: "video", src: "/public/bbb_video_avc_frag.mp4",
 			start: 0, end: 60000, track: 1, start_at_position: 5000, duration: 60000
 		})
-
+		this.#on_playing()
 		reactor.reaction(
 			() => this.#is_playing.value,
 			(is_playing) => {
-				this.#pause_time = performance.now() - this.#last_time
-				this.#on_playing(is_playing)
 				if(is_playing) {
 					this.#VideoManager.play_videos()
 				} else this.#VideoManager.pause_videos()
@@ -42,14 +40,17 @@ export class Compositor {
 		)
 	}
 
-	#on_playing = (is_playing: boolean) => {
-		if(is_playing) {
+	#on_playing = () => {
+		if(!this.#is_playing.value) {
+			this.#pause_time = performance.now() - this.#last_time
+		}
+		if(this.#is_playing.value) {
 			const elapsed_time = this.#calculate_elapsed_time()
 			this.actions.increase_timecode(elapsed_time)
 			this.on_playing.publish(0)
 			this.draw_effects()
 		}
-		requestAnimationFrame(() => this.#on_playing(this.#is_playing.value))
+		requestAnimationFrame(this.#on_playing)
 	}
 	
 	#calculate_elapsed_time() {
