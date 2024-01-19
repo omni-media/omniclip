@@ -8,7 +8,9 @@ import videoPlayerSvg from "../../../../icons/carbon-icons/video-player.svg.js"
 export const MediaPlayerPanel = panel({
 	label: "Player",
 	icon: videoPlayerSvg,
-	view: shadow_view({name: "media-player", styles}, _use => ({}: any) => {
+	view: shadow_view(use => ({}) => {
+		use.name("media-player")
+		use.styles(styles)
 		return html`${MediaPlayer([])}`
 	}),
 })

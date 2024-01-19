@@ -1,4 +1,4 @@
-import {html} from "@benev/slate"
+import {Op, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {Effect} from "./views/effect/view.js"
@@ -11,12 +11,13 @@ import {Indicator} from "../../context/controllers/timeline/types.js"
 import {ProposalIndicator} from "./views/indicators/proposal-indicator.js"
 import {calculate_timeline_width} from "./utils/calculate_timeline_width.js"
 
-export const OmniTimeline = shadow_component({styles}, use => {
+export const OmniTimeline = shadow_component(use => {
+	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const state = use.context.state.timeline
 	const effect_drag = use.context.controllers.timeline.effect_drag
 	const playhead_drag = use.context.controllers.timeline.playhead_drag
-	use.setup(() => {
+	use.mount(() => {
 		window.addEventListener("dragover", augmented_dragover)
 		return () => removeEventListener("dragover", augmented_dragover)
 	})

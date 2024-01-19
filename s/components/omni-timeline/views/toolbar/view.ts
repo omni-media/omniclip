@@ -7,7 +7,8 @@ import zoomInSvg from "../../../../icons/material-design-icons/zoom-in.svg.js"
 import zoomOutSvg from "../../../../icons/material-design-icons/zoom-out.svg.js"
 import {convert_ms_to_hmsms} from "../time-ruler/utils/convert_ms_to_hmsms.js"
 
-export const Toolbar = shadow_view({styles}, use => () => {
+export const Toolbar = shadow_view(use => () => {
+	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const actions = use.context.actions.timeline_actions
 	const zoom = use.context.state.timeline.zoom

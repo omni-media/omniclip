@@ -8,13 +8,14 @@ import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
 
-export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
+export const Effect = shadow_view(use => (effect: AnyEffect) => {
+	use.styles(styles)
 	const {effect_drag, on_drop} = use.context.controllers.timeline
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
 	const zoom = use.context.state.timeline.zoom
 	const {grabbed, hovering} = effect_drag
 
-	use.setup(() => on_drop(() => setCords([null, null])))
+	use.mount(() => on_drop(() => setCords([null, null])))
 
 	const drag_events = {
 		effect_drag_listener() {
@@ -41,7 +42,7 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
 		}
 	}
 
-	use.setup(() => {
+	use.mount(() => {
 		window.addEventListener("drop", (e) => drag_events.drop(e))
 		return () => removeEventListener("drop", drag_events.drop)
 	})
@@ -56,6 +57,7 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
 				transform: translate(${x ? x : calculate_start_position(effect.start_at_position, zoom)}px, ${y ? y : calculate_effect_track_placement(effect.track, 40)}px);
 			"
 			draggable="true"
+			@dragend=${(e: DragEvent) => effect_drag.dragzone.dragend()(e)}
 			@dragstart=${drag_events.start}
 			@click=${() => use.context.actions.timeline_actions.set_selected_effect(effect)}
 		>

@@ -1,4 +1,4 @@
-import {Slate, ZipAction, watch} from "@benev/slate"
+import {Nexus, ZipAction, watch} from "@benev/slate"
 import {slate, Context} from "@benev/construct/x/mini.js"
 
 import {OmniState} from "../types.js"
@@ -24,9 +24,9 @@ export class OmniContext extends Context {
 	controllers = {
 		timeline: new Timeline(this.actions.timeline_actions),
 		compositor: new Compositor(this.actions.timeline_actions),
-		video_export: new VideoExport(this.actions.timeline_actions)
+		video_export: new VideoExport(this.state.timeline, this.actions.timeline_actions)
 	}
 }
 
-export const omnislate = slate as Slate<OmniContext>
+export const omnislate = slate as unknown as Nexus<OmniContext>
 export const {shadow_component, shadow_view, light_view} = omnislate

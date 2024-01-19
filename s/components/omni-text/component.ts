@@ -9,7 +9,8 @@ import alignRightSvg from "../../icons/remix-icon/align-right.svg.js"
 import alignCenterSvg from "../../icons/remix-icon/align-center.svg.js"
 import {Font, FontStyle, TextAlign, TextEffectProps} from "../../context/controllers/timeline/types.js"
 
-export const OmniText = shadow_component({styles}, use => {
+export const OmniText = shadow_component(use => {
+	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const actions = use.context.actions
 	const {canvas, ctx} = use.context.controllers.compositor

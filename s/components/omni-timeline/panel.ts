@@ -7,7 +7,9 @@ import timelineSvg from "../../icons/gravity-ui/timeline.svg.js"
 export const TimelinePanel = panel({
 	label: "Timeline",
 	icon: timelineSvg,
-	view: shadow_view({name: "timeline", styles}, _use => ({}: any) => {
+	view: shadow_view(use => ({}) => {
+		use.styles(styles)
+		use.name("timeline")
 		return html`
 			<omni-timeline></omni-timeline>
 		`
