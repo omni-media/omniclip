@@ -1,4 +1,4 @@
-import { Op, Signal } from "@benev/slate"
+import {Op, Signal} from "@benev/slate"
 
 export type V2 = [number, number]
 
@@ -26,7 +26,7 @@ export interface Effect {
 
 export interface VideoEffect extends Effect {
 	kind: "video"
-	src: string
+	file: File
 }
 
 export type TextEffectProps = Omit<TextEffect, keyof Effect | "kind">

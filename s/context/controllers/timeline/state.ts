@@ -1,8 +1,10 @@
 import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 
 import {XTimeline} from "./types.js"
+import {signals} from "@benev/slate"
 
 export const timeline_state: XTimeline = {
+	is_app_loading_state: signals.op(),
 	selected_effect: null,
 	is_exporting: false,
 	export_progress: 0,
@@ -16,28 +18,5 @@ export const timeline_state: XTimeline = {
 		{id: generate_id()},
 		{id: generate_id()},
 	],
-	effects: [
-		/*
-		{id: generate_id(), item: {type: "Audio", source: ""},
-			start: 1000, end: 7000, track: 0, start_at_position: 5000, duration: 6000
-		},
-		{id: generate_id(),item: {type: "Audio", source: ""}, 
-			start: 7000, end: 15000, track: 0, start_at_position: 12000, duration: 8000
-		},
-		{id: generate_id(),item: {type: "Text", content: "", color: "", size: 4},
-			start: 7000, end: 12000, track: 1, start_at_position: 0, duration: 5000
-		},
-		*/
-		{id: "252", kind: "video", src: "/public/bbb_video_avc_frag.mp4",
-			start: 0, end: 60000, track: 1, start_at_position: 5000, duration: 60000
-		},
-		/*
-		{id: generate_id(),item: {type: "Image", source: ""},
-			start: 20000, end: 30000, track: 2, start_at_position: 20000, duration: 10000
-		},
-		{id: generate_id(),item: {type: "Video", source: "/public/bbb_video_avc_frag.mp4"},
-			start: 40000, end: 45000, track: 2, start_at_position: 35000, duration: 5000
-		}
-		*/
-	]
+	effects: []
 }

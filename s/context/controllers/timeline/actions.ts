@@ -3,7 +3,9 @@ import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 
 import {TimelineHelpers} from "./helpers.js"
 import {actionize} from "../../../utils/actionize.js"
-import {AnyEffect, TextEffect, TextEffectProps, TextRect} from "./types.js"
+import {Compositor} from "../compositor/controller.js"
+import {Video} from "../../../components/omni-media/types.js"
+import {AnyEffect, TextEffect, TextEffectProps, TextRect, VideoEffect} from "./types.js"
 
 export const timeline_actions = actionize({
 	add_text_effect: state => (text_props: TextEffectProps) => {
@@ -17,6 +19,21 @@ export const timeline_actions = actionize({
 			end: 5000,
 			track: 0
 		}
+		state.timeline.effects.push(effect)
+	},
+	add_video_effect: state => (video: Video, compositor: Compositor) => {
+		const duration = video.element.duration * 1000
+		const effect: VideoEffect = {
+			id: generate_id(),
+			kind: "video",
+			duration,
+			start_at_position: 1500,
+			start: 0,
+			end: duration,
+			track: 2,
+			file: video.file
+		}
+		compositor.VideoManager.add_video(effect)
 		state.timeline.effects.push(effect)
 	},
 	update_text_effect: state => (text_props: TextEffectProps, id: string) => {

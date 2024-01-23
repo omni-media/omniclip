@@ -1,10 +1,10 @@
 import {quick_hash} from "@benev/construct"
 
-import {ImportedFile} from "../../../components/omni-media/types"
+import {Video, MediaFile} from "../../../components/omni-media/types"
 
 export class Media {
 
-	async get_imported_files(database: IDBDatabase): Promise<ImportedFile[]> {
+	async get_imported_files(database: IDBDatabase): Promise<MediaFile[]> {
 		return new Promise((resolve, reject) => {
 			const transaction = database.transaction(["files"])
 			const files_handles_store = transaction.objectStore("files")
@@ -12,7 +12,7 @@ export class Media {
 
 			request.onsuccess = async () => {
 				try {
-					const files: ImportedFile[] = request.result || []
+					const files: MediaFile[] = request.result || []
 					resolve(files)
 				} catch (error) {
 					reject(error)
@@ -40,7 +40,7 @@ export class Media {
 		})
 	}
 
-	import_file(database: IDBDatabase): Promise<ImportedFile> {
+	import_file(database: IDBDatabase): Promise<MediaFile> {
 		return new Promise((resolve, reject) => {
 			const file_handle = this.get_file_handle()
 
@@ -56,7 +56,7 @@ export class Media {
 					const not_duplicate = check_if_duplicate.result === 0
 					if(not_duplicate) {
 						files_store.add({file: imported_file, hash})
-						resolve({content: imported_file, hash})
+						resolve({file: imported_file, hash})
 					}
 				}
 
@@ -66,13 +66,13 @@ export class Media {
 		})
 	}
 
-	create_videos_from_video_files(imported_files: ImportedFile[]) {
-		const videos: {media: HTMLVideoElement, file: ImportedFile}[] = []
-		for(const imported_file of imported_files) {
+	create_videos_from_video_files(files: MediaFile[]) {
+		const videos: Video[] = []
+		for(const {file, hash} of files) {
 			const video = document.createElement('video')
-			video.src = URL.createObjectURL(imported_file.content)
+			video.src = URL.createObjectURL(file)
 			video.load()
-			videos.push({media: video, file: imported_file})
+			videos.push({element: video, file, hash, kind: "video"})
 		}
 		return videos
 	}

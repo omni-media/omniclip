@@ -3,7 +3,9 @@ import {ConstructEditor, single_panel_layout} from "@benev/construct/x/mini.js"
 
 import {omnislate, OmniContext} from "./context/slate.js"
 import {TextPanel} from "./components/omni-text/panel.js"
+import {MediaPanel} from "./components/omni-media/panel.js"
 import {OmniText} from "./components/omni-text/component.js"
+import {OmniMedia} from "./components/omni-media/component.js"
 import {TimelinePanel} from "./components/omni-timeline/panel.js"
 import {OmniTimeline} from "./components/omni-timeline/component.js"
 import {MediaPlayerPanel} from "./components/omni-timeline/views/media-player/panel.js"
@@ -11,6 +13,7 @@ import {MediaPlayerPanel} from "./components/omni-timeline/views/media-player/pa
 omnislate.context = new OmniContext({
 	panels: {
 		TimelinePanel,
+		MediaPanel,
 		MediaPlayerPanel,
 		TextPanel
 	},
@@ -20,4 +23,4 @@ omnislate.context = new OmniContext({
 	},
 })
 
-register_to_dom({ConstructEditor, OmniTimeline, OmniText})
+register_to_dom({ConstructEditor, OmniTimeline, OmniText, OmniMedia})
