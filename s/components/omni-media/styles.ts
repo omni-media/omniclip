@@ -1,6 +1,18 @@
 import {css} from "@benev/slate"
 
 export const styles = css`
+	.import-btn {
+		padding: 0.2em 0.4em;
+		transition: opacity 0.5s ease 0s;
+		background: var(--alpha);
+		color: var(--bg-b);
+		cursor: pointer;
+		margin: 1em;
+
+		&:hover {
+			opacity: 0.8;
+		}
+	}
 
 	.media {
 		display: flex;
