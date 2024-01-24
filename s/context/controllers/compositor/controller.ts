@@ -17,25 +17,20 @@ export class Compositor {
 	readonly canvas = document.createElement("canvas")
 	readonly ctx = this.canvas.getContext("2d")
 
-	#VideoManager = new VideoManager(this)
+	VideoManager = new VideoManager(this)
 	TextManager: TextManager
 
 	constructor(private actions: TimelineActions) {
 		this.canvas.width = 1280
 		this.canvas.height = 720
-
 		this.TextManager = new TextManager(this, actions)
-		this.#VideoManager.add_video({
-			id: "252", kind: "video", src: "/public/bbb_video_avc_frag.mp4",
-			start: 0, end: 60000, track: 1, start_at_position: 5000, duration: 60000
-		})
 		this.#on_playing()
 		reactor.reaction(
 			() => this.#is_playing.value,
 			(is_playing) => {
 				if(is_playing) {
-					this.#VideoManager.play_videos()
-				} else this.#VideoManager.pause_videos()
+					this.VideoManager.play_videos()
+				} else this.VideoManager.pause_videos()
 			}
 		)
 	}
@@ -75,7 +70,7 @@ export class Compositor {
 		if(this.currently_played_effects) {
 			for(const effect of effects_sorted_by_track) {
 				if(effect.kind === "video") {
-					const video = this.#VideoManager.get(effect.id)
+					const video = this.VideoManager.get(effect.id)
 					if(!redraw && video?.paused) {await video.play()}
 					if(redraw && timecode) {
 						const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
@@ -83,7 +78,7 @@ export class Compositor {
 					}
 					try {
 						const frame = new VideoFrame(video!)
-						this.#VideoManager.draw_video_frame(frame)
+						this.VideoManager.draw_video_frame(frame)
 						frame.close()
 					} catch(e) {console.log(e)}
 				}
