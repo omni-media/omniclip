@@ -1,10 +1,37 @@
+import {pub} from "@benev/slate"
 import {quick_hash} from "@benev/construct"
 
 import {Video, MediaFile} from "../../../components/omni-media/types"
 
 export class Media {
+	#database_request = window.indexedDB.open("database", 3)
 
-	async get_imported_files(database: IDBDatabase): Promise<MediaFile[]> {
+	on_media_change = pub<{files: MediaFile[], action: "removed" | "added"}>()
+
+	constructor() {
+		this.#database_request.onerror = (event) => {
+			console.error("Why didn't you allow my web app to use IndexedDB?!")
+		}
+		this.#database_request.onsuccess = (event) => {
+			console.log("success")
+		}
+		this.#database_request.onupgradeneeded = (event) => {
+			const database = (event.target as IDBRequest).result as IDBDatabase
+			const objectStore = database.createObjectStore("files", {keyPath: "hash"})
+			objectStore!.createIndex("file", "file", { unique: true })
+			objectStore!.transaction.oncomplete = (event) => {
+				console.log("complete")
+			}
+		}
+		this.#database_request.onsuccess = async (e) => {
+			const target = e.target as IDBRequest
+			const database = target.result as IDBDatabase
+			const imported_files = await this.#get_imported_files(database)
+			this.on_media_change.publish({files: imported_files, action: "added"})
+		}
+	}
+
+	async #get_imported_files(database: IDBDatabase): Promise<MediaFile[]> {
 		return new Promise((resolve, reject) => {
 			const transaction = database.transaction(["files"])
 			const files_handles_store = transaction.objectStore("files")
@@ -25,44 +52,39 @@ export class Media {
 		})
 	}
 
-	async get_file_handle() {
+	async #get_file_handle() {
 		const [file_handle] = await window.showOpenFilePicker()
 		return file_handle
 	}
 
-	delete_file(database: IDBDatabase, file_hash: string): Promise<boolean> {
-		return new Promise((resolve, reject) => {
-			const request = database
-				.transaction(["files"], "readwrite")
-				.objectStore("files")
-				.delete(file_hash)
-			request.onsuccess = (event) => resolve(true)
-		})
+	delete_file(file: MediaFile) {
+		const request = this.#database_request.result
+			.transaction(["files"], "readwrite")
+			.objectStore("files")
+			.delete(file.hash)
+		request.onsuccess = (event) => {
+			this.on_media_change.publish({files: [file], action: "removed"})
+		}
 	}
 
-	import_file(database: IDBDatabase): Promise<MediaFile> {
-		return new Promise((resolve, reject) => {
-			const file_handle = this.get_file_handle()
+	import_file() {
+		const file_handle = this.#get_file_handle()
+		file_handle.then(async (handle) => {
+			const imported_file = await handle.getFile()
+			const hash = await quick_hash(imported_file)
+			const transaction = this.#database_request.result.transaction(["files"], "readwrite")
+			const files_store = transaction.objectStore("files")
+			const check_if_duplicate = files_store.count(hash)
 
-			file_handle.then(async (handle) => {
-
-				const imported_file = await handle.getFile()
-				const hash = await quick_hash(imported_file)
-				const transaction = database.transaction(["files"], "readwrite")
-				const files_store = transaction.objectStore("files")
-				const check_if_duplicate = files_store.count(hash)
-
-				check_if_duplicate!.onsuccess = () => {
-					const not_duplicate = check_if_duplicate.result === 0
-					if(not_duplicate) {
-						files_store.add({file: imported_file, hash})
-						resolve({file: imported_file, hash})
-					}
+			check_if_duplicate!.onsuccess = () => {
+				const not_duplicate = check_if_duplicate.result === 0
+				if(not_duplicate) {
+					files_store.add({file: imported_file, hash})
+					this.on_media_change.publish({files: [{file: imported_file, hash}], action: "added"})
 				}
+			}
 
-				check_if_duplicate!.onerror = (error) => reject(error)
-
-			})
+			check_if_duplicate!.onerror = (error) => console.log("error")
 		})
 	}
 

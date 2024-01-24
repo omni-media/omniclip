@@ -19,9 +19,6 @@ export class OmniContext extends Context {
 	#state =  watch.stateTree<OmniState>({
 		timeline: timeline_state
 	})
-	
-	database: IDBDatabase | null = null
-	request = window.indexedDB.open("database", 3)
 
 	get state() {
 		return this.#state.state
@@ -40,23 +37,6 @@ export class OmniContext extends Context {
 
 	constructor(options: MiniContextOptions) {
 		super(options)
-		if(this.database) {
-			this.database.onerror = (event) => {
-				console.error("Why didn't you allow my web app to use IndexedDB?!")
-			}
-		}
-		this.request.onsuccess = (event) => {
-			console.log("success")
-			this.database = (event.target as IDBRequest).result
-		}
-		this.request.onupgradeneeded = (event) => {
-			this.database = (event.target as IDBRequest).result
-			const objectStore = this.database?.createObjectStore("files", {keyPath: "hash"})
-			objectStore!.createIndex("file", "file", { unique: true })
-			objectStore!.transaction.oncomplete = (event) => {
-				console.log("complete")
-			}
-		}
 	}
 }
 export const omnislate = slate as Slate<OmniContext>
