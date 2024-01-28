@@ -1,6 +1,7 @@
 import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
+import {Filmstrips} from "../filmstrips/view.js"
 import {V2} from "../../utils/coordinates_in_rect.js"
 import {shadow_view} from "../../../../context/slate.js"
 import {AnyEffect} from "../../../../context/controllers/timeline/types.js"
@@ -9,11 +10,11 @@ import {calculate_start_position} from "../../utils/calculate_start_position.js"
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
 
 export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
+	use.watch(() => use.context.state.timeline)
 	const {effect_drag, on_drop} = use.context.controllers.timeline
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
 	const zoom = use.context.state.timeline.zoom
 	const {grabbed, hovering} = effect_drag
-
 	use.setup(() => on_drop(() => setCords([null, null])))
 
 	const drag_events = {
@@ -59,7 +60,9 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
 			@dragstart=${drag_events.start}
 			@click=${() => use.context.actions.timeline_actions.set_selected_effect(effect)}
 		>
-			${effect.kind}
+			${effect.kind === "video"
+			? Filmstrips([effect])
+			: effect.kind}
 		</span>
 	`
 })
