@@ -1,5 +1,5 @@
 import {html, watch} from "@benev/slate"
-import {FSNode} from "@ffmpeg/ffmpeg/dist/esm/types.js"
+import {FFprobeWorker} from "ffprobe-wasm/browser.mjs"
 import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
 
 import {styles} from "./styles.js"
@@ -21,7 +21,7 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect) => 
 	})
 	use.setup(() => {
 		if(effect.kind === "video") {
-			generateVideoThumbnails(effect.file)
+			generate_video_thumbnails(effect.file)
 		}
 		return () => {
 			for(const url of getThumbnails()) {
@@ -29,12 +29,13 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect) => 
 			}
 		}
 	})
-	
-	function generate_loading_image_placeholders(frames: FSNode[]) {
+
+	const ffprobe = use.prepare(() => new FFprobeWorker())
+
+	function generate_loading_image_placeholders(frames: number) {
 		const new_arr = []
-		for(const frame of frames) {
-			if(!frame.isDir)
-				new_arr.push(new URL("/assets/loading.svg", import.meta.url).toString())
+		for(let i = 0; i <= frames - 1; i++) {
+			new_arr.push(new URL("/assets/loading.svg", import.meta.url).toString())
 		}
 		setThumbnails(new_arr)
 	}
@@ -43,38 +44,49 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect) => 
 		const max_zoom_in = 2
 		const current_zoom = use.context.state.timeline.zoom
 		const diff = Math.abs(current_zoom - max_zoom_in)
-		const is_whole_number = diff % 1 === 0
-		if(is_whole_number) {
-			setVisibleThumbnails([])
-			for(let i = 0; i<= getThumbnails().length;i+=Math.pow(2, diff)) {
-				setVisibleThumbnails([...getVisibleThumbnails(), getThumbnails()[i]])
-			}
+		setVisibleThumbnails([])
+		for(let i = 0; i<= getThumbnails().length - 1;i+=Math.pow(2, Math.floor(diff))) {
+			setVisibleThumbnails([...getVisibleThumbnails(), getThumbnails()[i]])
 		}
 	}
 
-	async function generateVideoThumbnails(file: File) {
+	async function generate_video_thumbnails(file: File) {
 		let generated_frames = 0
+		let segment_number = 0
+
 		const result = await fetchFile(file)
 		await ffmpeg.createDir("/thumbnails")
+		await ffmpeg.createDir("/segments")
 		await ffmpeg.writeFile(file.name, result)
-		await ffmpeg.exec(["-i", file.name,"-filter_complex",`select='not(mod(n\,1))',scale=100:50`,"-an","-c:v", "libwebp", "thumbnails/out%d.webp"])
-		const frames = await ffmpeg.listDir("/thumbnails")
-		generate_loading_image_placeholders(frames)
+		const probe = await ffprobe.getFrames(file, 1)
+		generate_loading_image_placeholders(probe.nb_frames)
+		// remux to mkv container, which supports more variety of codecs
+		await ffmpeg.exec(["-i", file.name, "-c", "copy", "container.mkv"])
+		// split into 5 second segments, so user can get new filmstrips every 5 seconds
+		await ffmpeg.exec(["-i", "container.mkv", "-c", "copy", "-map", "0", "-reset_timestamps", "1", "-f", "segment", "-segment_time", "5", "segments/out%d.mkv"])
+		const segments = await ffmpeg.listDir("/segments")
 
-		for(const frame of frames) {
-			if(!frame.isDir) {
-				const frame_data = await ffmpeg.readFile(`thumbnails/${frame.name}`)
-				const new_arr = getThumbnails()
-				new_arr[generated_frames] = URL.createObjectURL(new Blob([frame_data]))
-				setThumbnails(new_arr)
-				generated_frames += 1
-				recalculate_visible_images()
-				await ffmpeg.deleteFile(`thumbnails/${frame.name}`)
+		for(const segment of segments) {
+			if(!segment.isDir) {
+				await ffmpeg.exec(["-i", `segments/${segment.name}`, "-filter_complex", `select='not(mod(n\,1))',scale=100:50`, "-an", "-c:v", "libwebp", `thumbnails/${segment_number}_out%d.webp`])
+				const frames = await ffmpeg.listDir("/thumbnails")
+				for(const frame of frames) {
+					if(!frame.isDir) {
+						const frame_data = await ffmpeg.readFile(`thumbnails/${frame.name}`)
+						const new_arr = [...getThumbnails()]
+						new_arr[generated_frames] = URL.createObjectURL(new Blob([frame_data]))
+						setThumbnails(new_arr)
+						generated_frames += 1
+						recalculate_visible_images()
+						await ffmpeg.deleteFile(`thumbnails/${frame.name}`)
+					}
+				}
 			}
+			segment_number += 1
 		}
 
 		await ffmpeg.deleteDir("/thumbnails")
-		ffmpeg.on("log", (e) => console.log(e, "LOGGG"))
+		ffmpeg.on("log", (e) => console.log(e))
 	}
 
 	return html`${visibleThumbnails.map((thumbnail) => html`<img style="height: 40px; width: ${width_of_frame}px; pointer-events: none;" src=${thumbnail} />`)}`
