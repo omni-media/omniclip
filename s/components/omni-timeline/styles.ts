@@ -13,6 +13,10 @@ export const styles = css`
 		
 		& .timeline-relative {
 			position: relative;
+
+			& * {
+				will-change: transform;
+			}
 		}
 
 		& .drop-indicator {

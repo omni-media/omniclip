@@ -1,4 +1,4 @@
-import {html, watch} from "@benev/slate"
+import {GoldElement, html, watch} from "@benev/slate"
 import {FFprobeWorker} from "ffprobe-wasm/browser.mjs"
 import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
 
@@ -7,7 +7,7 @@ import {shadow_view} from "../../../../context/slate.js"
 import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {VideoEffect} from "../../../../context/controllers/timeline/types.js"
 
-export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect) => {
+export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, timeline: GoldElement) => {
 	use.watch(() => use.context.state.timeline.zoom)
 	const zoom = use.context.state.timeline.zoom
 	const ffmpeg = use.context.controllers.video_export.FFmpegHelper.ffmpeg
@@ -28,6 +28,42 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect) => 
 				URL.revokeObjectURL(url)
 			}
 		}
+	})
+
+	use.setup(() => {
+		const options = {
+			root: timeline,
+			threshold: 0
+		}
+		const observer = new IntersectionObserver((elements) => {
+		elements.forEach(element => {
+			const image = element.target as HTMLImageElement
+			if(element.isIntersecting) {
+				const index = +image.getAttribute("data-index")!
+				image.src = getVisibleThumbnails()[index]
+			} else {image.src = ""}
+		})
+		}, options)
+		const mutation_observer = new MutationObserver((mutations) => {
+			for(const mutation of mutations) {
+				if(mutation.type === "childList") {
+					mutation.addedNodes.forEach((added) => {
+						const element = added as HTMLElement
+						if(element.className === "thumbnail") {
+							observer.observe(element)
+						}
+					})
+					mutation.removedNodes.forEach(removed => {
+						const element = removed as HTMLElement
+						if(element.className === "thumbnail") {
+							observer.unobserve(element)
+						}
+					})
+				}
+			}
+		})
+		mutation_observer.observe(use.shadow, {childList: true})
+		return () => {mutation_observer.disconnect(), observer.disconnect()}
 	})
 
 	const ffprobe = use.prepare(() => new FFprobeWorker())
@@ -89,5 +125,5 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect) => 
 		ffmpeg.on("log", (e) => console.log(e))
 	}
 
-	return html`${visibleThumbnails.map((thumbnail) => html`<img style="height: 40px; width: ${width_of_frame}px; pointer-events: none;" src=${thumbnail} />`)}`
+	return html`${visibleThumbnails.map((thumbnail, i) => html`<img data-index=${i}  class="thumbnail" style="height: 40px; width: ${width_of_frame}px; pointer-events: none;" src=${thumbnail} />`)}`
 })

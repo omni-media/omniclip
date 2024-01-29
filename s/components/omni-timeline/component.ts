@@ -48,7 +48,7 @@ export const OmniTimeline = shadow_component({styles}, use => {
 	}
 
 	const render_tracks = () => state.tracks.map((_track) => Track([], {attrs: {part: "add-track-indicator"}}))
-	const render_effects = () => state.effects.map((effect) => Effect([effect]))
+	const render_effects = () => state.effects.map((effect) => Effect([effect, use.element]))
 
 	return html`
 		<div

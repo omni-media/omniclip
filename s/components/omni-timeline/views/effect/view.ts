@@ -1,4 +1,4 @@
-import {html} from "@benev/slate"
+import {GoldElement, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {Filmstrips} from "../filmstrips/view.js"
@@ -9,7 +9,7 @@ import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
 
-export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
+export const Effect = shadow_view({styles}, use => (effect: AnyEffect, timeline: GoldElement) => {
 	use.watch(() => use.context.state.timeline)
 	const {effect_drag, on_drop} = use.context.controllers.timeline
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
@@ -61,7 +61,7 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect) => {
 			@click=${() => use.context.actions.timeline_actions.set_selected_effect(effect)}
 		>
 			${effect.kind === "video"
-			? Filmstrips([effect])
+			? Filmstrips([effect, timeline])
 			: effect.kind}
 		</span>
 	`
