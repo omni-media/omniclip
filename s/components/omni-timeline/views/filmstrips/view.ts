@@ -1,6 +1,4 @@
 import {GoldElement, html, watch} from "@benev/slate"
-import {FFprobeWorker} from "ffprobe-wasm/browser.mjs"
-import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
@@ -10,7 +8,7 @@ import {VideoEffect} from "../../../../context/controllers/timeline/types.js"
 export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, timeline: GoldElement) => {
 	use.watch(() => use.context.state.timeline.zoom)
 	const zoom = use.context.state.timeline.zoom
-	const ffmpeg = use.context.controllers.video_export.FFmpegHelper.ffmpeg
+	const controller = use.context.controllers.timeline.FilmstripsManager
 	const [_thumbnails, setThumbnails, getThumbnails] = use.state<string[]>([])
 	const [visibleThumbnails, setVisibleThumbnails, getVisibleThumbnails] = use.state<string[]>([])
 	const width_of_frame = calculate_effect_width(effect, zoom) / visibleThumbnails.length
@@ -19,9 +17,20 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		watch.track(() => use.context.state.timeline.zoom, (zoom) => recalculate_visible_images())
 		return () => {}
 	})
+
 	use.setup(() => {
 		if(effect.kind === "video") {
-			generate_video_thumbnails(effect.file)
+			controller.get_frames_count(effect.file).then(async frames => {
+				let generated_frames = 0 
+				generate_loading_image_placeholders(frames)
+				for await(const frame_blob_url of controller.generate_video_effect_filmstrips(effect.file)) {
+					const updated_thumbnails = [...getThumbnails()]
+					updated_thumbnails[generated_frames] = frame_blob_url
+					setThumbnails(updated_thumbnails)
+					recalculate_visible_images()
+					generated_frames += 1
+				}
+			})
 		}
 		return () => {
 			for(const url of getThumbnails()) {
@@ -31,42 +40,11 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 	})
 
 	use.setup(() => {
-		const options = {
-			root: timeline,
-			threshold: 0
-		}
-		const observer = new IntersectionObserver((elements) => {
-		elements.forEach(element => {
-			const image = element.target as HTMLImageElement
-			if(element.isIntersecting) {
-				const index = +image.getAttribute("data-index")!
-				image.src = getVisibleThumbnails()[index]
-			} else {image.src = ""}
-		})
-		}, options)
-		const mutation_observer = new MutationObserver((mutations) => {
-			for(const mutation of mutations) {
-				if(mutation.type === "childList") {
-					mutation.addedNodes.forEach((added) => {
-						const element = added as HTMLElement
-						if(element.className === "thumbnail") {
-							observer.observe(element)
-						}
-					})
-					mutation.removedNodes.forEach(removed => {
-						const element = removed as HTMLElement
-						if(element.className === "thumbnail") {
-							observer.unobserve(element)
-						}
-					})
-				}
-			}
-		})
+		const intersection_observer = controller.attach_intersection_observer({root: timeline, threshold: 0}, (index) => getVisibleThumbnails()[index])
+		const mutation_observer = controller.attach_mutation_observer(intersection_observer)
 		mutation_observer.observe(use.shadow, {childList: true})
-		return () => {mutation_observer.disconnect(), observer.disconnect()}
+		return () => {mutation_observer.disconnect(), intersection_observer.disconnect()}
 	})
-
-	const ffprobe = use.prepare(() => new FFprobeWorker())
 
 	function generate_loading_image_placeholders(frames: number) {
 		const new_arr = []
@@ -74,6 +52,7 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 			new_arr.push(new URL("/assets/loading.svg", import.meta.url).toString())
 		}
 		setThumbnails(new_arr)
+		recalculate_visible_images()
 	}
 
 	function recalculate_visible_images() {
@@ -84,45 +63,6 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		for(let i = 0; i<= getThumbnails().length - 1;i+=Math.pow(2, Math.floor(diff))) {
 			setVisibleThumbnails([...getVisibleThumbnails(), getThumbnails()[i]])
 		}
-	}
-
-	async function generate_video_thumbnails(file: File) {
-		let generated_frames = 0
-		let segment_number = 0
-
-		const result = await fetchFile(file)
-		await ffmpeg.createDir("/thumbnails")
-		await ffmpeg.createDir("/segments")
-		await ffmpeg.writeFile(file.name, result)
-		const probe = await ffprobe.getFrames(file, 1)
-		generate_loading_image_placeholders(probe.nb_frames)
-		// remux to mkv container, which supports more variety of codecs
-		await ffmpeg.exec(["-i", file.name, "-c", "copy", "container.mkv"])
-		// split into 5 second segments, so user can get new filmstrips every 5 seconds
-		await ffmpeg.exec(["-i", "container.mkv", "-c", "copy", "-map", "0", "-reset_timestamps", "1", "-f", "segment", "-segment_time", "5", "segments/out%d.mkv"])
-		const segments = await ffmpeg.listDir("/segments")
-
-		for(const segment of segments) {
-			if(!segment.isDir) {
-				await ffmpeg.exec(["-i", `segments/${segment.name}`, "-filter_complex", `select='not(mod(n\,1))',scale=100:50`, "-an", "-c:v", "libwebp", `thumbnails/${segment_number}_out%d.webp`])
-				const frames = await ffmpeg.listDir("/thumbnails")
-				for(const frame of frames) {
-					if(!frame.isDir) {
-						const frame_data = await ffmpeg.readFile(`thumbnails/${frame.name}`)
-						const new_arr = [...getThumbnails()]
-						new_arr[generated_frames] = URL.createObjectURL(new Blob([frame_data]))
-						setThumbnails(new_arr)
-						generated_frames += 1
-						recalculate_visible_images()
-						await ffmpeg.deleteFile(`thumbnails/${frame.name}`)
-					}
-				}
-			}
-			segment_number += 1
-		}
-
-		await ffmpeg.deleteDir("/thumbnails")
-		ffmpeg.on("log", (e) => console.log(e))
 	}
 
 	return html`${visibleThumbnails.map((thumbnail, i) => html`<img data-index=${i}  class="thumbnail" style="height: 40px; width: ${width_of_frame}px; pointer-events: none;" src=${thumbnail} />`)}`
