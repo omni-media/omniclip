@@ -5,11 +5,10 @@ import {shadow_view} from "../../../../context/slate.js"
 import {pad_to_2_digits} from "./utils/pad_to_2_digits.js"
 
 export const TimeRuler = shadow_view({styles}, use => (timeline: GoldElement) => {
-	const zoom = use.context.state.timeline.zoom
 	const [timeCodes, setTimeCodes] = use.state<{time: string, offset: number}[]>([])
 
 	use.setup(() => {
-		const set_time_codes = () => setTimeCodes(generate_time_codes(zoom))
+		const set_time_codes = () => setTimeCodes(generate_time_codes(use.context.state.timeline.zoom))
 		watch.track(() => use.context.state.timeline.zoom, (zoom) => setTimeCodes(generate_time_codes(zoom)))
 		timeline.addEventListener("scroll", set_time_codes)
 		return () => timeline.removeEventListener("scroll",set_time_codes)
