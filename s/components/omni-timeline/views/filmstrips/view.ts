@@ -14,20 +14,27 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 	const width_of_frame = calculate_effect_width(effect, zoom) / visibleThumbnails.length
 
 	use.setup(() => {
-		watch.track(() => use.context.state.timeline.zoom, (zoom) => recalculate_visible_images())
+		watch.track(() => use.context.state.timeline.zoom, (zoom) => {
+			const visible = recalculate_visible_images(getThumbnails())
+			setVisibleThumbnails(visible)
+		})
 		return () => {}
 	})
 
 	use.setup(() => {
 		if(effect.kind === "video") {
 			controller.get_frames_count(effect.file).then(async frames => {
-				let generated_frames = 0 
-				generate_loading_image_placeholders(frames)
+				let generated_frames = 0
+				const placeholders = generate_loading_image_placeholders(frames)
+				setThumbnails(placeholders)
+				const visible = recalculate_visible_images(placeholders)
+				setVisibleThumbnails(visible)
 				for await(const frame_blob_url of controller.generate_video_effect_filmstrips(effect.file)) {
 					const updated_thumbnails = [...getThumbnails()]
 					updated_thumbnails[generated_frames] = frame_blob_url
 					setThumbnails(updated_thumbnails)
-					recalculate_visible_images()
+					const visible = recalculate_visible_images(getThumbnails())
+					setVisibleThumbnails(visible)
 					generated_frames += 1
 				}
 			})
@@ -51,18 +58,18 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		for(let i = 0; i <= frames - 1; i++) {
 			new_arr.push(new URL("/assets/loading.svg", import.meta.url).toString())
 		}
-		setThumbnails(new_arr)
-		recalculate_visible_images()
+		return new_arr
 	}
 
-	function recalculate_visible_images() {
+	function recalculate_visible_images(images: string[]) {
 		const max_zoom_in = 2
 		const current_zoom = use.context.state.timeline.zoom
 		const diff = Math.abs(current_zoom - max_zoom_in)
-		setVisibleThumbnails([])
-		for(let i = 0; i<= getThumbnails().length - 1;i+=Math.pow(2, Math.floor(diff))) {
-			setVisibleThumbnails([...getVisibleThumbnails(), getThumbnails()[i]])
+		const new_arr = []
+		for(let i = 0; i<= images.length - 1;i+=Math.pow(2, Math.floor(diff))) {
+			new_arr.push(images[i])
 		}
+		return new_arr
 	}
 
 	return html`${visibleThumbnails.map((thumbnail, i) => html`<img data-index=${i}  class="thumbnail" style="height: 40px; width: ${width_of_frame}px; pointer-events: none;" src=${thumbnail} />`)}`
