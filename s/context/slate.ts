@@ -8,6 +8,7 @@ import {timeline_state} from "./controllers/timeline/state.js"
 import {Compositor} from "./controllers/compositor/controller.js"
 import {timeline_actions} from "./controllers/timeline/actions.js"
 import {VideoExport} from "./controllers/video-export/controller.js"
+import {FFmpegHelper} from "./controllers/video-export/helpers/FFmpegHelper/helper.js"
 import {StockLayouts} from "@benev/construct/x/context/controllers/layout/parts/utils/stock_layouts.js"
 
 export interface MiniContextOptions {
@@ -28,10 +29,14 @@ export class OmniContext extends Context {
 		timeline_actions
 	})
 
+	helpers = {
+		ffmpeg: new FFmpegHelper()
+	}
+
 	controllers = {
 		timeline: new Timeline(this.actions.timeline_actions),
 		compositor: new Compositor(this.actions.timeline_actions),
-		video_export: new VideoExport(this.actions.timeline_actions),
+		video_export: new VideoExport(this.actions.timeline_actions, this.helpers.ffmpeg),
 		media: new Media()
 	}
 

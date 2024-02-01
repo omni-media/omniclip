@@ -6,17 +6,16 @@ import {FileSystemHelper} from "./helpers/FileSystemHelper/helper.js"
 export class VideoExport {
 	#worker = new Worker(new URL("./worker/worker.js", import.meta.url), {type: "module"})
 	#file: Uint8Array | null = null
-	#FFmpegHelper = new FFmpegHelper()
 	#FileSystemHelper = new FileSystemHelper()
 	readonly canvas = document.createElement("canvas")
 
-	constructor(private actions: TimelineActions) {
+	constructor(private actions: TimelineActions, ffmpeg: FFmpegHelper) {
 		this.#worker.addEventListener("message", async (msg: MessageEvent<{chunks: Uint8Array, progress: number, type: string}>) => {
 			if(msg.data.type === "export-end") {
 				const binary_container_name = "raw.h264"
-				await this.#FFmpegHelper.write_binary_into_container(msg.data.chunks, binary_container_name)
-				await this.#FFmpegHelper.mux(binary_container_name, "test.mp4")
-				const muxed_file = await this.#FFmpegHelper.get_muxed_file()
+				await ffmpeg.write_binary_into_container(msg.data.chunks, binary_container_name)
+				await ffmpeg.mux(binary_container_name, "test.mp4")
+				const muxed_file = await ffmpeg.get_muxed_file()
 				this.#file = muxed_file
 			}
 			if(msg.data.type === "progress") {
