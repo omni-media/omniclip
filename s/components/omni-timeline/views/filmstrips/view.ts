@@ -16,17 +16,24 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 
 	use.setup(() => {
 		timeline.addEventListener("scroll", () => {
+			const width_of_frame = calculate_effect_width(effect, 2) / getThumbnails().length
+			const margin = width_of_frame * 2
 			const effect_left = calculate_start_position(effect.start_at_position, use.context.state.timeline.zoom)
-			const effect_scroll_left = roundToNearestMultiple(timeline.scrollLeft - effect_left)
-			const difference = effect_scroll_left - getLastEffectOffseLeftPosition()
-			const frame_count = timeline.clientWidth / 100
-			if(Math.abs(difference) >= 100) {
+			const normalized_left = Math.floor((timeline.scrollLeft - effect_left) / width_of_frame) * width_of_frame - margin < 0
+			? 0
+			: Math.floor((timeline.scrollLeft - effect_left) / width_of_frame) * width_of_frame - margin
+			const frame_count = timeline.clientWidth / width_of_frame
+			const difference = Math.abs(normalized_left - getLastEffectOffseLeftPosition())
+			if(difference >= Math.floor(width_of_frame)) {
 				const new_arr = []
-				setLastEffectOffsetLeftPosition(effect_scroll_left)
+				setLastEffectOffsetLeftPosition(normalized_left)
 				for(let i = 0; i<= frame_count;i+=1) {
-					new_arr.push(getThumbnails()[get_filmstrip_at(effect_scroll_left + 100 * i)])
+					const effect_width = calculate_effect_width(effect, use.context.state.timeline.zoom)
+					const position = normalized_left + width_of_frame * i
+					if(position <= effect_width)
+						new_arr.push(getThumbnails()[get_filmstrip_at(position)])
 				}
-				setStartAt(effect_scroll_left)
+				setStartAt(normalized_left)
 				setVisibleThumbnails(new_arr)
 			}
 		})
@@ -69,10 +76,6 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		return Math.floor(start_at_filmstrip)
 	}
 
-	function roundToNearestMultiple(number: number) {
-		return Math.round(number / 100) * 100;
-	}
-
 	function generate_loading_image_placeholders(frames: number) {
 		const new_arr = []
 		for(let i = 0; i <= frames - 1; i++) {
@@ -83,17 +86,22 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 
 	function recalculate_all_visible_images(images: string[]) {
 		const new_arr = []
+		const width_of_frame = calculate_effect_width(effect, 2) / getThumbnails().length
+		const margin = width_of_frame * 2
 		const frame_count = timeline.clientWidth / 100
 		const effect_left = calculate_start_position(effect.start_at_position, use.context.state.timeline.zoom)
-		const filmstrip_left = roundToNearestMultiple(timeline.scrollLeft - effect_left)
+		const normalized_left = Math.floor((timeline.scrollLeft - effect_left) / width_of_frame) * width_of_frame - margin < 0
+		? 0
+		: Math.floor((timeline.scrollLeft - effect_left) / width_of_frame) * width_of_frame - margin
 		for(let i = 0; i<= frame_count;i+=1) {
-			new_arr.push(getThumbnails()[get_filmstrip_at(filmstrip_left + 100 * i)])
+			const effect_width = calculate_effect_width(effect, use.context.state.timeline.zoom)
+			const position = normalized_left + width_of_frame * i
+			if(position <= effect_width)
+				new_arr.push(getThumbnails()[get_filmstrip_at(position)])
 		}
-		setStartAt(roundToNearestMultiple(timeline.scrollLeft - effect_left))
+		setStartAt(normalized_left)
 		return new_arr
 	}
 
-	const width_of_frame = calculate_effect_width(effect, 2) / getThumbnails().length
-
-	return html`${visibleThumbnails.map((thumbnail, i) => html`<img data-index=${i}  class="thumbnail" style="transform: translateX(${startAt}px);height: 40px; width: ${width_of_frame}px; pointer-events: none;" src=${thumbnail} />`)}`
+	return html`${visibleThumbnails.map((thumbnail, i) => html`<img data-index=${i}  class="thumbnail" style="transform: translateX(${startAt}px);height: 40px; width: ${calculate_effect_width(effect, 2) / getThumbnails().length}px; pointer-events: none;" src=${thumbnail} />`)}`
 })
