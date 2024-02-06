@@ -5,11 +5,8 @@ export const styles = css`
 		display: flex;
 		z-index: 1;
 		align-items: center;
-		justify-content: center;
-		padding: 0.5em;
 		background: #201f1f;
 		border-radius: 5px;
-		border: 1px solid #181818;
 		cursor: pointer;
 		position: absolute;
 		top: 0;
@@ -19,5 +16,13 @@ export const styles = css`
 			z-index: 2;
 			opacity: 0.5;
 		}
+
+		&:hover {
+			outline: 1px solid gray;
+		}
 	}
 `
+
+
+//justify-content: center;
+// padding: 0.5em;

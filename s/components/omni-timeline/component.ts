@@ -55,7 +55,7 @@ export const OmniTimeline = shadow_component({styles}, use => {
 			class="timeline"
 		>
 			${Toolbar([])}
-			${TimeRuler([])}
+			${TimeRuler([use.element])}
 			<div
 				style="width: ${calculate_timeline_width(state.effects, state.zoom)}px"
 				class=timeline-relative>
