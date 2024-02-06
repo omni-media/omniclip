@@ -36,12 +36,20 @@ export class OmniContext extends Context {
 	controllers = {
 		timeline: new Timeline(this.actions.timeline_actions),
 		compositor: new Compositor(this.actions.timeline_actions),
-		video_export: new VideoExport(this.actions.timeline_actions, this.helpers.ffmpeg),
-		media: new Media()
+		media: new Media(),
+	} as {
+		timeline: Timeline,
+		compositor: Compositor
+		media: Media
+		video_export: VideoExport
 	}
 
 	constructor(options: MiniContextOptions) {
 		super(options)
+		this.controllers = {
+			...this.controllers,
+			video_export: new VideoExport(this.actions.timeline_actions, this.helpers.ffmpeg, this.controllers.compositor)
+		}
 	}
 }
 export const omnislate = slate as Slate<OmniContext>

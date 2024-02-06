@@ -133,25 +133,25 @@ export class TextManager {
 		return null
 	}
 
-	draw_text(source: TextEffect) {
+	draw_text(source: TextEffect, ctx: CanvasRenderingContext2D) {
 		const {size, color, content} = source
-		this.compositor.ctx!.fillStyle = color
-		this.compositor.ctx!.font = `${size}px Lato`
+		ctx.fillStyle = color
+		ctx.font = `${size}px Lato`
 		if(source.rect.rotation) {
-			this.compositor.ctx!.save()
-			this.#rotate_text(source)
-			this.compositor.ctx!.fillText(content, -source.rect.width/2, source.rect.height/2)
-			this.compositor.ctx!.restore()
+			ctx.save()
+			this.#rotate_text(source, ctx)
+			ctx.fillText(content, -source.rect.width/2, source.rect.height/2)
+			ctx.restore()
 		} else {
-			this.compositor.ctx!.fillText(content, source.rect.position_on_canvas.x, source.rect.position_on_canvas.y)
+			ctx.fillText(content, source.rect.position_on_canvas.x, source.rect.position_on_canvas.y)
 		}
 	}
 
-	#rotate_text(effect: TextEffect) {
+	#rotate_text(effect: TextEffect, ctx: CanvasRenderingContext2D) {
 		const {centerX, centerY} = this.#calculate_center_of_effect(effect)
-		this.compositor.ctx!.translate(centerX, centerY)
+		ctx.translate(centerX, centerY)
 		// this.compositor.ctx!.rotate(Math.PI / 2);  // correction for image starting position
-		this.compositor.ctx!.rotate(effect.rect.rotation)
+		ctx.rotate(effect.rect.rotation)
 	}
 
 	measure_text_width (effect: TextEffect) {

@@ -86,7 +86,7 @@ export class Compositor {
 					this.clear_canvas()
 				}
 				else if(effect.kind === "text") {
-					this.TextManager.draw_text(effect)
+					this.TextManager.draw_text(effect, this.ctx!)
 				}
 			}
 		}

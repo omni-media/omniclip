@@ -9,6 +9,7 @@ export class FFmpegHelper {
 
 	constructor() {
 		this.#load_ffmpeg().then(() => console.log("loaded"))
+		this.ffmpeg.on("log", (log) => console.log(log))
 	}
 
 	async #load_ffmpeg() {
@@ -67,7 +68,6 @@ export class FFmpegHelper {
 		}
 
 		await this.ffmpeg.deleteDir("/thumbnails")
-		this.ffmpeg.on("log", (e) => console.log(e))
 	}
 
 }
