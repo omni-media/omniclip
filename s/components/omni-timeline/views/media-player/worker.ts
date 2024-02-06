@@ -1,4 +1,3 @@
-import {MP4Demuxer} from "./utils/demuxer_mp4.js"
 import {Canvas2DRenderer} from "./utils/renderer_2d.js"
 import {Status} from "../../../../context/controllers/timeline/types.js"
 
@@ -68,16 +67,6 @@ const start = ({dataUri, rendererName, canvas}: {dataUri: string, rendererName: 
 			break
 	}
 
-	const demuxer = new MP4Demuxer(dataUri, {
-		onConfig(config: VideoDecoderConfig) {
-			setStatus("decode", `${config.codec} @ ${config.codedWidth}x${config.codedHeight}`)
-			decoder.configure(config)
-		},
-		onChunk(chunk: EncodedVideoChunk) {
-			decoder.decode(chunk)
-		},
-		setStatus
-	})
 }
 
 self.addEventListener("message", message => start(message.data), {once: true})
