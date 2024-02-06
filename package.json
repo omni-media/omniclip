@@ -8,7 +8,8 @@
     "test": "cynic node ./x/tests.test.js",
     "build": "turtle-standard && run-p copy-coi",
     "start": "turtle-standard-watch",
-    "copy-coi": "cp node_modules/coi-serviceworker/coi-serviceworker.js x/"
+    "copy-coi": "cp node_modules/coi-serviceworker/coi-serviceworker.js x/",
+    "copy-assets": "cp -r assets x/"
   },
   "author": "zenkyuv",
   "license": "ISC",
