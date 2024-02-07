@@ -9,7 +9,17 @@ export default template(async basic => {
 		title: "omni-clip",
 		head: html`
 			<script src="coi-serviceworker.js"></script>
-			${startup_scripts_with_dev_mode(path)}
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<script type="importmap-shim" src="./importmap.json"></script>
+			<script defer src="./node_modules/es-module-shims/dist/es-module-shims.js"></script>
+			<script type="module-shim" src="./main.js"></script>
+			<link rel="stylesheet" href="index.css">
+			<link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
+			<link rel="preconnect" href="https://fonts.googleapis.com">
+			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+			<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;500;700;800&display=swap" rel="stylesheet">
+			<title>omni-clip</title>
 		`,
 		body: html`
 			<construct-editor></construct-editor>

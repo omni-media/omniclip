@@ -7,7 +7,9 @@
   "scripts": {
     "test": "cynic node ./x/tests.test.js",
     "build": "turtle-standard && run-p copy-coi",
+    "build-production": "turtle-standard && run-p copy-coi override-turle-importmap",
     "start": "turtle-standard-watch",
+    "override-turle-importmap": "importly --host=node_modules --root=/omni-clip/ < package-lock.json > x/importmap.json",
     "copy-coi": "cp node_modules/coi-serviceworker/coi-serviceworker.js x/",
     "copy-assets": "cp -r assets x/"
   },
