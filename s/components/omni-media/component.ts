@@ -38,7 +38,10 @@ export const OmniMedia = shadow_component({styles}, use => {
 	}
 
 	return html`
-		<button class="import-btn" @click=${() => media_controller.import_file()}>Import media files</button>
+		<form>
+			<label class="import-btn" for="import">Import Media Files</label>
+			<input type="file" id="import" class="hide" @change=${(e: Event) => media_controller.import_file(e.target as HTMLInputElement)}>
+		</form>
 		<div class="media">
 			${media.map(m => html`
 				<div

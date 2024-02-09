@@ -52,11 +52,6 @@ export class Media {
 		})
 	}
 
-	async #get_file_handle() {
-		const [file_handle] = await window.showOpenFilePicker()
-		return file_handle
-	}
-
 	delete_file(file: MediaFile) {
 		const request = this.#database_request.result
 			.transaction(["files"], "readwrite")
@@ -67,10 +62,9 @@ export class Media {
 		}
 	}
 
-	import_file() {
-		const file_handle = this.#get_file_handle()
-		file_handle.then(async (handle) => {
-			const imported_file = await handle.getFile()
+	async import_file(input: HTMLInputElement) {
+		const imported_file = input.files?.[0]
+		if(imported_file) {
 			const hash = await quick_hash(imported_file)
 			const transaction = this.#database_request.result.transaction(["files"], "readwrite")
 			const files_store = transaction.objectStore("files")
@@ -83,9 +77,8 @@ export class Media {
 					this.on_media_change.publish({files: [{file: imported_file, hash}], action: "added"})
 				}
 			}
-
 			check_if_duplicate!.onerror = (error) => console.log("error")
-		})
+		}
 	}
 
 	create_videos_from_video_files(files: MediaFile[]) {

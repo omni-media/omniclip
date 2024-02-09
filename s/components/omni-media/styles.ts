@@ -1,6 +1,10 @@
 import {css} from "@benev/slate"
 
 export const styles = css`
+	form {
+		margin-top: 1em;
+	}
+
 	.import-btn {
 		padding: 0.2em 0.4em;
 		transition: opacity 0.5s ease 0s;
@@ -12,6 +16,10 @@ export const styles = css`
 		&:hover {
 			opacity: 0.8;
 		}
+	}
+	
+	.hide {
+		display: none;
 	}
 
 	.media {
