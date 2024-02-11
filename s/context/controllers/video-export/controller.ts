@@ -97,7 +97,7 @@ export class VideoExport {
 	async #extract_frames_from_video(effect: VideoEffect) {
 		const file_result = await fetchFile(effect.file)
 		await this.ffmpeg.ffmpeg.writeFile(effect.file.name, file_result)
-		await this.ffmpeg.ffmpeg.exec(["-i", effect.file.name, `out${effect.id}_%d.png`])
+		await this.ffmpeg.ffmpeg.exec(["-threads", "4","-i", effect.file.name, `out${effect.id}_%d.png`])
 		this.decoded_effects.set(effect.id, effect.id)
 	}
 
