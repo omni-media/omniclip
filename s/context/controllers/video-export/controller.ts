@@ -1,5 +1,3 @@
-import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
-
 import {TimelineActions} from "../timeline/actions.js"
 import {Compositor} from "../compositor/controller.js"
 import {FFmpegHelper} from "./helpers/FFmpegHelper/helper.js"
@@ -8,20 +6,26 @@ import {AnyEffect, VideoEffect, XTimeline} from "../timeline/types.js"
 import {get_effects_at_timestamp} from "./utils/get_effects_at_timestamp.js"
 
 export class VideoExport {
-	#worker = new Worker(new URL("./worker/worker.js", import.meta.url), {type: "module"})
+	#worker = new Worker(new URL("./worker.js", import.meta.url), {type: "module"})
 	#file: Uint8Array | null = null
 	#FileSystemHelper = new FileSystemHelper()
 	#timestamp = 0
 	#timestamp_end = 0
 	readonly canvas = document.createElement("canvas")
 	ctx = this.canvas.getContext("2d")!
+	current_frame = 0
 	decoded_effects = new Map<string, string>()
 
 	constructor(private actions: TimelineActions, private ffmpeg: FFmpegHelper, private compositor: Compositor) {
 		this.canvas.width = 1280
 		this.canvas.height = 720
-
-		this.#worker.addEventListener("message", async (msg: MessageEvent<{binary: Uint8Array, progress: number, action: string}>) => {
+		this.#worker.addEventListener("message", async (msg: MessageEvent<{
+			binary: Uint8Array,
+			progress: number,
+			action: string,
+			frame: ImageBitmap,
+			chunk: EncodedVideoChunk
+		}>) => {
 			if(msg.data.action === "binary") {
 				const binary_container_name = "raw.h264"
 				await ffmpeg.write_binary_into_container(msg.data.binary, binary_container_name)
@@ -49,8 +53,11 @@ export class VideoExport {
 		const draw_queue: (() => void)[] = []
 		for(const effect of effects_at_timestamp) {
 			if(effect.kind === "video") {
-				const frame = await this.#get_frame_from_video(effect)
-				draw_queue.push(() => this.ctx?.drawImage(frame, 0, 0, this.canvas.width, this.canvas.height))
+				const frame = await this.#get_frame_from_video(effect, this.#timestamp)
+				draw_queue.push(() => {
+					this.ctx?.drawImage(frame, 0, 0, this.canvas.width, this.canvas.height)
+					frame.close()
+				})
 			}
 			if(effect.kind === "text") {
 				draw_queue.push(() => this.compositor.TextManager.draw_text(effect, this.ctx))
@@ -82,22 +89,28 @@ export class VideoExport {
 	#encode_composed_frame(canvas: HTMLCanvasElement) {
 		const frame = new VideoFrame(canvas, this.#frame_config)
 		this.#worker.postMessage({frame, action: "encode"})
+		frame.close()
 	}
 
-	async #get_frame_from_video(effect: VideoEffect) {
+	#get_frame_from_video(effect: VideoEffect, timestamp: number): Promise<ImageBitmap> {
 		if(!this.decoded_effects.has(effect.id)) {
-			await this.#extract_frames_from_video(effect)
+			this.#extract_frames_from_video(effect, timestamp)
 		}
-		const current_time = this.get_effect_current_time_relative_to_timecode(effect, this.#timestamp)
-		const frame_number = Math.ceil(current_time / (1000/30))
-		const frame_data = await this.ffmpeg.ffmpeg.readFile(`out${effect.id}_${frame_number}.png`)
-		return await createImageBitmap(new Blob([frame_data]))
+		return new Promise((resolve, reject) => {
+			this.#worker.postMessage({action: "get-frame", timestamp, effect_id: effect.id})
+			this.#worker.onmessage = (e) => {
+				if(e.data.action === "frame") {
+					resolve(e.data.frame)
+				}
+			}
+		})
 	}
 
-	async #extract_frames_from_video(effect: VideoEffect) {
-		const file_result = await fetchFile(effect.file)
-		await this.ffmpeg.ffmpeg.writeFile(effect.file.name, file_result)
-		await this.ffmpeg.ffmpeg.exec(["-threads", "4","-i", effect.file.name, `out${effect.id}_%d.png`])
+	async #extract_frames_from_video(effect: VideoEffect, timestamp: number) {
+		this.#worker.postMessage({action: "demux", effect: {
+			...effect,
+			file: effect.file
+		}, starting_timestamp: timestamp})
 		this.decoded_effects.set(effect.id, effect.id)
 	}
 
