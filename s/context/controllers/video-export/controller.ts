@@ -1,39 +1,36 @@
 import {TimelineActions} from "../timeline/actions.js"
 import {Compositor} from "../compositor/controller.js"
 import {FFmpegHelper} from "./helpers/FFmpegHelper/helper.js"
+import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 import {FileSystemHelper} from "./helpers/FileSystemHelper/helper.js"
 import {AnyEffect, VideoEffect, XTimeline} from "../timeline/types.js"
 import {get_effects_at_timestamp} from "./utils/get_effects_at_timestamp.js"
 
+interface DecodedFrame {
+	frame: VideoFrame
+	effect_id: string
+	timestamp: number
+	frames_count: number
+	frame_id: string
+}
+
 export class VideoExport {
-	#worker = new Worker(new URL("./worker.js", import.meta.url), {type: "module"})
+	#encode_worker = new Worker(new URL("./encode_worker.js", import.meta.url), {type: "module"})
 	#file: Uint8Array | null = null
 	#FileSystemHelper = new FileSystemHelper()
+
 	#timestamp = 0
 	#timestamp_end = 0
 	readonly canvas = document.createElement("canvas")
 	ctx = this.canvas.getContext("2d")!
+
 	current_frame = 0
 	decoded_effects = new Map<string, string>()
+	decoded_frames: Map<string, DecodedFrame> = new Map()
 
 	constructor(private actions: TimelineActions, private ffmpeg: FFmpegHelper, private compositor: Compositor) {
 		this.canvas.width = 1280
 		this.canvas.height = 720
-		this.#worker.addEventListener("message", async (msg: MessageEvent<{
-			binary: Uint8Array,
-			progress: number,
-			action: string,
-			frame: ImageBitmap,
-			chunk: EncodedVideoChunk
-		}>) => {
-			if(msg.data.action === "binary") {
-				const binary_container_name = "raw.h264"
-				await ffmpeg.write_binary_into_container(msg.data.binary, binary_container_name)
-				await ffmpeg.mux(binary_container_name, "test.mp4")
-				const muxed_file = await ffmpeg.get_muxed_file()
-				this.#file = muxed_file
-			}
-		})
 	}
 
 	async save_file() {
@@ -44,16 +41,34 @@ export class VideoExport {
 	export_start(timeline: XTimeline) {
 		const sorted_effects = this.#sort_effects_by_track(timeline.effects)
 		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position + effect.duration))
-		this.export_process(sorted_effects)
+		this.#export_process(sorted_effects)
 		this.actions.set_is_exporting(true)
 	}
 
-	async export_process(effects: AnyEffect[]) {
+	#find_closest_effect_frame(effect: VideoEffect, timestamp: number) {
+		let closest: DecodedFrame | null = null
+		let current_difference = Infinity
+		this.decoded_frames.forEach(frame => {
+			if(frame.effect_id === effect.id) {
+				const difference = Math.abs(frame.timestamp - timestamp)
+				if(difference < current_difference) {
+					current_difference = difference
+					closest = frame
+				}
+			}
+		})
+		return closest!
+	}
+
+	async #export_process(effects: AnyEffect[]) {
 		const effects_at_timestamp = get_effects_at_timestamp(effects, this.#timestamp)
 		const draw_queue: (() => void)[] = []
+		let frame_duration = null
 		for(const effect of effects_at_timestamp) {
 			if(effect.kind === "video") {
-				const frame = await this.#get_frame_from_video(effect, this.#timestamp)
+				const {frame, frames_count, frame_id} = await this.#get_frame_from_video(effect, this.#timestamp)
+				frame_duration = effect.duration / frames_count
+				this.decoded_frames.delete(frame_id)
 				draw_queue.push(() => {
 					this.ctx?.drawImage(frame, 0, 0, this.canvas.width, this.canvas.height)
 					frame.close()
@@ -66,15 +81,24 @@ export class VideoExport {
 		for(const draw of draw_queue) {draw()}
 		this.#encode_composed_frame(this.canvas)
 
-		this.#timestamp += 1000/30
+		this.#timestamp += frame_duration ?? Math.ceil(1000/60) 
 		const progress = this.#timestamp / this.#timestamp_end * 100 // for progress bar
 		this.actions.set_export_progress(progress)
+
 		if(this.#timestamp >= this.#timestamp_end) {
-			this.#worker.postMessage({action: "get-binary"})
+			this.#encode_worker.postMessage({action: "get-binary"})
+			this.#encode_worker.onmessage = async (msg) => {
+				if(msg.data.action === "binary") {
+					const binary_container_name = "raw.h264"
+					await this.ffmpeg.write_binary_into_container(msg.data.binary, binary_container_name)
+					await this.ffmpeg.mux(binary_container_name, "test.mp4")
+					const muxed_file = await this.ffmpeg.get_muxed_file()
+					this.#file = muxed_file
+				}
+			}
 			return
 		}
-
-		requestAnimationFrame(() => this.export_process(effects))
+		requestAnimationFrame(() => this.#export_process(effects))
 	}
 
 	get #frame_config(): VideoFrameInit {
@@ -88,26 +112,39 @@ export class VideoExport {
 
 	#encode_composed_frame(canvas: HTMLCanvasElement) {
 		const frame = new VideoFrame(canvas, this.#frame_config)
-		this.#worker.postMessage({frame, action: "encode"})
+		this.#encode_worker.postMessage({frame, action: "encode"})
 		frame.close()
 	}
 
-	#get_frame_from_video(effect: VideoEffect, timestamp: number): Promise<ImageBitmap> {
+	#get_frame_from_video(effect: VideoEffect, timestamp: number): Promise<DecodedFrame> {
 		if(!this.decoded_effects.has(effect.id)) {
 			this.#extract_frames_from_video(effect, timestamp)
 		}
-		return new Promise((resolve, reject) => {
-			this.#worker.postMessage({action: "get-frame", timestamp, effect_id: effect.id})
-			this.#worker.onmessage = (e) => {
-				if(e.data.action === "frame") {
-					resolve(e.data.frame)
-				}
+		return new Promise((resolve) => {
+			const decoded = this.#find_closest_effect_frame(effect, timestamp)
+			if(decoded) {
+				resolve(decoded)
+			} else {
+				const interval = setInterval(() => {
+					const decoded = this.#find_closest_effect_frame(effect, timestamp)
+					if(decoded) {
+						resolve(decoded)
+						clearInterval(interval)
+					}
+				}, 100)
 			}
 		})
 	}
 
 	async #extract_frames_from_video(effect: VideoEffect, timestamp: number) {
-		this.#worker.postMessage({action: "demux", effect: {
+		const worker = new Worker(new URL("./decode_worker.js", import.meta.url), {type: "module"})
+		worker.addEventListener("message", (msg) => {
+			if(msg.data.action === "new-frame") {
+				const id = generate_id()
+				this.decoded_frames.set(id, {...msg.data.frame, frame_id: id})
+			}
+		})
+		worker.postMessage({action: "demux", effect: {
 			...effect,
 			file: effect.file
 		}, starting_timestamp: timestamp})

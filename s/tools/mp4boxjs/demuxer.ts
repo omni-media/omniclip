@@ -37,12 +37,14 @@ export class MP4Demuxer {
 	#onConfig: OnConfig
 	#onChunk: OnChunk
 	#setStatus: SetStatus
+	#framesCount: (frames: number) => void
 	#file: MP4File
 
-	constructor(file: File, {onConfig, onChunk, setStatus}: {onConfig: OnConfig, onChunk: OnChunk, setStatus: SetStatus}) {
+	constructor(file: File, {onConfig, onChunk, setStatus, framesCount}: {onConfig: OnConfig, onChunk: OnChunk, setStatus: SetStatus, framesCount: (frames: number) => void}) {
 		this.#onConfig = onConfig
 		this.#onChunk = onChunk
 		this.#setStatus = setStatus
+		this.#framesCount = framesCount
 
 		this.#file = MP4Box.createFile()
 		this.#file.onError = error => setStatus("demux", error)
@@ -76,7 +78,7 @@ export class MP4Demuxer {
 			codedWidth: track.video.width,
 			description: this.#description(track),
 		});
-
+		this.#framesCount(track.nb_samples)
 		this.#file.setExtractionOptions(track.id)
 		this.#file.start()
 	}
