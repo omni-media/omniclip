@@ -79,13 +79,13 @@ export class VideoExport {
 			}
 		}
 		for(const draw of draw_queue) {draw()}
-		this.#encode_composed_frame(this.canvas)
+		this.#encode_composed_frame(this.canvas, frame_duration ?? Math.ceil(1000/60))
 
 		this.#timestamp += frame_duration ?? Math.ceil(1000/60) 
 		const progress = this.#timestamp / this.#timestamp_end * 100 // for progress bar
 		this.actions.set_export_progress(progress)
 
-		if(this.#timestamp >= this.#timestamp_end) {
+		if(Math.ceil(this.#timestamp) >= this.#timestamp_end) {
 			this.#encode_worker.postMessage({action: "get-binary"})
 			this.#encode_worker.onmessage = async (msg) => {
 				if(msg.data.action === "binary") {
@@ -101,17 +101,17 @@ export class VideoExport {
 		requestAnimationFrame(() => this.#export_process(effects))
 	}
 
-	get #frame_config(): VideoFrameInit {
+	#frame_config(canvas: HTMLCanvasElement, duration: number): VideoFrameInit {
 		return {
-			displayWidth: this.canvas.width,
-			displayHeight: this.canvas.height,
-			duration: 1000000/30,
+			displayWidth: canvas.width,
+			displayHeight: canvas.height,
+			duration,
 			timestamp: this.#timestamp * 1000
 		}
 	}
 
-	#encode_composed_frame(canvas: HTMLCanvasElement) {
-		const frame = new VideoFrame(canvas, this.#frame_config)
+	#encode_composed_frame(canvas: HTMLCanvasElement, duration: number) {
+		const frame = new VideoFrame(canvas, this.#frame_config(canvas, duration))
 		this.#encode_worker.postMessage({frame, action: "encode"})
 		frame.close()
 	}

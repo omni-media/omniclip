@@ -35,6 +35,7 @@ self.addEventListener("message", async message => {
 		frame.close()
 	}
 	if(message.data.action === "get-binary") {
+		await encoder.flush()
 		self.postMessage({action: "binary", binary: binary_accumulator.binary})
 	}
 })
