@@ -34,20 +34,30 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		return () => {}
 	})
 
+	const worker = use.prepare(() => new Worker(new URL("./filmstrip_worker.js", import.meta.url), {type: "module"}))
+
+	const generate_video_effect_filmstrips = (effect: VideoEffect, on_new_filmstrip: (url: string) => void) => {
+		worker.postMessage({action: "demux", effect, starting_timestamp: 0})
+		worker.onmessage = (msg) => {
+			const url = msg.data.url as string
+			on_new_filmstrip(url)
+		}
+	}
+
 	use.setup(() => {
 		if(effect.kind === "video") {
 			ffmpeg.get_frames_count(effect.file).then(async frames => {
 				let generated_frames = 0
-				const placeholders = generate_loading_filmstrip_placeholders(frames)
+				const placeholders = generate_filmstrip_placeholders(frames, effect.thumbnail)
 				setFilmstrips(placeholders)
 				const result = recalculate_all_visible_filmstrips(true)
 				if(result) {
 					setVisibleFilmstrips(result.visible)
 					setStartAt(result.normalized_left)
 				}
-				for await(const frame_blob_url of ffmpeg.generate_video_effect_filmstrips(effect.file)) {
+				generate_video_effect_filmstrips(effect, (url) => {
 					const updated_thumbnails = [...getFilmstrips()]
-					updated_thumbnails[generated_frames] = frame_blob_url
+					updated_thumbnails[generated_frames] = url
 					setFilmstrips(updated_thumbnails)
 					const result = recalculate_all_visible_filmstrips(true)
 					if(result) {
@@ -55,7 +65,7 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 						setVisibleFilmstrips(result.visible)
 					}
 					generated_frames += 1
-				}
+				})
 			})
 		}
 		return () => {
@@ -71,10 +81,10 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		return Math.floor(start_at_filmstrip)
 	}
 
-	function generate_loading_filmstrip_placeholders(frames: number) {
+	function generate_filmstrip_placeholders(frames: number, thumbnail: string) {
 		const new_arr = []
 		for(let i = 0; i <= frames - 1; i++) {
-			new_arr.push(new URL("/assets/loading.svg", import.meta.url).toString())
+			new_arr.push(thumbnail)
 		}
 		return new_arr
 	}

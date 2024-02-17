@@ -1,6 +1,5 @@
 import {FFprobeWorker} from "ffprobe-wasm/browser.mjs"
 import {FFmpeg} from "@ffmpeg/ffmpeg/dist/esm/index.js"
-import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
 import {toBlobURL} from "@ffmpeg/util/dist/esm/index.js"
 
 export class FFmpegHelper {
@@ -37,35 +36,6 @@ export class FFmpegHelper {
 	async get_frames_count(file: File) {
 		const probe = await this.ffprobe.getFrames(file, 1)
 		return probe.nb_frames
-	}
-
-	async* generate_video_effect_filmstrips(file: File): AsyncGenerator<string> {
-		let segment_number = 0
-
-		const result = await fetchFile(file)
-		await this.ffmpeg.createDir("/thumbnails")
-		await this.ffmpeg.createDir("/segments")
-		await this.ffmpeg.writeFile(file.name, result)
-		// split into 5 second segments, so user can get new filmstrips every 5 seconds
-		await this.ffmpeg.exec(["-threads", "4","-i", file.name, "-c", "copy", "-map", "0", "-reset_timestamps", "1", "-f", "segment", "-segment_time", "5", "segments/out%d.mp4"])
-		const segments = await this.ffmpeg.listDir("/segments")
-
-		for(const segment of segments) {
-			if(!segment.isDir) {
-				await this.ffmpeg.exec(["-threads", "4","-i", `segments/${segment.name}`, "-filter_complex", `scale=100:50`, "-an", "-c:v", "libwebp", "-preset","icon" ,`thumbnails/${segment_number}_out%d.webp`])
-				const frames = await this.ffmpeg.listDir("/thumbnails")
-				for(const frame of frames) {
-					if(!frame.isDir) {
-						const frame_data = await this.ffmpeg.readFile(`thumbnails/${frame.name}`)
-						yield URL.createObjectURL(new Blob([frame_data]))
-						await this.ffmpeg.deleteFile(`thumbnails/${frame.name}`)
-					}
-				}
-			}
-			segment_number += 1
-		}
-
-		await this.ffmpeg.deleteDir("/thumbnails")
 	}
 
 }
