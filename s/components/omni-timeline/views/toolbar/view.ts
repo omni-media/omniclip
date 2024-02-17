@@ -12,6 +12,7 @@ export const Toolbar = shadow_view({styles}, use => () => {
 	const actions = use.context.actions.timeline_actions
 	const zoom = use.context.state.timeline.zoom
 	const video_export = use.context.controllers.video_export
+	const state = use.context.state.timeline
 
 	if(use.context.state.timeline.is_exporting) {
 		const dialog = use.shadow.querySelector("dialog")
@@ -25,13 +26,17 @@ export const Toolbar = shadow_view({styles}, use => () => {
 					${video_export.canvas}
 					<div class="flex-col">
 						<div class="progress">
-							<span>Progress</span>
-							<span>${use.context.state.timeline.export_progress.toFixed(2)}%</span>
+							<span class="status">Progress ${state.export_status === "complete" || state.export_status === "flushing"
+								? "100"
+								: state.export_progress.toFixed(2)}
+								%</span>
+							<span>Status: ${state.export_status}</span>
+							<span>FPS: ${state.fps}</span>
 						</div>
 						<button
 							@click=${() => video_export.save_file()}
 							class="download"
-							.disabled=${use.context.state.timeline.export_progress <= 100}
+							.disabled=${state.export_status !== "complete"}
 						>
 							Download
 						</button>

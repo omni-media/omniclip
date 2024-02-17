@@ -32,6 +32,7 @@ export const styles = css`
 				display: flex;
 				flex-direction: column;
 				height: 300px;
+				width: 250px;
 				justify-content: space-between;
 				background: var(--bg-a);
 				padding: 1em;
@@ -40,11 +41,14 @@ export const styles = css`
 					display: flex;
 					flex-direction: column;
 					align-items: center;
+					gap: 0.5em;
+
+					& .status {}
 				}
 
 				& span {
 					color: white;
-					font-size: 2em;
+					font-size: 1.5em;
 				}
 			}
 

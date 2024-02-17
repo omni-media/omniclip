@@ -5,7 +5,7 @@ import {TimelineHelpers} from "./helpers.js"
 import {actionize} from "../../../utils/actionize.js"
 import {Compositor} from "../compositor/controller.js"
 import {Video} from "../../../components/omni-media/types.js"
-import {AnyEffect, TextEffect, TextEffectProps, TextRect, VideoEffect} from "./types.js"
+import {AnyEffect, ExportStatus, TextEffect, TextEffectProps, TextRect, VideoEffect} from "./types.js"
 
 export const timeline_actions = actionize({
 	add_text_effect: state => (text_props: TextEffectProps) => {
@@ -35,6 +35,12 @@ export const timeline_actions = actionize({
 		}
 		compositor.VideoManager.add_video(effect)
 		state.timeline.effects.push(effect)
+	},
+	set_export_status: state => (status: ExportStatus) => {
+		state.timeline.export_status = status
+	},
+	set_fps: state => (fps: number) => {
+		state.timeline.fps = fps
 	},
 	update_text_effect: state => (text_props: TextEffectProps, id: string) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect

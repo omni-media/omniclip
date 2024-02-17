@@ -8,6 +8,8 @@ export const timeline_state: XTimeline = {
 	selected_effect: null,
 	is_exporting: false,
 	export_progress: 0,
+	export_status: "demuxing",
+	fps: 0,
 	is_playing: false,
 	timecode: 0,
 	length: 1000,

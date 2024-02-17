@@ -1,3 +1,4 @@
+import {FPSCounter} from "./tools/FPSCounter/tool.js"
 import {TimelineActions} from "../timeline/actions.js"
 import {Compositor} from "../compositor/controller.js"
 import {FFmpegHelper} from "./helpers/FFmpegHelper/helper.js"
@@ -27,10 +28,12 @@ export class VideoExport {
 	current_frame = 0
 	decoded_effects = new Map<string, string>()
 	decoded_frames: Map<string, DecodedFrame> = new Map()
+	#FPSCounter: FPSCounter
 
 	constructor(private actions: TimelineActions, private ffmpeg: FFmpegHelper, private compositor: Compositor) {
 		this.canvas.width = 1280
 		this.canvas.height = 720
+		this.#FPSCounter = new FPSCounter(this.actions.set_fps, 100)
 	}
 
 	async save_file() {
@@ -78,6 +81,7 @@ export class VideoExport {
 				draw_queue.push(() => this.compositor.TextManager.draw_text(effect, this.ctx))
 			}
 		}
+		this.actions.set_export_status("composing")
 		for(const draw of draw_queue) {draw()}
 		this.#encode_composed_frame(this.canvas, frame_duration ?? Math.ceil(1000/60))
 
@@ -86,6 +90,7 @@ export class VideoExport {
 		this.actions.set_export_progress(progress)
 
 		if(Math.ceil(this.#timestamp) >= this.#timestamp_end) {
+			this.actions.set_export_status("flushing")
 			this.#encode_worker.postMessage({action: "get-binary"})
 			this.#encode_worker.onmessage = async (msg) => {
 				if(msg.data.action === "binary") {
@@ -94,11 +99,15 @@ export class VideoExport {
 					await this.ffmpeg.mux(binary_container_name, "test.mp4")
 					const muxed_file = await this.ffmpeg.get_muxed_file()
 					this.#file = muxed_file
+					this.actions.set_export_status("complete")
 				}
 			}
 			return
 		}
-		requestAnimationFrame(() => this.#export_process(effects))
+		requestAnimationFrame(() => {
+			this.#export_process(effects)
+			this.#FPSCounter.update()
+		})
 	}
 
 	#frame_config(canvas: HTMLCanvasElement, duration: number): VideoFrameInit {
@@ -136,7 +145,8 @@ export class VideoExport {
 		})
 	}
 
-	async #extract_frames_from_video(effect: VideoEffect, timestamp: number) {
+	#extract_frames_from_video(effect: VideoEffect, timestamp: number) {
+		this.actions.set_export_status("demuxing")
 		const worker = new Worker(new URL("./decode_worker.js", import.meta.url), {type: "module"})
 		worker.addEventListener("message", (msg) => {
 			if(msg.data.action === "new-frame") {
