@@ -18,6 +18,7 @@ export interface AudioFile extends MediaFile {
 export interface Video extends MediaFile {
 	kind: "video"
 	element: HTMLVideoElement
+	thumbnail: string
 }
 
 export interface Audio extends MediaFile {

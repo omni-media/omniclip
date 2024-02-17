@@ -31,7 +31,8 @@ export const timeline_actions = actionize({
 			start: 0,
 			end: duration,
 			track: 2,
-			file: video.file
+			file: video.file,
+			thumbnail: video.thumbnail
 		}
 		compositor.VideoManager.add_video(effect)
 		state.timeline.effects.push(effect)

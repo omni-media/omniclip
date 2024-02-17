@@ -1,7 +1,7 @@
 import {pub} from "@benev/slate"
 import {quick_hash} from "@benev/construct"
 
-import {Video, MediaFile} from "../../../components/omni-media/types"
+import {Video, MediaFile} from "../../../components/omni-media/types.js"
 
 export class Media {
 	#database_request = window.indexedDB.open("database", 3)
@@ -80,14 +80,32 @@ export class Media {
 			check_if_duplicate!.onerror = (error) => console.log("error")
 		}
 	}
+	
+	create_video_thumbnail(video: HTMLVideoElement): Promise<string> {
+		const canvas = document.createElement("canvas")
+		canvas.width = 150
+		canvas.height = 50
+		const ctx = canvas.getContext("2d")
+		video.currentTime = 1000/60
+		const f = (resolve: (url: string) => void) => {
+			ctx?.drawImage(video, 0, 0, 150, 50)
+			const url = canvas.toDataURL()
+			resolve(url)
+			removeEventListener("seeked", () => f(resolve))
+		}
+		return new Promise((resolve) => {
+			video.addEventListener("seeked", () => f(resolve))
+		})
+	}
 
-	create_videos_from_video_files(files: MediaFile[]) {
+	async create_videos_from_video_files(files: MediaFile[]) {
 		const videos: Video[] = []
 		for(const {file, hash} of files) {
 			const video = document.createElement('video')
 			video.src = URL.createObjectURL(file)
 			video.load()
-			videos.push({element: video, file, hash, kind: "video"})
+			const url = await this.create_video_thumbnail(video)
+			videos.push({element: video, file, hash, kind: "video", thumbnail: url})
 		}
 		return videos
 	}
