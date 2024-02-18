@@ -2,8 +2,9 @@ export class BinaryAccumulator {
 	#bytes: number[] = []
 
 	addChunk(chunk: Uint8Array) {
-		for (const byte of chunk)
-			this.#bytes.push(byte)
+		for(let i = 0; i <= chunk.length; i++) {
+			this.#bytes.push(chunk[i])
+		}
 	}
 
 	get binary() {
