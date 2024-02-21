@@ -143,5 +143,5 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		}
 	}
 
-	return html`${visibleFilmstrips.map(({url, left}, i) => html`<img data-index=${i}  class="thumbnail" style="transform: translateX(${left}px);height: 40px; width: ${calculate_effect_width(effect, 2) / getFilmstrips().length}px; pointer-events: none;" src=${url} />`)}`
+	return html`${visibleFilmstrips.map(({url, left}, i) => html`<img data-index=${i}  class="thumbnail" style="transform: translateX(${left}px);height: 50px; width: ${calculate_effect_width(effect, 2) / getFilmstrips().length}px; pointer-events: none;" src=${url} />`)}`
 })

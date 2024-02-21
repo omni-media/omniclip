@@ -54,7 +54,7 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect, timeline:
 			?data-grabbed=${grabbed?.effect === effect}
 			style="
 				width: ${calculate_effect_width(effect, zoom)}px;
-				transform: translate(${x ? x : calculate_start_position(effect.start_at_position, zoom)}px, ${y ? y : calculate_effect_track_placement(effect.track, 40)}px);
+				transform: translate(${x ? x : calculate_start_position(effect.start_at_position, zoom)}px, ${y ? y : calculate_effect_track_placement(effect.track, 50)}px);
 			"
 			draggable="true"
 			@dragstart=${drag_events.start}

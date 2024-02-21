@@ -2,7 +2,7 @@ import {css} from "@benev/slate"
 
 export const styles = css`
 	:host {
-		height: 40px;
+		height: 50px;
 		display: flex;
 		overflow: hidden;
 		width: 100%;

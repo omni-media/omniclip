@@ -23,7 +23,7 @@ export const ProposalIndicator = light_view(use => () => {
 		const start = ((x - grabbed.offset.x) * Math.pow(2, -baseline_zoom))
 		const timeline_start = start >= 0 ? start : 0
 		const timeline_end = ((x - grabbed.offset.x) * Math.pow(2, -baseline_zoom)) + grabbed.effect.duration
-		const track = Math.floor(y / 40)
+		const track = Math.floor(y / 50)
 
 		return {
 			timeline_start,
@@ -65,7 +65,7 @@ export const ProposalIndicator = light_view(use => () => {
 				}px;
 				transform: translate(
 					${calculate_start_position(proposedTimecode.proposed_place.start_at_position, zoom)}px,
-					${calculate_effect_track_placement(proposedTimecode!.proposed_place.track, 40)}px
+					${calculate_effect_track_placement(proposedTimecode!.proposed_place.track, 50)}px
 				);
 			"
 			data-indicator="drop-indicator"

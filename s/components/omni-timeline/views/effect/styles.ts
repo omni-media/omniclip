@@ -10,7 +10,7 @@ export const styles = css`
 		cursor: pointer;
 		position: absolute;
 		top: 0;
-		height: 40px;
+		height: 50px;
 
 		&[data-grabbed] {
 			z-index: 2;

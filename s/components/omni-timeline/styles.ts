@@ -20,7 +20,7 @@ export const styles = css`
 		}
 
 		& .drop-indicator {
-			height: 40px;
+			height: 50px;
 			border: green dotted 2px;
 			position: absolute;
 			background: #0080002e;

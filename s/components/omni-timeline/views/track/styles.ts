@@ -4,7 +4,7 @@ export const styles = css`
 	.track {
 		background: rgb(15 15 15);
 		display: flex;
-		height: 40px;
+		height: 50px;
 		outline: 1px solid #181818;
 	}
 

@@ -11,7 +11,7 @@ export function calculate_closest_track_place(
 
 	const [x, y] = cords
 
-	const track_index = Math.floor(y / 40)
+	const track_index = Math.floor(y / 50)
 	const track_start = track_index * track_height
 
 	const width = calculate_effect_width(effect, zoom)
