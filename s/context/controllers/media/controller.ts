@@ -5,7 +5,7 @@ import {Video, MediaFile} from "../../../components/omni-media/types.js"
 
 export class Media {
 	#database_request = window.indexedDB.open("database", 3)
-
+	#opened = false
 	on_media_change = pub<{files: MediaFile[], action: "removed" | "added"}>()
 
 	constructor() {
@@ -24,16 +24,29 @@ export class Media {
 			}
 		}
 		this.#database_request.onsuccess = async (e) => {
-			const target = e.target as IDBRequest
-			const database = target.result as IDBDatabase
-			const imported_files = await this.#get_imported_files(database)
-			this.on_media_change.publish({files: imported_files, action: "added"})
+			this.#opened = true
 		}
 	}
 
-	async #get_imported_files(database: IDBDatabase): Promise<MediaFile[]> {
-		return new Promise((resolve, reject) => {
-			const transaction = database.transaction(["files"])
+	#is_db_opened() {
+		return new Promise((resolve) => {
+			if(this.#opened) {
+				resolve(true)
+			} else {
+				const interval = setInterval(() => {
+					if(this.#opened) {
+						resolve(true)
+						clearInterval(interval)
+					}
+				}, 100)
+			}
+		})
+	}
+
+	async get_imported_files(): Promise<MediaFile[]> {
+		return new Promise(async (resolve, reject) => {
+			await this.#is_db_opened()
+			const transaction = this.#database_request.result.transaction(["files"])
 			const files_handles_store = transaction.objectStore("files")
 			const request = files_handles_store.getAll()
 

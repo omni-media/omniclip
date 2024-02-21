@@ -12,6 +12,10 @@ export const OmniMedia = shadow_component({styles}, use => {
 	const [media, setMedia, getMedia] = use.state<Video[]>([])
 
 	use.setup(() => {
+		media_controller.get_imported_files().then(async media => {
+			const video_files = await media_controller.create_videos_from_video_files(media)
+			setMedia([...getMedia(), ...video_files])
+		})
 		const unsub = media_controller.on_media_change(async (change) => {
 			if(change.action === "added") {
 				const video_files = await media_controller.create_videos_from_video_files(change.files)
