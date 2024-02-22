@@ -52,7 +52,9 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect, timeline:
 		<span
 			class="effect"
 			?data-grabbed=${grabbed?.effect === effect}
+			?data-selected=${use.context.state.timeline.selected_effect?.id === effect.id}
 			style="
+				${effect.kind === "text" ? `background-color: ${effect.color};` : ""}
 				width: ${calculate_effect_width(effect, zoom)}px;
 				transform: translate(${x ? x : calculate_start_position(effect.start_at_position, zoom)}px, ${y ? y : calculate_effect_track_placement(effect.track, 50)}px);
 			"
@@ -62,7 +64,7 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect, timeline:
 		>
 			${effect.kind === "video"
 			? Filmstrips([effect, timeline])
-			: effect.kind}
+			: null}
 		</span>
 	`
 })
