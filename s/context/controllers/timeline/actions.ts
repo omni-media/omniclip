@@ -5,19 +5,33 @@ import {TimelineHelpers} from "./helpers.js"
 import {actionize} from "../../../utils/actionize.js"
 import {Compositor} from "../compositor/controller.js"
 import {Video} from "../../../components/omni-media/types.js"
-import {AnyEffect, ExportStatus, TextEffect, TextEffectProps, TextRect, VideoEffect} from "./types.js"
+import {AnyEffect, ExportStatus, Font, FontStyle, TextAlign, TextEffect, TextRect, VideoEffect} from "./types.js"
 
 export const timeline_actions = actionize({
-	add_text_effect: state => (text_props: TextEffectProps) => {
-		const effect: AnyEffect = {
-			...text_props,
+	add_text_effect: state => (compositor: Compositor) => {
+		const effect: TextEffect = {
 			id: generate_id(),
 			kind: "text",
 			start_at_position: 1000,
 			duration: 5000,
 			start: 0,
 			end: 5000,
-			track: 0
+			track: 0,
+			size: 38,
+			content: "example",
+			style: "normal",
+			font: "Lato",
+			color: "#e66465",
+			align: "center",
+			rect: {
+				position_on_canvas: {
+					x: compositor.canvas.width / 2,
+					y: compositor.canvas.height / 2,
+				},
+				width: compositor.TextManager.measure_text_width("example", 38, "Lato", "#e66465"),
+				height: compositor.TextManager.measure_text_height("example"),
+				rotation: 0
+			}
 		}
 		state.timeline.effects.push(effect)
 	},
@@ -43,12 +57,30 @@ export const timeline_actions = actionize({
 	set_fps: state => (fps: number) => {
 		state.timeline.fps = fps
 	},
-	update_text_effect: state => (text_props: TextEffectProps, id: string) => {
-		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
-		for(const prop in text_props) {
-			//@ts-ignore
-			effect[prop] = text_props[prop]
-		}
+	set_text_color: state => (color: string) => {
+		(state.timeline.selected_effect as TextEffect).color = color
+		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
+		effect.color = color
+	},
+	set_text_font: state => (font: Font) => {
+		(state.timeline.selected_effect as TextEffect).font = font
+		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
+		effect.font = font
+	},
+	set_font_size: state => (size: number) => {
+		(state.timeline.selected_effect as TextEffect).size = size
+		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
+		effect.size = size
+	},
+	set_font_style: state => (style: FontStyle) => {
+		(state.timeline.selected_effect as TextEffect).style = style
+		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
+		effect.style = style
+	},
+	set_text_align: state => (align: TextAlign) => {
+		(state.timeline.selected_effect as TextEffect).align = align
+		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
+		effect.align = align
 	},
 	set_is_exporting: state => (is_exporting) => {
 		state.timeline.is_exporting = is_exporting
@@ -58,6 +90,7 @@ export const timeline_actions = actionize({
 	},
 	set_text_rect: state => ({id}: TextEffect, rect: TextRect) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
+		(state.timeline.selected_effect as TextEffect).rect = rect
 		effect.rect = rect
 	},
 	set_text_rotation: state => ({id}: TextEffect, rotation: number) => {

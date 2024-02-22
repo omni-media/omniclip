@@ -1,8 +1,8 @@
 import {coordinates_in_rect} from "@benev/construct"
 
 import {Compositor} from "../controller.js"
-import {TextEffect} from "../../timeline/types.js"
 import {TimelineActions} from "../../timeline/actions.js"
+import {Font, FontStyle, TextAlign, TextEffect} from "../../timeline/types.js"
 import {is_point_inside_rectangle} from "../utils/is_point_inside_rectangle.js"
 
 export class TextManager {
@@ -75,10 +75,12 @@ export class TextManager {
 		const clickedY = (e.clientY - canvasRect.top) * scaleY
 
 		const clicked = this.#find_effect_at(clickedX, clickedY)
-		this.actions.set_selected_effect(clicked)
-		this.#clicked_effect = clicked
-		if(!clicked)
+		if(clicked) {
+			this.#clicked_effect = {...clicked}
+			this.actions.set_selected_effect(clicked)
+		} else {
 			requestAnimationFrame(() => this.compositor.draw_effects(true))
+		}
 	}
 	
 	#calculate_center_of_effect(effect: TextEffect) {
@@ -136,14 +138,15 @@ export class TextManager {
 	draw_text(source: TextEffect, ctx: CanvasRenderingContext2D) {
 		const {size, color, content} = source
 		ctx.fillStyle = color
-		ctx.font = `${size}px Lato`
+		ctx.font = `${source.style} ${size}px Lato`
+		ctx.textAlign = `${source.align}`
 		if(source.rect.rotation) {
 			ctx.save()
 			this.#rotate_text(source, ctx)
-			ctx.fillText(content, -source.rect.width/2, source.rect.height/2)
+			ctx.fillText(content, -source.rect.width + source.rect.width, source.rect.height/2)
 			ctx.restore()
 		} else {
-			ctx.fillText(content, source.rect.position_on_canvas.x, source.rect.position_on_canvas.y)
+			ctx.fillText(content, source.rect.position_on_canvas.x + source.rect.width / 2, source.rect.position_on_canvas.y)
 		}
 	}
 
@@ -154,11 +157,56 @@ export class TextManager {
 		ctx.rotate(effect.rect.rotation)
 	}
 
-	measure_text_width (effect: TextEffect) {
-		return this.compositor.ctx!.measureText(effect?.content).width!
+	measure_text_width (content: string, size: number, font: Font, color: string) {
+		this.compositor.ctx!.font = `${size}px ${font}`;
+		this.compositor.ctx!.fillStyle = color;
+		return this.compositor.ctx?.measureText(content).width!
 	}
 
-	measure_text_height(effect: TextEffect) {
-		return this.compositor.ctx!.measureText(effect.content).actualBoundingBoxAscent! + this.compositor.ctx?.measureText(effect.content).actualBoundingBoxDescent!
+	measure_text_height(content: string) {
+		return this.compositor.ctx?.measureText(content).actualBoundingBoxAscent! + this.compositor.ctx?.measureText(content).actualBoundingBoxDescent!
+	}
+
+	set_text_font(font: Font, update_compositor: () => void) {
+		this.actions.set_text_font(font)
+		this.#clicked_effect!.font = font
+		update_compositor()
+	}
+
+	set_font_size(size: number, update_compositor: () => void) {
+		this.actions.set_font_size(size)
+		this.#clicked_effect!.size = size
+		this.#update_text_rect()
+		update_compositor()
+	}
+
+	set_font_style(style: FontStyle, update_compositor: () => void) {
+		this.actions.set_font_style(style)
+		this.#clicked_effect!.style = style
+		update_compositor()
+	}
+
+	set_text_align(align: TextAlign, update_compositor: () => void) {
+		this.actions.set_text_align(align)
+		this.#clicked_effect!.align = align
+		update_compositor()
+	}
+
+	set_text_color(color: string, update_compositor: () => void) {
+		this.actions.set_text_color(color)
+		update_compositor()
+	}
+
+	#update_text_rect() {
+		const {content, size, font, color} = this.#clicked_effect!
+		const width = this.measure_text_width(content, size, font, color)
+		const height = this.measure_text_height(content)
+		const rect = {
+			...this.#clicked_effect!.rect,
+			width,
+			height
+		}
+		this.#clicked_effect!.rect = rect
+		this.actions.set_text_rect(this.#clicked_effect!, {...rect})
 	}
 }

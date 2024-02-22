@@ -7,7 +7,8 @@ export const styles = css`
 		display: flex;
 		flex-direction: column;
 		gap: 0.3em;
-		padding: 0.3em;
+		padding: 1em;
+		height: 200px;
 		
 		& [data-selected] {
 			background: rgb(32, 31, 31);
@@ -71,19 +72,6 @@ export const styles = css`
 			text-align: center;
 		}
 
-		& .add-text {
-			padding: 0.5em;
-			background: rgb(32, 31, 31);
-			margin-top: 1em;
-			cursor: pointer;
-			transition: all 0.3s ease;
-			font-weight: bold;
-
-			&:hover {
-				opacity: 0.7;
-				color: white;
-			}
-		}
 
 		& .color-picker {
 			display: flex;
@@ -106,6 +94,33 @@ export const styles = css`
 					border: none;
 				}
 			}
+		}
+	}
+	
+	h2 {
+		padding: 0.3em;
+	}
+
+	.not-selected {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 200px;
+		font-size: 1.5em;
+	}
+
+	.add-text {
+		padding: 0.5em;
+		margin: 1em;
+		background: rgb(32, 31, 31);
+		margin-top: 1em;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		font-weight: bold;
+
+		&:hover {
+			opacity: 0.7;
+			color: white;
 		}
 	}
 `
