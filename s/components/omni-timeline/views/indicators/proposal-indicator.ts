@@ -3,6 +3,7 @@ import {html} from "@benev/slate"
 import {light_view} from "../../../../context/slate.js"
 import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
+import {calculate_effect_track_index} from "../../utils/calculate_effect_track_index.js"
 import {At, ProposedTimecode, Grabbed} from "../../../../context/controllers/timeline/types.js"
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
 
@@ -17,14 +18,15 @@ export const ProposalIndicator = light_view(use => () => {
 		effects_to_push: null
 	})
 
+	const track_effects = controller.get_effects_on_track(use.context.state.timeline, proposedTimecode.proposed_place.track)
+
 	function translate_to_timecode(grabbed: Grabbed, hovering: At) {
 		const baseline_zoom = use.context.state.timeline.zoom
 		const [x, y] = hovering.coordinates
 		const start = ((x - grabbed.offset.x) * Math.pow(2, -baseline_zoom))
 		const timeline_start = start >= 0 ? start : 0
 		const timeline_end = ((x - grabbed.offset.x) * Math.pow(2, -baseline_zoom)) + grabbed.effect.duration
-		const track = Math.floor(y / 50)
-
+		const track = calculate_effect_track_index(y, use.context.state.timeline.tracks.length, use.context.state.timeline.effects)
 		return {
 			timeline_start,
 			timeline_end,
@@ -49,10 +51,17 @@ export const ProposalIndicator = light_view(use => () => {
 		setProposedTimecode(proposed_timecode)
 	}
 
+	const text_effect_specific_styles = () => {
+		return !track_effects.find(effect => effect.kind === "video") && track_effects.find(effect => effect.kind === "text")
+			? `height: 30px;`
+			: ""
+	}
+
 	return html`
 		<div
 			?data-push-effects=${proposedTimecode?.effects_to_push}
 			style="
+				${text_effect_specific_styles()}
 				display: ${grabbed ? "block" : "none"};
 				width: ${
 					proposedTimecode.effects_to_push
@@ -65,7 +74,7 @@ export const ProposalIndicator = light_view(use => () => {
 				}px;
 				transform: translate(
 					${calculate_start_position(proposedTimecode.proposed_place.start_at_position, zoom)}px,
-					${calculate_effect_track_placement(proposedTimecode!.proposed_place.track, 50)}px
+					${calculate_effect_track_placement(proposedTimecode!.proposed_place.track, use.context.state.timeline.effects)}px
 				);
 			"
 			data-indicator="drop-indicator"

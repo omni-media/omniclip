@@ -15,6 +15,7 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect, timeline:
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
 	const zoom = use.context.state.timeline.zoom
 	const {grabbed, hovering} = effect_drag
+	const controller = use.context.controllers.timeline
 	use.setup(() => on_drop(() => setCords([null, null])))
 
 	const drag_events = {
@@ -47,6 +48,18 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect, timeline:
 		return () => removeEventListener("drop", drag_events.drop)
 	})
 	drag_events.effect_drag_listener()
+	
+	const text_effect_specific_styles = () => {
+		if(effect.kind === "text") {
+			return `
+				${!controller.get_effects_on_track(use.context.state.timeline, effect.track)
+					.find(effect => effect.kind === "video")
+					? `height: 30px;`
+					: ""}
+				background-color: ${effect.color};
+			`
+		} else return ""
+	}
 
 	return html`
 		<span
@@ -54,9 +67,9 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect, timeline:
 			?data-grabbed=${grabbed?.effect === effect}
 			?data-selected=${use.context.state.timeline.selected_effect?.id === effect.id}
 			style="
-				${effect.kind === "text" ? `background-color: ${effect.color};` : ""}
+				${text_effect_specific_styles()}
 				width: ${calculate_effect_width(effect, zoom)}px;
-				transform: translate(${x ? x : calculate_start_position(effect.start_at_position, zoom)}px, ${y ? y : calculate_effect_track_placement(effect.track, 50)}px);
+				transform: translate(${x ? x : calculate_start_position(effect.start_at_position, zoom)}px, ${y ? y : calculate_effect_track_placement(effect.track, use.context.state.timeline.effects)}px);
 			"
 			draggable="true"
 			@dragstart=${drag_events.start}

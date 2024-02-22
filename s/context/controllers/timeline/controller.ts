@@ -2,8 +2,8 @@ import {pub} from "@benev/slate/x/tools/pub.js"
 import {ShockDragDrop} from "@benev/construct/x/tools/shockdrop/drag_drop.js"
 
 import {TimelineActions} from "./actions.js"
-import {EffectTimecode, XTimeline as TimelineState} from "./types.js"
 import {Grabbed, At, ProposedTimecode, V2, AnyEffect} from "./types.js"
+import {EffectTimecode, XTimeline as TimelineState, XTimeline} from "./types.js"
 
 export class Timeline {
 	effect_drag = new ShockDragDrop<Grabbed, At> ({handle_drop: (_event: DragEvent, grabbed, dropped_at) => this.on_drop.publish({grabbed, dropped_at})})
@@ -119,6 +119,10 @@ export class Timeline {
 	#exclude_grabbed_effect_from_proposals(effect_to_exclude: string, effects: AnyEffect[]) {
 		const excluded = effects.filter(effect => effect.id !== effect_to_exclude)
 		return excluded
+	}
+
+	get_effects_on_track(timeline: XTimeline, track_id: number) {
+		return timeline.effects.filter(effect => effect.track === track_id)
 	}
 }
 
