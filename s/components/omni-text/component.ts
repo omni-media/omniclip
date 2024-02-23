@@ -1,6 +1,7 @@
 import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
+import addSvg from "../../icons/gravity-ui/add.svg.js"
 import {shadow_component} from "../../context/slate.js"
 import boldSvg from "../../icons/remix-icon/bold.svg.js"
 import italicSvg from "../../icons/remix-icon/italic.svg.js"
@@ -32,7 +33,7 @@ export const OmniText = shadow_component({styles}, use => {
 						<select @change=${(e: Event) => text_manager.set_text_font((e.target as HTMLSelectElement).value as Font, update_compositor)} name="fonts" id="font-select">
 							<option value="Arial">Arial</option>
 						</select>
-						<input @change=${(e: Event) => text_manager.set_font_size(+(e.target as HTMLInputElement).value, update_compositor)} class="font-size" value=${selected_effect.size} />
+						<input @change=${(e: Event) => text_manager.set_font_size(+(e.target as HTMLInputElement).value, update_compositor)} class="font-size" value=${selected_effect.size}>
 					</div>
 					<div class=flex-hover>
 						<div ?data-selected=${selected_effect.style === "bold"} @click=${() => text_manager.set_font_style("bold", update_compositor)} class="bold">${boldSvg}</div>
@@ -62,6 +63,13 @@ export const OmniText = shadow_component({styles}, use => {
 					<p>No text selected</p>
 				</div>`}
 			<h2>Add Text</h2>
-			<button class="add-text" @click=${() => actions.timeline_actions.add_text_effect(use.context.controllers.compositor)}>Add text</button>
+			<div class="examples">
+				<div class="example">
+					<span style="color: #e66465; font-family: Lato;" class="text">
+						example
+					</span>
+					<div @click=${() => actions.timeline_actions.add_text_effect(use.context.controllers.compositor)} class="add-btn">${addSvg}</div>
+				</div>
+			</div>
 	`
 })
