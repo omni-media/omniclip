@@ -2,12 +2,11 @@ import {GoldElement, html, watch} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
-import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {VideoEffect} from "../../../../context/controllers/timeline/types.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
 
 export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, timeline: GoldElement) => {
-	use.watch(() => use.context.state.timeline.zoom)
+	use.watch(() => use.context.state.timeline)
 	const ffmpeg = use.context.helpers.ffmpeg
 	const [_thumbnails, setFilmstrips, getFilmstrips] = use.state<string[]>([])
 	const [visibleFilmstrips, setVisibleFilmstrips, getVisibleFilmstrips] = use.state<{url: string, left: number}[]>([])
@@ -18,7 +17,8 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 
 	use.setup(() => {
 		timeline.addEventListener("scroll", async (e) => {
-			for await(const {url, normalized_left, i} of recalculate_all_visible_filmstrips(timeline.scrollLeft)) {
+			const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as VideoEffect
+			for await(const {url, normalized_left, i} of recalculate_all_visible_filmstrips(get_effect, timeline.scrollLeft)) {
 				let new_visible = getVisibleFilmstrips()
 				new_visible[i] = {url, left: normalized_left}
 				setVisibleFilmstrips(new_visible)
@@ -27,7 +27,8 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		})
 
 		watch.track(() => use.context.state.timeline.zoom, async (zoom) => {
-			for await(const {url, normalized_left, i} of recalculate_all_visible_filmstrips(timeline.scrollLeft, true)) {
+			const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as VideoEffect
+			for await(const {url, normalized_left, i} of recalculate_all_visible_filmstrips(get_effect, timeline.scrollLeft, true)) {
 				let new_visible = getVisibleFilmstrips()
 				new_visible[i] = {url, left: normalized_left}
 				setVisibleFilmstrips(new_visible)
@@ -64,7 +65,7 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 				setFramesCount(frames)
 				const placeholders = generate_filmstrip_placeholders(frames)
 				setFilmstrips(placeholders)
-				for await(const {url, normalized_left, i} of recalculate_all_visible_filmstrips(timeline.scrollLeft,true)) {
+				for await(const {url, normalized_left, i} of recalculate_all_visible_filmstrips(effect, timeline.scrollLeft, true)) {
 					let new_visible = getVisibleFilmstrips()
 					new_visible[i] = {url, left: normalized_left}
 					setVisibleFilmstrips(new_visible)
@@ -78,9 +79,9 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		}
 	})
 
-	function get_filmstrip_at(position: number) {
-		const width_of_frame_if_all_frames = calculate_effect_width(effect, use.context.state.timeline.zoom) / getFilmstrips().length
-		let start_at_filmstrip = position / width_of_frame_if_all_frames
+	function get_filmstrip_at(effect: VideoEffect, position: number) {
+		const width_of_frame_if_all_frames = effect.duration * Math.pow(2, use.context.state.timeline.zoom) / getFilmstrips().length
+		let start_at_filmstrip = (position) / width_of_frame_if_all_frames
 		return Math.floor(start_at_filmstrip)
 	}
 
@@ -92,11 +93,18 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		return new_arr
 	}
 
-	async function *recalculate_all_visible_filmstrips(scroll_left: number, force_recalculate?: boolean): AsyncGenerator<{url: string, normalized_left: number, i:number}> {
-		const width_of_frame = calculate_effect_width(effect, 2) / getFilmstrips().length
+	async function *recalculate_all_visible_filmstrips(effect: VideoEffect, scroll_left: number, force_recalculate?: boolean): AsyncGenerator<{
+		url: string
+		normalized_left: number
+		i:number
+	}> {
+		const width_of_frame = effect.duration * Math.pow(2, 2) / getFilmstrips().length
 		const margin = width_of_frame * 2
-		const frame_count = timeline.clientWidth / 100
-		const effect_left = calculate_start_position(effect.start_at_position, use.context.state.timeline.zoom)
+		const effect_width = effect.duration * Math.pow(2, 2)
+		const frame_count = effect_width < timeline.clientWidth 
+			? effect_width / 100
+			: timeline.clientWidth / 100
+		const effect_left = calculate_start_position((effect.start_at_position - effect.start), use.context.state.timeline.zoom)
 		const normalized_left = Math.floor((timeline.scrollLeft - effect_left) / width_of_frame) * width_of_frame - margin < 0
 			? 0
 			: Math.floor((timeline.scrollLeft - effect_left) / width_of_frame) * width_of_frame - margin
@@ -110,21 +118,21 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 			const is_left = is_scrolling_left(scroll_left)
 			const count = is_left ? 0 : frame_count
 			for(let i = 0; i<= frame_count; i+=1) {
-				const effect_width = calculate_effect_width(effect, use.context.state.timeline.zoom)
+				const effect_width = effect.duration * Math.pow(2, 2)
 				const position = normalized_left + width_of_frame * i
 				if(position <= effect_width) {
-					yield {url: getFilmstrips()[get_filmstrip_at(position)], normalized_left, i}
+					yield {url: getFilmstrips()[get_filmstrip_at(effect, position)], normalized_left, i}
 				}
 			}
 			for(let i = is_left ? frame_count : 0; is_left ? i >= count : i <= count; is_left ? i -= 1 : i += 1) {
-				const effect_width = calculate_effect_width(effect, use.context.state.timeline.zoom)
+				const effect_width = effect.duration * Math.pow(2, 2)
 				const position = normalized_left + width_of_frame * i
 				if(position <= effect_width) {
-					const filmstrip = getFilmstrips()[get_filmstrip_at(position)]
+					const filmstrip = getFilmstrips()[get_filmstrip_at(effect, position)]
 					if(filmstrip !== new URL("/assets/loading.svg", import.meta.url).toString()) {
 						yield {url: filmstrip, normalized_left, i: Math.floor(i)}
 					} else {
-						video.currentTime = +(ms * get_filmstrip_at(Number(position.toFixed(2))) / 1000).toFixed(2)
+						video.currentTime = +(ms * get_filmstrip_at(effect, Number(position.toFixed(2))) / 1000).toFixed(2)
 						await new Promise((r) => setResolve(r))
 						const canvas = document.createElement("canvas")
 						canvas.width = 150
@@ -133,8 +141,8 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 						ctx?.drawImage(video, 0, 0, 150, 50)
 						const url = canvas.toDataURL("image/webp", 0.5)
 						const filmstrips = getFilmstrips()
-						URL.revokeObjectURL(filmstrips[get_filmstrip_at(position)])
-						filmstrips[get_filmstrip_at(position)] = url
+						URL.revokeObjectURL(filmstrips[get_filmstrip_at(effect, position)])
+						filmstrips[get_filmstrip_at(effect, position)] = url
 						setFilmstrips(filmstrips)
 						yield {url, normalized_left, i: Math.floor(i)}
 					}
@@ -143,5 +151,5 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		}
 	}
 
-	return html`${visibleFilmstrips.map(({url, left}, i) => html`<img data-index=${i}  class="thumbnail" style="transform: translateX(${left}px);height: 50px; width: ${calculate_effect_width(effect, 2) / getFilmstrips().length}px; pointer-events: none;" src=${url} />`)}`
+	return html`${visibleFilmstrips.map(({url, left}, i) => html`<img data-index=${i}  class="thumbnail" style="position: absolute; transform: translateX(${left + (i * (effect.duration * Math.pow(2,2))/ getFilmstrips().length - (effect.start * Math.pow(2, use.context.state.timeline.zoom))) }px);height: 50px; width: ${effect.duration * Math.pow(2, 2) / getFilmstrips().length}px; pointer-events: none;" src=${url} />`)}`
 })
