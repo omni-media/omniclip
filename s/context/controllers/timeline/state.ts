@@ -10,6 +10,7 @@ export const timeline_state: XTimeline = {
 	export_progress: 0,
 	export_status: "demuxing",
 	fps: 0,
+	timebase: 25,
 	is_playing: false,
 	timecode: 0,
 	length: 1000,

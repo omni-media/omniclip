@@ -16,6 +16,7 @@ export interface XTimeline {
 	effects: AnyEffect[]
 	tracks: XTrack[]
 	zoom: number
+	timebase: number
 }
 
 export interface Effect {
