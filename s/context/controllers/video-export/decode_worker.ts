@@ -7,13 +7,18 @@ let wait_time = 0
 let interval_number = 0
 let decoded_effect: VideoEffect
 let frames = 0
+let timestamp_start = 0
 
 const decoder = new VideoDecoder({
 	output(frame) {
-		self.postMessage({action: "new-frame", frame: {timestamp, frame, effect_id: decoded_effect.id, frames_count: frames}})
-		frame.close()
-		timestamp += decoded_effect.duration / frames
-		wait_time = 0
+		if(timestamp >= timestamp_start + decoded_effect.start && timestamp <= timestamp_start + decoded_effect.end) {
+			self.postMessage({action: "new-frame", frame: {timestamp: timestamp - decoded_effect.start, frame, effect_id: decoded_effect.id, frames_count: frames}}, [frame])
+			frame.close()
+			wait_time = 0
+		} else {
+			frame.close()
+		}
+		timestamp += decoded_effect.raw_duration / frames
 	},
 	error: (e) => console.log(e)
 })
@@ -23,7 +28,7 @@ const interval = () => setInterval(() => {
 	if(wait_time === 200) {
 		decoder.flush()
 	}
-	if(timestamp === end_timestamp) {
+	if(timestamp >= end_timestamp) {
 		clearInterval(interval_number)
 	}
 }, 100)
@@ -35,7 +40,6 @@ const demux = (file: File) => new MP4Demuxer(file, {
 	},
 	async onChunk(chunk: EncodedVideoChunk) {
 		decoder.decode(chunk)
-		end_timestamp += decoded_effect.duration / frames
 	},
 	framesCount(frames_count) {
 		frames = frames_count
@@ -45,9 +49,10 @@ const demux = (file: File) => new MP4Demuxer(file, {
 
 self.addEventListener("message", async message => {
 	if(message.data.action === "demux") {
-		timestamp = message.data.starting_timestamp
-		end_timestamp = message.data.starting_timestamp
+		timestamp_start = message.data.starting_timestamp
 		decoded_effect = message.data.effect
+		timestamp = message.data.starting_timestamp
+		end_timestamp = (message.data.starting_timestamp) + message.data.effect.end
 		interval_number = interval()
 		demux(message.data.effect.file)
 	}

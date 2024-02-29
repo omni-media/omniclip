@@ -9,13 +9,16 @@ import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
 
-export const Effect = shadow_view({styles}, use => (effect: AnyEffect, timeline: GoldElement) => {
+export const Effect = shadow_view({styles}, use => ({id}: AnyEffect, timeline: GoldElement) => {
 	use.watch(() => use.context.state.timeline)
+	const effect = use.context.state.timeline.effects.find(effect => effect.id === id)!
 	const {effect_drag, on_drop} = use.context.controllers.timeline
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
 	const zoom = use.context.state.timeline.zoom
 	const {grabbed, hovering} = effect_drag
 	const controller = use.context.controllers.timeline
+	const handler = controller.effect_trim_handler
+
 	use.setup(() => on_drop(() => setCords([null, null])))
 
 	const drag_events = {
@@ -61,6 +64,21 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect, timeline:
 		} else return ""
 	}
 
+	const render_trim_handle = (side: "left" | "right") => {
+		return html`
+			<span
+				draggable="true"
+				@drop=${(e: DragEvent) => handler.trim_drop(e, use.context.state.timeline)}
+				@dragend=${(e: DragEvent) => handler.trim_end(e, use.context.state.timeline)}
+				@dragstart=${(e: DragEvent) => handler.trim_start(e, effect, side)}
+				class="trim-handle-${side}"
+			>
+				<span class=line></span>
+				<span class=line></span>
+			</span>
+			`
+	}
+
 	return html`
 		<span
 			class="effect"
@@ -75,6 +93,8 @@ export const Effect = shadow_view({styles}, use => (effect: AnyEffect, timeline:
 			@dragstart=${drag_events.start}
 			@click=${() => use.context.actions.timeline_actions.set_selected_effect(effect)}
 		>
+			${render_trim_handle("left")}
+			${render_trim_handle("right")}
 			${effect.kind === "video"
 			? Filmstrips([effect, timeline])
 			: null}

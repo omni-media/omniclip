@@ -16,6 +16,8 @@ export const OmniTimeline = shadow_component({styles}, use => {
 	const state = use.context.state.timeline
 	const effect_drag = use.context.controllers.timeline.effect_drag
 	const playhead_drag = use.context.controllers.timeline.playhead_drag
+	const handler = use.context.controllers.timeline.effect_trim_handler
+
 	use.setup(() => {
 		window.addEventListener("dragover", augmented_dragover)
 		return () => removeEventListener("dragover", augmented_dragover)
@@ -43,12 +45,16 @@ export const OmniTimeline = shadow_component({styles}, use => {
 	}
 
 	function augmented_dragover(event: DragEvent) {
+		if(use.context.controllers.timeline.effect_trim_handler.effect_resize_handle_drag.grabbed) {
+			handler.effect_dragover(event, use.element, use.context.state.timeline)
+			return
+		}
 		playhead_drag_over(event)
 		effect_drag_over(event)
 	}
 
 	const render_tracks = () => state.tracks.map((_track, i) => Track([i], {attrs: {part: "add-track-indicator"}}))
-	const render_effects = () => state.effects.map((effect) => Effect([effect, use.element]))
+	const render_effects = () => use.context.state.timeline.effects.map((effect) => Effect([effect, use.element]))
 
 	return html`
 		<div

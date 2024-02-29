@@ -1,5 +1,6 @@
 import {BinaryAccumulator} from "./tools/BinaryAccumulator/tool.js"
 
+const timebase = 25 // hardcoded timebase
 const binary_accumulator = new BinaryAccumulator()
 
 async function handleChunk(chunk: EncodedVideoChunk) {
@@ -15,7 +16,7 @@ const config: VideoEncoderConfig = {
 	width: 1280,
 	height: 720,
 	bitrate: 4_000_000, // 2 Mbps
-	framerate: 30,
+	framerate: timebase,
 	bitrateMode: "constant"
 }
 

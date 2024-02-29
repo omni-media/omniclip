@@ -43,14 +43,14 @@ export class VideoExport {
 
 	export_start(timeline: XTimeline) {
 		const sorted_effects = this.#sort_effects_by_track(timeline.effects)
-		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position + effect.duration))
+		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position - effect.start + effect.end))
 		this.#export_process(sorted_effects)
 		this.actions.set_is_exporting(true)
 	}
 
 	#find_closest_effect_frame(effect: VideoEffect, timestamp: number) {
 		let closest: DecodedFrame | null = null
-		let current_difference = Infinity
+		let current_difference = Number.MAX_SAFE_INTEGER
 		this.decoded_frames.forEach(frame => {
 			if(frame.effect_id === effect.id) {
 				const difference = Math.abs(frame.timestamp - timestamp)
@@ -63,29 +63,54 @@ export class VideoExport {
 		return closest!
 	}
 
+	#remove_unnecessary_frames_below_timestamp(effect_id: string, thresholdTimestamp: number) {
+		const timebase = 40 // hardcoded timebase
+		const entriesToRemove: string[] = []
+
+		/* margin to keep about one frame more incase its needed,
+		* for some reason sometimes its needed, but im lazy to fix it */
+		const margin_for_additional_frame = timebase * 1.5
+
+		this.decoded_frames.forEach((value, key) => {
+				if (value.effect_id === effect_id && value.timestamp < thresholdTimestamp - margin_for_additional_frame) {
+						entriesToRemove.push(key)
+				}
+		});
+
+		entriesToRemove.forEach(key => {
+				const decoded = this.decoded_frames.get(key)
+				decoded?.frame.close()
+				this.decoded_frames.delete(key)
+		})
+	}
+
 	async #export_process(effects: AnyEffect[]) {
 		const effects_at_timestamp = get_effects_at_timestamp(effects, this.#timestamp)
 		const draw_queue: (() => void)[] = []
 		let frame_duration = null
+
 		for(const effect of effects_at_timestamp) {
 			if(effect.kind === "video") {
-				const {frame, frames_count, frame_id} = await this.#get_frame_from_video(effect, this.#timestamp)
+				const {frame, frames_count, frame_id, effect_id} = await this.#get_frame_from_video(effect, this.#timestamp)
 				frame_duration = effect.duration / frames_count
-				this.decoded_frames.delete(frame_id)
 				draw_queue.push(() => {
 					this.ctx?.drawImage(frame, 0, 0, this.canvas.width, this.canvas.height)
 					frame.close()
+					this.#remove_unnecessary_frames_below_timestamp(effect_id, this.#timestamp)
+					this.decoded_frames.delete(frame_id)
 				})
 			}
 			if(effect.kind === "text") {
 				draw_queue.push(() => this.compositor.TextManager.draw_text(effect, this.ctx))
 			}
 		}
+
 		this.actions.set_export_status("composing")
 		for(const draw of draw_queue) {draw()}
-		this.#encode_composed_frame(this.canvas, frame_duration ?? Math.ceil(1000/60))
+		this.#encode_composed_frame(this.canvas, 1000/25)
 
-		this.#timestamp += frame_duration ?? Math.ceil(1000/60) 
+		this.#timestamp += 1000/25
+
 		const progress = this.#timestamp / this.#timestamp_end * 100 // for progress bar
 		this.actions.set_export_progress(progress)
 

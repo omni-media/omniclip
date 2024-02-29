@@ -37,13 +37,15 @@ export const timeline_actions = actionize({
 	},
 	add_video_effect: state => (video: Video, compositor: Compositor) => {
 		const duration = video.element.duration * 1000
+		const adjusted_duration_to_timebase = Math.round(duration / (1000/state.timeline.timebase)) * (1000/state.timeline.timebase)
 		const effect: VideoEffect = {
 			id: generate_id(),
 			kind: "video",
-			duration,
+			raw_duration: duration,
+			duration: adjusted_duration_to_timebase,
 			start_at_position: 1500,
 			start: 0,
-			end: duration,
+			end: adjusted_duration_to_timebase,
 			track: 2,
 			file: video.file,
 			thumbnail: video.thumbnail
@@ -128,6 +130,16 @@ export const timeline_actions = actionize({
 		const helper = new TimelineHelpers(state.timeline)
 		const effect = helper.get_effect(id)
 		effect!.start_at_position = x
+	},
+	set_effect_start: state => ({id}: AnyEffect, start: number) => {
+		const helper = new TimelineHelpers(state.timeline)
+		const effect = helper.get_effect(id)
+		effect!.start = start
+	},
+	set_effect_end: state => ({id}: AnyEffect, end: number) => {
+		const helper = new TimelineHelpers(state.timeline)
+		const effect = helper.get_effect(id)
+		effect!.end = end
 	},
 	add_track: state => () => {
 		state.timeline.tracks.push({id: generate_id()})

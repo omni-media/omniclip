@@ -32,6 +32,7 @@ export interface VideoEffect extends Effect {
 	kind: "video"
 	file: File
 	thumbnail: string
+	raw_duration: number
 }
 
 export type TextEffectProps = Omit<TextEffect, keyof Effect | "kind">

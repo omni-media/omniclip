@@ -2,16 +2,20 @@ import {pub} from "@benev/slate/x/tools/pub.js"
 import {ShockDragDrop} from "@benev/construct/x/tools/shockdrop/drag_drop.js"
 
 import {TimelineActions} from "./actions.js"
-import {Grabbed, At, ProposedTimecode, V2, AnyEffect} from "./types.js"
+import {effectTrimHandler} from "./parts/effect-trim-handler.js"
+import {Grabbed, At, ProposedTimecode, AnyEffect} from "./types.js"
 import {EffectTimecode, XTimeline as TimelineState, XTimeline} from "./types.js"
 
 export class Timeline {
 	effect_drag = new ShockDragDrop<Grabbed, At> ({handle_drop: (_event: DragEvent, grabbed, dropped_at) => this.on_drop.publish({grabbed, dropped_at})})
 	playhead_drag = new ShockDragDrop<boolean, {x: number}>({handle_drop: (_event: DragEvent) => {}})
 	on_drop = pub<{grabbed: Grabbed, dropped_at: At}>()
+	effect_trim_handler: effectTrimHandler
 	on_playhead_drag = pub()
 	
-	constructor(private timeline_actions: TimelineActions) {}
+	constructor(private timeline_actions: TimelineActions) {
+		this.effect_trim_handler = new effectTrimHandler(timeline_actions)
+	}
 
 	calculate_proposed_timecode({timeline_end, timeline_start, track}: EffectTimecode, grabbed_effect_id: string, state: TimelineState) {
 		const effects_to_propose_to = this.#exclude_grabbed_effect_from_proposals(grabbed_effect_id, state.effects)
@@ -59,7 +63,7 @@ export class Timeline {
 
 		return {
 			proposed_place: {
-				start_at_position: start_position,
+				start_at_position: this.#round_to_nearest_frame_place(start_position, state.timebase),
 				track
 			},
 			duration: shrinked_size,
@@ -103,6 +107,11 @@ export class Timeline {
 			else return 1
 		})
 		return effects_after
+	}
+
+	#round_to_nearest_frame_place(start_at_position: number, timebase: number) {
+		const rounded = Math.round(start_at_position / (1000/timebase)) * 1000/timebase
+		return rounded
 	}
 
 	set_proposed_timecode(effect: AnyEffect, {proposed_place, duration, effects_to_push}: ProposedTimecode) {
