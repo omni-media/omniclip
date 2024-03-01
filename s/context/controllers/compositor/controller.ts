@@ -103,14 +103,15 @@ export class Compositor {
 
 	get_effects_relative_to_timecode(state: XTimeline) {
 		const timecode = state.timecode
-		const effects = state.effects.filter(effect => effect.start_at_position <= timecode && effect.start_at_position + effect.duration >= timecode)
+		const effects = state.effects.filter(effect => effect.start_at_position <= timecode && timecode <= effect.start_at_position + (effect.end - effect.start))
 		return effects.length > 0 ? effects : undefined
 	}
 
 	update_currently_played_effects(timeline: XTimeline) {
 		const effects_relative_to_timecode = this.get_effects_relative_to_timecode(timeline)
-		if(effects_relative_to_timecode)
-		this.currently_played_effects = effects_relative_to_timecode
+		if(effects_relative_to_timecode) {
+			this.currently_played_effects = effects_relative_to_timecode
+		} else this.currently_played_effects = []
 	}
 
 	update_currently_played_effect(effect: AnyEffect) {
