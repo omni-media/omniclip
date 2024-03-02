@@ -56,13 +56,20 @@ export const Playhead = shadow_view({styles}, use => () => {
 		translate_to_timecode(playhead_drag.hovering.x)
 	}
 
+	const normalize_to_timebase = (timecode: number) => {
+		const frame_duration = 1000/use.context.state.timeline.timebase
+		const normalized = Math.round(((timecode)) / frame_duration) * frame_duration
+		return normalized * Math.pow(2, use.context.state.timeline.zoom)
+	}
+	const normalized = normalize_to_timebase(use.context.state.timeline.timecode)
+
 	return html`
 		<div
 			draggable="true"
 			@dragstart=${drag_events.start}
 			@drop=${drag_events.drop}
 			@dragend=${drag_events.end}
-			style="transform: translateX(${use.context.state.timeline.timecode * Math.pow(2, use.context.state.timeline.zoom)}px);"
+			style="transform: translateX(${normalized}px);"
 			class="playhead">
 			<div class="head">${playheadSvg}</div>
 		</div>
