@@ -145,10 +145,10 @@ export const timeline_actions = actionize({
 		state.timeline.tracks.push({id: generate_id()})
 	},
 	zoom_in: state => () => {
-		state.timeline.zoom += 0.5
+		state.timeline.zoom += 0.1
 	},
 	zoom_out: state => () => {
-		state.timeline.zoom -= 0.5
+		state.timeline.zoom -= 0.1
 	},
 	set_timecode: state => (timecode: number) => {
 		state.timeline.timecode = timecode
