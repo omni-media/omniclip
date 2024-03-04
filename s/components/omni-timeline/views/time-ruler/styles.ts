@@ -5,11 +5,22 @@ export const styles = css`
 		font-size: 0.5em;
 		display: flex;
 		height: 10px;
+		align-items: center;
 	}
 
 	.time {
 		position: absolute;
-		border-left: 1px solid gray;
-		padding-left: 0.2em;
+	}
+
+	.dot {
+		width: 3px;
+		height: 3px;
+		background: gray;
+		border-radius: 5px;
+	}
+
+	.content {
+		position: relative;
+		right: 50%;
 	}
 `
