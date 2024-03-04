@@ -5,14 +5,17 @@ import {Video} from "./types.js"
 import addSvg from "../../icons/gravity-ui/add.svg.js"
 import binSvg from "../../icons/gravity-ui/bin.svg.js"
 import {shadow_component} from "../../context/slate.js"
+import loadingSvg from "../../icons/loading.svg.js"
 
 export const OmniMedia = shadow_component({styles}, use => {
 	const media_controller = use.context.controllers.media
 	const timeline_actions = use.context.actions.timeline_actions
 	const [media, setMedia, getMedia] = use.state<Video[]>([])
+	const [placeholders, setPlaceholders] = use.state<any[]>([])
 
 	use.setup(() => {
 		media_controller.get_imported_files().then(async media => {
+			setPlaceholders(Array.apply(null, Array(media.length)))
 			const video_files = await media_controller.create_videos_from_video_files(media)
 			setMedia([...getMedia(), ...video_files])
 		})
@@ -47,6 +50,9 @@ export const OmniMedia = shadow_component({styles}, use => {
 			<input type="file" id="import" class="hide" @change=${(e: Event) => media_controller.import_file(e.target as HTMLInputElement)}>
 		</form>
 		<div class="media">
+			${media.length === 0
+				? placeholders.map(_ => html`<div class="box placeholder">${loadingSvg}</div>`)
+				: null}
 			${media.map(m => html`
 				<div
 					@pointerenter=${() => video_on_pointer.enter(m.element)}

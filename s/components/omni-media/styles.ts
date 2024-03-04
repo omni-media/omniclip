@@ -5,6 +5,16 @@ export const styles = css`
 		margin-top: 1em;
 	}
 
+	.placeholder {
+		justify-content: center;
+		align-items: center;
+
+		& svg {
+			width: 50px;
+			height: 80px;
+		}
+	}
+
 	.import-btn {
 		padding: 0.2em 0.4em;
 		transition: opacity 0.5s ease 0s;
