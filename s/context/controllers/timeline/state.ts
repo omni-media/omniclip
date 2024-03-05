@@ -1,10 +1,9 @@
 import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 
 import {XTimeline} from "./types.js"
-import {signals} from "@benev/slate"
 
 export const timeline_state: XTimeline = {
-	is_app_loading_state: signals.op(),
+	is_ffmpeg_loading: true,
 	selected_effect: null,
 	is_exporting: false,
 	export_progress: 0,

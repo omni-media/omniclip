@@ -1,10 +1,8 @@
-import {Op, Signal} from "@benev/slate"
-
 export type V2 = [number, number]
 export type ExportStatus = "complete" | "composing" | "demuxing" | "flushing"
 
 export interface XTimeline {
-	is_app_loading_state: Signal<Op.For<any>>
+	is_ffmpeg_loading: boolean
 	is_playing: boolean
 	selected_effect: AnyEffect | null
 	is_exporting: boolean,

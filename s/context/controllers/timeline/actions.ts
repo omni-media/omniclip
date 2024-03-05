@@ -161,6 +161,9 @@ export const timeline_actions = actionize({
 	},
 	toggle_is_playing: state => () => {
 		state.timeline.is_playing = !state.timeline.is_playing
+	},
+	set_is_ffmpeg_loading: state => (v: boolean) => {
+		state.timeline.is_ffmpeg_loading = v
 	}
 })
 
