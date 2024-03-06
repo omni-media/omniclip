@@ -44,11 +44,13 @@ export const Toolbar = shadow_view(use => () => {
 					</div>
 				</div>
 			</dialog>
-			<button class="export-button" @click=${() => video_export.export_start(use.context.state.timeline)}>${exportSvg}<span>Export</span></button>
-			<div>${convert_ms_to_hmsms(use.context.state.timeline.timecode)}</div>
-			<div class="zoom">
-				<button ?disabled=${zoom >= 2} @click=${actions.zoom_in} class="zoom-in">${zoomInSvg}</button>
-				<button ?disabled=${zoom <= -13} @click=${actions.zoom_out} class="zoom-out">${zoomOutSvg}</button>
+			<div class=tools>
+				<button class="export-button" @click=${() => video_export.export_start(use.context.state.timeline)}>${exportSvg}<span>Export</span></button>
+				<div>${convert_ms_to_hmsms(use.context.state.timeline.timecode)}</div>
+				<div class="zoom">
+					<button ?disabled=${zoom >= 2} @click=${actions.zoom_in} class="zoom-in">${zoomInSvg}</button>
+					<button ?disabled=${zoom <= -13} @click=${actions.zoom_out} class="zoom-out">${zoomOutSvg}</button>
+				</div>
 			</div>
 		</div>
 	`

@@ -92,6 +92,13 @@ export const styles = css`
 		margin-left: 0.5em;
 	}
 
+	.tools {
+		display: flex;
+		position: fixed;
+		width: 98%;
+		justify-content: space-between;
+	}
+
 	.zoom {
 		display: flex;
 		align-items: center;
