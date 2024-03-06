@@ -13,7 +13,7 @@ export const styles = css`
 		flex-direction: column;
 		gap: 0.3em;
 		padding: 1em;
-		height: 200px;
+		height: 230px;
 		
 		& [data-selected] {
 			background: rgb(32, 31, 31);
@@ -77,6 +77,13 @@ export const styles = css`
 			text-align: center;
 		}
 
+		& .content {
+			background: rgb(32, 32, 32);
+			border: none;
+			border-radius: 5px;
+			color: white;
+			padding: 0.3em;
+		}
 
 		& .color-picker {
 			display: flex;

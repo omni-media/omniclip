@@ -4,12 +4,12 @@ import {styles} from "./styles.js"
 import {Filmstrips} from "../filmstrips/view.js"
 import {V2} from "../../utils/coordinates_in_rect.js"
 import {shadow_view} from "../../../../context/slate.js"
-import {AnyEffect} from "../../../../context/controllers/timeline/types.js"
 import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
+import {AnyEffect, TextEffect} from "../../../../context/controllers/timeline/types.js"
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
 
-export const Effect = shadow_view(use => ({id}: AnyEffect, timeline: GoldElement) => {
+export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldElement) => {
 	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const effect = use.context.state.timeline.effects.find(effect => effect.id === id)!
@@ -80,6 +80,12 @@ export const Effect = shadow_view(use => ({id}: AnyEffect, timeline: GoldElement
 			`
 	}
 
+	const set_selected_effect = () => {
+		use.context.actions.timeline_actions.set_selected_effect(effect)
+		if(kind === "text")
+			use.context.controllers.compositor.TextManager.set_clicked_effect(effect as TextEffect)
+	}
+
 	return html`
 		<span
 			class="effect"
@@ -92,7 +98,7 @@ export const Effect = shadow_view(use => ({id}: AnyEffect, timeline: GoldElement
 			"
 			draggable="true"
 			@dragstart=${drag_events.start}
-			@click=${() => use.context.actions.timeline_actions.set_selected_effect(effect)}
+			@click=${set_selected_effect}
 		>
 			${render_trim_handle("left")}
 			${render_trim_handle("right")}

@@ -197,6 +197,17 @@ export class TextManager {
 		update_compositor()
 	}
 
+	set_text_content(content: string, update_compositor: () => void) {
+		this.actions.set_text_content(content)
+		this.#clicked_effect!.content = content
+		this.#update_text_rect()
+		update_compositor()
+	}
+
+	set_clicked_effect(effect: TextEffect) {
+		this.#clicked_effect = {...effect}
+	}
+
 	#update_text_rect() {
 		const {content, size, font, color} = this.#clicked_effect!
 		const width = this.measure_text_width(content, size, font, color)

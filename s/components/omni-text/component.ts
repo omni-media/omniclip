@@ -58,6 +58,10 @@ export const OmniText = shadow_component(use => {
 							style="background: ${selected_effect.color};"
 						>
 					</div>
+					<input
+						@input=${(e: InputEvent) => text_manager.set_text_content((e.target as HTMLInputElement).value, update_compositor)}
+						.value=${selected_effect.content} class="content"
+					>
 				</div>
 			`
 			: html`

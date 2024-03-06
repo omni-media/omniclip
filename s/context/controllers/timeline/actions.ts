@@ -95,6 +95,11 @@ export const timeline_actions = actionize({
 		(state.timeline.selected_effect as TextEffect).rect = rect
 		effect.rect = rect
 	},
+	set_text_content: state => (content: string) => {
+		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
+		(state.timeline.selected_effect as TextEffect).content = content
+		effect.content = content
+	},
 	set_text_rotation: state => ({id}: TextEffect, rotation: number) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
 		effect.rect.rotation = rotation
