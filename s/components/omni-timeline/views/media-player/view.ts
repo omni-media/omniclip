@@ -1,4 +1,4 @@
-import {html, reactor} from "@benev/slate"
+import {html, reactor, watch} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
@@ -22,9 +22,13 @@ export const MediaPlayer = shadow_view(use => () => {
 			compositor.update_currently_played_effects(use.context.state.timeline)
 			compositor.draw_effects(true, use.context.state.timeline.timecode)
 		})
-		reactor.reaction(
+		watch.track(
 			() => use.context.state.timeline,
-			(timeline) => compositor.update_currently_played_effects(timeline))
+			(timeline) => {
+				compositor.update_currently_played_effects(timeline)
+				compositor.draw_effects(true, use.context.state.timeline.timecode)
+			}
+		)
 		const unsub_on_playing = compositor.on_playing(() => compositor.update_currently_played_effects(use.context.state.timeline))
 		return () => {unsub_on_playing(), unsub_onplayhead()}
 	})
