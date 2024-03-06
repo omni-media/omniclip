@@ -20,7 +20,7 @@ export const Playhead = shadow_view(use => () => {
 			if(use.context.controllers.timeline.playhead_drag.hovering) {
 				const time = now - getPauseTime()
 				const wait_time = time - getLastTime()
-				if(wait_time > 100) {
+				if(wait_time > 200) {
 					controller.on_playhead_drag.publish(0)
 					setLastTime(time)
 				}
