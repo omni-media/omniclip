@@ -32,17 +32,6 @@ export const styles = css`
 				display: flex;
 				background: #0080002e;
 
-				& .plus {
-					color: #028100;
-					left: 50vw;
-					position: absolute;
-					background: #1c1c1c;
-					width: 20px;
-					border-radius: 15px;
-					display: flex;
-					justify-content: center;
-				}
-
 			}
 		}
 	}

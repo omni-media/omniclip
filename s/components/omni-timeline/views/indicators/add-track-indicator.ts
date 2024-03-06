@@ -22,7 +22,6 @@ export const AddTrackIndicator = light_view(use => () => {
 			?data-indicate=${indicator ? true : false}
 			class="indicator"
 		>
-			<span class="plus">+</span>
 		</div>
 		<div
 			data-indicator="add-track"
