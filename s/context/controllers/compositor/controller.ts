@@ -82,13 +82,13 @@ export class Compositor {
 						frame.close()
 					} catch(e) {console.log(e)}
 				}
-				else if(effects_sorted_by_track.length <= 0) {
-					this.clear_canvas()
-				}
 				else if(effect.kind === "text") {
 					this.TextManager.draw_text(effect, this.ctx!)
 				}
 			}
+		}
+		if(this.currently_played_effects.length === 0) {
+			this.clear_canvas()
 		}
 	}
 
