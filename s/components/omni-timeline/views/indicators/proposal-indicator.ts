@@ -26,7 +26,10 @@ export const ProposalIndicator = light_view(use => () => {
 		const start = ((x - grabbed.offset.x) * Math.pow(2, -baseline_zoom))
 		const timeline_start = start >= 0 ? start : 0
 		const timeline_end = ((x - grabbed.offset.x) * Math.pow(2, -baseline_zoom)) + grabbed.effect.duration
-		const track = calculate_effect_track_index(y, use.context.state.timeline.tracks.length, use.context.state.timeline.effects)
+		// limit to 4 tracks for now
+		const track = calculate_effect_track_index(y, use.context.state.timeline.tracks.length, use.context.state.timeline.effects) > 3
+			? 3
+			: calculate_effect_track_index(y, use.context.state.timeline.tracks.length, use.context.state.timeline.effects)
 		return {
 			timeline_start,
 			timeline_end,
