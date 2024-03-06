@@ -6,15 +6,17 @@ import playSvg from "../../../../icons/gravity-ui/play.svg.js"
 import pauseSvg from "../../../../icons/gravity-ui/pause.svg.js"
 import {TextPositioner} from "../../../../views/text-positioner/view.js"
 import fullscreenSvg from "../../../../icons/gravity-ui/fullscreen.svg.js"
+import {loadingPlaceholder} from "../../../../views/loading-placeholder/view.js"
 
-export const MediaPlayer = shadow_view({styles}, use => () => {
+export const MediaPlayer = shadow_view(use => () => {
+	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const state = use.context.state.timeline
-	const compositor = use.prepare(() => use.context.controllers.compositor)
+	const compositor = use.once(() => use.context.controllers.compositor)
 	const playhead = use.context.controllers.timeline
 	const [isVideoMuted, setIsVideoMuted] = use.state(false)
 
-	use.setup(() => {
+	use.mount(() => {
 		const unsub_onplayhead = playhead.on_playhead_drag(() => {
 			if(use.context.state.timeline.is_playing) {compositor.set_video_playing(false)}
 			compositor.update_currently_played_effects(use.context.state.timeline)
@@ -27,7 +29,7 @@ export const MediaPlayer = shadow_view({styles}, use => () => {
 		return () => {unsub_on_playing(), unsub_onplayhead()}
 	})
 
-	return html`
+	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<div class="flex">
 			<figure>
 				${TextPositioner([])}
@@ -45,5 +47,5 @@ export const MediaPlayer = shadow_view({styles}, use => () => {
 				<button class="fs" type="button" data-state="go-fullscreen">${fullscreenSvg}</button>
 			</div>
 		</div>
-	`
+	`)
 })

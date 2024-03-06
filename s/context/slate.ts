@@ -1,4 +1,4 @@
-import {Pojo, Slate, ZipAction, watch} from "@benev/slate"
+import {Pojo, Nexus, ZipAction, watch} from "@benev/slate"
 import {slate, Context, PanelSpec} from "@benev/construct/x/mini.js"
 
 import {OmniState} from "../types.js"
@@ -52,5 +52,5 @@ export class OmniContext extends Context {
 		}
 	}
 }
-export const omnislate = slate as Slate<OmniContext>
+export const omnislate = slate as Nexus<OmniContext>
 export const {shadow_component, shadow_view, light_view} = omnislate

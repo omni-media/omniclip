@@ -3,11 +3,12 @@ import {GoldElement, html, watch} from "@benev/slate"
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
 
-export const TimeRuler = shadow_view({styles}, use => (timeline: GoldElement) => {
+export const TimeRuler = shadow_view(use => (timeline: GoldElement) => {
+	use.styles(styles)
 	const [timeCodes, setTimeCodes] = use.state<{time: string, offset: number, kind: "normal" | "dot"}[]>([])
 	const [_, setPrevTimecode, getPrevTimecode] = use.state<null | number>(null)
 	const [_p, setPrev, getPrev] = use.state<null | number>(null)
-	use.setup(() => {
+	use.mount(() => {
 		const set_time_codes = () => setTimeCodes(generate_time_codes(use.context.state.timeline.zoom))
 		watch.track(() => use.context.state.timeline.zoom, (zoom) => setTimeCodes(generate_time_codes(zoom)))
 		timeline.addEventListener("scroll", set_time_codes)

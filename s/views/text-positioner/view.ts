@@ -4,7 +4,8 @@ import {styles} from "./styles.js"
 import {shadow_view} from "../../context/slate.js"
 import rotateSvg from "../../icons/material-design-icons/rotate.svg.js"
 
-export const TextPositioner = shadow_view({styles}, use => () => {
+export const TextPositioner = shadow_view(use => () => {
+	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const {canvas} = use.context.controllers.compositor
 	const compositor = use.context.controllers.compositor

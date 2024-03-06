@@ -3,7 +3,6 @@ import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 import {XTimeline} from "./types.js"
 
 export const timeline_state: XTimeline = {
-	is_ffmpeg_loading: true,
 	selected_effect: null,
 	is_exporting: false,
 	export_progress: 0,

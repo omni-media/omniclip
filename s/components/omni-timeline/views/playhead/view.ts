@@ -4,7 +4,8 @@ import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
 import playheadSvg from "../../../../icons/remix-icon/playhead.svg.js"
 
-export const Playhead = shadow_view({styles}, use => () => {
+export const Playhead = shadow_view(use => () => {
+	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const controller = use.context.controllers.timeline
 	const actions = use.context.actions.timeline_actions
@@ -12,7 +13,7 @@ export const Playhead = shadow_view({styles}, use => () => {
 	const [_pauseTime, setPauseTime, getPauseTime] = use.state(0)
 	const [_lastTime, setLastTime, getLastTime] = use.state(0)
 
-	use.setup(() => {
+	use.mount(() => {
 		let on_playhead_drag_active = true
 
 		const on_playhead_drag = (now: number) => {

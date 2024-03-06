@@ -7,7 +7,9 @@ import textSvg from "../../icons/gravity-ui/text.svg.js"
 export const TextPanel = panel({
 	label: "Text",
 	icon: textSvg,
-	view: shadow_view({name: "text", styles}, _use => ({}: any) => {
+	view: shadow_view(use => ({}: any) => {
+		use.styles(styles)
+		use.name("text")
 		return html`
 			<omni-text></omni-text>
 		`

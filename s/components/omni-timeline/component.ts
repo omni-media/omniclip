@@ -1,4 +1,4 @@
-import {html} from "@benev/slate"
+import {TemplateResult, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {Effect} from "./views/effect/view.js"
@@ -8,17 +8,19 @@ import {Playhead} from "./views/playhead/view.js"
 import {TimeRuler} from "./views/time-ruler/view.js"
 import {shadow_component} from "../../context/slate.js"
 import {Indicator} from "../../context/controllers/timeline/types.js"
+import {loadingPlaceholder} from "../../views/loading-placeholder/view.js"
 import {ProposalIndicator} from "./views/indicators/proposal-indicator.js"
 import {calculate_timeline_width} from "./utils/calculate_timeline_width.js"
 
-export const OmniTimeline = shadow_component({styles}, use => {
+export const OmniTimeline = shadow_component(use => {
+	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const state = use.context.state.timeline
 	const effect_drag = use.context.controllers.timeline.effect_drag
 	const playhead_drag = use.context.controllers.timeline.playhead_drag
 	const handler = use.context.controllers.timeline.effect_trim_handler
 
-	use.setup(() => {
+	use.mount(() => {
 		window.addEventListener("dragover", augmented_dragover)
 		return () => removeEventListener("dragover", augmented_dragover)
 	})
@@ -56,7 +58,7 @@ export const OmniTimeline = shadow_component({styles}, use => {
 	const render_tracks = () => state.tracks.map((_track, i) => Track([i], {attrs: {part: "add-track-indicator"}}))
 	const render_effects = () => use.context.state.timeline.effects.map((effect) => Effect([effect, use.element]))
 
-	return html`
+	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<div
 			class="timeline"
 		>
@@ -71,5 +73,5 @@ export const OmniTimeline = shadow_component({styles}, use => {
 				${ProposalIndicator()}
 			</div>
 		</div>
-	`
+ `)
 })

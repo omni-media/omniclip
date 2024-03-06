@@ -9,8 +9,10 @@ import {Font} from "../../context/controllers/timeline/types.js"
 import alignLeftSvg from "../../icons/remix-icon/align-left.svg.js"
 import alignRightSvg from "../../icons/remix-icon/align-right.svg.js"
 import alignCenterSvg from "../../icons/remix-icon/align-center.svg.js"
+import {loadingPlaceholder} from "../../views/loading-placeholder/view.js"
 
-export const OmniText = shadow_component({styles}, use => {
+export const OmniText = shadow_component(use => {
+	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const actions = use.context.actions
 	const text_manager = use.context.controllers.compositor.TextManager
@@ -23,7 +25,7 @@ export const OmniText = shadow_component({styles}, use => {
 		use.context.controllers.compositor.draw_effects(true)
 	}
 
-	return html`
+	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<h2>Update Text</h2>
 		${selected_effect
 			? html`
@@ -71,5 +73,5 @@ export const OmniText = shadow_component({styles}, use => {
 					<div @click=${() => actions.timeline_actions.add_text_effect(use.context.controllers.compositor)} class="add-btn">${addSvg}</div>
 				</div>
 			</div>
-	`
+	`)
 })

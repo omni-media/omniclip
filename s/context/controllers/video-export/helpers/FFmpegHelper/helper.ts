@@ -1,3 +1,4 @@
+import {signals} from "@benev/slate"
 import {FFprobeWorker} from "ffprobe-wasm/browser.mjs"
 import {FFmpeg} from "@ffmpeg/ffmpeg/dist/esm/index.js"
 import {toBlobURL} from "@ffmpeg/util/dist/esm/index.js"
@@ -5,9 +6,11 @@ import {toBlobURL} from "@ffmpeg/util/dist/esm/index.js"
 export class FFmpegHelper {
 	ffmpeg = new FFmpeg()
 	ffprobe = new FFprobeWorker()
+	is_loading = signals.op<any>()
 
 	constructor() {
-		this.#load_ffmpeg().then(() => console.log("loaded"))
+		this.is_loading.load(async() => await this.#load_ffmpeg())
+		console.log("loaded")
 		this.ffmpeg.on("log", (log) => console.log(log))
 	}
 

@@ -4,7 +4,8 @@ import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
 import {AddTrackIndicator} from "../indicators/add-track-indicator.js"
 
-export const Track = shadow_view({styles}, use => (index :number) => {
+export const Track = shadow_view(use => (index :number) => {
+	use.styles(styles)
 	const controller = use.context.controllers.timeline
 	const track_effects = controller.get_effects_on_track(use.context.state.timeline, index)
 

@@ -2,18 +2,21 @@ import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {Video} from "./types.js"
+import loadingSvg from "../../icons/loading.svg.js"
 import addSvg from "../../icons/gravity-ui/add.svg.js"
 import binSvg from "../../icons/gravity-ui/bin.svg.js"
 import {shadow_component} from "../../context/slate.js"
-import loadingSvg from "../../icons/loading.svg.js"
+import {loadingPlaceholder} from "../../views/loading-placeholder/view.js"
 
-export const OmniMedia = shadow_component({styles}, use => {
+export const OmniMedia = shadow_component(use => {
+	use.watch(() => use.context.state.timeline)
+	use.styles(styles)
 	const media_controller = use.context.controllers.media
 	const timeline_actions = use.context.actions.timeline_actions
 	const [media, setMedia, getMedia] = use.state<Video[]>([])
 	const [placeholders, setPlaceholders] = use.state<any[]>([])
 
-	use.setup(() => {
+	use.mount(() => {
 		media_controller.get_imported_files().then(async media => {
 			setPlaceholders(Array.apply(null, Array(media.length)))
 			const video_files = await media_controller.create_videos_from_video_files(media)
@@ -44,7 +47,7 @@ export const OmniMedia = shadow_component({styles}, use => {
 		}
 	}
 
-	return html`
+	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<form>
 			<label class="import-btn" for="import">Import Media Files</label>
 			<input type="file" id="import" class="hide" @change=${(e: Event) => media_controller.import_file(e.target as HTMLInputElement)}>
@@ -68,6 +71,6 @@ export const OmniMedia = shadow_component({styles}, use => {
 				</div>
 			`)}
 		</div>
-	`
+	`)
 })
 

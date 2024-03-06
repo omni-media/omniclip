@@ -5,7 +5,8 @@ import {shadow_view} from "../../../../context/slate.js"
 import {VideoEffect} from "../../../../context/controllers/timeline/types.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
 
-export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, timeline: GoldElement) => {
+export const Filmstrips = shadow_view(use => (effect: VideoEffect, timeline: GoldElement) => {
+	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const ffmpeg = use.context.helpers.ffmpeg
 	const [_thumbnails, setFilmstrips, getFilmstrips] = use.state<string[]>([])
@@ -15,7 +16,7 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 	const [prev, setPreviousScrollPosition, getPreviousScrollPosition] = use.state(0)
 	const [_f, setFramesCount, getFramesCount] = use.state(0)
 
-	use.setup(() => {
+	use.mount(() => {
 		timeline.addEventListener("scroll", async (e) => {
 			const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as VideoEffect
 			for await(const {url, normalized_left, i} of recalculate_all_visible_filmstrips(get_effect, timeline.scrollLeft)) {
@@ -37,8 +38,8 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		return () => {}
 	})
 
-	const worker = use.prepare(() => new Worker(new URL("./filmstrip_worker.js", import.meta.url), {type: "module"}))
-	const video = use.prepare(() => {
+	const worker = use.once(() => new Worker(new URL("./filmstrip_worker.js", import.meta.url), {type: "module"}))
+	const video = use.once(() => {
 		const video = document.createElement("video")
 		video.src = URL.createObjectURL(effect.file)
 		video.load()
@@ -59,7 +60,7 @@ export const Filmstrips = shadow_view({styles}, use => (effect: VideoEffect, tim
 		return going_left
 	}
 
-	use.setup(() => {
+	use.mount(() => {
 		if(effect.kind === "video") {
 			ffmpeg.get_frames_count(effect.file).then(async frames => {
 				setFramesCount(frames)

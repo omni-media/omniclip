@@ -34,7 +34,7 @@ export const ProposalIndicator = light_view(use => () => {
 		}
 	}
 
-	use.setup(() => on_drop(({grabbed, dropped_at}) => {
+	use.mount(() => on_drop(({grabbed, dropped_at}) => {
 		const proposed_timecode = getProposedTimecode()
 		controller.set_proposed_timecode(grabbed.effect, proposed_timecode)
 		if(dropped_at.indicator === "add-track-indicator") {actions.add_track()}

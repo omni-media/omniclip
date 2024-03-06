@@ -9,7 +9,8 @@ import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
 
-export const Effect = shadow_view({styles}, use => ({id}: AnyEffect, timeline: GoldElement) => {
+export const Effect = shadow_view(use => ({id}: AnyEffect, timeline: GoldElement) => {
+	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const effect = use.context.state.timeline.effects.find(effect => effect.id === id)!
 	const {effect_drag, on_drop} = use.context.controllers.timeline
@@ -19,7 +20,7 @@ export const Effect = shadow_view({styles}, use => ({id}: AnyEffect, timeline: G
 	const controller = use.context.controllers.timeline
 	const handler = controller.effect_trim_handler
 
-	use.setup(() => on_drop(() => setCords([null, null])))
+	use.mount(() => on_drop(() => setCords([null, null])))
 
 	const drag_events = {
 		effect_drag_listener() {
@@ -46,7 +47,7 @@ export const Effect = shadow_view({styles}, use => ({id}: AnyEffect, timeline: G
 		}
 	}
 
-	use.setup(() => {
+	use.mount(() => {
 		window.addEventListener("drop", (e) => drag_events.drop(e))
 		return () => removeEventListener("drop", drag_events.drop)
 	})
