@@ -89,7 +89,7 @@ export const Filmstrips = shadow_view(use => (effect: VideoEffect, timeline: Gol
 	function generate_filmstrip_placeholders(frames: number) {
 		const new_arr = []
 		for(let i = 0; i <= frames - 1; i++) {
-			new_arr.push(new URL("/assets/loading.svg", import.meta.url).toString())
+			new_arr.push(`${window.location.href}/assets/loading.svg`)
 		}
 		return new_arr
 	}
@@ -130,7 +130,7 @@ export const Filmstrips = shadow_view(use => (effect: VideoEffect, timeline: Gol
 				const position = normalized_left + width_of_frame * i
 				if(position <= effect_width) {
 					const filmstrip = getFilmstrips()[get_filmstrip_at(effect, position)]
-					if(filmstrip !== new URL("/assets/loading.svg", import.meta.url).toString()) {
+					if(filmstrip !== `${window.location.href}/assets/loading.svg`) {
 						yield {url: filmstrip, normalized_left, i: Math.floor(i)}
 					} else {
 						video.currentTime = +(ms * get_filmstrip_at(effect, Number(position.toFixed(2))) / 1000).toFixed(2)
