@@ -43,7 +43,7 @@ export const timeline_actions = actionize({
 			kind: "video",
 			raw_duration: duration,
 			duration: adjusted_duration_to_timebase,
-			start_at_position: 1500,
+			start_at_position: 1000,
 			start: 0,
 			end: adjusted_duration_to_timebase,
 			track: 2,
