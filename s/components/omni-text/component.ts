@@ -22,7 +22,6 @@ export const OmniText = shadow_component(use => {
 
 	const update_compositor = () => {
 		use.context.controllers.compositor.update_currently_played_effects(use.context.state.timeline)
-		use.context.controllers.compositor.draw_effects(true)
 	}
 
 	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
