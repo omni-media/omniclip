@@ -26,7 +26,7 @@ export const MediaPlayer = shadow_view(use => () => {
 			() => use.context.state.timeline,
 			(timeline) => {
 				compositor.update_currently_played_effects(timeline)
-				compositor.draw_effects(true, use.context.state.timeline.timecode)
+				compositor.draw_effects(false, use.context.state.timeline.timecode)
 			}
 		)
 		const unsub_on_playing = compositor.on_playing(() => compositor.update_currently_played_effects(use.context.state.timeline))
