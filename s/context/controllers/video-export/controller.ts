@@ -84,7 +84,12 @@ export class VideoExport {
 		})
 	}
 
+	#clear_canvas() {
+		this.ctx?.clearRect(0, 0, 1280, 720)
+	}
+
 	async #export_process(effects: AnyEffect[]) {
+		this.#clear_canvas()
 		const effects_at_timestamp = get_effects_at_timestamp(effects, this.#timestamp)
 		const draw_queue: (() => void)[] = []
 		let frame_duration = null

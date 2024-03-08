@@ -65,7 +65,7 @@ export class Compositor {
 	}
 
 	async draw_effects(redraw?: boolean, timecode?: number) {
-		if(redraw) {this.clear_canvas()}
+		this.clear_canvas()
 		const effects_sorted_by_track = this.#sort_effects_by_track(this.currently_played_effects!)
 		if(this.currently_played_effects) {
 			for(const effect of effects_sorted_by_track) {
@@ -86,9 +86,6 @@ export class Compositor {
 					this.TextManager.draw_text(effect, this.ctx!)
 				}
 			}
-		}
-		if(this.currently_played_effects.length === 0) {
-			this.clear_canvas()
 		}
 	}
 
