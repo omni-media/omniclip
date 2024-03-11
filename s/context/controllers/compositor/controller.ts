@@ -1,6 +1,7 @@
 import {pub, reactor, signal} from "@benev/slate"
 
 import {TextManager} from "./parts/text-manager.js"
+import {ImageManager} from "./parts/image-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
 import {TimelineActions} from "../timeline/actions.js"
 import {AnyEffect, XTimeline} from "../timeline/types.js"
@@ -19,6 +20,7 @@ export class Compositor {
 
 	VideoManager = new VideoManager(this)
 	TextManager: TextManager
+	ImageManager = new ImageManager(this)
 
 	constructor(private actions: TimelineActions) {
 		this.canvas.width = 1280
@@ -65,7 +67,6 @@ export class Compositor {
 	}
 
 	async draw_effects(redraw?: boolean, timecode?: number) {
-		this.clear_canvas()
 		const effects_sorted_by_track = this.#sort_effects_by_track(this.currently_played_effects!)
 		if(this.currently_played_effects) {
 			for(const effect of effects_sorted_by_track) {
@@ -77,15 +78,19 @@ export class Compositor {
 						video!.currentTime = current_time
 					}
 					try {
-						const frame = new VideoFrame(video!)
-						this.VideoManager.draw_video_frame(frame)
-						frame.close()
+						this.VideoManager.draw_video_frame(video!)
 					} catch(e) {console.log(e)}
 				}
 				else if(effect.kind === "text") {
 					this.TextManager.draw_text(effect, this.ctx!)
 				}
+				else if(effect.kind === "image") {
+					this.ImageManager.draw_image_frame(effect)
+				}
 			}
+		}
+		if(this.currently_played_effects.length === 0) {
+			this.clear_canvas()
 		}
 	}
 
@@ -94,7 +99,7 @@ export class Compositor {
 	}
 
 	get_effect_current_time_relative_to_timecode(effect: AnyEffect, timecode: number) {
-		const current_time = timecode - effect.start_at_position
+		const current_time = timecode - effect.start_at_position + effect.start
 		return current_time / 1000
 	}
 

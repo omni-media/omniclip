@@ -32,6 +32,12 @@ export interface VideoEffect extends Effect {
 	raw_duration: number
 }
 
+export interface ImageEffect extends Effect {
+	kind: "image"
+	file: File
+	url: string
+}
+
 export type TextEffectProps = Omit<TextEffect, keyof Effect | "kind">
 export type FontStyle = "italic" | "bold" | "normal"
 export type Font = "Arial" | "Lato"
@@ -61,6 +67,7 @@ export interface TextEffect extends Effect {
 export type AnyEffect = (
 	| VideoEffect
 	| TextEffect
+	| ImageEffect
 )
 
 export type Timeline = {

@@ -46,6 +46,10 @@ export const styles = css`
 			flex: 1;
 			position: relative;
 
+			& img {
+				width: 100%;
+			}
+
 			& .media-element {
 				position: relative;
 				cursor: pointer;

@@ -65,6 +65,15 @@ export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldE
 		} else return ""
 	}
 
+	const image_effect_specific_styles = () => {
+		if(effect.kind === "image") {
+			return `
+				background-image: url(${effect.url});
+				background-size: contain;
+			`
+		} else return ""
+	}
+
 	const render_trim_handle = (side: "left" | "right") => {
 		return html`
 			<span
@@ -92,6 +101,7 @@ export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldE
 			?data-grabbed=${grabbed?.effect === effect}
 			?data-selected=${use.context.state.timeline.selected_effect?.id === effect.id}
 			style="
+				${image_effect_specific_styles()}
 				${text_effect_specific_styles()}
 				width: ${calculate_effect_width(effect, zoom)}px;
 				transform: translate(${x ? x : calculate_start_position(effect.start_at_position, zoom)}px, ${y ? y : calculate_effect_track_placement(effect.track, use.context.state.timeline.effects)}px);

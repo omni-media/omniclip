@@ -108,6 +108,9 @@ export class VideoExport {
 			if(effect.kind === "text") {
 				draw_queue.push(() => this.compositor.TextManager.draw_text(effect, this.ctx))
 			}
+			else if(effect.kind === "image") {
+				draw_queue.push(async () => this.compositor.ImageManager.draw_image_frame(effect))
+			}
 		}
 
 		this.actions.set_export_status("composing")

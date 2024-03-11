@@ -1,12 +1,12 @@
 import {pub} from "@benev/slate"
 import {quick_hash} from "@benev/construct"
 
-import {Video, MediaFile} from "../../../components/omni-media/types.js"
+import {Video, VideoFile, AnyMedia, ImageFile, Image} from "../../../components/omni-media/types.js"
 
 export class Media {
 	#database_request = window.indexedDB.open("database", 3)
 	#opened = false
-	on_media_change = pub<{files: MediaFile[], action: "removed" | "added"}>()
+	on_media_change = pub<{files: AnyMedia[], action: "removed" | "added"}>()
 
 	constructor() {
 		this.#database_request.onerror = (event) => {
@@ -43,7 +43,7 @@ export class Media {
 		})
 	}
 
-	async get_imported_files(): Promise<MediaFile[]> {
+	async get_imported_files(): Promise<AnyMedia[]> {
 		return new Promise(async (resolve, reject) => {
 			await this.#is_db_opened()
 			const transaction = this.#database_request.result.transaction(["files"])
@@ -52,7 +52,7 @@ export class Media {
 
 			request.onsuccess = async () => {
 				try {
-					const files: MediaFile[] = request.result || []
+					const files: AnyMedia[] = request.result || []
 					resolve(files)
 				} catch (error) {
 					reject(error)
@@ -65,7 +65,7 @@ export class Media {
 		})
 	}
 
-	delete_file(file: MediaFile) {
+	delete_file(file: AnyMedia) {
 		const request = this.#database_request.result
 			.transaction(["files"], "readwrite")
 			.objectStore("files")
@@ -86,8 +86,14 @@ export class Media {
 			check_if_duplicate!.onsuccess = () => {
 				const not_duplicate = check_if_duplicate.result === 0
 				if(not_duplicate) {
-					files_store.add({file: imported_file, hash})
-					this.on_media_change.publish({files: [{file: imported_file, hash}], action: "added"})
+					if(imported_file.type.startsWith("image")) {
+						files_store.add({file: imported_file, hash, kind: "image"})
+						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "image"}], action: "added"})
+					}
+					else if(imported_file.type.startsWith("video")) {
+						files_store.add({file: imported_file, hash, kind: "video"})
+						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "video"}], action: "added"})
+					}
 				}
 			}
 			check_if_duplicate!.onerror = (error) => console.log("error")
@@ -111,7 +117,17 @@ export class Media {
 		})
 	}
 
-	async create_videos_from_video_files(files: MediaFile[]) {
+	create_image_elements(files: ImageFile[]) {
+		const images: Image[] = files.map(({file, hash}) => {
+			const image = document.createElement("img")
+			const url = URL.createObjectURL(file)
+			image.src = url
+			return {element: image, file, hash, kind: "image", url}
+		})
+		return images
+	}
+
+	async create_videos_from_video_files(files: VideoFile[]) {
 		const videos: Video[] = []
 		for(const {file, hash} of files) {
 			const video = document.createElement('video')

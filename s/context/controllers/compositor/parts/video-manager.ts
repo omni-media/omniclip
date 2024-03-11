@@ -21,15 +21,14 @@ export class VideoManager extends Map<string, HTMLVideoElement> {
 		// video.preload = 'auto';
 	}
 
-	draw_video_frame(frame: VideoFrame) {
+	draw_video_frame(video: HTMLVideoElement) {
 		this.compositor.ctx!.drawImage(
-			frame,
+			video,
 			0,
 			0,
 			this.compositor.canvas.width,
 			this.compositor.canvas.height
 		)
-		frame.close()
 	}
 
 	pause_videos() {

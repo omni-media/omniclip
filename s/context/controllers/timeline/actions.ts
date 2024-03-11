@@ -4,8 +4,8 @@ import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 import {TimelineHelpers} from "./helpers.js"
 import {actionize} from "../../../utils/actionize.js"
 import {Compositor} from "../compositor/controller.js"
-import {Video} from "../../../components/omni-media/types.js"
-import {AnyEffect, ExportStatus, Font, FontStyle, TextAlign, TextEffect, TextRect, VideoEffect} from "./types.js"
+import {Image, Video} from "../../../components/omni-media/types.js"
+import {AnyEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, TextRect, VideoEffect} from "./types.js"
 
 export const timeline_actions = actionize({
 	add_text_effect: state => (compositor: Compositor) => {
@@ -33,6 +33,21 @@ export const timeline_actions = actionize({
 				rotation: 0
 			}
 		}
+		state.timeline.effects.push(effect)
+	},
+	add_image_effect: state => (image: Image, compositor: Compositor) => {
+		const effect: ImageEffect = {
+			id: generate_id(),
+			kind: "image",
+			duration: 1000,
+			start_at_position: 1000,
+			start: 0,
+			end: 1000,
+			track: 2,
+			file: image.file,
+			url: image.url
+		}
+		compositor.ImageManager.add_image(effect)
 		state.timeline.effects.push(effect)
 	},
 	add_video_effect: state => (video: Video, compositor: Compositor) => {
