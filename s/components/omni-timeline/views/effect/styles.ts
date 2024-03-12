@@ -20,6 +20,7 @@ export const styles = css`
 		&[data-selected] {
 			& .trim-handle-right, & .trim-handle-left {
 				display: flex;
+				opacity: 0.4;
 				align-items: center;
 				justify-content: center;
 				gap: 3px;

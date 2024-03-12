@@ -16,6 +16,7 @@ export const styles = css`
 	}
 
 	.import-btn {
+		border-radius: 4px;
 		padding: 0.2em 0.4em;
 		transition: opacity 0.5s ease 0s;
 		background: var(--alpha);
