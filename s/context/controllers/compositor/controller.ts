@@ -2,6 +2,7 @@ import {pub, reactor, signal} from "@benev/slate"
 
 import {TextManager} from "./parts/text-manager.js"
 import {ImageManager} from "./parts/image-manager.js"
+import {AudioManager} from "./parts/audio-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
 import {TimelineActions} from "../timeline/actions.js"
 import {AnyEffect, XTimeline} from "../timeline/types.js"
@@ -21,6 +22,7 @@ export class Compositor {
 	VideoManager = new VideoManager(this)
 	TextManager: TextManager
 	ImageManager = new ImageManager(this)
+	AudioManager = new AudioManager(this)
 
 	constructor(private actions: TimelineActions) {
 		this.canvas.width = 1280
@@ -32,7 +34,11 @@ export class Compositor {
 			(is_playing) => {
 				if(is_playing) {
 					this.VideoManager.play_videos()
-				} else this.VideoManager.pause_videos()
+					this.AudioManager.play_audios()
+				} else {
+					this.VideoManager.pause_videos()
+					this.AudioManager.pause_audios()
+				}
 			}
 		)
 	}
@@ -86,6 +92,14 @@ export class Compositor {
 				}
 				else if(effect.kind === "image") {
 					this.ImageManager.draw_image_frame(effect)
+				}
+				else if(effect.kind === "audio") {
+					const audio = this.AudioManager.get(effect.id)
+					if(!redraw && audio?.paused) {await audio.play()}
+					if(redraw && timecode) {
+						const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
+						audio!.currentTime = current_time
+					}
 				}
 			}
 		}

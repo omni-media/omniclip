@@ -5,15 +5,15 @@ import loadingSvg from "../../icons/loading.svg.js"
 import addSvg from "../../icons/gravity-ui/add.svg.js"
 import binSvg from "../../icons/gravity-ui/bin.svg.js"
 import {shadow_component} from "../../context/slate.js"
-import {Image, ImageFile, Video, VideoFile} from "./types.js"
 import {loadingPlaceholder} from "../../views/loading-placeholder/view.js"
+import {Audio, AudioFile, Image, ImageFile, Video, VideoFile} from "./types.js"
 
 export const OmniMedia = shadow_component(use => {
 	use.watch(() => use.context.state.timeline)
 	use.styles(styles)
 	const media_controller = use.context.controllers.media
 	const timeline_actions = use.context.actions.timeline_actions
-	const [media, setMedia, getMedia] = use.state<(Video | Image)[]>([])
+	const [media, setMedia, getMedia] = use.state<(Video | Image | Audio)[]>([])
 	const [placeholders, setPlaceholders] = use.state<any[]>([])
 
 	use.mount(() => {
@@ -21,17 +21,21 @@ export const OmniMedia = shadow_component(use => {
 			setPlaceholders(Array.apply(null, Array(media.length)))
 			const video_files = media.filter(({kind}) => kind === "video") as VideoFile[]
 			const image_files = media.filter(({kind}) => kind === "image") as ImageFile[]
+			const audio_files = media.filter(({kind}) => kind === "audio") as AudioFile[]
 			const video_elements = await media_controller.create_videos_from_video_files(video_files)
 			const image_elements = media_controller.create_image_elements(image_files)
-			setMedia([...getMedia(), ...video_elements, ...image_elements])
+			const audio_elements = media_controller.create_audio_elements(audio_files)
+			setMedia([...getMedia(), ...video_elements, ...image_elements, ...audio_elements])
 		})
 		const unsub = media_controller.on_media_change(async (change) => {
 			if(change.action === "added") {
 				const video_files = change.files.filter(({kind}) => kind === "video") as VideoFile[]
 				const image_files = change.files.filter(({kind}) => kind === "image") as ImageFile[]
+				const audio_files = media.filter(({kind}) => kind === "audio") as AudioFile[]
 				const video_elements = await media_controller.create_videos_from_video_files(video_files)
 				const image_elements = media_controller.create_image_elements(image_files)
-				setMedia([...getMedia(), ...video_elements, ...image_elements])
+				const audio_elements = media_controller.create_audio_elements(audio_files)
+				setMedia([...getMedia(), ...video_elements, ...image_elements, ...audio_elements])
 			}
 			if(change.action === "removed") {
 				change.files.forEach(file => {
@@ -84,10 +88,24 @@ export const OmniMedia = shadow_component(use => {
 		`
 	}
 
+	const render_audio_element = (audio: Audio) => {
+		return html`
+			<div class="box"
+			>
+				<div class="media-element">
+					${audio.element}
+					<div @click=${() => timeline_actions.add_audio_effect(audio, use.context.controllers.compositor)} class="add-btn">${addSvg}</div>
+					<div @click=${() => media_controller.delete_file(audio)} class="delete-btn">${binSvg}</div>
+				</div>
+				<span class="media-name">${audio.file.name}</span>
+			</div>
+		`
+	}
+
 	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<form>
 			<label class="import-btn" for="import">Import Multimedia</label>
-			<input type="file" accept="image/*, video/mp4" id="import" class="hide" @change=${(e: Event) => media_controller.import_file(e.target as HTMLInputElement)}>
+			<input type="file" accept="image/*, video/mp4, .mp3" id="import" class="hide" @change=${(e: Event) => media_controller.import_file(e.target as HTMLInputElement)}>
 		</form>
 		<div class="media">
 			${media.length === 0
@@ -98,6 +116,8 @@ export const OmniMedia = shadow_component(use => {
 					return render_video_element(media)
 				if(media.kind === "image")
 					return render_image_element(media)
+				if(media.kind === "audio")
+					return render_audio_element(media)
 			})}
 		</div>
 	`)

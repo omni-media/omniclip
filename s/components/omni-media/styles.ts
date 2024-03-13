@@ -54,6 +54,7 @@ export const styles = css`
 			& .media-element {
 				position: relative;
 				cursor: pointer;
+				height: 100%;
 
 				& .duration {
 					display: flex;

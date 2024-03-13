@@ -1,7 +1,7 @@
 import {pub} from "@benev/slate"
 import {quick_hash} from "@benev/construct"
 
-import {Video, VideoFile, AnyMedia, ImageFile, Image} from "../../../components/omni-media/types.js"
+import {Video, VideoFile, AnyMedia, ImageFile, Image, AudioFile, Audio} from "../../../components/omni-media/types.js"
 
 export class Media {
 	#database_request = window.indexedDB.open("database", 3)
@@ -94,6 +94,10 @@ export class Media {
 						files_store.add({file: imported_file, hash, kind: "video"})
 						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "video"}], action: "added"})
 					}
+					else if(imported_file.type.startsWith("audio")) {
+						files_store.add({file: imported_file, hash, kind: "audio"})
+						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "audio"}], action: "added"})
+					}
 				}
 			}
 			check_if_duplicate!.onerror = (error) => console.log("error")
@@ -125,6 +129,17 @@ export class Media {
 			return {element: image, file, hash, kind: "image", url}
 		})
 		return images
+	}
+
+	create_audio_elements(files: AudioFile[]) {
+		const audios: Audio[] = files.map(({file, hash}) => {
+			const audio = document.createElement("audio")
+			const url = URL.createObjectURL(file)
+			audio.src = url
+			audio.load()
+			return {element: audio, file, hash, kind: "audio", url}
+		})
+		return audios
 	}
 
 	async create_videos_from_video_files(files: VideoFile[]) {

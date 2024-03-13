@@ -21,6 +21,7 @@ export const styles = css`
 			& .trim-handle-right, & .trim-handle-left {
 				display: flex;
 				opacity: 0.4;
+				z-index: 3;
 				align-items: center;
 				justify-content: center;
 				gap: 3px;

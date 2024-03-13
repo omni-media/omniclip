@@ -32,6 +32,12 @@ export interface VideoEffect extends Effect {
 	raw_duration: number
 }
 
+export interface AudioEffect extends Effect {
+	kind: "audio"
+	file: File
+	raw_duration: number
+}
+
 export interface ImageEffect extends Effect {
 	kind: "image"
 	file: File
@@ -66,6 +72,7 @@ export interface TextEffect extends Effect {
 
 export type AnyEffect = (
 	| VideoEffect
+	| AudioEffect
 	| TextEffect
 	| ImageEffect
 )

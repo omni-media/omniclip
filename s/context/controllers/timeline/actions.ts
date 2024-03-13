@@ -4,8 +4,8 @@ import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 import {TimelineHelpers} from "./helpers.js"
 import {actionize} from "../../../utils/actionize.js"
 import {Compositor} from "../compositor/controller.js"
-import {Image, Video} from "../../../components/omni-media/types.js"
-import {AnyEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, TextRect, VideoEffect} from "./types.js"
+import {Audio, Image, Video} from "../../../components/omni-media/types.js"
+import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, TextRect, VideoEffect} from "./types.js"
 
 export const timeline_actions = actionize({
 	add_text_effect: state => (compositor: Compositor) => {
@@ -66,6 +66,23 @@ export const timeline_actions = actionize({
 			thumbnail: video.thumbnail
 		}
 		compositor.VideoManager.add_video(effect)
+		state.timeline.effects.push(effect)
+	},
+	add_audio_effect: state => (audio: Audio, compositor: Compositor) => {
+		const duration = audio.element.duration * 1000
+		const adjusted_duration_to_timebase = Math.round(duration / (1000/state.timeline.timebase)) * (1000/state.timeline.timebase)
+		const effect: AudioEffect = {
+			id: generate_id(),
+			kind: "audio",
+			raw_duration: duration,
+			duration: adjusted_duration_to_timebase,
+			start_at_position: 1000,
+			start: 0,
+			end: adjusted_duration_to_timebase,
+			track: 2,
+			file: audio.file,
+		}
+		compositor.AudioManager.add_video(effect)
 		state.timeline.effects.push(effect)
 	},
 	set_export_status: state => (status: ExportStatus) => {
