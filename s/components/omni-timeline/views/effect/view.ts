@@ -1,4 +1,6 @@
-import {GoldElement, html} from "@benev/slate"
+import WaveSurfer from 'wavesurfer.js'
+import {GoldElement, html, watch} from "@benev/slate"
+import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
 
 import {styles} from "./styles.js"
 import {Filmstrips} from "../filmstrips/view.js"
@@ -6,8 +8,8 @@ import {V2} from "../../utils/coordinates_in_rect.js"
 import {shadow_view} from "../../../../context/slate.js"
 import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
-import {AnyEffect, TextEffect} from "../../../../context/controllers/timeline/types.js"
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
+import {AnyEffect, AudioEffect, TextEffect} from "../../../../context/controllers/timeline/types.js"
 
 export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldElement) => {
 	use.styles(styles)
@@ -95,6 +97,45 @@ export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldE
 			use.context.controllers.compositor.TextManager.set_clicked_effect(effect as TextEffect)
 	}
 
+	const wave = use.once(() => document.createElement("div"))
+
+	use.once(async () => {
+		if(effect.kind === "audio") {
+			const wavesurfer = WaveSurfer.create({
+				container: wave,
+				backend: "MediaElement",
+				autoScroll: true,
+				hideScrollbar: true,
+				interact: false,
+				height: 50,
+				// fillParent: false
+			})
+
+			wavesurfer.setOptions({width: calculate_effect_width(effect, use.context.state.timeline.zoom)})
+			const uint = await fetchFile(effect.file)
+			const blob = new Blob([uint])
+			const url = URL.createObjectURL(blob)
+			await wavesurfer.load(url)
+
+			timeline.addEventListener("scroll", () => {
+				const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as AudioEffect
+				const effect_left = calculate_start_position((get_effect.start_at_position - get_effect.start), use.context.state.timeline.zoom)
+				const normalized_left = timeline.scrollLeft - effect_left < 0 ? 0 : (timeline.scrollLeft - effect_left)
+				const start = normalized_left * Math.pow(2, -use.context.state.timeline.zoom) / 1000
+				if(normalized_left + wave.scrollWidth < calculate_effect_width(get_effect, use.context.state.timeline.zoom)) {
+					wave.style.transform = `translateX(${normalized_left}px)`
+					wavesurfer.setScrollTime(start)
+				}
+			})
+
+			watch.track(() => use.context.state.timeline.zoom, (zoom) => {
+				const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as AudioEffect
+				wavesurfer.setOptions({width: 4000})
+				wavesurfer.zoom(calculate_effect_width(get_effect, zoom) / wavesurfer.getDuration())
+			})
+		}
+	})
+
 	return html`
 		<span
 			class="effect"
@@ -114,6 +155,8 @@ export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldE
 			${render_trim_handle("right")}
 			${effect.kind === "video"
 			? Filmstrips([effect, timeline])
+			: effect.kind === "audio"
+			? wave
 			: null}
 		</span>
 	`

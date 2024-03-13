@@ -41,6 +41,7 @@
     "es-module-shims": "^1.8.2",
     "ffprobe-wasm": "^0.3.1",
     "lit": "^2.6.1",
-    "mp4box": "^0.5.2"
+    "mp4box": "^0.5.2",
+    "wavesurfer.js": "^7.7.5"
   }
 }
