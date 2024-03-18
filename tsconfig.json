@@ -13,7 +13,7 @@
 		"sourceMap": true,
 		"declaration": true,
 		"skipLibCheck": true,
-		"types": ["@types/wicg-file-system-access"]
+		"types": ["@types/wicg-file-system-access", "@types/dom-webcodecs"]
 	},
 	"include": [
 		"s/**/*.ts",

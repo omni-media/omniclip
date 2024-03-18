@@ -19,6 +19,7 @@
     "@benev/turtle": "^0.5.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@types/chai": "^4.3.10",
+    "@types/dom-webcodecs": "^0.1.11",
     "@types/wicg-file-system-access": "^2023.10.4",
     "chai": "^4.3.10",
     "chokidar": "^3.6.0",
