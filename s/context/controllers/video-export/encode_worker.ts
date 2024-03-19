@@ -1,6 +1,6 @@
 import {BinaryAccumulator} from "./tools/BinaryAccumulator/tool.js"
 
-const timebase = 25 // hardcoded timebase
+let timebase = 25
 const binary_accumulator = new BinaryAccumulator()
 
 async function handle_chunk(chunk: EncodedVideoChunk) {
@@ -32,6 +32,10 @@ const encoder = new VideoEncoder({
 encoder.configure(config)
 
 self.addEventListener("message", async message => {
+	if(message.data.action === "update-timebase") {
+		timebase = message.data.timebase as number
+		encoder.configure(config)
+	}
 	if(message.data.action === "encode") {
 		const frame = message.data.frame as VideoFrame
 		encoder.encode(frame)

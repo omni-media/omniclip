@@ -52,13 +52,13 @@ export const timeline_actions = actionize({
 	},
 	add_video_effect: state => (video: Video, compositor: Compositor) => {
 		const duration = video.element.duration * 1000
-		const adjusted_duration_to_timebase = Math.round(duration / (1000/state.timeline.timebase)) * (1000/state.timeline.timebase)
+		const adjusted_duration_to_timebase = Math.floor(duration / (1000/state.timeline.timebase)) * (1000/state.timeline.timebase)
 		const effect: VideoEffect = {
 			id: generate_id(),
 			kind: "video",
 			raw_duration: duration,
 			duration: adjusted_duration_to_timebase,
-			start_at_position: 1000,
+			start_at_position: 1000/state.timeline.timebase * 10,
 			start: 0,
 			end: adjusted_duration_to_timebase,
 			track: 2,
@@ -70,13 +70,13 @@ export const timeline_actions = actionize({
 	},
 	add_audio_effect: state => (audio: Audio, compositor: Compositor) => {
 		const duration = audio.element.duration * 1000
-		const adjusted_duration_to_timebase = Math.round(duration / (1000/state.timeline.timebase)) * (1000/state.timeline.timebase)
+		const adjusted_duration_to_timebase = Math.floor(duration / (1000/state.timeline.timebase)) * (1000/state.timeline.timebase)
 		const effect: AudioEffect = {
 			id: generate_id(),
 			kind: "audio",
 			raw_duration: duration,
 			duration: adjusted_duration_to_timebase,
-			start_at_position: 1000,
+			start_at_position: 1000/state.timeline.timebase * 10,
 			start: 0,
 			end: adjusted_duration_to_timebase,
 			track: 2,
@@ -84,6 +84,9 @@ export const timeline_actions = actionize({
 		}
 		compositor.AudioManager.add_video(effect)
 		state.timeline.effects.push(effect)
+	},
+	set_timebase: state => (timebase: number) => {
+		state.timeline.timebase = timebase
 	},
 	set_export_status: state => (status: ExportStatus) => {
 		state.timeline.export_status = status

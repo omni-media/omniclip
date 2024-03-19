@@ -20,6 +20,7 @@ export class VideoExport {
 	#file: Uint8Array | null = null
 	#FileSystemHelper = new FileSystemHelper()
 
+	#timebase = 25
 	#timestamp = 0
 	#timestamp_end = 0
 	readonly canvas = document.createElement("canvas")
@@ -34,6 +35,11 @@ export class VideoExport {
 		this.canvas.width = 1280
 		this.canvas.height = 720
 		this.#FPSCounter = new FPSCounter(this.actions.set_fps, 100)
+	}
+
+	set_timebase(timebase: number) {
+		this.#timebase = timebase
+		this.#encode_worker.postMessage({action: "update-timebase"})
 	}
 
 	async save_file() {
@@ -64,12 +70,12 @@ export class VideoExport {
 	}
 
 	#remove_stale_chunks(effect_id: string, thresholdTimestamp: number) {
-		const timebase = 40 // hardcoded timebase
+		const timebase_in_ms = 1000/this.#timebase
 		const entriesToRemove: string[] = []
 
 		/* margin to keep about one frame more incase its needed,
 		* for some reason sometimes its needed, but im lazy to fix it */
-		const margin_for_additional_frame = timebase * 1.5
+		const margin_for_additional_frame = timebase_in_ms * 1.5
 
 		this.decoded_frames.forEach((value, key) => {
 				if (value.effect_id === effect_id && value.timestamp < thresholdTimestamp - margin_for_additional_frame) {
@@ -115,9 +121,9 @@ export class VideoExport {
 
 		this.actions.set_export_status("composing")
 		for(const draw of draw_queue) {draw()}
-		this.#encode_composed_frame(this.canvas, 1000/25)
+		this.#encode_composed_frame(this.canvas, 1000/this.#timebase)
 
-		this.#timestamp += 1000/25
+		this.#timestamp += 1000/this.#timebase
 
 		const progress = this.#timestamp / this.#timestamp_end * 100 // for progress bar
 		this.actions.set_export_progress(progress)
@@ -191,7 +197,7 @@ export class VideoExport {
 		worker.postMessage({action: "demux", effect: {
 			...effect,
 			file: effect.file
-		}, starting_timestamp: timestamp})
+		}, starting_timestamp: timestamp, timebase: this.#timebase})
 		this.decoded_effects.set(effect.id, effect.id)
 	}
 

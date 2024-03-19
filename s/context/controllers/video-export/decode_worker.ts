@@ -8,6 +8,7 @@ let interval_number = 0
 let decoded_effect: VideoEffect
 let frames = 0
 let timestamp_start = 0
+let timebase = 25
 
 const decoder = new VideoDecoder({
 	output(frame) {
@@ -18,7 +19,7 @@ const decoder = new VideoDecoder({
 		} else {
 			frame.close()
 		}
-		timestamp += decoded_effect.raw_duration / frames
+		timestamp += 1000/timebase
 	},
 	error: (e) => console.log(e)
 })
@@ -55,6 +56,7 @@ self.addEventListener("message", async message => {
 		timestamp = message.data.starting_timestamp
 		end_timestamp = (message.data.starting_timestamp) + message.data.effect.end
 		interval_number = interval()
+		timebase = message.data.timebase
 		demux(message.data.effect.file)
 	}
 })
