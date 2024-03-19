@@ -63,7 +63,7 @@ export class VideoExport {
 		return closest!
 	}
 
-	#remove_unnecessary_frames_below_timestamp(effect_id: string, thresholdTimestamp: number) {
+	#remove_stale_chunks(effect_id: string, thresholdTimestamp: number) {
 		const timebase = 40 // hardcoded timebase
 		const entriesToRemove: string[] = []
 
@@ -101,7 +101,7 @@ export class VideoExport {
 				draw_queue.push(() => {
 					this.ctx?.drawImage(frame, 0, 0, this.canvas.width, this.canvas.height)
 					frame.close()
-					this.#remove_unnecessary_frames_below_timestamp(effect_id, this.#timestamp)
+					this.#remove_stale_chunks(effect_id, this.#timestamp)
 					this.decoded_frames.delete(frame_id)
 				})
 			}
@@ -127,10 +127,11 @@ export class VideoExport {
 			this.#encode_worker.postMessage({action: "get-binary"})
 			this.#encode_worker.onmessage = async (msg) => {
 				if(msg.data.action === "binary") {
-					const binary_container_name = "raw.h264"
-					await this.ffmpeg.write_binary_into_container(msg.data.binary, binary_container_name)
-					await this.ffmpeg.mux(binary_container_name, "test.mp4")
-					const muxed_file = await this.ffmpeg.get_muxed_file()
+					const container_name = "container.mp4"
+					const output_name = "output.mp4"
+					await this.ffmpeg.write_binary_into_container(msg.data.binary, container_name)
+					await this.ffmpeg.merge_audio_with_video_and_mux(effects, container_name, output_name)
+					const muxed_file = await this.ffmpeg.get_muxed_file(output_name)
 					this.#file = muxed_file
 					this.actions.set_export_status("complete")
 				}
