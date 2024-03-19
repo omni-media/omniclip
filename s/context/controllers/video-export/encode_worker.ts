@@ -3,10 +3,12 @@ import {BinaryAccumulator} from "./tools/BinaryAccumulator/tool.js"
 const timebase = 25 // hardcoded timebase
 const binary_accumulator = new BinaryAccumulator()
 
-async function handleChunk(chunk: EncodedVideoChunk) {
-	const chunkData = new Uint8Array(chunk.byteLength);
-	chunk.copyTo(chunkData)
-	binary_accumulator.addChunk(chunkData)
+async function handle_chunk(chunk: EncodedVideoChunk) {
+	let chunk_data = new Uint8Array(chunk.byteLength)
+	chunk.copyTo(chunk_data)
+	binary_accumulator.add_chunk(chunk_data)
+	//@ts-ignore
+	chunk_data = null
 }
 
 // for later: https://github.com/gpac/mp4box.js/issues/243
@@ -21,7 +23,7 @@ const config: VideoEncoderConfig = {
 }
 
 const encoder = new VideoEncoder({
-	output: handleChunk,
+	output: handle_chunk,
 	error: (e: any) => {
 		console.log(e.message)
 	},
