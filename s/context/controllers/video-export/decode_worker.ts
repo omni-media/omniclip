@@ -23,10 +23,11 @@ const decoder = new VideoDecoder({
 	error: (e) => console.log(e)
 })
 
-const interval = () => setInterval(() => {
+const interval = () => setInterval(async () => {
 	wait_time += 100
 	if(wait_time === 200) {
-		decoder.flush()
+		if(decoder.state === "configured")
+			await decoder.flush()
 	}
 	if(timestamp >= end_timestamp) {
 		clearInterval(interval_number)
