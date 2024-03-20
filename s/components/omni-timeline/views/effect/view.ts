@@ -107,8 +107,7 @@ export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldE
 				autoScroll: true,
 				hideScrollbar: true,
 				interact: false,
-				height: 50,
-				// fillParent: false
+				height: 50
 			})
 
 			wavesurfer.setOptions({width: calculate_effect_width(effect, use.context.state.timeline.zoom)})
@@ -117,21 +116,20 @@ export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldE
 			const url = URL.createObjectURL(blob)
 			await wavesurfer.load(url)
 
-			timeline.addEventListener("scroll", () => {
-				const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as AudioEffect
-				const effect_left = calculate_start_position((get_effect.start_at_position - get_effect.start), use.context.state.timeline.zoom)
-				const normalized_left = timeline.scrollLeft - effect_left < 0 ? 0 : (timeline.scrollLeft - effect_left)
-				const start = normalized_left * Math.pow(2, -use.context.state.timeline.zoom) / 1000
-				if(normalized_left + wave.scrollWidth < calculate_effect_width(get_effect, use.context.state.timeline.zoom)) {
-					wave.style.transform = `translateX(${normalized_left}px)`
-					wavesurfer.setScrollTime(start)
-				}
-			})
-
 			watch.track(() => use.context.state.timeline.zoom, (zoom) => {
 				const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as AudioEffect
-				wavesurfer.setOptions({width: 4000})
-				wavesurfer.zoom(calculate_effect_width(get_effect, zoom) / wavesurfer.getDuration())
+				const width = get_effect.duration * Math.pow(2, use.context.state.timeline.zoom)
+				if(width < 4000) {
+					wavesurfer.setOptions({width})
+				} else {
+					wavesurfer.setOptions({width: 4000})
+				}
+				wavesurfer.zoom(width / wavesurfer.getDuration())
+			})
+
+			watch.track(() => use.context.state.timeline, (state) => {
+				const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as AudioEffect
+				wave.style.transform = `translateX(${-get_effect.start * Math.pow(2, use.context.state.timeline.zoom)}px)`
 			})
 		}
 	})
