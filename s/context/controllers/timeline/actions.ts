@@ -5,6 +5,7 @@ import {TimelineHelpers} from "./helpers.js"
 import {actionize} from "../../../utils/actionize.js"
 import {Compositor} from "../compositor/controller.js"
 import {Audio, Image, Video} from "../../../components/omni-media/types.js"
+import {find_place_for_new_effect} from "./utils/find_place_for_new_effect.js"
 import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, TextRect, VideoEffect} from "./types.js"
 
 export const timeline_actions = actionize({
@@ -12,7 +13,7 @@ export const timeline_actions = actionize({
 		const effect: TextEffect = {
 			id: generate_id(),
 			kind: "text",
-			start_at_position: 1000,
+			start_at_position: 0,
 			duration: 5000,
 			start: 0,
 			end: 5000,
@@ -33,6 +34,9 @@ export const timeline_actions = actionize({
 				rotation: 0
 			}
 		}
+		const {position, track} = find_place_for_new_effect(state.timeline.effects, state.timeline.tracks)
+		effect.start_at_position = position!
+		effect.track = track
 		state.timeline.effects.push(effect)
 	},
 	add_image_effect: state => (image: Image, compositor: Compositor) => {
@@ -40,13 +44,16 @@ export const timeline_actions = actionize({
 			id: generate_id(),
 			kind: "image",
 			duration: 1000,
-			start_at_position: 1000,
+			start_at_position: 0,
 			start: 0,
 			end: 1000,
 			track: 2,
 			file: image.file,
 			url: image.url
 		}
+		const {position, track} = find_place_for_new_effect(state.timeline.effects, state.timeline.tracks)
+		effect.start_at_position = position!
+		effect.track = track
 		compositor.ImageManager.add_image(effect)
 		state.timeline.effects.push(effect)
 	},
@@ -58,13 +65,16 @@ export const timeline_actions = actionize({
 			kind: "video",
 			raw_duration: duration,
 			duration: adjusted_duration_to_timebase,
-			start_at_position: 1000/state.timeline.timebase * 10,
+			start_at_position: 0,
 			start: 0,
 			end: adjusted_duration_to_timebase,
-			track: 2,
+			track: 0,
 			file: video.file,
 			thumbnail: video.thumbnail
 		}
+		const {position, track} = find_place_for_new_effect(state.timeline.effects, state.timeline.tracks)
+		effect.start_at_position = position!
+		effect.track = track
 		compositor.VideoManager.add_video(effect)
 		state.timeline.effects.push(effect)
 	},
@@ -76,12 +86,15 @@ export const timeline_actions = actionize({
 			kind: "audio",
 			raw_duration: duration,
 			duration: adjusted_duration_to_timebase,
-			start_at_position: 1000/state.timeline.timebase * 10,
+			start_at_position: 0,
 			start: 0,
 			end: adjusted_duration_to_timebase,
 			track: 2,
 			file: audio.file,
 		}
+		const {position, track} = find_place_for_new_effect(state.timeline.effects, state.timeline.tracks)
+		effect.start_at_position = position!
+		effect.track = track
 		compositor.AudioManager.add_video(effect)
 		state.timeline.effects.push(effect)
 	},
