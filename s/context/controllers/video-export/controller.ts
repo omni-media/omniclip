@@ -133,10 +133,10 @@ export class VideoExport {
 			this.#encode_worker.postMessage({action: "get-binary"})
 			this.#encode_worker.onmessage = async (msg) => {
 				if(msg.data.action === "binary") {
-					const container_name = "container.mp4"
+					const composed_data_input_name = "composed.h264"
 					const output_name = "output.mp4"
-					await this.ffmpeg.write_binary_into_container(msg.data.binary, container_name)
-					await this.ffmpeg.merge_audio_with_video_and_mux(effects, container_name, output_name)
+					await this.ffmpeg.write_composed_data(msg.data.binary, composed_data_input_name)
+					await this.ffmpeg.merge_audio_with_video_and_mux(effects, composed_data_input_name, output_name)
 					const muxed_file = await this.ffmpeg.get_muxed_file(output_name)
 					this.#file = muxed_file
 					this.actions.set_export_status("complete")

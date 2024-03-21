@@ -25,7 +25,7 @@ export class FFmpegHelper {
 		})
 	}
 
-	async write_binary_into_container(binary: Uint8Array, container_name: string) {
+	async write_composed_data(binary: Uint8Array, container_name: string) {
 		await this.ffmpeg.writeFile(`${container_name}`, binary)
 	}
 
