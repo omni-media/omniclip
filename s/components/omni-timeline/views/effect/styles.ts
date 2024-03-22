@@ -1,6 +1,12 @@
 import {css} from "@benev/slate"
 
 export const styles = css`
+
+	::part(scroll) {
+		overflow-x: visible;
+		overflow-y: visible;
+	}
+
 	.effect {
 		display: flex;
 		z-index: 1;
@@ -42,12 +48,14 @@ export const styles = css`
 
 			& .trim-handle-left {
 				left: 0;
+				z-index: 3;
 				border-top-left-radius: 5px;
 				border-bottom-left-radius: 5px;
 			}
 
 			& .trim-handle-right {
 				right: 0;
+				z-index: 3;
 				border-top-right-radius: 5px;
 				border-bottom-right-radius: 5px;
 			}
