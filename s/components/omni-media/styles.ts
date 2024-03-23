@@ -35,26 +35,37 @@ export const styles = css`
 
 	.media {
 		display: flex;
-		margin: 1em;
+		padding: 1em;
+		max-height: 90%;
 		flex-wrap: wrap;
 		gap: 1em;
+		overflow-y: scroll;
+		overflow-x: hidden;
 
 		& .box {
+			align-self: start;
+			aspect-ratio: 16/9;
 			display: flex;
 			flex-direction: column;
-			max-width: 250px;
 			min-width: 100px;
-			flex: 1;
+			flex: 25%;
+			border: 1px solid #302f2f;
+			border-radius: 2px;
 			position: relative;
 
 			& img {
 				width: 100%;
+				height: 100%;
+				object-fit: fill;
 			}
 
 			& .media-element {
 				position: relative;
 				cursor: pointer;
 				height: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
 
 				& .duration {
 					display: flex;
@@ -65,6 +76,8 @@ export const styles = css`
 				}
 
 				& video {
+					object-fit: fill;
+					height: 100%;
 					width: 100%;
 				}
 
@@ -91,8 +104,8 @@ export const styles = css`
 				}
 
 				& svg {
-					width: 25px;
-					height: 25px;
+					width: 20px;
+					height: 20px;
 					opacity: 0.5;
 
 					&:hover {
@@ -101,20 +114,33 @@ export const styles = css`
 				}
 			}
 
+			& .audio {
+				& svg:not(.add-btn svg, .delete-btn svg) {
+					width: 35%;
+					height: 35%;
+				}
+				&:hover {
+					& svg:not(.add-btn svg, .delete-btn svg) {
+						opacity: 0.7;
+					}
+				}
+			}
+
 			& .media-name {
 				position: absolute;
-				bottom: -10px;
+				bottom: -12px;
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
 				width: 100%;
-				font-size: 0.7em;
+				font-size: 0.6em;
 			}
 
 			&:hover {
 
-				& video {
-					outline: 2px solid gray;
+				& .media-element {
+					outline: 2px solid #3c3b3b;
+					border-radius: 2px;
 				}
 
 				& .add-btn {
