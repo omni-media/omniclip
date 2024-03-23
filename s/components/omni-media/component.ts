@@ -6,6 +6,7 @@ import addSvg from "../../icons/gravity-ui/add.svg.js"
 import binSvg from "../../icons/gravity-ui/bin.svg.js"
 import {shadow_component} from "../../context/slate.js"
 import {loadingPlaceholder} from "../../views/loading-placeholder/view.js"
+import audioWaveSvg from "../../icons/material-design-icons/audio-wave.svg.js"
 import {Audio, AudioFile, Image, ImageFile, Video, VideoFile} from "./types.js"
 
 export const OmniMedia = shadow_component(use => {
@@ -92,8 +93,9 @@ export const OmniMedia = shadow_component(use => {
 		return html`
 			<div class="box"
 			>
-				<div class="media-element">
+				<div class="media-element audio">
 					${audio.element}
+					${audioWaveSvg}
 					<div @click=${() => timeline_actions.add_audio_effect(audio, use.context.controllers.compositor)} class="add-btn">${addSvg}</div>
 					<div @click=${() => media_controller.delete_file(audio)} class="delete-btn">${binSvg}</div>
 				</div>
