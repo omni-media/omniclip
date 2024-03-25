@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@benev/construct": "^0.0.0-y.0",
-    "@benev/slate": "^0.1.0-x.13",
+    "@benev/slate": "^0.1.0-x.14",
     "@ffmpeg/ffmpeg": "^0.12.9",
     "@ffmpeg/util": "^0.12.1",
     "coi-serviceworker": "^0.1.7",
