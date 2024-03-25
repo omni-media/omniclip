@@ -2,14 +2,48 @@ import {ZipAction} from "@benev/slate/x/watch/zip/action.js"
 import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 
 import {TimelineHelpers} from "./helpers.js"
-import {actionize} from "../../../utils/actionize.js"
-import {Compositor} from "../compositor/controller.js"
-import {Audio, Image, Video} from "../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "./utils/find_place_for_new_effect.js"
+import {actionize_historical, actionize_non_historical} from "../../../utils/actionize.js"
 import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, TextRect, VideoEffect} from "./types.js"
 
-export const timeline_actions = actionize({
-	add_text_effect: state => (compositor: Compositor) => {
+export const timeline_non_historical_actions = actionize_non_historical({
+	zoom_in: state => () => {
+		state.timeline.zoom += 0.1
+	},
+	zoom_out: state => () => {
+		state.timeline.zoom -= 0.1
+	},
+	set_timecode: state => (timecode: number) => {
+		state.timeline.timecode = timecode
+	},
+	increase_timecode: state => (by_milliseconds: number) => {
+		state.timeline.timecode += by_milliseconds
+	},
+	set_is_playing: state => (is_playing: boolean) => {
+		state.timeline.is_playing = is_playing
+	},
+	toggle_is_playing: state => () => {
+		state.timeline.is_playing = !state.timeline.is_playing
+	},
+	set_is_exporting: state => (is_exporting) => {
+		state.timeline.is_exporting = is_exporting
+	},
+	set_export_progress: state => (progress: number) => {
+		state.timeline.export_progress = progress
+	},
+	set_timebase: state => (timebase: number) => {
+		state.timeline.timebase = timebase
+	},
+	set_export_status: state => (status: ExportStatus) => {
+		state.timeline.export_status = status
+	},
+	set_fps: state => (fps: number) => {
+		state.timeline.fps = fps
+	},
+})
+
+export const timeline_historical_actions = actionize_historical({
+	add_text_effect: state => () => {
 		const effect: TextEffect = {
 			id: generate_id(),
 			kind: "text",
@@ -26,11 +60,11 @@ export const timeline_actions = actionize({
 			align: "center",
 			rect: {
 				position_on_canvas: {
-					x: compositor.canvas.width / 2,
-					y: compositor.canvas.height / 2,
+					x: 100,
+					y: 50,
 				},
-				width: compositor.TextManager.measure_text_width("example", 38, "Lato", "#e66465"),
-				height: compositor.TextManager.measure_text_height("example"),
+				width: 100,
+				height: 20,
 				rotation: 0
 			}
 		}
@@ -39,73 +73,14 @@ export const timeline_actions = actionize({
 		effect.track = track
 		state.timeline.effects.push(effect)
 	},
-	add_image_effect: state => (image: Image, compositor: Compositor) => {
-		const effect: ImageEffect = {
-			id: generate_id(),
-			kind: "image",
-			duration: 1000,
-			start_at_position: 0,
-			start: 0,
-			end: 1000,
-			track: 2,
-			file: image.file,
-			url: image.url
-		}
-		const {position, track} = find_place_for_new_effect(state.timeline.effects, state.timeline.tracks)
-		effect.start_at_position = position!
-		effect.track = track
-		compositor.ImageManager.add_image(effect)
+	add_image_effect: state => (effect: ImageEffect) => {
 		state.timeline.effects.push(effect)
 	},
-	add_video_effect: state => (video: Video, compositor: Compositor) => {
-		const duration = video.element.duration * 1000
-		const adjusted_duration_to_timebase = Math.floor(duration / (1000/state.timeline.timebase)) * (1000/state.timeline.timebase)
-		const effect: VideoEffect = {
-			id: generate_id(),
-			kind: "video",
-			raw_duration: duration,
-			duration: adjusted_duration_to_timebase,
-			start_at_position: 0,
-			start: 0,
-			end: adjusted_duration_to_timebase,
-			track: 0,
-			file: video.file,
-			thumbnail: video.thumbnail
-		}
-		const {position, track} = find_place_for_new_effect(state.timeline.effects, state.timeline.tracks)
-		effect.start_at_position = position!
-		effect.track = track
-		compositor.VideoManager.add_video(effect)
+	add_video_effect: state => (effect: VideoEffect) => {
 		state.timeline.effects.push(effect)
 	},
-	add_audio_effect: state => (audio: Audio, compositor: Compositor) => {
-		const duration = audio.element.duration * 1000
-		const adjusted_duration_to_timebase = Math.floor(duration / (1000/state.timeline.timebase)) * (1000/state.timeline.timebase)
-		const effect: AudioEffect = {
-			id: generate_id(),
-			kind: "audio",
-			raw_duration: duration,
-			duration: adjusted_duration_to_timebase,
-			start_at_position: 0,
-			start: 0,
-			end: adjusted_duration_to_timebase,
-			track: 2,
-			file: audio.file,
-		}
-		const {position, track} = find_place_for_new_effect(state.timeline.effects, state.timeline.tracks)
-		effect.start_at_position = position!
-		effect.track = track
-		compositor.AudioManager.add_video(effect)
+	add_audio_effect: state => (effect: AudioEffect) => {
 		state.timeline.effects.push(effect)
-	},
-	set_timebase: state => (timebase: number) => {
-		state.timeline.timebase = timebase
-	},
-	set_export_status: state => (status: ExportStatus) => {
-		state.timeline.export_status = status
-	},
-	set_fps: state => (fps: number) => {
-		state.timeline.fps = fps
 	},
 	set_text_color: state => (color: string) => {
 		(state.timeline.selected_effect as TextEffect).color = color
@@ -132,12 +107,6 @@ export const timeline_actions = actionize({
 		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
 		effect.align = align
 	},
-	set_is_exporting: state => (is_exporting) => {
-		state.timeline.is_exporting = is_exporting
-	},
-	set_export_progress: state => (progress: number) => {
-		state.timeline.export_progress = progress
-	},
 	set_text_rect: state => ({id}: TextEffect, rect: TextRect) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
 		(state.timeline.selected_effect as TextEffect).rect = rect
@@ -148,26 +117,8 @@ export const timeline_actions = actionize({
 		(state.timeline.selected_effect as TextEffect).content = content
 		effect.content = content
 	},
-	set_text_rotation: state => ({id}: TextEffect, rotation: number) => {
-		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
-		effect.rect.rotation = rotation
-		if(state.timeline.selected_effect?.kind === "text")
-			state.timeline.selected_effect.rect.rotation = rotation
-	},
 	set_selected_effect: state => (effect: AnyEffect | null) => {
 		state.timeline.selected_effect = effect
-	},
-	set_text_position_on_canvas: state => ({id}: TextEffect, x: number, y: number) => {
-		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
-		effect.rect.position_on_canvas = {
-			x,
-			y
-		}
-		if(state.timeline.selected_effect?.kind === "text")
-			state.timeline.selected_effect.rect.position_on_canvas = {
-				x,
-				y
-			}
 	},
 	set_effect_track: state => (effect: AnyEffect, track: number) => {
 		const helper = new TimelineHelpers(state.timeline)
@@ -197,24 +148,26 @@ export const timeline_actions = actionize({
 	add_track: state => () => {
 		state.timeline.tracks.push({id: generate_id()})
 	},
-	zoom_in: state => () => {
-		state.timeline.zoom += 0.1
+	set_text_rotation: state => ({id}: TextEffect, rotation: number) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
+		effect.rect.rotation = rotation
+		if(state.timeline.selected_effect?.kind === "text")
+			state.timeline.selected_effect.rect.rotation = rotation
 	},
-	zoom_out: state => () => {
-		state.timeline.zoom -= 0.1
-	},
-	set_timecode: state => (timecode: number) => {
-		state.timeline.timecode = timecode
-	},
-	increase_timecode: state => (by_milliseconds: number) => {
-		state.timeline.timecode += by_milliseconds
-	},
-	set_is_playing: state => (is_playing: boolean) => {
-		state.timeline.is_playing = is_playing
-	},
-	toggle_is_playing: state => () => {
-		state.timeline.is_playing = !state.timeline.is_playing
+	set_text_position_on_canvas: state => ({id}: TextEffect, x: number, y: number) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
+		effect.rect.position_on_canvas = {
+			x,
+			y
+		}
+		if(state.timeline.selected_effect?.kind === "text")
+			state.timeline.selected_effect.rect.position_on_canvas = {
+				x,
+				y
+			}
 	},
 })
 
-export type TimelineActions = ZipAction.Callable<typeof timeline_actions>
+export type TimelineActions = TimelineHistoricalActions & TimelineNonHistoricalActions
+type TimelineHistoricalActions = ZipAction.Callable<typeof timeline_historical_actions>
+type TimelineNonHistoricalActions = ZipAction.Callable<typeof timeline_non_historical_actions>

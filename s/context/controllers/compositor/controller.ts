@@ -77,14 +77,14 @@ export class Compositor {
 		if(this.currently_played_effects) {
 			for(const effect of effects_sorted_by_track) {
 				if(effect.kind === "video") {
-					const video = this.VideoManager.get(effect.id)
-					if(!redraw && video?.paused) {await video.play()}
+					const {element} = this.VideoManager.get(effect.id)!
+					if(!redraw && element.paused) {await element.play()}
 					if(redraw && timecode) {
 						const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
-						video!.currentTime = current_time
+						element.currentTime = current_time
 					}
 					try {
-						this.VideoManager.draw_video_frame(video!)
+						this.VideoManager.draw_video_frame(element)
 					} catch(e) {console.log(e)}
 				}
 				else if(effect.kind === "text") {
@@ -94,11 +94,11 @@ export class Compositor {
 					this.ImageManager.draw_image_frame(effect)
 				}
 				else if(effect.kind === "audio") {
-					const audio = this.AudioManager.get(effect.id)
-					if(!redraw && audio?.paused) {await audio.play()}
+					const {element} = this.AudioManager.get(effect.id)!
+					if(!redraw && element.paused) {await element.play()}
 					if(redraw && timecode) {
 						const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
-						audio!.currentTime = current_time
+						element.currentTime = current_time
 					}
 				}
 			}

@@ -1,26 +1,26 @@
 import {Compositor} from "../controller.js"
 import {AudioEffect} from "../../timeline/types.js"
 
-export class AudioManager extends Map<string, HTMLAudioElement> {
+export class AudioManager extends Map<string, {element: HTMLAudioElement, file: File}> {
 
 	constructor(private compositor: Compositor) {
 		super()
 	}
 
-	add_video(effect: AudioEffect) {
+	add_video(effect: AudioEffect, file: File) {
 		const audio = document.createElement("audio")
 		const source = document.createElement("source")
 		source.type = "audio/mp3"
-		source.src = URL.createObjectURL(effect.file)
+		source.src = URL.createObjectURL(file)
 		audio.append(source)
-		this.set(effect.id, audio)
+		this.set(effect.id, {element: audio, file})
 	}
 
 	pause_audios() {
 		for(const effect of this.compositor.currently_played_effects) {
 			if(effect.kind === "audio") {
-				const audio = this.get(effect.id)
-				audio?.pause()
+				const {element} = this.get(effect.id)!
+				element.pause()
 			}
 		}
 	}
@@ -28,8 +28,8 @@ export class AudioManager extends Map<string, HTMLAudioElement> {
 	async play_audios() {
 		for(const effect of this.compositor.currently_played_effects) {
 			if(effect.kind === "audio") {
-				const audio = this.get(effect.id)
-				await audio?.play()
+				const {element} = this.get(effect.id)!
+				await element.play()
 			}
 		}
 	}

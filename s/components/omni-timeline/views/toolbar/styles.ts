@@ -99,18 +99,37 @@ export const styles = css`
 		justify-content: space-between;
 	}
 
+	.history {
+		position: absolute;
+		left: 10%;
+		fill: #555454;
+
+		& svg {
+			cursor: default;
+		}
+
+		& button[data-past], button[data-future] {
+			fill: #989898;
+
+			& svg {
+				cursor: pointer;
+			}
+		}
+	}
+
 	.zoom {
 		display: flex;
 		align-items: center;
 
 		& .zoom-in, .zoom-out {
 			display: flex;
+			color: #989898;
 		}
 	}
 
 	svg {
-		width: 15px;
-		height: 15px;
+		width: 20px;
+		height: 20px;
 		cursor: pointer;
 	}
 

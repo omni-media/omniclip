@@ -1,23 +1,23 @@
 import {Compositor} from "../controller.js"
 import {VideoEffect} from "../../timeline/types.js"
 
-export class VideoManager extends Map<string, HTMLVideoElement> {
+export class VideoManager extends Map<string, {element: HTMLVideoElement, file: File}> {
 
 	constructor(private compositor: Compositor) {
 		super()
 	}
 
-	add_video(effect: VideoEffect) {
+	add_video(effect: VideoEffect, file: File) {
 		const video = document.createElement('video');
 		// video.src = effect.src
 		const source = document.createElement("source")
 		source.type = "video/mp4"
 		// video.src = `${new URL("bbb_video_avc_frag.mp4", import.meta.url)}`
-		source.src = URL.createObjectURL(effect.file)
+		source.src = URL.createObjectURL(file)
 		video.append(source)
 		// video.load()
 
-		this.set(effect.id, video)
+		this.set(effect.id, {element: video, file})
 		// video.preload = 'auto';
 	}
 
@@ -34,8 +34,8 @@ export class VideoManager extends Map<string, HTMLVideoElement> {
 	pause_videos() {
 		for(const effect of this.compositor.currently_played_effects) {
 			if(effect.kind === "video") {
-				const video = this.get(effect.id)
-				video?.pause()
+				const {element} = this.get(effect.id)!
+				element.pause()
 			}
 		}
 	}
@@ -43,8 +43,8 @@ export class VideoManager extends Map<string, HTMLVideoElement> {
 	async play_videos() {
 		for(const effect of this.compositor.currently_played_effects) {
 			if(effect.kind === "video") {
-				const video = this.get(effect.id)
-				await video?.play()
+				const {element} = this.get(effect.id)!
+				await element.play()
 			}
 		}
 	}

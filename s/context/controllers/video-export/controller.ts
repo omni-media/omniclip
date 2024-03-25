@@ -1,8 +1,9 @@
+import {generate_id} from "@benev/slate/x/tools/generate_id.js"
+
 import {FPSCounter} from "./tools/FPSCounter/tool.js"
 import {TimelineActions} from "../timeline/actions.js"
 import {Compositor} from "../compositor/controller.js"
 import {FFmpegHelper} from "./helpers/FFmpegHelper/helper.js"
-import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 import {FileSystemHelper} from "./helpers/FileSystemHelper/helper.js"
 import {AnyEffect, VideoEffect, XTimeline} from "../timeline/types.js"
 import {get_effects_at_timestamp} from "./utils/get_effects_at_timestamp.js"
@@ -136,7 +137,7 @@ export class VideoExport {
 					const composed_data_input_name = "composed.h264"
 					const output_name = "output.mp4"
 					await this.ffmpeg.write_composed_data(msg.data.binary, composed_data_input_name)
-					await this.ffmpeg.merge_audio_with_video_and_mux(effects, composed_data_input_name, output_name)
+					await this.ffmpeg.merge_audio_with_video_and_mux(effects, composed_data_input_name, output_name, this.compositor)
 					const muxed_file = await this.ffmpeg.get_muxed_file(output_name)
 					this.#file = muxed_file
 					this.actions.set_export_status("complete")
@@ -194,9 +195,10 @@ export class VideoExport {
 				this.decoded_frames.set(id, {...msg.data.frame, frame_id: id})
 			}
 		})
+		const {file} = this.compositor.VideoManager.get(effect.id)!
 		worker.postMessage({action: "demux", effect: {
 			...effect,
-			file: effect.file
+			file
 		}, starting_timestamp: timestamp, timebase: this.#timebase})
 		this.decoded_effects.set(effect.id, effect.id)
 	}

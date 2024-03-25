@@ -73,7 +73,7 @@ export const OmniText = shadow_component(use => {
 					<span style="color: #e66465; font-family: Lato;" class="text">
 						example
 					</span>
-					<div @click=${() => actions.timeline_actions.add_text_effect(use.context.controllers.compositor)} class="add-btn">${addSvg}</div>
+					<div @click=${() => actions.timeline_actions.add_text_effect()} class="add-btn">${addSvg}</div>
 				</div>
 			</div>
 	`)

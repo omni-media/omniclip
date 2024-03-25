@@ -1,5 +1,11 @@
-import {XTimeline} from "./context/controllers/timeline/types.js"
+import {TimelineHistorical, TimelineNonHistorical} from "./context/controllers/timeline/types.js"
 
-export interface OmniState {
-	timeline: XTimeline
+export interface OmniStateHistorical {
+	timeline: TimelineHistorical
 }
+
+export interface OmniStateNonHistorical {
+	timeline: TimelineNonHistorical
+}
+
+export type OmniState = OmniStateHistorical & OmniStateNonHistorical

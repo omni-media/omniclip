@@ -27,7 +27,7 @@ export const Filmstrips = shadow_view(use => (effect: VideoEffect, timeline: Gol
 			}
 		})
 
-		watch.track(() => use.context.state.timeline.zoom, async (zoom) => {
+		const dispose = watch.track(() => use.context.state.timeline.zoom, async (zoom) => {
 			const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as VideoEffect
 			for await(const {url, normalized_left, i} of recalculate_all_visible_filmstrips(get_effect, timeline.scrollLeft, true)) {
 				let new_visible = getVisibleFilmstrips()
@@ -35,13 +35,14 @@ export const Filmstrips = shadow_view(use => (effect: VideoEffect, timeline: Gol
 				setVisibleFilmstrips(new_visible)
 			}
 		})
-		return () => {}
+		return () => dispose()
 	})
 
 	const worker = use.once(() => new Worker(new URL("./filmstrip_worker.js", import.meta.url), {type: "module"}))
 	const video = use.once(() => {
 		const video = document.createElement("video")
-		video.src = URL.createObjectURL(effect.file)
+		const {file} = use.context.controllers.compositor.VideoManager.get(effect.id)!
+		video.src = URL.createObjectURL(file)
 		video.load()
 		video.addEventListener("seeked", () => {
 			const res = getResolve()
@@ -62,7 +63,8 @@ export const Filmstrips = shadow_view(use => (effect: VideoEffect, timeline: Gol
 
 	use.mount(() => {
 		if(effect.kind === "video") {
-			ffmpeg.get_frames_count(effect.file).then(async frames => {
+			const {file} = use.context.controllers.compositor.VideoManager.get(effect.id)!
+			ffmpeg.get_frames_count(file).then(async frames => {
 				setFramesCount(frames)
 				const placeholders = generate_filmstrip_placeholders(frames)
 				setFilmstrips(placeholders)

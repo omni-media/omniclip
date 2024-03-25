@@ -1,9 +1,19 @@
 import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 
-import {XTimeline} from "./types.js"
+import {TimelineHistorical, TimelineNonHistorical} from "./types.js"
 
-export const timeline_state: XTimeline = {
+export const timeline_historical_state: TimelineHistorical = {
 	selected_effect: null,
+	tracks: [
+		{id: generate_id()},
+		{id: generate_id()},
+		{id: generate_id()},
+		{id: generate_id()},
+	],
+	effects: []
+}
+
+export const timeline_non_historical_state: TimelineNonHistorical = {
 	is_exporting: false,
 	export_progress: 0,
 	export_status: "demuxing",
@@ -13,11 +23,4 @@ export const timeline_state: XTimeline = {
 	timecode: 0,
 	length: 1000,
 	zoom: -3,
-	tracks: [
-		{id: generate_id()},
-		{id: generate_id()},
-		{id: generate_id()},
-		{id: generate_id()},
-	],
-	effects: []
 }

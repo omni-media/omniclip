@@ -111,7 +111,8 @@ export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldE
 			})
 
 			wavesurfer.setOptions({width: calculate_effect_width(effect, use.context.state.timeline.zoom)})
-			const uint = await fetchFile(effect.file)
+			const {file} = use.context.controllers.compositor.AudioManager.get(id)!
+			const uint = await fetchFile(file)
 			const blob = new Blob([uint])
 			const url = URL.createObjectURL(blob)
 			await wavesurfer.load(url)

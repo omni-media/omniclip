@@ -1,20 +1,25 @@
 export type V2 = [number, number]
 export type ExportStatus = "complete" | "composing" | "demuxing" | "flushing"
 
-export interface XTimeline {
-	is_playing: boolean
+export interface TimelineHistorical {
 	selected_effect: AnyEffect | null
-	is_exporting: boolean,
-	export_progress: number,
+	effects: AnyEffect[]
+	tracks: XTrack[]
+}
+
+export interface TimelineNonHistorical {
+	is_playing: boolean
+	is_exporting: boolean
+	export_progress: number
 	export_status: ExportStatus
 	fps: number
 	timecode: number
 	length: number
-	effects: AnyEffect[]
-	tracks: XTrack[]
 	zoom: number
 	timebase: number
 }
+
+export type XTimeline = TimelineNonHistorical & TimelineHistorical
 
 export interface Effect {
 	id: string
@@ -27,20 +32,17 @@ export interface Effect {
 
 export interface VideoEffect extends Effect {
 	kind: "video"
-	file: File
 	thumbnail: string
 	raw_duration: number
 }
 
 export interface AudioEffect extends Effect {
 	kind: "audio"
-	file: File
 	raw_duration: number
 }
 
 export interface ImageEffect extends Effect {
 	kind: "image"
-	file: File
 	url: string
 }
 
