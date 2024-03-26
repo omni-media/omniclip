@@ -8,6 +8,7 @@ import {OmniText} from "./components/omni-text/component.js"
 import {OmniMedia} from "./components/omni-media/component.js"
 import {TimelinePanel} from "./components/omni-timeline/panel.js"
 import {OmniTimeline} from "./components/omni-timeline/component.js"
+import {ExportPanel} from "./components/omni-timeline/views/export/panel.js"
 import {MediaPlayerPanel} from "./components/omni-timeline/views/media-player/panel.js"
 
 omnislate.context = new OmniContext({
@@ -15,7 +16,8 @@ omnislate.context = new OmniContext({
 		TimelinePanel,
 		MediaPanel,
 		MediaPlayerPanel,
-		TextPanel
+		TextPanel,
+		ExportPanel
 	},
 	layouts: {
 		empty: single_panel_layout("TimelinePanel"),
