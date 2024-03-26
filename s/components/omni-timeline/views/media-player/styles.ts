@@ -75,6 +75,8 @@ export const styles = css`
 		background: transparent;
 		background-size: contain;
 		background-repeat: no-repeat;
+		display: flex;
+		justify-content: center;
 	}
 
 	.controls button:hover,

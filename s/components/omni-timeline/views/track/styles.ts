@@ -2,7 +2,7 @@ import {css} from "@benev/slate"
 
 export const styles = css`
 	.track {
-		background: rgb(15 15 15);
+		background: rgb(0 0 0 / 38%);
 		display: flex;
 		height: 50px;
 		outline: 1px solid #181818;

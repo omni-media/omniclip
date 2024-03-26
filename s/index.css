@@ -23,7 +23,7 @@ construct-editor {
 
 	--alpha: yellow;
 	--bravo: lime;
-	--bg-a: #181818;
+	--bg-a: #0000005e url(../assets/noise.svg);
 	--bg-b: #000;
 	--bg-c: #333;
 	--taskbar-size: 1em;

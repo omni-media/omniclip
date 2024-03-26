@@ -2,7 +2,7 @@ import {css} from "@benev/slate"
 
 export const styles = css`
 	form {
-		margin-top: 1em;
+		margin: 1em;
 	}
 
 	.placeholder {
@@ -16,13 +16,12 @@ export const styles = css`
 	}
 
 	.import-btn {
-		border-radius: 4px;
-		padding: 0.2em 0.4em;
+		display: flex;
+		gap: 0.1em;
+		letter-spacing: 0.5px;
 		transition: opacity 0.5s ease 0s;
-		background: var(--alpha);
-		color: var(--bg-b);
+		color: gray;
 		cursor: pointer;
-		margin: 1em;
 
 		&:hover {
 			opacity: 0.8;
