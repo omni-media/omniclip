@@ -2,7 +2,6 @@ import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
-import exportSvg from "../../../../icons/gravity-ui/export.svg.js"
 import undoSvg from "../../../../icons/material-design-icons/undo.svg.js"
 import redoSvg from "../../../../icons/material-design-icons/redo.svg.js"
 import zoomInSvg from "../../../../icons/material-design-icons/zoom-in.svg.js"
@@ -14,40 +13,10 @@ export const Toolbar = shadow_view(use => () => {
 	use.watch(() => use.context.state.timeline)
 	const actions = use.context.actions.timeline_actions
 	const zoom = use.context.state.timeline.zoom
-	const video_export = use.context.controllers.video_export
-	const state = use.context.state.timeline
-
-	if(use.context.state.timeline.is_exporting) {
-		const dialog = use.shadow.querySelector("dialog")
-		dialog?.showModal()
-	}
 
 	return html`
 		<div class="toolbar">
-			<dialog>
-				<div class="box">
-					${video_export.canvas}
-					<div class="flex-col">
-						<div class="progress">
-							<span class="status">Progress ${state.export_status === "complete" || state.export_status === "flushing"
-								? "100"
-								: state.export_progress.toFixed(2)}
-								%</span>
-							<span>Status: ${state.export_status}</span>
-							<span>FPS: ${state.fps}</span>
-						</div>
-						<button
-							@click=${() => video_export.save_file()}
-							class="download"
-							.disabled=${state.export_status !== "complete"}
-						>
-							Download
-						</button>
-					</div>
-				</div>
-			</dialog>
 			<div class=tools>
-				<button class="export-button" @click=${() => video_export.export_start(use.context.state.timeline)}>${exportSvg}<span>Export</span></button>
 				<div class=history>
 					<button ?data-past=${use.context.history.past.length !== 0} @click=${() => use.context.undo()}>${undoSvg}</button>
 					<button ?data-future=${use.context.history.future.length !== 0} @click=${() => use.context.redo()}>${redoSvg}</button>
