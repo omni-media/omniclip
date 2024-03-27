@@ -1,4 +1,4 @@
-import {html} from "@benev/slate"
+import {html, watch} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {AspectRatio} from "./types.js"
@@ -13,6 +13,7 @@ export const Export = shadow_view(use => () => {
 	use.watch(() => use.context.state.timeline)
 	const video_export = use.context.controllers.video_export
 	const state = use.context.state.timeline
+	const [logs, setLogs, getLogs] = use.state<string[]>([])
 
 	const [selectedResolution, setSelectedResolution] = use.state("1920x1080")
 	const [selectedAsptectRatio, setSelectedAspectRatio] = use.state<AspectRatio>("16/9")
@@ -26,6 +27,13 @@ export const Export = shadow_view(use => () => {
 	}
 	
 	use.mount(() => {
+		watch.track(() => use.context.state.timeline.log, (log) => {
+			if(getLogs().length === 20) {
+				const new_arr = getLogs().slice(1)
+				setLogs(new_arr)
+			}
+			setLogs([...getLogs(), log])
+		})
 		const resizer = () => {
 			video_export.canvas.width = window.innerWidth
 			video_export.canvas.height = window.innerHeight
@@ -54,6 +62,12 @@ export const Export = shadow_view(use => () => {
 							</span>
 							<span>Status: ${state.export_status}</span>
 							<span>FPS: ${state.fps}</span>
+							<span class=logs-txt>logs:</span>
+							<div class=logs>
+								<div class="box-logs">
+									${logs.map(log => html`<span>${log}<span>`)}
+								</div>
+							</div>
 						</div>
 						<button
 							@click=${() => video_export.save_file()}

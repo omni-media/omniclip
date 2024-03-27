@@ -17,6 +17,7 @@ export interface TimelineNonHistorical {
 	length: number
 	zoom: number
 	timebase: number
+	log: string
 }
 
 export type XTimeline = TimelineNonHistorical & TimelineHistorical

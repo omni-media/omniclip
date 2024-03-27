@@ -27,7 +27,6 @@ export class VideoExport {
 	readonly canvas = document.createElement("canvas")
 	ctx = this.canvas.getContext("2d")!
 
-	current_frame = 0
 	decoded_effects = new Map<string, string>()
 	decoded_frames: Map<string, DecodedFrame> = new Map()
 	#FPSCounter: FPSCounter

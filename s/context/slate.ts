@@ -56,7 +56,7 @@ export class OmniContext extends Context {
 	}
 
 	helpers = {
-		ffmpeg: new FFmpegHelper()
+		ffmpeg: new FFmpegHelper(this.actions.timeline_actions)
 	}
 
 	controllers = {

@@ -103,7 +103,7 @@ export const styles = css`
 				display: flex;
 				flex-direction: column;
 				height: 300px;
-				width: 250px;
+				width: 350px;
 				justify-content: space-between;
 				background: #18181894;
 				padding: 1em;
@@ -113,18 +113,50 @@ export const styles = css`
 					display: flex;
 					flex-direction: column;
 					align-items: center;
-					gap: 0.5em;
+					gap: 0.3em;
+					height: 100%;
+
+					& .logs {
+						display: flex;
+						align-self: start;
+						justify-content: left;
+						flex-direction: column;
+						overflow: hidden;
+						height: 100%;
+						width: 100%;
+						text-align: left;
+						position: relative;
+
+						& .box-logs {
+							word-break: break-all;
+							position: absolute;
+							bottom: 0;
+						}
+
+						& span {
+							display: block;
+							color: green;
+							font-size: 8px;
+							text-align: left;
+						}
+					}
+
+					& .logs-txt {
+						align-self: start;
+						font-size: 10px;
+					}
 
 					& .status {}
 				}
 
 				& span {
 					color: white;
-					font-size: 1.5em;
+					font-size: 1.2em;
 				}
 			}
 			
 			& .save-button {
+				margin-top: 1em;
 				position: relative;
 				display: flex;
 				align-self: center;

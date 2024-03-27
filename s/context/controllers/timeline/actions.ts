@@ -40,6 +40,9 @@ export const timeline_non_historical_actions = actionize_non_historical({
 	set_fps: state => (fps: number) => {
 		state.timeline.fps = fps
 	},
+	set_log: state => (log: string) => {
+		state.timeline.log = log
+	},
 })
 
 export const timeline_historical_actions = actionize_historical({

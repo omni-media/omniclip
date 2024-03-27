@@ -23,4 +23,5 @@ export const timeline_non_historical_state: TimelineNonHistorical = {
 	timecode: 0,
 	length: 1000,
 	zoom: -3,
+	log: ""
 }

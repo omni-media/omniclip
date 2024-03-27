@@ -5,6 +5,7 @@ import {toBlobURL} from "@ffmpeg/util/dist/esm/index.js"
 import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
 
 import {Compositor} from "../../../compositor/controller.js"
+import {TimelineActions} from "../../../timeline/actions.js"
 import {AnyEffect, AudioEffect, VideoEffect} from "../../../timeline/types.js"
 
 export class FFmpegHelper {
@@ -12,10 +13,9 @@ export class FFmpegHelper {
 	ffprobe = new FFprobeWorker()
 	is_loading = signals.op<any>()
 
-	constructor() {
+	constructor(actions: TimelineActions) {
 		this.is_loading.load(async() => await this.#load_ffmpeg())
-		console.log("loaded")
-		this.ffmpeg.on("log", (log) => console.log(log))
+		this.ffmpeg.on("log", (log) => actions.set_log(log.message))
 	}
 
 	async #load_ffmpeg() {
@@ -41,13 +41,13 @@ export class FFmpegHelper {
 
 		const all_audio_effects = [...audio_from_video_effects, ...added_audio_effects]
 
-
 		for(const {id, kind, start, end} of all_audio_effects) {
-			const {file} = compositor.VideoManager.get(id)!
 			if(kind === "video") {
+				const {file} = compositor.VideoManager.get(id)!
 				await this.ffmpeg.writeFile(`${id}.mp4`,  await fetchFile(file))
 				await this.ffmpeg.exec(["-ss", `${start / 1000}`,"-i", `${id}.mp4`,"-t" ,`${(end - start) / 1000}`, "-vn", `${id}.mp3`])
 			} else {
+				const {file} = compositor.AudioManager.get(id)!
 				await this.ffmpeg.writeFile(`${id}x.mp3`,  await fetchFile(file))
 				await this.ffmpeg.exec(["-ss", `${start / 1000}`,"-i", `${id}x.mp3`,"-t" ,`${(end - start) / 1000}`, "-vn", `${id}.mp3`])
 			}
