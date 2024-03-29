@@ -18,6 +18,12 @@ export const TextPositioner = shadow_view(use => () => {
 	const scaleX = canvas.width / canvas_rect.width
 	const scaleY = canvas.height / canvas_rect.height
 
+	use.mount(() => {
+		const observer = new ResizeObserver(() => use.rerender())
+		observer.observe(canvas)
+		return () => observer.disconnect()
+	})
+
 	return html`
 		${selected_effect
 		? html`

@@ -19,6 +19,7 @@ export const styles = css`
 	}
 
 	figure {
+		position: relative;
 		align-self: center;
 		overflow: hidden;
 	}
