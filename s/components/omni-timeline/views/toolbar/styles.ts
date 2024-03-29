@@ -26,6 +26,7 @@ export const styles = css`
 	}
 
 	.history {
+		display: flex;
 		fill: #555454;
 
 		& svg {
@@ -37,6 +38,15 @@ export const styles = css`
 
 			& svg {
 				cursor: pointer;
+			}
+		}
+
+		& .split {
+			color: #555454;
+			margin-left: 50%;
+
+			& svg {
+				width: 17px;
 			}
 		}
 	}

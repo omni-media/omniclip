@@ -2,6 +2,7 @@ import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
+import scissorsSvg from "../../../../icons/gravity-ui/scissors.svg.js"
 import undoSvg from "../../../../icons/material-design-icons/undo.svg.js"
 import redoSvg from "../../../../icons/material-design-icons/redo.svg.js"
 import zoomInSvg from "../../../../icons/material-design-icons/zoom-in.svg.js"
@@ -13,6 +14,7 @@ export const Toolbar = shadow_view(use => () => {
 	use.watch(() => use.context.state.timeline)
 	const actions = use.context.actions.timeline_actions
 	const zoom = use.context.state.timeline.zoom
+	const controller = use.context.controllers.timeline
 
 	return html`
 		<div class="toolbar">
@@ -20,6 +22,7 @@ export const Toolbar = shadow_view(use => () => {
 				<div class=history>
 					<button ?data-past=${use.context.history.past.length !== 0} @click=${() => use.context.undo()}>${undoSvg}</button>
 					<button ?data-future=${use.context.history.future.length !== 0} @click=${() => use.context.redo()}>${redoSvg}</button>
+					<button @click=${() => controller.split(use.context.state.timeline, use.context.controllers.compositor)} class="split">${scissorsSvg}</button>
 				</div>
 				<div>${convert_ms_to_hmsms(use.context.state.timeline.timecode)}</div>
 				<div class="zoom">

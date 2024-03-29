@@ -1,10 +1,13 @@
+import {generate_id} from "@benev/slate"
 import {pub} from "@benev/slate/x/tools/pub.js"
 import {ShockDragDrop} from "@benev/construct/x/tools/shockdrop/drag_drop.js"
 
 import {TimelineActions} from "./actions.js"
+import {Compositor} from "../compositor/controller.js"
 import {effectTrimHandler} from "./parts/effect-trim-handler.js"
 import {Grabbed, At, ProposedTimecode, AnyEffect} from "./types.js"
 import {EffectTimecode, XTimeline as TimelineState, XTimeline} from "./types.js"
+import {get_effects_at_timestamp} from "../video-export/utils/get_effects_at_timestamp.js"
 
 export class Timeline {
 	effect_drag = new ShockDragDrop<Grabbed, At> ({handle_drop: (_event: DragEvent, grabbed, dropped_at) => this.on_drop.publish({grabbed, dropped_at})})
@@ -132,6 +135,47 @@ export class Timeline {
 
 	get_effects_on_track(timeline: XTimeline, track_id: number) {
 		return timeline.effects.filter(effect => effect.track === track_id)
+	}
+
+	add_split_effect(effect: AnyEffect, compositor: Compositor) {
+		if(effect.kind === "video") {
+			const {file} = compositor.VideoManager.get(effect.id)!
+			effect.id = generate_id()
+			compositor.VideoManager.add_video(effect, file)
+			this.timeline_actions.add_video_effect(effect)
+		}
+	}
+
+	split(timeline: XTimeline, compositor: Compositor) {
+		const normalized_timecode = this.normalize_to_timebase(timeline)
+		const selected = timeline.effects.find(effect => effect.id === timeline.selected_effect?.id)
+		const effects = get_effects_at_timestamp(timeline.effects, normalized_timecode)
+		if(selected) {
+			this.#split(selected, timeline, compositor)
+		} else if(effects.length !== 0) {
+			this.#split(effects[0], timeline, compositor)
+		} 
+	}
+
+	#split(effect: AnyEffect, timeline: XTimeline, compositor: Compositor) {
+		const normalized_timecode = this.normalize_to_timebase(timeline)
+		const is_between = get_effects_at_timestamp([effect], normalized_timecode)
+		const if_split_effect_is_atleast_one_frame = 
+			normalized_timecode - effect.start_at_position >= timeline.timebase &&
+			(effect.start_at_position + effect.end) - normalized_timecode >= timeline.timebase
+		if(is_between.length !== 0 && if_split_effect_is_atleast_one_frame) {
+			const end = normalized_timecode - (effect.start_at_position - effect.start)
+			this.timeline_actions.set_effect_end(effect, end)
+			const start = (normalized_timecode - effect.start_at_position) + effect.start
+			const split_effect = {...effect, start, start_at_position: normalized_timecode, end: effect.end}
+			this.add_split_effect(split_effect, compositor)
+		}
+	}
+
+	normalize_to_timebase(timeline: XTimeline) {
+		const frame_duration = 1000/timeline.timebase
+		const normalized = Math.round(timeline.timecode / frame_duration) * frame_duration
+		return normalized
 	}
 }
 
