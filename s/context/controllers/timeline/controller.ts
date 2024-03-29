@@ -48,7 +48,7 @@ export class Timeline {
 			const distance_between_grabbed_effect_and_effect_before_it =
 				this.#calculate_distance_between_grabbed_effect_and_effect_before_it(effect_before, timeline_start)
 			if(distance_between_grabbed_effect_and_effect_before_it < 0) {
-				start_position = effect_before.start_at_position + effect_before.duration
+				start_position = effect_before.start_at_position + (effect_before.end - effect_before.start)
 			}
 		}
 
@@ -80,7 +80,7 @@ export class Timeline {
 	}
 
 	#calculate_space_between_effect_after_and_before_grabbed_effect(effect_before: AnyEffect, effect_after: AnyEffect) {
-		const space = effect_after.start_at_position - (effect_before.start_at_position + effect_before.duration)
+		const space = effect_after.start_at_position - (effect_before.start_at_position + (effect_before.end - effect_before.start))
 		return space
 	}
 
@@ -90,7 +90,7 @@ export class Timeline {
 	}
 
 	#calculate_distance_between_grabbed_effect_and_effect_before_it(effect_before: AnyEffect, timeline_start: number) {
-		const distance = timeline_start - (effect_before.start_at_position + effect_before.duration)
+		const distance = timeline_start - (effect_before.start_at_position + (effect_before.end - effect_before.start))
 		return distance
 	}
 
@@ -124,7 +124,7 @@ export class Timeline {
 			this.timeline_actions.set_effect_duration(effect, duration)
 		}
 		if(effects_to_push) {
-			this.#push_effects_forward(effects_to_push, effect.duration)
+			this.#push_effects_forward(effects_to_push, (effect.end - effect.start))
 		}
 	}
 
@@ -147,7 +147,7 @@ export class Timeline {
 	}
 
 	split(timeline: XTimeline, compositor: Compositor) {
-		const normalized_timecode = this.normalize_to_timebase(timeline)
+		const normalized_timecode = this.#normalize_to_timebase(timeline)
 		const selected = timeline.effects.find(effect => effect.id === timeline.selected_effect?.id)
 		const effects = get_effects_at_timestamp(timeline.effects, normalized_timecode)
 		if(selected) {
@@ -158,7 +158,7 @@ export class Timeline {
 	}
 
 	#split(effect: AnyEffect, timeline: XTimeline, compositor: Compositor) {
-		const normalized_timecode = this.normalize_to_timebase(timeline)
+		const normalized_timecode = this.#normalize_to_timebase(timeline)
 		const is_between = get_effects_at_timestamp([effect], normalized_timecode)
 		const if_split_effect_is_atleast_one_frame = 
 			normalized_timecode - effect.start_at_position >= timeline.timebase &&
@@ -172,7 +172,7 @@ export class Timeline {
 		}
 	}
 
-	normalize_to_timebase(timeline: XTimeline) {
+	#normalize_to_timebase(timeline: XTimeline) {
 		const frame_duration = 1000/timeline.timebase
 		const normalized = Math.round(timeline.timecode / frame_duration) * frame_duration
 		return normalized
