@@ -5,7 +5,7 @@ export const styles = css`
 		display: flex;
 		justify-content: center;
 		position: absolute;
-		z-index: 1;
+		z-index: 2;
 
 		& .text-rect {
 			position: absolute;

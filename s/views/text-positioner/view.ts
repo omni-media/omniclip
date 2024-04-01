@@ -2,13 +2,13 @@ import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../context/slate.js"
+import {TextUpdater} from "../text-updater/view.js"
 import rotateSvg from "../../icons/material-design-icons/rotate.svg.js"
 
 export const TextPositioner = shadow_view(use => () => {
 	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const {canvas} = use.context.controllers.compositor
-	const compositor = use.context.controllers.compositor
 	const selected_effect = use.context.state.timeline.selected_effect?.kind === "text"
 		? use.context.state.timeline.selected_effect
 		: null
@@ -23,6 +23,8 @@ export const TextPositioner = shadow_view(use => () => {
 		observer.observe(canvas)
 		return () => observer.disconnect()
 	})
+
+	const box = use.defer(() => use.shadow.querySelector(".box"))
 
 	return html`
 		${selected_effect
@@ -42,5 +44,9 @@ export const TextPositioner = shadow_view(use => () => {
 			</div>
 		`
 		: null}
+		${selected_effect 
+			? TextUpdater([selected_effect, box!])
+			: null
+		}
 	`
 })
