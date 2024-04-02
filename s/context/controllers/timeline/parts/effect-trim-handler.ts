@@ -4,7 +4,7 @@ import {TimelineActions} from "../actions.js"
 import {AnyEffect, XTimeline} from "../types.js"
 
 export class effectTrimHandler {
-	effect_resize_handle_drag = new ShockDragDrop<"right" | "left", {x: number}>({handle_drop: (_event: DragEvent) => {}})
+	effect_resize_handle_drag = new ShockDragDrop<"right" | "left", {x: number, client_x: number}>({handle_drop: (_event: DragEvent) => {}})
 	initial_x = 0
 	initial_start_position = 0
 	initial_start = 0
@@ -15,16 +15,20 @@ export class effectTrimHandler {
 
 	constructor(private actions: TimelineActions) {}
 
-	effect_dragover(event: DragEvent, element: HTMLElement, timeline: XTimeline) {
+	effect_dragover(clientX: number, timeline: XTimeline) {
 		if(!this.effect_resize_handle_drag.grabbed)
 			return
 		const get_effect = timeline.effects.find(({id}) => id === this.effect?.id)
-		const delta = event.clientX - this.initial_x;
+		const delta = clientX - this.initial_x;
 		if(this.effect_resize_handle_drag.grabbed === "left") {
-			const is_within_boundary = delta < get_effect!.start_at_position - get_effect!.start
+			const is_within_boundary = delta < Math.abs(get_effect!.start_at_position - get_effect!.start)
 			if (is_within_boundary) {
-				const start_at = (this.initial_start_position + (delta  * Math.pow(2, -timeline.zoom)))
-				const start = (this.initial_start + delta * Math.pow(2, -timeline.zoom))
+				const start_at = (this.initial_start_position + (delta  * Math.pow(2, -timeline.zoom))) < get_effect!.start_at_position - get_effect!.start
+				? this.initial_start_position - this.initial_start
+				: (this.initial_start_position + (delta  * Math.pow(2, -timeline.zoom)))
+				const start = (this.initial_start + delta * Math.pow(2, -timeline.zoom)) < 0
+				? 0
+				: (this.initial_start + delta * Math.pow(2, -timeline.zoom))
 				if(start_at >= get_effect!.start_at_position - get_effect!.start) {
 					this.actions.set_effect_start_position(this.effect!, start_at)
 					this.actions.set_effect_start(get_effect!, start)
@@ -33,11 +37,12 @@ export class effectTrimHandler {
 		} else {
 			const is_within_boundary = delta < get_effect!.duration - get_effect!.end
 			if (is_within_boundary) {
-				const end = (this.initial_end + delta * Math.pow(2, -timeline.zoom))
+				const end = (this.initial_end + delta * Math.pow(2, -timeline.zoom)) < this.effect!.duration
+				? (this.initial_end + delta * Math.pow(2, -timeline.zoom))
+				: this.effect!.duration
 				this.actions.set_effect_end(get_effect!, end)
 			}
 		}
-		this.effect_resize_handle_drag.dropzone.dragover({x: element.clientLeft})(event)
 	}
 
 	#normalize_to_timebase_and_set(e: DragEvent, timeline: XTimeline) {
@@ -54,7 +59,9 @@ export class effectTrimHandler {
 		} else {
 			const is_within_boundary = delta < get_effect!.duration - get_effect!.end
 			if (is_within_boundary) {
-				const end = Math.round((this.initial_end + delta * Math.pow(2, -timeline.zoom)) / frame_duration) * frame_duration
+				const end = Math.round((this.initial_end + delta * Math.pow(2, -timeline.zoom)) / frame_duration) * frame_duration < this.effect!.duration 
+					? Math.round((this.initial_end + delta * Math.pow(2, -timeline.zoom)) / frame_duration) * frame_duration
+					: this.effect!.duration
 				this.actions.set_effect_end(get_effect!, end)
 			}
 		}

@@ -35,6 +35,12 @@ export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldE
 				setCords(center_of_effect)
 		}
 		},
+		effect_trim_listener() {
+			if(handler.effect_resize_handle_drag.hovering) {
+				handler.effect_dragover(handler.effect_resize_handle_drag.hovering!.client_x, use.context.state.timeline)
+				return
+			}
+		},
 		start(event: DragEvent) {
 			const img = new Image()
 			img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
@@ -54,6 +60,7 @@ export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldE
 		return () => removeEventListener("drop", drag_events.drop)
 	})
 	drag_events.effect_drag_listener()
+	drag_events.effect_trim_listener()
 	
 	const text_effect_specific_styles = () => {
 		if(effect.kind === "text") {
