@@ -35,6 +35,7 @@ export interface VideoEffect extends Effect {
 	kind: "video"
 	thumbnail: string
 	raw_duration: number
+	frames: number
 }
 
 export interface AudioEffect extends Effect {

@@ -69,19 +69,19 @@ export class VideoExport {
 		return closest!
 	}
 
-	#remove_stale_chunks(effect_id: string, thresholdTimestamp: number) {
-		const timebase_in_ms = 1000/this.#timebase
+	#remove_stale_chunks(thresholdTimestamp: number) {
 		const entriesToRemove: string[] = []
+		const timebase_in_ms = 1000/this.#timebase
 
-		/* margin to keep about one frame more incase its needed,
-		* for some reason sometimes its needed, but im lazy to fix it */
+	/* margin to keep about one frame more incase its needed,
+-		* for some reason sometimes its needed, but im lazy to fix it */
 		const margin_for_additional_frame = timebase_in_ms * 1.5
 
-		this.decoded_frames.forEach((value, key) => {
-				if (value.effect_id === effect_id && value.timestamp < thresholdTimestamp - margin_for_additional_frame) {
-						entriesToRemove.push(key)
-				}
-		});
+ 		this.decoded_frames.forEach((value, key) => {
+			if (value.timestamp < thresholdTimestamp - margin_for_additional_frame) {
+				entriesToRemove.push(key)
+			}
+		})
 
 		entriesToRemove.forEach(key => {
 				const decoded = this.decoded_frames.get(key)
@@ -107,7 +107,7 @@ export class VideoExport {
 				draw_queue.push(() => {
 					this.ctx?.drawImage(frame, 0, 0, this.canvas.width, this.canvas.height)
 					frame.close()
-					this.#remove_stale_chunks(effect_id, this.#timestamp)
+					this.#remove_stale_chunks(this.#timestamp)
 					this.decoded_frames.delete(frame_id)
 				})
 			}

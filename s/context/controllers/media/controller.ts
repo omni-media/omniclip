@@ -1,11 +1,14 @@
 import {quick_hash} from "@benev/construct"
 import {generate_id, pub} from "@benev/slate"
+import {FFprobeWorker} from "ffprobe-wasm/browser.mjs"
 
 import {Compositor} from "../compositor/controller.js"
 import {TimelineActions} from "../timeline/actions.js"
 import {AudioEffect, ImageEffect, VideoEffect, XTimeline} from "../timeline/types.js"
 import {find_place_for_new_effect} from "../timeline/utils/find_place_for_new_effect.js"
 import {Video, VideoFile, AnyMedia, ImageFile, Image, AudioFile, Audio} from "../../../components/omni-media/types.js"
+
+const ffprobe = new FFprobeWorker()
 
 export class Media {
 	#database_request = window.indexedDB.open("database", 3)
@@ -81,6 +84,7 @@ export class Media {
 
 	async import_file(input: HTMLInputElement) {
 		const imported_file = input.files?.[0]
+		const frames = imported_file?.type.startsWith("video") ? await ffprobe.getFrames(imported_file, 1) : null
 		if(imported_file) {
 			const hash = await quick_hash(imported_file)
 			const transaction = this.#database_request.result.transaction(["files"], "readwrite")
@@ -95,8 +99,8 @@ export class Media {
 						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "image"}], action: "added"})
 					}
 					else if(imported_file.type.startsWith("video")) {
-						files_store.add({file: imported_file, hash, kind: "video"})
-						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "video"}], action: "added"})
+						files_store.add({file: imported_file, hash, kind: "video", frames: frames?.nb_frames!})
+						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "video", frames: frames?.nb_frames!}], action: "added"})
 					}
 					else if(imported_file.type.startsWith("audio")) {
 						files_store.add({file: imported_file, hash, kind: "audio"})
@@ -110,8 +114,9 @@ export class Media {
 	
 	add_video_effect(video: Video, compositor: Compositor, timeline: XTimeline) {
 		const duration = video.element.duration * 1000
-		const adjusted_duration_to_timebase = Math.floor(duration / (1000/timeline.timebase)) * (1000/timeline.timebase)
+		const adjusted_duration_to_timebase = Math.floor(duration / (1000/timeline.timebase)) * (1000/timeline.timebase) - 40
 		const effect: VideoEffect = {
+			frames: video.frames,
 			id: generate_id(),
 			kind: "video",
 			raw_duration: duration,
@@ -207,12 +212,12 @@ export class Media {
 
 	async create_videos_from_video_files(files: VideoFile[]) {
 		const videos: Video[] = []
-		for(const {file, hash} of files) {
+		for(const {file, hash, frames} of files) {
 			const video = document.createElement('video')
 			video.src = URL.createObjectURL(file)
 			video.load()
 			const url = await this.create_video_thumbnail(video)
-			videos.push({element: video, file, hash, kind: "video", thumbnail: url})
+			videos.push({element: video, file, hash, kind: "video", thumbnail: url, frames})
 		}
 		return videos
 	}

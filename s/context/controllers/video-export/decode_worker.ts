@@ -12,14 +12,14 @@ let timebase = 25
 
 const decoder = new VideoDecoder({
 	output(frame) {
-		if(timestamp >= timestamp_start + decoded_effect.start && timestamp <= timestamp_start + decoded_effect.end) {
+		timestamp += (decoded_effect.duration / decoded_effect.frames)
+		if(timestamp >= timestamp_start + decoded_effect.start && timestamp <= timestamp_start + decoded_effect.end + 100) {
 			self.postMessage({action: "new-frame", frame: {timestamp: timestamp - decoded_effect.start, frame, effect_id: decoded_effect.id, frames_count: frames}}, [frame])
 			frame.close()
 			wait_time = 0
 		} else {
 			frame.close()
 		}
-		timestamp += 1000/timebase
 	},
 	error: (e) => console.log(e)
 })
