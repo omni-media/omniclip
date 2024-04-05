@@ -33,23 +33,33 @@ export const MediaPlayer = shadow_view(use => () => {
 		return () => {unsub_on_playing(), unsub_onplayhead()}
 	})
 
+	const figure = use.defer(() => use.shadow.querySelector("figure"))!
+
+	const toggle_fullScreen = () => {
+		if (!document.fullscreenElement) {
+			figure.requestFullscreen()
+		} else if (document.exitFullscreen) {
+			document.exitFullscreen()
+		}
+	}
+
 	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<div class="flex">
 			<figure>
 				${TextPositioner([])}
 				${compositor.canvas}
+				<div id="video-controls" class="controls">
+					<button
+						@click=${compositor.toggle_video_playing}
+						id="playpause"
+						type="button"
+						data-state="${state.is_playing ? 'pause' : 'play'}"
+					>
+						${state.is_playing ? pauseSvg : playSvg}
+					</button>
+					<button @click=${toggle_fullScreen} class="fs" type="button" data-state="go-fullscreen">${fullscreenSvg}</button>
+				</div>
 			</figure>
-			<div id="video-controls" class="controls">
-				<button
-					@click=${compositor.toggle_video_playing}
-					id="playpause"
-					type="button"
-					data-state="${state.is_playing ? 'pause' : 'play'}"
-				>
-					${state.is_playing ? pauseSvg : playSvg}
-				</button>
-				<button class="fs" type="button" data-state="go-fullscreen">${fullscreenSvg}</button>
-			</div>
 		</div>
 	`)
 })

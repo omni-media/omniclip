@@ -31,7 +31,10 @@ export const styles = css`
 	.controls {
 		display: flex;
 		justify-content: center;
-		position: relative;
+		position: absolute;
+		bottom: 1em;
+		right: 1em;
+		width: 100%;
 		margin: 0.5em;
 
 		& button {
