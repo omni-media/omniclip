@@ -4,8 +4,8 @@ import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
 import playSvg from "../../../../icons/gravity-ui/play.svg.js"
 import pauseSvg from "../../../../icons/gravity-ui/pause.svg.js"
-import {TextPositioner} from "../../../../views/text-positioner/view.js"
 import fullscreenSvg from "../../../../icons/gravity-ui/fullscreen.svg.js"
+import {EffectPositioner} from "../../../../views/effect-positioner/view.js"
 import {loadingPlaceholder} from "../../../../views/loading-placeholder/view.js"
 
 export const MediaPlayer = shadow_view(use => () => {
@@ -46,7 +46,7 @@ export const MediaPlayer = shadow_view(use => () => {
 	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<div class="flex">
 			<figure>
-				${TextPositioner([])}
+				${EffectPositioner([])}
 				${compositor.canvas}
 				<div id="video-controls" class="controls">
 					<button

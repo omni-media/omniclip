@@ -36,6 +36,7 @@ export interface VideoEffect extends Effect {
 	thumbnail: string
 	raw_duration: number
 	frames: number
+	rect: EffectRect
 }
 
 export interface AudioEffect extends Effect {
@@ -46,6 +47,7 @@ export interface AudioEffect extends Effect {
 export interface ImageEffect extends Effect {
 	kind: "image"
 	url: string
+	rect: EffectRect
 }
 
 export type TextEffectProps = Omit<TextEffect, keyof Effect | "kind">
@@ -53,7 +55,7 @@ export type FontStyle = "italic" | "bold" | "normal"
 export type Font = "Arial" | "Lato"
 export type TextAlign = "left" | "right" | "center"
 
-export interface TextRect {
+export interface EffectRect {
 	width: number
 	height: number
 	position_on_canvas: {
@@ -71,7 +73,7 @@ export interface TextEffect extends Effect {
 	size: number
 	style: FontStyle
 	align: TextAlign
-	rect: TextRect
+	rect: EffectRect
 }
 
 export type AnyEffect = (

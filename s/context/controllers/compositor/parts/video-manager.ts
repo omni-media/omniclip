@@ -21,13 +21,38 @@ export class VideoManager extends Map<string, {element: HTMLVideoElement, file: 
 		// video.preload = 'auto';
 	}
 
-	draw_video_frame(video: HTMLVideoElement) {
+	draw_video_frame(effect: VideoEffect, frame?: VideoFrame) {
+		if(effect.rect.rotation) {
+			this.#draw_with_rotation(effect, frame)
+		} else {
+			this.#draw_without_rotation(effect, frame)
+		}
+	}
+
+	#draw_with_rotation(effect: VideoEffect, frame?: VideoFrame) {
+		const {element} = this.get(effect.id)!
+		const {rect} = effect
+		this.compositor.ctx!.save()
+		this.compositor.EffectManager.rotate_effect(effect)
 		this.compositor.ctx!.drawImage(
-			video,
-			0,
-			0,
-			this.compositor.canvas.width,
-			this.compositor.canvas.height
+			frame ?? element,
+			-rect.width / 2,
+			-rect.height / 2,
+			rect.width,
+			rect.height
+		)
+		this.compositor.ctx!.restore()
+	}
+
+	#draw_without_rotation(effect: VideoEffect, frame?: VideoFrame) {
+		const {element} = this.get(effect.id)!
+		const {rect} = effect
+		this.compositor.ctx!.drawImage(
+			frame ?? element,
+			rect.position_on_canvas.x,
+			rect.position_on_canvas.y,
+			rect.width,
+			rect.height
 		)
 	}
 

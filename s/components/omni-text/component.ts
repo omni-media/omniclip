@@ -11,7 +11,6 @@ export const OmniText = shadow_component(use => {
 	const actions = use.context.actions
 
 	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
-		<h2>Add Text</h2>
 		<div class="examples">
 			<div class="example">
 				<span style="color: #e66465; font-family: Lato;" class="text">

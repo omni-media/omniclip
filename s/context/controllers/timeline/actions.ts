@@ -4,7 +4,7 @@ import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 import {TimelineHelpers} from "./helpers.js"
 import {find_place_for_new_effect} from "./utils/find_place_for_new_effect.js"
 import {actionize_historical, actionize_non_historical} from "../../../utils/actionize.js"
-import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, TextRect, VideoEffect} from "./types.js"
+import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, EffectRect, VideoEffect} from "./types.js"
 
 export const timeline_non_historical_actions = actionize_non_historical({
 	zoom_in: state => () => {
@@ -110,7 +110,7 @@ export const timeline_historical_actions = actionize_historical({
 		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
 		effect.align = align
 	},
-	set_text_rect: state => ({id}: TextEffect, rect: TextRect) => {
+	set_text_rect: state => ({id}: TextEffect, rect: EffectRect) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
 		(state.timeline.selected_effect as TextEffect).rect = rect
 		effect.rect = rect
@@ -151,23 +151,17 @@ export const timeline_historical_actions = actionize_historical({
 	add_track: state => () => {
 		state.timeline.tracks.push({id: generate_id()})
 	},
-	set_text_rotation: state => ({id}: TextEffect, rotation: number) => {
-		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
+	set_rotation: state => ({id}: TextEffect | ImageEffect | VideoEffect, rotation: number) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect | VideoEffect | ImageEffect
 		effect.rect.rotation = rotation
-		if(state.timeline.selected_effect?.kind === "text")
-			state.timeline.selected_effect.rect.rotation = rotation
+		if(state.timeline.selected_effect?.kind !== "audio")
+			state.timeline.selected_effect!.rect.rotation = rotation
 	},
-	set_text_position_on_canvas: state => ({id}: TextEffect, x: number, y: number) => {
+	set_position_on_canvas: state => ({id}: TextEffect | ImageEffect | VideoEffect, x: number, y: number) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
-		effect.rect.position_on_canvas = {
-			x,
-			y
-		}
-		if(state.timeline.selected_effect?.kind === "text")
-			state.timeline.selected_effect.rect.position_on_canvas = {
-				x,
-				y
-			}
+		effect.rect.position_on_canvas = {x, y}
+		if(state.timeline.selected_effect?.kind !== "audio")
+			state.timeline.selected_effect!.rect.position_on_canvas = {x, y}
 	},
 })
 

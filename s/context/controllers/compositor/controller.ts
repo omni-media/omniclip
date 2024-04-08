@@ -5,6 +5,7 @@ import {ImageManager} from "./parts/image-manager.js"
 import {AudioManager} from "./parts/audio-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
 import {TimelineActions} from "../timeline/actions.js"
+import {EffectManager} from "./parts/effect-manager.js"
 import {AnyEffect, XTimeline} from "../timeline/types.js"
 
 export class Compositor {
@@ -22,12 +23,15 @@ export class Compositor {
 	VideoManager = new VideoManager(this)
 	TextManager: TextManager
 	ImageManager = new ImageManager(this)
+	EffectManager: EffectManager
 	AudioManager = new AudioManager(this)
 
 	constructor(private actions: TimelineActions) {
 		this.canvas.width = 1280
 		this.canvas.height = 720
 		this.TextManager = new TextManager(this, actions)
+		this.EffectManager = new EffectManager(this, actions)
+
 		this.#on_playing()
 		reactor.reaction(
 			() => this.#is_playing.value,
@@ -73,6 +77,7 @@ export class Compositor {
 	}
 
 	async draw_effects(redraw?: boolean, timecode?: number) {
+		this.clear_canvas()
 		const effects_sorted_by_track = this.#sort_effects_by_track(this.currently_played_effects!)
 		if(this.currently_played_effects) {
 			for(const effect of effects_sorted_by_track) {
@@ -84,11 +89,11 @@ export class Compositor {
 						element.currentTime = current_time
 					}
 					try {
-						this.VideoManager.draw_video_frame(element)
+						this.VideoManager.draw_video_frame(effect)
 					} catch(e) {console.log(e)}
 				}
 				else if(effect.kind === "text") {
-					this.TextManager.draw_text(effect, this.ctx!)
+					this.TextManager.draw_text(effect)
 				}
 				else if(effect.kind === "image") {
 					this.ImageManager.draw_image_frame(effect)

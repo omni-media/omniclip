@@ -11,6 +11,8 @@ import {loadingPlaceholder} from "../../../../views/loading-placeholder/view.js"
 export const Export = shadow_view(use => () => {
 	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
+
+	const compositor = use.context.controllers.compositor
 	const video_export = use.context.controllers.video_export
 	const state = use.context.state.timeline
 	const [logs, setLogs, getLogs] = use.state<string[]>([])
@@ -27,19 +29,14 @@ export const Export = shadow_view(use => () => {
 	}
 	
 	use.mount(() => {
-		watch.track(() => use.context.state.timeline.log, (log) => {
+		const dispose = watch.track(() => use.context.state.timeline.log, (log) => {
 			if(getLogs().length === 20) {
 				const new_arr = getLogs().slice(1)
 				setLogs(new_arr)
 			}
 			setLogs([...getLogs(), log])
 		})
-		const resizer = () => {
-			video_export.canvas.width = window.innerWidth
-			video_export.canvas.height = window.innerHeight
-		}
-		window.addEventListener("resize", resizer)
-		return () => window.removeEventListener("resize", resizer)
+		return () => dispose()
 	})
 
 	if(use.context.state.timeline.is_exporting) {
@@ -51,7 +48,7 @@ export const Export = shadow_view(use => () => {
 		<div class="flex">
 			<dialog @cancel=${(e: Event) => e.preventDefault()}>
 				<div class="box">
-					${video_export.canvas}
+					${compositor.canvas}
 					<div class="flex-col">
 						<div class="progress">
 							<span class="status">

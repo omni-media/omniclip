@@ -5,11 +5,11 @@ import {shadow_view} from "../../context/slate.js"
 import {TextUpdater} from "../text-updater/view.js"
 import rotateSvg from "../../icons/material-design-icons/rotate.svg.js"
 
-export const TextPositioner = shadow_view(use => () => {
+export const EffectPositioner = shadow_view(use => () => {
 	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const {canvas} = use.context.controllers.compositor
-	const selected_effect = use.context.state.timeline.selected_effect?.kind === "text"
+	const selected_effect = use.context.state.timeline.selected_effect?.kind !== "audio" 
 		? use.context.state.timeline.selected_effect
 		: null
 
@@ -36,7 +36,7 @@ export const TextPositioner = shadow_view(use => () => {
 					height: ${selected_effect?.rect.height / scaleY}px;
 					left: ${selected_effect.rect.position_on_canvas.x / scaleX}px;
 					transform: rotate(${selected_effect.rect.rotation}rad);
-					top: ${(selected_effect.rect.position_on_canvas.y - selected_effect.rect.height) / scaleY}px;
+					top: ${(selected_effect.rect.position_on_canvas.y ) / scaleY}px;
 				"
 			>
 				<span class="rotate">${rotateSvg}</span>
@@ -44,7 +44,7 @@ export const TextPositioner = shadow_view(use => () => {
 			</div>
 		`
 		: null}
-		${selected_effect 
+		${selected_effect?.kind === "text"
 			? TextUpdater([selected_effect, box!])
 			: null
 		}

@@ -24,16 +24,12 @@ export class VideoExport {
 	#timebase = 25
 	#timestamp = 0
 	#timestamp_end = 0
-	readonly canvas = document.createElement("canvas")
-	ctx = this.canvas.getContext("2d")!
 
 	decoded_effects = new Map<string, string>()
 	decoded_frames: Map<string, DecodedFrame> = new Map()
 	#FPSCounter: FPSCounter
 
 	constructor(private actions: TimelineActions, private ffmpeg: FFmpegHelper, private compositor: Compositor) {
-		this.canvas.width = 1280
-		this.canvas.height = 720
 		this.#FPSCounter = new FPSCounter(this.actions.set_fps, 100)
 	}
 
@@ -91,11 +87,10 @@ export class VideoExport {
 	}
 
 	#clear_canvas() {
-		this.ctx?.clearRect(0, 0, 1280, 720)
+		this.compositor.ctx?.clearRect(0, 0, 1280, 720)
 	}
 
 	async #export_process(effects: AnyEffect[]) {
-		this.#clear_canvas()
 		const effects_at_timestamp = get_effects_at_timestamp(effects, this.#timestamp)
 		const draw_queue: (() => void)[] = []
 		let frame_duration = null
@@ -105,24 +100,24 @@ export class VideoExport {
 				const {frame, frames_count, frame_id, effect_id} = await this.#get_frame_from_video(effect, this.#timestamp)
 				frame_duration = effect.duration / frames_count
 				draw_queue.push(() => {
-					this.ctx?.drawImage(frame, 0, 0, this.canvas.width, this.canvas.height)
+					this.compositor.VideoManager.draw_video_frame(effect, frame)
 					frame.close()
 					this.#remove_stale_chunks(this.#timestamp)
 					this.decoded_frames.delete(frame_id)
 				})
 			}
-			if(effect.kind === "text") {
-				draw_queue.push(() => this.compositor.TextManager.draw_text(effect, this.ctx))
+			else if(effect.kind === "text") {
+				draw_queue.push(() => this.compositor.TextManager.draw_text(effect))
 			}
 			else if(effect.kind === "image") {
-				draw_queue.push(async () => this.compositor.ImageManager.draw_image_frame(effect))
+				draw_queue.push(() => this.compositor.ImageManager.draw_image_frame(effect))
 			}
 		}
 
 		this.actions.set_export_status("composing")
+		this.#clear_canvas()
 		for(const draw of draw_queue) {draw()}
-		this.#encode_composed_frame(this.canvas, 1000/this.#timebase)
-
+		await this.#encode_composed_frame(this.compositor.canvas)
 		this.#timestamp += 1000/this.#timebase
 
 		const progress = this.#timestamp / this.#timestamp_end * 100 // for progress bar
@@ -150,17 +145,17 @@ export class VideoExport {
 		})
 	}
 
-	#frame_config(canvas: HTMLCanvasElement, duration: number): VideoFrameInit {
+	#frame_config(canvas: HTMLCanvasElement): VideoFrameInit {
 		return {
 			displayWidth: canvas.width,
 			displayHeight: canvas.height,
-			duration,
+			duration: 1000/this.#timebase,
 			timestamp: this.#timestamp * 1000
 		}
 	}
 
-	#encode_composed_frame(canvas: HTMLCanvasElement, duration: number) {
-		const frame = new VideoFrame(canvas, this.#frame_config(canvas, duration))
+	async #encode_composed_frame(canvas: HTMLCanvasElement) {
+		const frame = new VideoFrame(canvas, this.#frame_config(canvas))
 		this.#encode_worker.postMessage({frame, action: "encode"})
 		frame.close()
 	}

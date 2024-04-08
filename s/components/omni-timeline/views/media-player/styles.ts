@@ -36,6 +36,7 @@ export const styles = css`
 		right: 1em;
 		width: 100%;
 		margin: 0.5em;
+		z-index: 999;
 
 		& button {
 			display: flex;
