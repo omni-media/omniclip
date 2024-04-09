@@ -9,7 +9,7 @@ export const EffectPositioner = shadow_view(use => () => {
 	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const {canvas} = use.context.controllers.compositor
-	const selected_effect = use.context.state.timeline.selected_effect?.kind !== "audio" 
+	const selected_effect = use.context.state.timeline.selected_effect?.kind !== "audio"
 		? use.context.state.timeline.selected_effect
 		: null
 
@@ -40,7 +40,11 @@ export const EffectPositioner = shadow_view(use => () => {
 				"
 			>
 				<span class="rotate">${rotateSvg}</span>
-				<div class="text-rect"></div>
+				<div class="width left handle"></div>
+				<div class="width right handle"></div>
+				<div class="height top handle"></div>
+				<div class="height bottom handle"></div>
+				<div class="rect"></div>
 			</div>
 		`
 		: null}

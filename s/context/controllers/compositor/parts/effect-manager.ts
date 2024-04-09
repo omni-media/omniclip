@@ -13,7 +13,7 @@ export class EffectManager {
 	constructor(private compositor: Compositor, private actions: TimelineActions) {
 		window.addEventListener("pointerdown", (e) => {
 			const rotate_indicator = e.composedPath().find((e) => (e as HTMLElement).className === "rotate")
-			const rect = e.composedPath().find((e) => (e as HTMLElement).className === "text-rect")
+			const rect = e.composedPath().find((e) => (e as HTMLElement).className === "rect")
 			const omni_text_panel =	e.composedPath().find((e: any) => e.getAttribute ? e.getAttribute("view") === "text" : null)
 			if(rotate_indicator) {this.#on_rotate_indicator_pointer_down = true}
 				else {
