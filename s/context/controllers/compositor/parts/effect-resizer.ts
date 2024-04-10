@@ -2,7 +2,7 @@ import {Compositor} from "../controller.js"
 import {TimelineActions} from "../../timeline/actions.js"
 import {AnyEffect, AudioEffect} from "../../timeline/types.js"
 
-type Handle = "left" | "right" | "top" | "bottom"
+type Handle = "left" | "right" | "top" | "bottom" | "top-left" | "top-right" | "bottom-right" | "bottom-left"
 
 export class EffectResizer {
 	selected_handle: Handle | null = null
@@ -25,30 +25,49 @@ export class EffectResizer {
 
 	resize_effect = (e: PointerEvent) => {
 		if (this.selected_handle) {
-			let newWidth = this.start_width
-			let newHeight = this.start_height
-			const scaleX = this.compositor.canvas.width / this.compositor.canvas.getBoundingClientRect().width
-			const scaleY = this.compositor.canvas.height / this.compositor.canvas.getBoundingClientRect().height
+			let new_width = this.start_width
+			let new_height = this.start_height
+			const scale_x = this.compositor.canvas.width / this.compositor.canvas.getBoundingClientRect().width
+			const scale_y = this.compositor.canvas.height / this.compositor.canvas.getBoundingClientRect().height
+			const adjusted_y = (e.clientY - this.compositor.canvas.getBoundingClientRect().top) * scale_y
+			const adjusted_x = (e.clientX - this.compositor.canvas.getBoundingClientRect().left) * scale_x
 			switch (this.selected_handle) {
 				case "top":
-					newHeight = this.start_height - (e.clientY - this.start_y) * scaleY
-					const adjustedY = (e.clientY - this.compositor.canvas.getBoundingClientRect().top) * scaleY
-					this.actions.set_position_on_canvas(this.effect!, this.effect!.rect.position_on_canvas.x, adjustedY)
+					new_height = this.start_height - (e.clientY - this.start_y) * scale_y
+					this.actions.set_position_on_canvas(this.effect!, this.effect!.rect.position_on_canvas.x, adjusted_y)
 					break
 				case "right":
-					newWidth = this.start_width + (e.clientX - this.start_x) * scaleX;
+					new_width = this.start_width + (e.clientX - this.start_x) * scale_x
 					break
 				case "left":
-					const adjustedX = (e.clientX - this.compositor.canvas.getBoundingClientRect().left) * scaleX
-					newWidth = this.start_width - (e.clientX - this.start_x) * scaleX
-					this.actions.set_position_on_canvas(this.effect!, adjustedX, this.effect!.rect.position_on_canvas.y)
+					new_width = this.start_width - (e.clientX - this.start_x) * scale_x
+					this.actions.set_position_on_canvas(this.effect!, adjusted_x, this.effect!.rect.position_on_canvas.y)
 					break
 				case "bottom":
-					newHeight = this.start_height + (e.clientY - this.start_y) * scaleY
+					new_height = this.start_height + (e.clientY - this.start_y) * scale_y
+					break
+				case "bottom-right":
+					new_height = this.start_height + (e.clientY - this.start_y) * scale_y
+					new_width = this.start_width + (e.clientX - this.start_x) * scale_x
+					break
+				case "top-right":
+					new_height = this.start_height - (e.clientY - this.start_y) * scale_y
+					new_width = this.start_width + (e.clientX - this.start_x) * scale_x
+					this.actions.set_position_on_canvas(this.effect!, this.effect!.rect.position_on_canvas.x, adjusted_y)
+					break
+				case "top-left":
+					new_height = this.start_height - (e.clientY - this.start_y) * scale_y
+					new_width = this.start_width - (e.clientX - this.start_x) * scale_x
+					this.actions.set_position_on_canvas(this.effect!, adjusted_x, adjusted_y)
+					break
+				case "bottom-left":
+					new_height = this.start_height + (e.clientY - this.start_y) * scale_y
+					new_width = this.start_width - (e.clientX - this.start_x) * scale_x
+					this.actions.set_position_on_canvas(this.effect!, adjusted_x, this.effect!.rect.position_on_canvas.y)
 					break
 			}
-			this.actions.set_effect_height(this.effect!, newHeight)
-			this.actions.set_effect_width(this.effect!, newWidth)
+			this.actions.set_effect_height(this.effect!, new_height)
+			this.actions.set_effect_width(this.effect!, new_width)
 		}
 	}
 }

@@ -13,34 +13,65 @@ export const styles = css`
 			z-index: 2;
 			border: 1px solid gray;
 			border-radius: 5px;
+			min-width: 5px;
+			min-height: 5px;
+		}
+
+		& .corner {
+			width: 10px;
+			height: 10px;
+		}
+
+		& .top-left {
+			top: -5px;
+			left: -5px;
+			cursor: nwse-resize;
+		}
+
+		& .top-right {
+			top: -5px;
+			right: -5px;
+			cursor: nesw-resize;
+		}
+
+		& .bottom-right {
+			bottom: -5px;
+			right: -5px;
+			cursor: nw-resize;
+		}
+
+		& .bottom-left {
+			bottom: -5px;
+			left: -5px;
+			cursor: ne-resize;
 		}
 
 		& .left {
-			left: -1.5%;
+			left: -5px;
 		}
 
 		& .right {
-			right: -1.5%;
+			right: -5px;
 		}
 
 		& .top {
-			top: -1.5%;
+			top: -5px;
 		}
 
 		& .bottom {
-			bottom: -1.5%;
+			bottom: -5px;
 		}
 
 		& .width {
 			top: 42.5%;
-			width: 3%;
+			width: 10px;
 			height: 15%;
 			cursor: e-resize;
 		}
 
 		& .height {
 			width: 15%;
-			height: 3%;
+			height: 10px;
 			right: 42.5%;
 			cursor: n-resize;
 		}

@@ -50,6 +50,10 @@ export const EffectPositioner = shadow_view(use => () => {
 				<div @pointerdown=${(e: MouseEvent) => compositor.EffectResizer.set_handle(e, "right", selected_effect)} class="width right handle"></div>
 				<div @pointerdown=${(e: MouseEvent) => compositor.EffectResizer.set_handle(e, "top", selected_effect)} class="height top handle"></div>
 				<div @pointerdown=${(e: MouseEvent) => compositor.EffectResizer.set_handle(e, "bottom", selected_effect)} class="height bottom handle"></div>
+				<div @pointerdown=${(e: MouseEvent) => compositor.EffectResizer.set_handle(e, "top-left", selected_effect)} class="corner top-left handle"></div>
+				<div @pointerdown=${(e: MouseEvent) => compositor.EffectResizer.set_handle(e, "top-right", selected_effect)} class="corner top-right handle"></div>
+				<div @pointerdown=${(e: MouseEvent) => compositor.EffectResizer.set_handle(e, "bottom-left", selected_effect)} class="corner bottom-left handle"></div>
+				<div @pointerdown=${(e: MouseEvent) => compositor.EffectResizer.set_handle(e, "bottom-right", selected_effect)} class="corner bottom-right handle"></div>
 				<div class="rect"></div>
 			</div>
 		`
