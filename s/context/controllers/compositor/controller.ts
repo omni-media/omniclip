@@ -6,6 +6,7 @@ import {AudioManager} from "./parts/audio-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
 import {TimelineActions} from "../timeline/actions.js"
 import {EffectManager} from "./parts/effect-manager.js"
+import {EffectResizer} from "./parts/effect-resizer.js"
 import {AnyEffect, XTimeline} from "../timeline/types.js"
 
 export class Compositor {
@@ -25,12 +26,14 @@ export class Compositor {
 	ImageManager = new ImageManager(this)
 	EffectManager: EffectManager
 	AudioManager = new AudioManager(this)
+	EffectResizer: EffectResizer
 
 	constructor(private actions: TimelineActions) {
 		this.canvas.width = 1280
 		this.canvas.height = 720
 		this.TextManager = new TextManager(this, actions)
 		this.EffectManager = new EffectManager(this, actions)
+		this.EffectResizer = new EffectResizer(this, actions)
 
 		this.#on_playing()
 		reactor.reaction(

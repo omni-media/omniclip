@@ -163,6 +163,18 @@ export const timeline_historical_actions = actionize_historical({
 		if(state.timeline.selected_effect?.kind !== "audio")
 			state.timeline.selected_effect!.rect.position_on_canvas = {x, y}
 	},
+	set_effect_width: state => ({id}: TextEffect | ImageEffect | VideoEffect, width: number) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as Exclude<AnyEffect, AudioEffect>
+		effect.rect.width = width
+		if(state.timeline.selected_effect?.kind !== "audio")
+			state.timeline.selected_effect!.rect.width = width
+	},
+	set_effect_height: state => ({id}: TextEffect | ImageEffect | VideoEffect, height: number) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as Exclude<AnyEffect, AudioEffect>
+		effect.rect.height = height
+		if(state.timeline.selected_effect?.kind !== "audio")
+			state.timeline.selected_effect!.rect.height = height
+	}
 })
 
 export type TimelineActions = TimelineHistoricalActions & TimelineNonHistoricalActions
