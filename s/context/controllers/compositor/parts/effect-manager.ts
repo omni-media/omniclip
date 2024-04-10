@@ -9,11 +9,13 @@ export class EffectManager {
 	#clicked_effect: ImageEffect | VideoEffect | TextEffect | null = null
 	#on_rect_pointer_down = false
 	#on_rotate_indicator_pointer_down = false
+	#offset_x = 0
+	#offset_y = 0
 
 	constructor(private compositor: Compositor, private actions: TimelineActions) {
 		window.addEventListener("pointerdown", (e) => {
 			const rotate_indicator = e.composedPath().find((e) => (e as HTMLElement).className === "rotate")
-			const rect = e.composedPath().find((e) => (e as HTMLElement).className === "rect")
+			const rect = e.composedPath().find((e) => (e as HTMLElement).className === "rect") as HTMLElement
 			const omni_text_panel =	e.composedPath().find((e: any) => e.getAttribute ? e.getAttribute("view") === "text" : null)
 			if(rotate_indicator) {this.#on_rotate_indicator_pointer_down = true}
 				else {
@@ -21,7 +23,12 @@ export class EffectManager {
 						return
 					this.#set_clicked_effect(e)
 				}
-			if(rect) {this.#on_rect_pointer_down = true}
+			if(rect) {
+				const [offset_x, offset_y] = coordinates_in_rect([e.clientX, e.clientY], rect!.getBoundingClientRect())!
+				this.#offset_x = offset_x
+				this.#offset_y = offset_y
+				this.#on_rect_pointer_down = true
+			}
 		})
 		window.addEventListener("pointerup", () => {
 			this.#on_rotate_indicator_pointer_down = false
@@ -46,17 +53,12 @@ export class EffectManager {
 		const coordinates = coordinates_in_rect([e.clientX, e.clientY], canvasRect)
 		if(!coordinates)
 			return
-	
-		const x = coordinates[0] * scaleX
-		const y = coordinates[1] * scaleY
-
-		this.actions.set_position_on_canvas(effect, x - effect.rect.width / 2, y - effect.rect.height / 2)
+		const x = (coordinates[0] - this.#offset_x) * scaleX
+		const y = (coordinates[1] - this.#offset_y) * scaleY
+		this.actions.set_position_on_canvas(effect, x, y)
 		const updated_effect: ImageEffect | VideoEffect | TextEffect = {...effect, rect: {
 			...effect.rect,
-			position_on_canvas: {
-				x: x - effect.rect.width / 2,
-				y: y - effect.rect.height / 2
-			}
+			position_on_canvas: {x, y}
 		}}
 		this.#clicked_effect = updated_effect
 		this.compositor.update_currently_played_effect(updated_effect)
