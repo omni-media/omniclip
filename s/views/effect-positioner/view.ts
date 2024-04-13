@@ -38,11 +38,15 @@ export const EffectPositioner = shadow_view(use => () => {
 			<div
 				class="box"
 				style="
-					width: ${selected_effect?.rect?.width / scaleX}px;
-					height: ${selected_effect?.rect.height / scaleY}px;
-					left: ${selected_effect.rect.position_on_canvas.x / scaleX}px;
-					transform: rotate(${selected_effect.rect.rotation}rad);
-					top: ${(selected_effect.rect.position_on_canvas.y ) / scaleY}px;
+					transform-origin: center;
+					transform:
+						translate(
+							${selected_effect.rect.position_on_canvas.x / scaleY}px,
+							${selected_effect.rect.position_on_canvas.y / scaleY}px
+						)
+						rotate(${selected_effect.rect.rotation}rad);
+					width: ${selected_effect.rect.width / scaleX}px;
+					height: ${selected_effect.rect.height / scaleY}px;
 				"
 			>
 				<span class="rotate">${rotateSvg}</span>
