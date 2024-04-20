@@ -1,25 +1,66 @@
+import {generate_id} from "@benev/slate"
+import {FabricText} from "fabric/dist/index.mjs"
+
 import {Compositor} from "../controller.js"
 import {TimelineActions} from "../../timeline/actions.js"
-import {Font, FontStyle, TextAlign, TextEffect} from "../../timeline/types.js"
+import {Font, FontStyle, TextAlign, TextEffect, XTimeline} from "../../timeline/types.js"
+import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
-export class TextManager {
+export class TextManager extends Map<string, FabricText> {
 	#clicked_effect: TextEffect | null = null
 
-	constructor(private compositor: Compositor, private actions: TimelineActions) {}
+	constructor(private compositor: Compositor, private actions: TimelineActions) {super()}
 
-	draw_text(source: TextEffect) {
-		const {size, color, content} = source
-		this.compositor.ctx!.fillStyle = color
-		this.compositor.ctx!.font = `${source.style} ${size}px Lato`
-		this.compositor.ctx!.textAlign = `${source.align}`
-		if(source.rect.rotation) {
-			this.compositor.ctx!.save()
-			this.compositor.EffectManager.rotate_effect(source)
-			this.compositor.ctx!.fillText(content, -source.rect.width + source.rect.width, source.rect.height / 2)
-			this.compositor.ctx!.restore()
-		} else {
-			this.compositor.ctx!.fillText(content, source.rect.position_on_canvas.x + source.rect.width / 2, source.rect.position_on_canvas.y + source.rect.height)
+	add_text_effect(timeline: XTimeline) {
+		const effect: TextEffect = {
+			id: generate_id(),
+			kind: "text",
+			start_at_position: 0,
+			duration: 5000,
+			start: 0,
+			end: 5000,
+			track: 0,
+			size: 38,
+			content: "example",
+			style: "normal",
+			font: "Lato",
+			color: "#e66465",
+			align: "center",
+			rect: {
+				position_on_canvas: {
+					x: 100,
+					y: 50,
+				},
+				width: 100,
+				height: 20,
+				rotation: 0,
+			}
 		}
+		this.#add_text(effect)
+		const {position, track} = find_place_for_new_effect(timeline.effects, timeline.tracks)
+		effect.start_at_position = position!
+		effect.track = track
+		this.actions.add_text_effect(effect)
+	}
+
+	#add_text(effect: TextEffect) {
+		const {size, color, content} = effect
+		const text = new FabricText(content, {fill: color, fontSize: size, objectCaching: false})
+		this.set(effect.id, text)
+	}
+
+	add_text_to_canvas(effect: TextEffect) {
+		const max_track = 4 // lower track means it should draw on top of higher tracks, although moveObjectTo z-index works in reverse
+		const text = this.get(effect.id)!
+		this.compositor.canvas.add(text)
+		this.compositor.canvas.moveObjectTo(text, 10)
+		this.compositor.canvas.renderAll()
+	}
+
+	remove_text_from_canvas(effect: TextEffect) {
+		const text = this.get(effect.id)!
+		this.compositor.canvas.remove(text)
+		this.compositor.canvas.renderAll()
 	}
 
 	measure_text_width (content: string, size: number, font: Font, color: string) {

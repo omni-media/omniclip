@@ -5,7 +5,6 @@ import {shadow_view} from "../../../../context/slate.js"
 import playSvg from "../../../../icons/gravity-ui/play.svg.js"
 import pauseSvg from "../../../../icons/gravity-ui/pause.svg.js"
 import fullscreenSvg from "../../../../icons/gravity-ui/fullscreen.svg.js"
-import {EffectPositioner} from "../../../../views/effect-positioner/view.js"
 import {loadingPlaceholder} from "../../../../views/loading-placeholder/view.js"
 
 export const MediaPlayer = shadow_view(use => () => {
@@ -19,17 +18,16 @@ export const MediaPlayer = shadow_view(use => () => {
 	use.mount(() => {
 		const unsub_onplayhead = playhead.on_playhead_drag(() => {
 			if(use.context.state.timeline.is_playing) {compositor.set_video_playing(false)}
-			compositor.update_currently_played_effects(use.context.state.timeline)
-			compositor.draw_effects(true, use.context.state.timeline.timecode)
+			compositor.set_current_time_of_audio_or_video_and_redraw(true, use.context.state.timeline.timecode)
 		})
 		watch.track(
 			() => use.context.state.timeline,
 			(timeline) => {
-				compositor.update_currently_played_effects(timeline)
-				compositor.draw_effects(true)
+				if(!timeline.is_exporting)
+					compositor.compose_effects(timeline.effects, timeline.timecode)
 			}
 		)
-		const unsub_on_playing = compositor.on_playing(() => compositor.update_currently_played_effects(use.context.state.timeline))
+		const unsub_on_playing = compositor.on_playing(() => compositor.compose_effects(use.context.state.timeline.effects, use.context.state.timeline.timecode))
 		return () => {unsub_on_playing(), unsub_onplayhead()}
 	})
 
@@ -46,8 +44,10 @@ export const MediaPlayer = shadow_view(use => () => {
 	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<div class="flex">
 			<figure>
-				${EffectPositioner([])}
-				${compositor.canvas}
+				<div class="canvas-container">
+					${compositor.canvas.getSelectionElement()}
+					${compositor.canvas.getElement()}
+				</div>
 				<div id="video-controls" class="controls">
 					<button
 						@click=${compositor.toggle_video_playing}

@@ -101,7 +101,7 @@ export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldE
 	const set_selected_effect = () => {
 		use.context.actions.timeline_actions.set_selected_effect(effect)
 		if(kind === "text")
-			use.context.controllers.compositor.TextManager.set_clicked_effect(effect as TextEffect)
+			use.context.controllers.compositor.managers.textManager.set_clicked_effect(effect as TextEffect)
 	}
 
 	const wave = use.once(() => document.createElement("div"))
@@ -118,7 +118,7 @@ export const Effect = shadow_view(use => ({id, kind}: AnyEffect, timeline: GoldE
 			})
 
 			wavesurfer.setOptions({width: calculate_effect_width(effect, use.context.state.timeline.zoom)})
-			const {file} = use.context.controllers.compositor.AudioManager.get(id)!
+			const {file} = use.context.controllers.compositor.managers.audioManager.get(id)!
 			const uint = await fetchFile(file)
 			const blob = new Blob([uint])
 			const url = URL.createObjectURL(blob)

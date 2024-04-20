@@ -48,6 +48,8 @@ export class VideoExport {
 		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position - effect.start + effect.end))
 		this.#export_process(sorted_effects)
 		this.actions.set_is_exporting(true)
+		this.compositor.currently_played_effects.clear()
+		this.compositor.canvas.clear()
 	}
 
 	#find_closest_effect_frame(effect: VideoEffect, timestamp: number) {
@@ -86,38 +88,23 @@ export class VideoExport {
 		})
 	}
 
-	#clear_canvas() {
-		this.compositor.ctx?.clearRect(0, 0, 1280, 720)
-	}
-
 	async #export_process(effects: AnyEffect[]) {
 		const effects_at_timestamp = get_effects_at_timestamp(effects, this.#timestamp)
-		const draw_queue: (() => void)[] = []
 		let frame_duration = null
-
 		for(const effect of effects_at_timestamp) {
 			if(effect.kind === "video") {
-				const {frame, frames_count, frame_id, effect_id} = await this.#get_frame_from_video(effect, this.#timestamp)
+				const {frame, frames_count, frame_id} = await this.#get_frame_from_video(effect, this.#timestamp)
 				frame_duration = effect.duration / frames_count
-				draw_queue.push(() => {
-					this.compositor.VideoManager.draw_video_frame(effect, frame)
-					frame.close()
-					this.#remove_stale_chunks(this.#timestamp)
-					this.decoded_frames.delete(frame_id)
-				})
-			}
-			else if(effect.kind === "text") {
-				draw_queue.push(() => this.compositor.TextManager.draw_text(effect))
-			}
-			else if(effect.kind === "image") {
-				draw_queue.push(() => this.compositor.ImageManager.draw_image_frame(effect))
+				this.compositor.managers.videoManager.draw_decoded_frame(effect, frame)
+				frame.close()
+				this.#remove_stale_chunks(this.#timestamp)
+				this.decoded_frames.delete(frame_id)
 			}
 		}
+		this.compositor.compose_effects(effects, this.#timestamp, true)
 
 		this.actions.set_export_status("composing")
-		this.#clear_canvas()
-		for(const draw of draw_queue) {draw()}
-		await this.#encode_composed_frame(this.compositor.canvas)
+		await this.#encode_composed_frame(this.compositor.canvas.lowerCanvasEl)
 		this.#timestamp += 1000/this.#timebase
 
 		const progress = this.#timestamp / this.#timestamp_end * 100 // for progress bar
@@ -189,7 +176,7 @@ export class VideoExport {
 				this.decoded_frames.set(id, {...msg.data.frame, frame_id: id})
 			}
 		})
-		const {file} = this.compositor.VideoManager.get(effect.id)!
+		const {file} = this.compositor.managers.videoManager.get(effect.id)!
 		worker.postMessage({action: "demux", effect: {
 			...effect,
 			file

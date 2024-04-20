@@ -1,81 +1,104 @@
+import {generate_id} from "@benev/slate"
+import {FabricImage} from "fabric/dist/index.mjs"
+
 import {Compositor} from "../controller.js"
-import {VideoEffect} from "../../timeline/types.js"
+import {TimelineActions} from "../../timeline/actions.js"
+import {VideoEffect, XTimeline} from "../../timeline/types.js"
+import {Video} from "../../../../components/omni-media/types.js"
+import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
-export class VideoManager extends Map<string, {element: HTMLVideoElement, file: File}> {
+export class VideoManager extends Map<string, {fabric: FabricImage, file: File}> {
 
-	constructor(private compositor: Compositor) {
-		super()
-	}
+	constructor(private compositor: Compositor, private actions: TimelineActions) {super()}
 
-	add_video(effect: VideoEffect, file: File) {
-		const video = document.createElement('video');
-		// video.src = effect.src
-		const source = document.createElement("source")
-		source.type = "video/mp4"
-		// video.src = `${new URL("bbb_video_avc_frag.mp4", import.meta.url)}`
-		source.src = URL.createObjectURL(file)
-		video.append(source)
-		// video.load()
-
-		this.set(effect.id, {element: video, file})
-		// video.preload = 'auto';
-	}
-
-	draw_video_frame(effect: VideoEffect, frame?: VideoFrame) {
-		if(effect.rect.rotation) {
-			this.#draw_with_rotation(effect, frame)
-		} else {
-			this.#draw_without_rotation(effect, frame)
+	create_and_add_video_effect(video: Video, timeline: XTimeline) {
+		const duration = video.element.duration * 1000
+		const adjusted_duration_to_timebase = Math.floor(duration / (1000/timeline.timebase)) * (1000/timeline.timebase) - 40
+		const effect: VideoEffect = {
+			frames: video.frames,
+			id: generate_id(),
+			kind: "video",
+			raw_duration: duration,
+			duration: adjusted_duration_to_timebase,
+			start_at_position: 0,
+			start: 0,
+			end: adjusted_duration_to_timebase,
+			track: 0,
+			thumbnail: video.thumbnail,
+			rect: {
+				position_on_canvas: {x: 0, y: 0},
+				width: 1280,
+				height: 720,
+				rotation: 0,
+			}
 		}
+		const {position, track} = find_place_for_new_effect(timeline.effects, timeline.tracks)
+		effect.start_at_position = position!
+		effect.track = track
+		this.add_video_effect(effect, video.file, video.element.videoWidth, video.element.videoHeight)
 	}
 
-	#draw_with_rotation(effect: VideoEffect, frame?: VideoFrame) {
-		const {element} = this.get(effect.id)!
-		const {rect} = effect
-		this.compositor.ctx!.save()
-		this.compositor.EffectManager.rotate_effect(effect)
-		this.compositor.ctx!.drawImage(
-			frame ?? element,
-			-rect.width / 2,
-			-rect.height / 2,
-			rect.width,
-			rect.height
-		)
-		this.compositor.ctx!.restore()
+	add_video_effect(effect: VideoEffect, file: File, width: number, height: number) {
+		const element = document.createElement('video')
+		const obj = URL.createObjectURL(file)
+		element.src = obj
+		element.load()
+		element.width = width
+		element.height = height
+		const video = new FabricImage(element, {
+			left: 0,
+			top: 0,
+			width,
+			height,
+			objectCaching: false
+		})
+		video.scaleToWidth(effect.rect.width)
+		video.scaleToHeight(effect.rect.height)
+		this.set(effect.id, {fabric: video, file})
+		this.actions.add_video_effect(effect)
 	}
 
-	#draw_without_rotation(effect: VideoEffect, frame?: VideoFrame) {
-		const {element} = this.get(effect.id)!
-		const {rect} = effect
-		this.compositor.ctx!.drawImage(
-			frame ?? element,
-			rect.position_on_canvas.x,
-			rect.position_on_canvas.y,
-			rect.width,
-			rect.height
-		)
+	add_video_to_canvas(effect: VideoEffect) {
+		const max_track = 4 // lower track means it should draw on top of higher tracks, although moveObjectTo z-index works in reverse
+		const video = this.get(effect.id)!.fabric
+		this.compositor.canvas.add(video)
+		this.compositor.canvas.moveObjectTo(video, max_track - effect.track)
+		this.compositor.canvas.renderAll()
+	}
+
+	remove_video_from_canvas(effect: VideoEffect) {
+		const video = this.get(effect.id)!.fabric
+		this.compositor.canvas.remove(video)
+		this.compositor.canvas.renderAll()
+	}
+
+	draw_decoded_frame(effect: VideoEffect, frame: VideoFrame) {
+		const video = this.get(effect.id)!.fabric
+		const canvas = document.createElement("canvas")
+		canvas.width = video.width
+		canvas.height = video.height
+		canvas.getContext("2d")!.drawImage(frame, 0,0, video.width, video.height)
+		video.setElement(canvas)
 	}
 
 	pause_videos() {
-		for(const effect of this.compositor.currently_played_effects) {
+		for(const effect of this.compositor.currently_played_effects.values()) {
 			if(effect.kind === "video") {
-				const {element} = this.get(effect.id)!
+				const {fabric} = this.get(effect.id)!
+				const element = fabric.getElement() as HTMLVideoElement
 				element.pause()
 			}
 		}
 	}
 
 	async play_videos() {
-		for(const effect of this.compositor.currently_played_effects) {
+		for(const effect of this.compositor.currently_played_effects.values()) {
 			if(effect.kind === "video") {
-				const {element} = this.get(effect.id)!
-				await element.play()
+				const {fabric} = this.get(effect.id)!
+				const element = fabric.getElement() as HTMLVideoElement
+				await	element.play()
 			}
 		}
 	}
 
-	// play(startTime: number, endTime: number): void {
-	// 	this.video.currentTime = startTime;
-	// 	this.video.play();
-	// }
 }

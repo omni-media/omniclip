@@ -2,7 +2,6 @@ import {ZipAction} from "@benev/slate/x/watch/zip/action.js"
 import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 
 import {TimelineHelpers} from "./helpers.js"
-import {find_place_for_new_effect} from "./utils/find_place_for_new_effect.js"
 import {actionize_historical, actionize_non_historical} from "../../../utils/actionize.js"
 import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, EffectRect, VideoEffect} from "./types.js"
 
@@ -46,34 +45,7 @@ export const timeline_non_historical_actions = actionize_non_historical({
 })
 
 export const timeline_historical_actions = actionize_historical({
-	add_text_effect: state => () => {
-		const effect: TextEffect = {
-			id: generate_id(),
-			kind: "text",
-			start_at_position: 0,
-			duration: 5000,
-			start: 0,
-			end: 5000,
-			track: 0,
-			size: 38,
-			content: "example",
-			style: "normal",
-			font: "Lato",
-			color: "#e66465",
-			align: "center",
-			rect: {
-				position_on_canvas: {
-					x: 100,
-					y: 50,
-				},
-				width: 100,
-				height: 20,
-				rotation: 0
-			}
-		}
-		const {position, track} = find_place_for_new_effect(state.timeline.effects, state.timeline.tracks)
-		effect.start_at_position = position!
-		effect.track = track
+	add_text_effect: state => (effect: TextEffect) => {
 		state.timeline.effects.push(effect)
 	},
 	add_image_effect: state => (effect: ImageEffect) => {
@@ -160,8 +132,9 @@ export const timeline_historical_actions = actionize_historical({
 	set_position_on_canvas: state => ({id}: TextEffect | ImageEffect | VideoEffect, x: number, y: number) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
 		effect.rect.position_on_canvas = {x, y}
-		if(state.timeline.selected_effect?.kind !== "audio")
+		if(state.timeline.selected_effect?.kind !== "audio") {
 			state.timeline.selected_effect!.rect.position_on_canvas = {x, y}
+		}
 	},
 	set_effect_width: state => ({id}: TextEffect | ImageEffect | VideoEffect, width: number) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as Exclude<AnyEffect, AudioEffect>

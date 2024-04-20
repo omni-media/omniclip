@@ -48,7 +48,11 @@ export const Export = shadow_view(use => () => {
 		<div class="flex">
 			<dialog @cancel=${(e: Event) => e.preventDefault()}>
 				<div class="box">
-					${compositor.canvas}
+					${state.is_exporting
+						? html`
+							${compositor.canvas_element}
+						`
+						: null}
 					<div class="flex-col">
 						<div class="progress">
 							<span class="status">

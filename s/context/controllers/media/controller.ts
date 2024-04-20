@@ -1,11 +1,8 @@
+import {pub} from "@benev/slate"
 import {quick_hash} from "@benev/construct"
-import {generate_id, pub} from "@benev/slate"
 import {FFprobeWorker} from "ffprobe-wasm/browser.mjs"
 
-import {Compositor} from "../compositor/controller.js"
 import {TimelineActions} from "../timeline/actions.js"
-import {AudioEffect, ImageEffect, VideoEffect, XTimeline} from "../timeline/types.js"
-import {find_place_for_new_effect} from "../timeline/utils/find_place_for_new_effect.js"
 import {Video, VideoFile, AnyMedia, ImageFile, Image, AudioFile, Audio} from "../../../components/omni-media/types.js"
 
 const ffprobe = new FFprobeWorker()
@@ -13,7 +10,7 @@ const ffprobe = new FFprobeWorker()
 export class Media {
 	#database_request = window.indexedDB.open("database", 3)
 	#opened = false
-	on_media_change = pub<{files: AnyMedia[], action: "removed" | "added"}>()
+	on_media_change = pub<{files: AnyMedia[], action: "removed" | "added" | "placeholder"}>()
 
 	constructor(private actions: TimelineActions) {
 		this.#database_request.onerror = (event) => {
@@ -110,66 +107,6 @@ export class Media {
 			}
 			check_if_duplicate!.onerror = (error) => console.log("error")
 		}
-	}
-	
-	add_video_effect(video: Video, compositor: Compositor, timeline: XTimeline) {
-		const duration = video.element.duration * 1000
-		const adjusted_duration_to_timebase = Math.floor(duration / (1000/timeline.timebase)) * (1000/timeline.timebase) - 40
-		const effect: VideoEffect = {
-			frames: video.frames,
-			id: generate_id(),
-			kind: "video",
-			raw_duration: duration,
-			duration: adjusted_duration_to_timebase,
-			start_at_position: 0,
-			start: 0,
-			end: adjusted_duration_to_timebase,
-			track: 0,
-			thumbnail: video.thumbnail
-		}
-		const {position, track} = find_place_for_new_effect(timeline.effects, timeline.tracks)
-		effect.start_at_position = position!
-		effect.track = track
-		compositor.VideoManager.add_video(effect, video.file)
-		this.actions.add_video_effect(effect)
-	}
-
-	add_audio_effect(audio: Audio, compositor: Compositor, timeline: XTimeline) {
-		const duration = audio.element.duration * 1000
-		const adjusted_duration_to_timebase = Math.floor(duration / (1000/timeline.timebase)) * (1000/timeline.timebase)
-		const effect: AudioEffect = {
-			id: generate_id(),
-			kind: "audio",
-			raw_duration: duration,
-			duration: adjusted_duration_to_timebase,
-			start_at_position: 0,
-			start: 0,
-			end: adjusted_duration_to_timebase,
-			track: 2,
-		}
-		const {position, track} = find_place_for_new_effect(timeline.effects, timeline.tracks)
-		effect.start_at_position = position!
-		effect.track = track
-		compositor.AudioManager.add_video(effect, audio.file)
-		this.actions.add_audio_effect(effect)
-	}
-
-	add_image_effect(image: Image, compositor: Compositor, timeline: XTimeline) {
-		const effect: ImageEffect = {
-			id: generate_id(),
-			kind: "image",
-			duration: 1000,
-			start_at_position: 0,
-			start: 0,
-			end: 1000,
-			track: 2,
-			url: image.url
-		}
-		const {position, track} = find_place_for_new_effect(timeline.effects, timeline.tracks)
-		effect.start_at_position = position!
-		effect.track = track
-		compositor.ImageManager.add_image(effect, image.file)
-		this.actions.add_image_effect(effect)
 	}
 
 	create_video_thumbnail(video: HTMLVideoElement): Promise<string> {

@@ -8,7 +8,7 @@ import {loadingPlaceholder} from "../../views/loading-placeholder/view.js"
 export const OmniText = shadow_component(use => {
 	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
-	const actions = use.context.actions
+	const manager = use.context.controllers.compositor.managers.textManager
 
 	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<div class="examples">
@@ -16,7 +16,7 @@ export const OmniText = shadow_component(use => {
 				<span style="color: #e66465; font-family: Lato;" class="text">
 					example
 				</span>
-				<div @click=${() => actions.timeline_actions.add_text_effect()} class="add-btn">${addSvg}</div>
+				<div @click=${() => manager.add_text_effect(use.context.state.timeline)} class="add-btn">${addSvg}</div>
 			</div>
 		</div>
 	`)

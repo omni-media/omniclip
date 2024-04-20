@@ -43,11 +43,11 @@ export class FFmpegHelper {
 
 		for(const {id, kind, start, end} of all_audio_effects) {
 			if(kind === "video") {
-				const {file} = compositor.VideoManager.get(id)!
+				const {file} = compositor.managers.videoManager.get(id)!
 				await this.ffmpeg.writeFile(`${id}.mp4`,  await fetchFile(file))
 				await this.ffmpeg.exec(["-ss", `${start / 1000}`,"-i", `${id}.mp4`,"-t" ,`${(end - start) / 1000}`, "-vn", `${id}.mp3`])
 			} else {
-				const {file} = compositor.AudioManager.get(id)!
+				const {file} = compositor.managers.audioManager.get(id)!
 				await this.ffmpeg.writeFile(`${id}x.mp3`,  await fetchFile(file))
 				await this.ffmpeg.exec(["-ss", `${start / 1000}`,"-i", `${id}x.mp3`,"-t" ,`${(end - start) / 1000}`, "-vn", `${id}.mp3`])
 			}
