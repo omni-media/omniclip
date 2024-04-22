@@ -1,46 +1,30 @@
-import {generate_id} from "@benev/slate/x/tools/generate_id.js"
-
+import {Decoder} from "./parts/decoder.js"
+import {Encoder} from "./parts/encoder.js"
 import {FPSCounter} from "./tools/FPSCounter/tool.js"
 import {TimelineActions} from "../timeline/actions.js"
 import {Compositor} from "../compositor/controller.js"
-import {FFmpegHelper} from "./helpers/FFmpegHelper/helper.js"
+import {AnyEffect, XTimeline} from "../timeline/types.js"
 import {FileSystemHelper} from "./helpers/FileSystemHelper/helper.js"
-import {AnyEffect, VideoEffect, XTimeline} from "../timeline/types.js"
-import {get_effects_at_timestamp} from "./utils/get_effects_at_timestamp.js"
-
-interface DecodedFrame {
-	frame: VideoFrame
-	effect_id: string
-	timestamp: number
-	frames_count: number
-	frame_id: string
-}
 
 export class VideoExport {
-	#encode_worker = new Worker(new URL("./encode_worker.js", import.meta.url), {type: "module"})
-	#file: Uint8Array | null = null
 	#FileSystemHelper = new FileSystemHelper()
 
-	#timebase = 25
 	#timestamp = 0
 	#timestamp_end = 0
 
-	decoded_effects = new Map<string, string>()
-	decoded_frames: Map<string, DecodedFrame> = new Map()
 	#FPSCounter: FPSCounter
+	#Decoder: Decoder
+	#Encoder: Encoder
 
-	constructor(private actions: TimelineActions, private ffmpeg: FFmpegHelper, private compositor: Compositor) {
+	constructor(private actions: TimelineActions, private compositor: Compositor) {
 		this.#FPSCounter = new FPSCounter(this.actions.set_fps, 100)
-	}
-
-	set_timebase(timebase: number) {
-		this.#timebase = timebase
-		this.#encode_worker.postMessage({action: "update-timebase"})
+		this.#Decoder = new Decoder(actions, compositor)
+		this.#Encoder = new Encoder(actions, compositor)
 	}
 
 	async save_file() {
 		const handle = await this.#FileSystemHelper.getFileHandle()
-		await this.#FileSystemHelper.writeFile(handle, this.#file!)
+		await this.#FileSystemHelper.writeFile(handle, this.#Encoder.file!)
 	}
 
 	export_start(timeline: XTimeline) {
@@ -52,136 +36,24 @@ export class VideoExport {
 		this.compositor.canvas.clear()
 	}
 
-	#find_closest_effect_frame(effect: VideoEffect, timestamp: number) {
-		let closest: DecodedFrame | null = null
-		let current_difference = Number.MAX_SAFE_INTEGER
-		this.decoded_frames.forEach(frame => {
-			if(frame.effect_id === effect.id) {
-				const difference = Math.abs(frame.timestamp - timestamp)
-				if(difference < current_difference) {
-					current_difference = difference
-					closest = frame
-				}
-			}
-		})
-		return closest!
-	}
-
-	#remove_stale_chunks(thresholdTimestamp: number) {
-		const entriesToRemove: string[] = []
-		const timebase_in_ms = 1000/this.#timebase
-
-	/* margin to keep about one frame more incase its needed,
--		* for some reason sometimes its needed, but im lazy to fix it */
-		const margin_for_additional_frame = timebase_in_ms * 1.5
-
- 		this.decoded_frames.forEach((value, key) => {
-			if (value.timestamp < thresholdTimestamp - margin_for_additional_frame) {
-				entriesToRemove.push(key)
-			}
-		})
-
-		entriesToRemove.forEach(key => {
-				const decoded = this.decoded_frames.get(key)
-				decoded?.frame.close()
-				this.decoded_frames.delete(key)
-		})
-	}
-
 	async #export_process(effects: AnyEffect[]) {
-		const effects_at_timestamp = get_effects_at_timestamp(effects, this.#timestamp)
-		let frame_duration = null
-		for(const effect of effects_at_timestamp) {
-			if(effect.kind === "video") {
-				const {frame, frames_count, frame_id} = await this.#get_frame_from_video(effect, this.#timestamp)
-				frame_duration = effect.duration / frames_count
-				this.compositor.managers.videoManager.draw_decoded_frame(effect, frame)
-				frame.close()
-				this.#remove_stale_chunks(this.#timestamp)
-				this.decoded_frames.delete(frame_id)
-			}
-		}
-		this.compositor.compose_effects(effects, this.#timestamp, true)
-
+		await this.#Decoder.get_and_draw_decoded_frame(effects, this.#timestamp)
+		this.compositor.compose_effects(effects, this.#timestamp)
 		this.actions.set_export_status("composing")
-		await this.#encode_composed_frame(this.compositor.canvas.lowerCanvasEl)
-		this.#timestamp += 1000/this.#timebase
-
+		await this.#Encoder.encode_composed_frame(this.compositor.canvas.lowerCanvasEl, this.#timestamp)
+		this.#timestamp += 1000/this.compositor.timebase
 		const progress = this.#timestamp / this.#timestamp_end * 100 // for progress bar
 		this.actions.set_export_progress(progress)
 
 		if(Math.ceil(this.#timestamp) >= this.#timestamp_end) {
-			this.actions.set_export_status("flushing")
-			this.#encode_worker.postMessage({action: "get-binary"})
-			this.#encode_worker.onmessage = async (msg) => {
-				if(msg.data.action === "binary") {
-					const composed_data_input_name = "composed.h264"
-					const output_name = "output.mp4"
-					await this.ffmpeg.write_composed_data(msg.data.binary, composed_data_input_name)
-					await this.ffmpeg.merge_audio_with_video_and_mux(effects, composed_data_input_name, output_name, this.compositor)
-					const muxed_file = await this.ffmpeg.get_muxed_file(output_name)
-					this.#file = muxed_file
-					this.actions.set_export_status("complete")
-				}
-			}
+			this.#Encoder.export_process_end(effects)
 			return
 		}
+
 		requestAnimationFrame(() => {
 			this.#export_process(effects)
 			this.#FPSCounter.update()
 		})
-	}
-
-	#frame_config(canvas: HTMLCanvasElement): VideoFrameInit {
-		return {
-			displayWidth: canvas.width,
-			displayHeight: canvas.height,
-			duration: 1000/this.#timebase,
-			timestamp: this.#timestamp * 1000
-		}
-	}
-
-	async #encode_composed_frame(canvas: HTMLCanvasElement) {
-		const frame = new VideoFrame(canvas, this.#frame_config(canvas))
-		this.#encode_worker.postMessage({frame, action: "encode"})
-		frame.close()
-	}
-
-	#get_frame_from_video(effect: VideoEffect, timestamp: number): Promise<DecodedFrame> {
-		if(!this.decoded_effects.has(effect.id)) {
-			this.#extract_frames_from_video(effect, timestamp)
-		}
-		return new Promise((resolve) => {
-			const decoded = this.#find_closest_effect_frame(effect, timestamp)
-			if(decoded) {
-				resolve(decoded)
-			} else {
-				const interval = setInterval(() => {
-					const decoded = this.#find_closest_effect_frame(effect, timestamp)
-					if(decoded) {
-						resolve(decoded)
-						clearInterval(interval)
-					}
-				}, 100)
-			}
-		})
-	}
-
-	#extract_frames_from_video(effect: VideoEffect, timestamp: number) {
-		this.actions.set_export_status("demuxing")
-		const worker = new Worker(new URL("./decode_worker.js", import.meta.url), {type: "module"})
-		worker.addEventListener("message", (msg) => {
-			if(msg.data.action === "new-frame") {
-				const id = generate_id()
-				this.decoded_frames.set(id, {...msg.data.frame, frame_id: id})
-			}
-		})
-		const {file} = this.compositor.managers.videoManager.get(effect.id)!
-		worker.postMessage({action: "demux", effect: {
-			...effect,
-			file
-		}, starting_timestamp: timestamp, timebase: this.#timebase})
-		this.decoded_effects.set(effect.id, effect.id)
 	}
 
 	get_effect_current_time_relative_to_timecode(effect: AnyEffect, timecode: number) {

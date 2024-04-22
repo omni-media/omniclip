@@ -1,4 +1,4 @@
-import {BinaryAccumulator} from "./tools/BinaryAccumulator/tool.js"
+import {BinaryAccumulator} from "../tools/BinaryAccumulator/tool.js"
 
 let timebase = 25
 const binary_accumulator = new BinaryAccumulator()

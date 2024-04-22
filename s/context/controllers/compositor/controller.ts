@@ -22,7 +22,8 @@ export class Compositor {
 	#is_playing = signal(false)
 	#last_time = 0
 	#pause_time = 0
-	#timecode = 0
+	timecode = 0
+	timebase = 25
 	currently_played_effects = new Map<string, AnyEffect>()
 	
 	canvas_element = document.createElement("canvas")
@@ -64,7 +65,7 @@ export class Compositor {
 			const elapsed_time = this.#calculate_elapsed_time()
 			this.actions.increase_timecode(elapsed_time)
 			this.on_playing.publish(0)
-			this.compose_effects([...this.currently_played_effects.values()], this.#timecode)
+			this.compose_effects([...this.currently_played_effects.values()], this.timecode)
 		}
 		requestAnimationFrame(this.#on_playing)
 	}
@@ -76,8 +77,8 @@ export class Compositor {
 		return elapsed_time
 	}
 
-	async compose_effects(effects: AnyEffect[], timecode: number, exporting?: boolean) {
-		this.#timecode = timecode
+	compose_effects(effects: AnyEffect[], timecode: number) {
+		this.timecode = timecode
 		this.#update_currently_played_effects(effects, timecode)
 		this.canvas.requestRenderAll()
 	}

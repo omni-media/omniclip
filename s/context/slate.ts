@@ -74,7 +74,7 @@ export class OmniContext extends Context {
 		super(options)
 		this.controllers = {
 			...this.controllers,
-			video_export: new VideoExport(this.actions.timeline_actions, this.helpers.ffmpeg, this.controllers.compositor)
+			video_export: new VideoExport(this.actions.timeline_actions, this.controllers.compositor)
 		}
 	}
 }
