@@ -35,7 +35,8 @@ export class Compositor {
 
 	constructor(private actions: TimelineActions) {
 	this.canvas = new Canvas(this.canvas_element, {width: 1280, height: 720, renderOnAddRemove: true, preserveObjectStacking: true})
-	this.init_guidelines()
+	this.#init_guidelines()
+	this.#on_new_canvas_object_set_handle_styles()
 	this.managers = {
 		videoManager: new VideoManager(this, actions),
 		textManager: new TextManager(this, actions),
@@ -181,7 +182,7 @@ export class Compositor {
 		}
 	}
 
-	init_guidelines() {
+	#init_guidelines() {
 		const guideline = new AlignGuidelines({
 			canvas: this.canvas,
 			aligningOptions: {
@@ -191,6 +192,16 @@ export class Compositor {
 		guideline.init()
 		// add rect as big as canvas so it acts as guideline for canvas borders
 		this.canvas.add(new Rect({width: 1279, height: 719, fill: "transparent", selectable: false, evented: false}))
+	}
+
+	#on_new_canvas_object_set_handle_styles() {
+		this.canvas.on("object:added", (e) => {
+			e.target.set({
+				transparentCorners: false,
+				borderColor: "#03a9c1",
+				cornerColor: "white"
+			})
+		})
 	}
 
 	set_video_playing = (playing: boolean) => {
