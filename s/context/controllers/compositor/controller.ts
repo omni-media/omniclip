@@ -1,5 +1,5 @@
-import {Canvas} from "fabric/dist/fabric.mjs"
 import {pub, reactor, signal} from "@benev/slate"
+import {Canvas, Rect} from "fabric/dist/fabric.mjs"
 
 import {AnyEffect} from "../timeline/types.js"
 import {TextManager} from "./parts/text-manager.js"
@@ -7,6 +7,7 @@ import {ImageManager} from "./parts/image-manager.js"
 import {AudioManager} from "./parts/audio-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
 import {TimelineActions} from "../timeline/actions.js"
+import {AlignGuidelines} from "./lib/aligning_guidelines.js"
 import {compare_arrays} from "../../../utils/compare_arrays.js"
 import {sort_effects_by_track} from "../video-export/utils/sort_effects_by_track.js"
 
@@ -34,7 +35,7 @@ export class Compositor {
 
 	constructor(private actions: TimelineActions) {
 	this.canvas = new Canvas(this.canvas_element, {width: 1280, height: 720, renderOnAddRemove: true, preserveObjectStacking: true})
-
+	this.init_guidelines()
 	this.managers = {
 		videoManager: new VideoManager(this, actions),
 		textManager: new TextManager(this, actions),
@@ -178,6 +179,18 @@ export class Compositor {
 				this.currently_played_effects.delete(effect.id)
 			}
 		}
+	}
+
+	init_guidelines() {
+		const guideline = new AlignGuidelines({
+			canvas: this.canvas,
+			aligningOptions: {
+				lineColor: "#03a9c1"
+			}
+		})
+		guideline.init()
+		// add rect as big as canvas so it acts as guideline for canvas borders
+		this.canvas.add(new Rect({width: 1279, height: 719, fill: "transparent", selectable: false, evented: false}))
 	}
 
 	set_video_playing = (playing: boolean) => {
