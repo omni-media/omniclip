@@ -1,4 +1,4 @@
-import {Canvas, Point, FabricObject, util} from "fabric/dist/fabric.mjs"
+import {Canvas, Point, FabricObject, util, BasicTransformEvent, TPointerEvent, FabricObjectProps, SerializedObjectProps, ObjectEvents} from "fabric/dist/fabric.mjs"
 import {Keys} from "./util.js"
 
 type VerticalLineCoords = {
@@ -18,6 +18,10 @@ type IgnoreObjTypes = { key: string; value: any }[];
 type ACoordsAppendCenter = NonNullable<FabricObject["aCoords"]> & {
 	c: Point;
 };
+
+type FabricEvent = BasicTransformEvent<TPointerEvent> & {
+	target: FabricObject<Partial<FabricObjectProps>, SerializedObjectProps, ObjectEvents>;
+}
 
 export class AlignGuidelines {
 	aligningLineMargin = 4;
@@ -140,25 +144,28 @@ export class AlignGuidelines {
 		this.verticalLines.length = this.horizontalLines.length = 0;
 	}
 
-	private watchObjectMoving() {
-		this.canvas.on("object:moving", (e) => {
-			this.clearLinesMeta();
-			const activeObject = e.target as FabricObject;
-			this.activeObj = activeObject;
-			const canvasObjects = this.canvas.getObjects().filter((obj) => {
-				if (this.ignoreObjTypes.length) {
-					return !this.ignoreObjTypes.some((item) => (obj as any)[item.key] === item.value);
-				}
-				if (this.pickObjTypes.length) {
-					return this.pickObjTypes.some((item) => (obj as any)[item.key] === item.value);
-				}
-				return true;
-			});
-			// @ts-ignore
-			const transform = this.canvas._currentTransform;
-			if (!transform) return;
-			this.traversAllObjects(activeObject, canvasObjects);
+	private on_object_move_or_scale(e: FabricEvent) {
+		this.clearLinesMeta();
+		const activeObject = e.target as FabricObject;
+		this.activeObj = activeObject;
+		const canvasObjects = this.canvas.getObjects().filter((obj) => {
+			if (this.ignoreObjTypes.length) {
+				return !this.ignoreObjTypes.some((item) => (obj as any)[item.key] === item.value);
+			}
+			if (this.pickObjTypes.length) {
+				return this.pickObjTypes.some((item) => (obj as any)[item.key] === item.value);
+			}
+			return true;
 		});
+		// @ts-ignore
+		const transform = this.canvas._currentTransform;
+		if (!transform) return;
+		this.traversAllObjects(activeObject, canvasObjects);
+	}
+
+	private watchObjectMoving() {
+		this.canvas.on("object:moving", (e) => this.on_object_move_or_scale(e));
+		this.canvas.on("object:scaling", (e) => this.on_object_move_or_scale(e));
 	}
 
 	private getObjDraggingObjCoords(activeObject: FabricObject) {
