@@ -12,16 +12,31 @@ export const styles = css`
 	}
 
 	canvas {
-		height: 100%;
-		width: 100%;
+		height: 100% !important;
+		width: 100% !important;
+	}
+
+	.lower-canvas {
 		background: rgb(32, 31, 31);
+	}
+
+	.canvas-container {
+		position: relative;
 		aspect-ratio: 16/9;
+		height: 100%;
+	}
+
+	.upper-canvas {
+		z-index: 100;
 	}
 
 	figure {
 		position: relative;
-		align-self: center;
 		overflow: hidden;
+		aspect-ratio: 16/9;
+		display: flex;
+		justify-content: center;
+		margin: 1em;
 	}
 	
 	video {

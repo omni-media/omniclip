@@ -6,6 +6,12 @@ export const styles = css`
 		height: 100%;
 	}
 
+	canvas {
+		position: relative !important;
+		width: 500px !important;
+		height: 300px !important;
+	}
+
 	.flex {
 		display: flex;
 		justify-content: center;
