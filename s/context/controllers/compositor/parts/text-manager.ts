@@ -53,7 +53,7 @@ export class TextManager extends Map<string, FabricText> {
 		const max_track = 4 // lower track means it should draw on top of higher tracks, although moveObjectTo z-index works in reverse
 		const text = this.get(effect.id)!
 		this.compositor.canvas.add(text)
-		this.compositor.canvas.moveObjectTo(text, 10)
+		this.compositor.canvas.moveObjectTo(text, max_track - effect.track)
 		this.compositor.canvas.renderAll()
 	}
 
@@ -82,6 +82,8 @@ export class TextManager extends Map<string, FabricText> {
 	set_font_size(size: number, update_compositor: () => void) {
 		this.actions.set_font_size(size)
 		this.#clicked_effect!.size = size
+		const text = this.compositor.canvas.getActiveObject()! as FabricText
+		text.set("fontSize", size)
 		this.#update_text_rect()
 		update_compositor()
 	}
@@ -89,23 +91,31 @@ export class TextManager extends Map<string, FabricText> {
 	set_font_style(style: FontStyle, update_compositor: () => void) {
 		this.actions.set_font_style(style)
 		this.#clicked_effect!.style = style
+		const text = this.compositor.canvas.getActiveObject()! as FabricText
+		text.set("fontStyle", style)
 		update_compositor()
 	}
 
 	set_text_align(align: TextAlign, update_compositor: () => void) {
 		this.actions.set_text_align(align)
 		this.#clicked_effect!.align = align
+		const text = this.compositor.canvas.getActiveObject()! as FabricText
+		text.set("textAlign", align)
 		update_compositor()
 	}
 
 	set_text_color(color: string, update_compositor: () => void) {
 		this.actions.set_text_color(color)
+		const text = this.compositor.canvas.getActiveObject()! as FabricText
+		text.set("fill", color)
 		update_compositor()
 	}
 
 	set_text_content(content: string, update_compositor: () => void) {
 		this.actions.set_text_content(content)
 		this.#clicked_effect!.content = content
+		const text = this.compositor.canvas.getActiveObject()! as FabricText
+		text.set("text", content)
 		this.#update_text_rect()
 		update_compositor()
 	}
