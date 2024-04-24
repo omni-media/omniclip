@@ -7,6 +7,7 @@ import {Compositor} from "../compositor/controller.js"
 import {effectTrimHandler} from "./parts/effect-trim-handler.js"
 import {Grabbed, At, ProposedTimecode, AnyEffect} from "./types.js"
 import {EffectTimecode, XTimeline as TimelineState, XTimeline} from "./types.js"
+import {get_effect_at_timestamp} from "../video-export/utils/get_effect_at_timestamp.js"
 import {get_effects_at_timestamp} from "../video-export/utils/get_effects_at_timestamp.js"
 
 export class Timeline {
@@ -178,12 +179,22 @@ export class Timeline {
 		return normalized
 	}
 
-	set_selected_effect(effect: AnyEffect, compositor: Compositor) {
+	set_selected_effect(effect: AnyEffect, compositor: Compositor, timeline: XTimeline) {
 		this.timeline_actions.set_selected_effect(effect)
-		const object = compositor.canvas.getObjects().find((object: any) => (object?.effect as AnyEffect)?.id === effect.id)
-		compositor.canvas.setActiveObject(object!)
-		if(effect.kind === "text")
-			compositor.managers.textManager.set_clicked_effect(effect)
+		if(effect.kind === "text") {compositor.managers.textManager.set_clicked_effect(effect)}
+		this.set_or_discard_active_object_on_canvas_for_selected_effect(effect, compositor, timeline)
+	}
+
+	set_or_discard_active_object_on_canvas_for_selected_effect(selected_effect: AnyEffect, compositor: Compositor, timeline: XTimeline) {
+		const is_effect_on_canvas = get_effect_at_timestamp(selected_effect, timeline.timecode)
+		if(is_effect_on_canvas) {
+			const object = compositor.canvas.getObjects().find((object: any) => (object?.effect as AnyEffect)?.id === selected_effect.id)
+			if(object !== compositor.canvas.getActiveObject()) {
+				compositor.canvas.setActiveObject(object!)
+			}
+		} else {
+			compositor.canvas.discardActiveObject()
+		}
 	}
 }
 

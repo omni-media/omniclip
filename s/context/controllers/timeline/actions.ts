@@ -93,7 +93,11 @@ export const timeline_historical_actions = actionize_historical({
 		effect.content = content
 	},
 	set_selected_effect: state => (effect: AnyEffect | null) => {
-		state.timeline.selected_effect = effect
+		if(effect) {
+			state.timeline.selected_effect = state.timeline.effects.find(({id}) => effect.id === id)!
+		} else {
+			state.timeline.selected_effect = effect
+		}
 	},
 	set_effect_track: state => (effect: AnyEffect, track: number) => {
 		const helper = new TimelineHelpers(state.timeline)

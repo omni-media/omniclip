@@ -1,12 +1,12 @@
 import {pub, reactor, signal} from "@benev/slate"
 import {Canvas, Rect} from "fabric/dist/fabric.mjs"
 
-import {AnyEffect} from "../timeline/types.js"
 import {TextManager} from "./parts/text-manager.js"
 import {ImageManager} from "./parts/image-manager.js"
 import {AudioManager} from "./parts/audio-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
 import {TimelineActions} from "../timeline/actions.js"
+import {AnyEffect, AudioEffect} from "../timeline/types.js"
 import {AlignGuidelines} from "./lib/aligning_guidelines.js"
 import {compare_arrays} from "../../../utils/compare_arrays.js"
 import {sort_effects_by_track} from "../video-export/utils/sort_effects_by_track.js"
@@ -98,9 +98,15 @@ export class Compositor {
 	#update_currently_played_effects(effects: AnyEffect[], timecode: number) {
 		const effects_relative_to_timecode = this.get_effects_relative_to_timecode(effects, timecode)
 		const {add, remove} = compare_arrays([...this.currently_played_effects.values()], effects_relative_to_timecode)
+		this.#update_effects(effects_relative_to_timecode)
 		this.#remove_effects_from_canvas(remove)
 		this.#add_effects_to_canvas(add)
-		this.#draw_in_correct_order(sort_effects_by_track([...this.currently_played_effects.values()]))
+		this.#draw_in_correct_order(sort_effects_by_track(effects_relative_to_timecode))
+	}
+
+	#update_effects(new_effects: AnyEffect[]) {
+		this.currently_played_effects.clear()
+		new_effects.forEach(effect => {this.currently_played_effects.set(effect.id, effect)})
 	}
 
 	#draw_in_correct_order(effects: AnyEffect[]) {
@@ -210,8 +216,14 @@ export class Compositor {
 			//@ts-ignore
 			const selected_effect = e.target ? e.target.effect as AnyEffect : null
 			this.actions.set_selected_effect(selected_effect)
-			if(e.target)
-				this.canvas.setActiveObject(e.target)
+			if(e.target) {this.canvas.setActiveObject(e.target)}
+			if(selected_effect?.kind === "text") {this.managers.textManager.set_clicked_effect(selected_effect)}
+		})
+		this.canvas.on("mouse:up", (e) => {
+			//@ts-ignore
+			const selected_effect = e.target ? e.target.effect as Exclude<AnyEffect, AudioEffect> : null
+			if(selected_effect)
+				this.actions.set_position_on_canvas(selected_effect, e.target!.left, e.target!.top)
 		})
 	}
 
