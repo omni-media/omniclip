@@ -177,5 +177,13 @@ export class Timeline {
 		const normalized = Math.round(timeline.timecode / frame_duration) * frame_duration
 		return normalized
 	}
+
+	set_selected_effect(effect: AnyEffect, compositor: Compositor) {
+		this.timeline_actions.set_selected_effect(effect)
+		const object = compositor.canvas.getObjects().find((object: any) => (object?.effect as AnyEffect)?.id === effect.id)
+		compositor.canvas.setActiveObject(object!)
+		if(effect.kind === "text")
+			compositor.managers.textManager.set_clicked_effect(effect)
+	}
 }
 

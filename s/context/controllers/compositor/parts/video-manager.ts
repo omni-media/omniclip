@@ -50,7 +50,8 @@ export class VideoManager extends Map<string, {fabric: FabricImage, file: File}>
 			top: 0,
 			width,
 			height,
-			objectCaching: false
+			objectCaching: false,
+			effect
 		})
 		video.scaleToWidth(effect.rect.width)
 		video.scaleToHeight(effect.rect.height)

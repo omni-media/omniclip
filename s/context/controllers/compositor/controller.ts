@@ -37,6 +37,7 @@ export class Compositor {
 	this.canvas = new Canvas(this.canvas_element, {width: 1280, height: 720, renderOnAddRemove: true, preserveObjectStacking: true})
 	this.#init_guidelines()
 	this.#on_new_canvas_object_set_handle_styles()
+	this.#on_selected_canvas_object()
 	this.managers = {
 		videoManager: new VideoManager(this, actions),
 		textManager: new TextManager(this, actions),
@@ -201,6 +202,16 @@ export class Compositor {
 				borderColor: "#03a9c1",
 				cornerColor: "white"
 			})
+		})
+	}
+
+	#on_selected_canvas_object() {
+		this.canvas.on("mouse:down", (e) => {
+			//@ts-ignore
+			const selected_effect = e.target ? e.target.effect as AnyEffect : null
+			this.actions.set_selected_effect(selected_effect)
+			if(e.target)
+				this.canvas.setActiveObject(e.target)
 		})
 	}
 
