@@ -10,21 +10,44 @@ import alignCenterSvg from "../../icons/remix-icon/align-center.svg.js"
 import {loadingPlaceholder} from "../../views/loading-placeholder/view.js"
 import {Font, TextEffect} from "../../context/controllers/timeline/types.js"
 
-export const TextUpdater = shadow_view(use => (effect: TextEffect, element: Element | null) => {
+export const TextUpdater = shadow_view(use => (effect: TextEffect) => {
 	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
-	const text_manager = use.context.controllers.compositor.TextManager
-	const update_compositor = () => use.context.controllers.compositor.update_currently_played_effects(use.context.state.timeline)
+
+	const text_manager = use.context.controllers.compositor.managers.textManager
+	const compositor = use.context.controllers.compositor
+
 	const [opened, setOpened] = use.state({
 		text_align: false,
 		font_style: false
 	})
 
+	const [[x, y], setCoords] = use.state(() => {
+		const object = compositor.canvas.getActiveObject()!
+		return [object.left, object.top + object.getScaledHeight()]
+	})
+
+	const canvasRect = compositor.canvas_element.getBoundingClientRect()
+	const scaleX = compositor.canvas.width / canvasRect.width
+	const scaleY = compositor.canvas.height / canvasRect.height
+
+	use.once(() => {
+		const active_object = compositor.canvas.getActiveObject()!
+		active_object.on("moving", () => {
+			setCoords([active_object.left, active_object.top + active_object.getScaledHeight()])
+		})
+	})
+
+	const update_compositor = () => use.context.controllers.compositor.compose_effects(use.context.state.timeline.effects, use.context.state.timeline.timecode)
+
 	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<div
 			style="
-				top: ${element?.getBoundingClientRect().top}px;
-				left: ${element?.getBoundingClientRect().left}px;
+				transform:
+					translate(
+						${x / scaleX}px,
+						${y / scaleY}px
+					);
 			"
 			class="text-selector"
 		>

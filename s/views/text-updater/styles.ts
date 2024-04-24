@@ -10,7 +10,7 @@ export const styles = css`
 
 	.text-selector {
 		position: fixed;
-		z-index: 1;
+		z-index: 999;
 		display: flex;
 		border-radius: 5px;
 		background: #00000059;

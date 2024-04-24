@@ -149,7 +149,7 @@ export const Effect = shadow_view(use => ({id}: AnyEffect, timeline: GoldElement
 			"
 			draggable="true"
 			@dragstart=${drag_events.start}
-			@click=${() => use.context.controllers.timeline.set_selected_effect(effect, use.context.controllers.compositor)}
+			@click=${() => use.context.controllers.timeline.set_selected_effect(effect, use.context.controllers.compositor, use.context.state.timeline)}
 		>
 			${render_trim_handle("left")}
 			${render_trim_handle("right")}
