@@ -73,14 +73,14 @@ export class TextManager extends Map<string, FabricText> {
 		return this.compositor.ctx?.measureText(content).actualBoundingBoxAscent! + this.compositor.ctx?.measureText(content).actualBoundingBoxDescent!
 	}
 
-	set_text_font(font: Font, update_compositor: () => void) {
-		this.actions.set_text_font(font)
+	set_text_font(effect: TextEffect, font: Font, update_compositor: () => void) {
+		this.actions.set_text_font(effect, font)
 		this.#clicked_effect!.font = font
 		update_compositor()
 	}
 
-	set_font_size(size: number, update_compositor: () => void) {
-		this.actions.set_font_size(size)
+	set_font_size(effect: TextEffect, size: number, update_compositor: () => void) {
+		this.actions.set_font_size(effect, size)
 		this.#clicked_effect!.size = size
 		const text = this.compositor.canvas.getActiveObject()! as FabricText
 		text.set("fontSize", size)
@@ -88,31 +88,31 @@ export class TextManager extends Map<string, FabricText> {
 		update_compositor()
 	}
 
-	set_font_style(style: FontStyle, update_compositor: () => void) {
-		this.actions.set_font_style(style)
+	set_font_style(effect: TextEffect, style: FontStyle, update_compositor: () => void) {
+		this.actions.set_font_style(effect, style)
 		this.#clicked_effect!.style = style
 		const text = this.compositor.canvas.getActiveObject()! as FabricText
 		text.set("fontStyle", style)
 		update_compositor()
 	}
 
-	set_text_align(align: TextAlign, update_compositor: () => void) {
-		this.actions.set_text_align(align)
+	set_text_align(effect: TextEffect, align: TextAlign, update_compositor: () => void) {
+		this.actions.set_text_align(effect, align)
 		this.#clicked_effect!.align = align
 		const text = this.compositor.canvas.getActiveObject()! as FabricText
 		text.set("textAlign", align)
 		update_compositor()
 	}
 
-	set_text_color(color: string, update_compositor: () => void) {
-		this.actions.set_text_color(color)
+	set_text_color(effect: TextEffect, color: string, update_compositor: () => void) {
+		this.actions.set_text_color(effect, color)
 		const text = this.compositor.canvas.getActiveObject()! as FabricText
 		text.set("fill", color)
 		update_compositor()
 	}
 
-	set_text_content(content: string, update_compositor: () => void) {
-		this.actions.set_text_content(content)
+	set_text_content(effect: TextEffect, content: string, update_compositor: () => void) {
+		this.actions.set_text_content(effect, content)
 		this.#clicked_effect!.content = content
 		const text = this.compositor.canvas.getActiveObject()! as FabricText
 		text.set("text", content)

@@ -42,6 +42,9 @@ export const timeline_non_historical_actions = actionize_non_historical({
 	set_log: state => (log: string) => {
 		state.timeline.log = log
 	},
+	set_selected_effect: state => (effect: AnyEffect | null) => {
+		state.timeline.selected_effect = effect
+	},
 })
 
 export const timeline_historical_actions = actionize_historical({
@@ -57,47 +60,33 @@ export const timeline_historical_actions = actionize_historical({
 	add_audio_effect: state => (effect: AudioEffect) => {
 		state.timeline.effects.push(effect)
 	},
-	set_text_color: state => (color: string) => {
-		(state.timeline.selected_effect as TextEffect).color = color
-		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
+	set_text_color: state => ({id}: TextEffect, color: string) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
 		effect.color = color
 	},
-	set_text_font: state => (font: Font) => {
-		(state.timeline.selected_effect as TextEffect).font = font
-		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
+	set_text_font: state => ({id}: TextEffect, font: Font) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
 		effect.font = font
 	},
-	set_font_size: state => (size: number) => {
-		(state.timeline.selected_effect as TextEffect).size = size
-		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
+	set_font_size: state => ({id}: TextEffect, size: number) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
 		effect.size = size
 	},
-	set_font_style: state => (style: FontStyle) => {
-		(state.timeline.selected_effect as TextEffect).style = style
-		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
+	set_font_style: state => ({id}: TextEffect, style: FontStyle) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
 		effect.style = style
 	},
-	set_text_align: state => (align: TextAlign) => {
-		(state.timeline.selected_effect as TextEffect).align = align
-		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
+	set_text_align: state => ({id}: TextEffect, align: TextAlign) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
 		effect.align = align
 	},
 	set_text_rect: state => ({id}: TextEffect, rect: EffectRect) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
-		(state.timeline.selected_effect as TextEffect).rect = rect
 		effect.rect = rect
 	},
-	set_text_content: state => (content: string) => {
-		const effect = state.timeline.effects.find(({id}) => id === state.timeline.selected_effect?.id) as TextEffect
-		(state.timeline.selected_effect as TextEffect).content = content
+	set_text_content: state => ({id}: TextEffect, content: string) => {
+		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
 		effect.content = content
-	},
-	set_selected_effect: state => (effect: AnyEffect | null) => {
-		if(effect) {
-			state.timeline.selected_effect = state.timeline.effects.find(({id}) => effect.id === id)!
-		} else {
-			state.timeline.selected_effect = effect
-		}
 	},
 	set_effect_track: state => (effect: AnyEffect, track: number) => {
 		const helper = new TimelineHelpers(state.timeline)
@@ -130,27 +119,18 @@ export const timeline_historical_actions = actionize_historical({
 	set_rotation: state => ({id}: TextEffect | ImageEffect | VideoEffect, rotation: number) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect | VideoEffect | ImageEffect
 		effect.rect.rotation = rotation
-		if(state.timeline.selected_effect?.kind !== "audio")
-			state.timeline.selected_effect!.rect.rotation = rotation
 	},
 	set_position_on_canvas: state => ({id}: TextEffect | ImageEffect | VideoEffect, x: number, y: number) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as TextEffect
 		effect.rect.position_on_canvas = {x, y}
-		if(state.timeline.selected_effect?.kind !== "audio") {
-			state.timeline.selected_effect!.rect.position_on_canvas = {x, y}
-		}
 	},
 	set_effect_width: state => ({id}: TextEffect | ImageEffect | VideoEffect, width: number) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as Exclude<AnyEffect, AudioEffect>
 		effect.rect.width = width
-		if(state.timeline.selected_effect?.kind !== "audio")
-			state.timeline.selected_effect!.rect.width = width
 	},
 	set_effect_height: state => ({id}: TextEffect | ImageEffect | VideoEffect, height: number) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as Exclude<AnyEffect, AudioEffect>
 		effect.rect.height = height
-		if(state.timeline.selected_effect?.kind !== "audio")
-			state.timeline.selected_effect!.rect.height = height
 	}
 })
 

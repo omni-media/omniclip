@@ -2,12 +2,12 @@ export type V2 = [number, number]
 export type ExportStatus = "complete" | "composing" | "demuxing" | "flushing"
 
 export interface TimelineHistorical {
-	selected_effect: AnyEffect | null
 	effects: AnyEffect[]
 	tracks: XTrack[]
 }
 
 export interface TimelineNonHistorical {
+	selected_effect: AnyEffect | null
 	is_playing: boolean
 	is_exporting: boolean
 	export_progress: number
