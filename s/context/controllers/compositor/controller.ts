@@ -6,9 +6,9 @@ import {ImageManager} from "./parts/image-manager.js"
 import {AudioManager} from "./parts/audio-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
 import {TimelineActions} from "../timeline/actions.js"
-import {AnyEffect, AudioEffect} from "../timeline/types.js"
 import {AlignGuidelines} from "./lib/aligning_guidelines.js"
 import {compare_arrays} from "../../../utils/compare_arrays.js"
+import {AnyEffect, AudioEffect, XTimeline} from "../timeline/types.js"
 import {sort_effects_by_track} from "../video-export/utils/sort_effects_by_track.js"
 
 export interface Managers {
@@ -222,8 +222,30 @@ export class Compositor {
 		this.canvas.on("mouse:up", (e) => {
 			//@ts-ignore
 			const selected_effect = e.target ? e.target.effect as Exclude<AnyEffect, AudioEffect> : null
-			if(selected_effect)
-				this.actions.set_position_on_canvas(selected_effect, e.target!.left, e.target!.top)
+			if(selected_effect) {
+				const {rect: {position_on_canvas: {x, y}}} = selected_effect
+				if(x !== e.target!.left || y !== e.target!.top) {
+					this.actions.set_position_on_canvas(selected_effect, e.target!.left, e.target!.top);
+					//@ts-ignore
+					(e.target.effect as Exclude<AnyEffect, AudioEffect>).rect.position_on_canvas = {x: e.target!.left, y: e.target!.top}
+				}
+			}
+		})
+	}
+
+	undo_or_redo(timeline: XTimeline) {
+		this.canvas.getObjects().forEach(object => {
+			if(!(object instanceof Rect)) {
+				//@ts-ignore
+				const object_effect = object.effect as Exclude<AnyEffect, AudioEffect>
+				const effect = timeline.effects.find(effect => effect.id === object_effect.id)! as Exclude<AnyEffect, AudioEffect>
+				if(effect) {
+					object.left = effect.rect.position_on_canvas.x
+					object.top = effect.rect.position_on_canvas.y
+					object.setCoords()
+					this.canvas.renderAll()
+				}
+			}
 		})
 	}
 

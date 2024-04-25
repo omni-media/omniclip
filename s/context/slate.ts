@@ -2,6 +2,7 @@ import {AppCore, Pojo, Nexus, ZipAction, watch} from "@benev/slate"
 import {slate, Context, PanelSpec} from "@benev/construct/x/mini.js"
 
 import {Media} from "./controllers/media/controller.js"
+import {XTimeline} from "./controllers/timeline/types.js"
 import {Timeline} from "./controllers/timeline/controller.js"
 import {Compositor} from "./controllers/compositor/controller.js"
 import {VideoExport} from "./controllers/video-export/controller.js"
@@ -43,12 +44,14 @@ export class OmniContext extends Context {
 		}}
 	}
 
-	undo() {
+	undo(timeline: XTimeline) {
 		this.#core.history.undo()
+		this.controllers.compositor.undo_or_redo(timeline)
 	}
 
-	redo() {
+	redo(timeline: XTimeline) {
 		this.#core.history.redo()
+		this.controllers.compositor.undo_or_redo(timeline)
 	}
 
 	get history() {

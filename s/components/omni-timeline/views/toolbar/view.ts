@@ -20,8 +20,8 @@ export const Toolbar = shadow_view(use => () => {
 		<div class="toolbar">
 			<div class=tools>
 				<div class=history>
-					<button ?data-past=${use.context.history.past.length !== 0} @click=${() => use.context.undo()}>${undoSvg}</button>
-					<button ?data-future=${use.context.history.future.length !== 0} @click=${() => use.context.redo()}>${redoSvg}</button>
+					<button ?data-past=${use.context.history.past.length !== 0} @click=${() => use.context.undo(use.context.state.timeline)}>${undoSvg}</button>
+					<button ?data-future=${use.context.history.future.length !== 0} @click=${() => use.context.redo(use.context.state.timeline)}>${redoSvg}</button>
 					<button @click=${() => controller.split(use.context.state.timeline, use.context.controllers.compositor)} class="split">${scissorsSvg}</button>
 				</div>
 				<div>${convert_ms_to_hmsms(use.context.state.timeline.timecode)}</div>
