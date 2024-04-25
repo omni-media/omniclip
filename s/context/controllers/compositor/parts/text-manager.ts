@@ -11,7 +11,7 @@ export class TextManager extends Map<string, FabricText> {
 
 	constructor(private compositor: Compositor, private actions: TimelineActions) {super()}
 
-	add_text_effect(timeline: XTimeline) {
+	create_and_add_text_effect(timeline: XTimeline) {
 		const effect: TextEffect = {
 			id: generate_id(),
 			kind: "text",
@@ -36,17 +36,17 @@ export class TextManager extends Map<string, FabricText> {
 				rotation: 0,
 			}
 		}
-		this.#add_text(effect)
 		const {position, track} = find_place_for_new_effect(timeline.effects, timeline.tracks)
 		effect.start_at_position = position!
 		effect.track = track
-		this.actions.add_text_effect(effect)
+		this.add_text_effect(effect)
 	}
 
-	#add_text(effect: TextEffect) {
+	add_text_effect(effect: TextEffect) {
 		const {size, color, content} = effect
 		const text = new FabricText(content, {fill: color, fontSize: size, objectCaching: false, effect})
 		this.set(effect.id, text)
+		this.actions.add_text_effect(effect)
 	}
 
 	add_text_to_canvas(effect: TextEffect) {

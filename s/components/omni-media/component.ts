@@ -82,7 +82,7 @@ export const OmniMedia = shadow_component(use => {
 			>
 				<div class="media-element">
 					${image.element}
-					<div @click=${() => managers.imageManager.add_image_effect(image, use.context.state.timeline)} class="add-btn">${addSvg}</div>
+					<div @click=${() => managers.imageManager.create_and_add_image_effect(image, use.context.state.timeline)} class="add-btn">${addSvg}</div>
 					<div @click=${() => media_controller.delete_file(image)} class="delete-btn">${binSvg}</div>
 				</div>
 				<span class="media-name">${image.file.name}</span>
@@ -97,7 +97,7 @@ export const OmniMedia = shadow_component(use => {
 				<div class="media-element audio">
 					${audio.element}
 					${audioWaveSvg}
-					<div @click=${() => managers.audioManager.add_audio_effect(audio, use.context.state.timeline)} class="add-btn">${addSvg}</div>
+					<div @click=${() => managers.audioManager.create_and_add_audio_effect(audio, use.context.state.timeline)} class="add-btn">${addSvg}</div>
 					<div @click=${() => media_controller.delete_file(audio)} class="delete-btn">${binSvg}</div>
 				</div>
 				<span class="media-name">${audio.file.name}</span>

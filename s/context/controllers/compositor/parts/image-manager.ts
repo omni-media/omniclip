@@ -11,7 +11,7 @@ export class ImageManager extends Map<string, {element: FabricImage, file: File}
 
 	constructor(private compositor: Compositor, private actions: TimelineActions) {super()}
 
-	async add_image_effect(image: Image, timeline: XTimeline) {
+	async create_and_add_image_effect(image: Image, timeline: XTimeline) {
 		const effect: ImageEffect = {
 			id: generate_id(),
 			kind: "image",
@@ -31,16 +31,16 @@ export class ImageManager extends Map<string, {element: FabricImage, file: File}
 		const {position, track} = find_place_for_new_effect(timeline.effects, timeline.tracks)
 		effect.start_at_position = position!
 		effect.track = track
-		await this.#add_image(effect, image.file)
-		this.actions.add_image_effect(effect)
+		await this.add_image_effect(effect, image.file)
 	}
 
-	async #add_image(effect: ImageEffect, file: File) {
+	async add_image_effect(effect: ImageEffect, file: File) {
 		let img = new Image()
 		img.src = effect.url
 		await new Promise(r => img.onload=r)
 		const image = new FabricImage(img, {width: effect.rect.width, height: effect.rect.height, top: 0, left: 0, objectCaching: false, effect})
 		this.set(effect.id, {element: image, file})
+		this.actions.add_image_effect(effect)
 	}
 
 	add_image_to_canvas(effect: ImageEffect) {

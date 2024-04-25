@@ -145,6 +145,20 @@ export class Timeline {
 			effect.id = generate_id()
 			compositor.managers.videoManager.add_video_effect(effect, file, element.videoWidth, element.videoHeight)
 		}
+		else if(effect.kind === "text") {
+			effect.id = generate_id()
+			compositor.managers.textManager.add_text_effect(effect)
+		}
+		else if(effect.kind === "image") {
+			const {file} = compositor.managers.imageManager.get(effect.id)!
+			effect.id = generate_id()
+			compositor.managers.imageManager.add_image_effect(effect, file)
+		}
+		else if(effect.kind === "audio") {
+			const {file} = compositor.managers.audioManager.get(effect.id)!
+			effect.id = generate_id()
+			compositor.managers.audioManager.add_audio_effect(effect, file)
+		}
 	}
 
 	split(timeline: XTimeline, compositor: Compositor) {
