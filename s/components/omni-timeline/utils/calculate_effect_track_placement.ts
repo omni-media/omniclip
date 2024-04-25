@@ -6,10 +6,12 @@ export function calculate_effect_track_placement(track_index: number, effects: A
 	for (let i = 0; i < track_index; i++) {
 		const video_effect = effects.find(effect => effect.track === i && effect.kind === "video")
 		const text_effect = effects.find(effect => effect.track === i && effect.kind === "text")
+		const image_effect = effects.find(effect => effect.track === i && effect.kind === "image")
+		const audio_effect = effects.find(effect => effect.track === i && effect.kind === "audio")
 
 		let trackHeight = 50
 
-		if (!video_effect && text_effect) {
+		if (!image_effect && !video_effect && !audio_effect && text_effect) {
 			trackHeight = 30
 		}
 

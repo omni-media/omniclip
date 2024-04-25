@@ -55,7 +55,7 @@ export const ProposalIndicator = light_view(use => () => {
 	}
 
 	const text_effect_specific_styles = () => {
-		return !track_effects.find(effect => effect.kind === "video") && track_effects.find(effect => effect.kind === "text")
+		return !track_effects.some(effect => effect.kind !== "text") && track_effects.find(effect => effect.kind === "text")
 			? `height: 30px;`
 			: ""
 	}

@@ -10,9 +10,9 @@ export const Track = shadow_view(use => (index :number) => {
 	const track_effects = controller.get_effects_on_track(use.context.state.timeline, index)
 
 	const if_text_on_track_styles = () => {
-		return !track_effects.find(effect => effect.kind === "video") && track_effects.find(effect => effect.kind === "text")
+		return track_effects.some(effect => effect.kind === "text") && !track_effects.some(effect => effect.kind !== "text")
 			? `height: 30px;`
-			: ""
+			: "height: 50px;"
 	}
 
 	return html`

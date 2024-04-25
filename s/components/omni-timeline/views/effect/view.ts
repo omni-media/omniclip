@@ -66,7 +66,7 @@ export const Effect = shadow_view(use => ({id}: AnyEffect, timeline: GoldElement
 		if(effect.kind === "text") {
 			return `
 				${!controller.get_effects_on_track(use.context.state.timeline, effect.track)
-					.find(effect => effect.kind === "video")
+					.some(effect => effect.kind !== "text")
 					? `height: 30px;`
 					: ""}
 				background-color: ${effect.color};
