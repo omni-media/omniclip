@@ -17,15 +17,17 @@ export const Filmstrips = shadow_view(use => (effect: VideoEffect, timeline: Gol
 	const [_f, setFramesCount, getFramesCount] = use.state(0)
 
 	use.mount(() => {
-		timeline.addEventListener("scroll", async (e) => {
-			const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as VideoEffect
-			for await(const {url, normalized_left, i} of recalculate_all_visible_filmstrips(get_effect, timeline.scrollLeft)) {
-				let new_visible = getVisibleFilmstrips()
-				new_visible[i] = {url, left: normalized_left}
-				setVisibleFilmstrips(new_visible)
-				setLastEffectOffsetLeftPosition(normalized_left)
-			}
-		})
+		async function recalculate_filmstrips_on_scroll() {
+			const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id) as VideoEffect | null
+			if(get_effect)
+				for await(const {url, normalized_left, i} of recalculate_all_visible_filmstrips(get_effect, timeline.scrollLeft)) {
+					let new_visible = getVisibleFilmstrips()
+					new_visible[i] = {url, left: normalized_left}
+					setVisibleFilmstrips(new_visible)
+					setLastEffectOffsetLeftPosition(normalized_left)
+				}
+		}
+		timeline.addEventListener("scroll", recalculate_filmstrips_on_scroll)
 
 		const dispose = watch.track(() => use.context.state.timeline.zoom, async (zoom) => {
 			const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as VideoEffect
@@ -35,7 +37,7 @@ export const Filmstrips = shadow_view(use => (effect: VideoEffect, timeline: Gol
 				setVisibleFilmstrips(new_visible)
 			}
 		})
-		return () => dispose()
+		return () => {dispose(); timeline.removeEventListener("scroll", recalculate_filmstrips_on_scroll)}
 	})
 
 	const worker = use.once(() => new Worker(new URL("./filmstrip_worker.js", import.meta.url), {type: "module"}))
