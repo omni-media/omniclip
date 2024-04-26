@@ -47,9 +47,9 @@ export const styles = css`
 		display: flex;
 		justify-content: center;
 		position: absolute;
-		bottom: 1em;
-		right: 1em;
 		width: 100%;
+		bottom: 0;
+		right: 0;
 		margin: 0.5em;
 		z-index: 999;
 
@@ -69,14 +69,6 @@ export const styles = css`
 	}
 
 	.controls[data-state="visible"] {
-		display: block;
-	}
-
-	.controls > * {
-		float: left;
-		width: 3.90625%;
-		height: 100%;
-		margin-left: 0.1953125%;
 		display: block;
 	}
 
@@ -130,48 +122,5 @@ export const styles = css`
 
 	.controls progress::-webkit-progress-value {
 		background-color: #0095dd;
-	}
-
-	@media screen and (max-width: 64em) {
-		figure {
-			padding-left: 0;
-			padding-right: 0;
-			height: auto;
-		}
-
-		.controls {
-			height: 1.876rem;
-		}
-	}
-
-	@media screen and (max-width: 42.5em) {
-		.controls {
-			height: auto;
-		}
-
-		.controls > * {
-			display: block;
-			width: 16.6667%;
-			margin-left: 0;
-			height: 2.5rem;
-			margin-top: 2.5rem;
-		}
-
-		.controls .progress {
-			position: absolute;
-			top: 0;
-			width: 100%;
-			float: none;
-			margin-top: 0;
-		}
-
-		.controls .progress progress {
-			width: 98%;
-			margin: 0 auto;
-		}
-
-		.controls button {
-			background-position: center center;
-		}
 	}
 `
