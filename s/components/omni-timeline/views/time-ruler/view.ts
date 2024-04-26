@@ -141,7 +141,7 @@ export const TimeRuler = shadow_view(use => (timeline: GoldElement) => {
 		<div
 			@pointerenter=${() => setIndicator(true)}
 			@pointerleave=${() => setIndicator(false)}
-			@pointermove=${(e: PointerEvent) => setIndicatorX(e.clientX - timeline.getBoundingClientRect().left)}
+			@pointermove=${(e: PointerEvent) => setIndicatorX(e.clientX - timeline.getBoundingClientRect().left + timeline.scrollLeft)}
 			@click=${() => translate_to_timecode_and_set(indicatorX)} class=time-ruler
 		>
 			<div style="transform: translateX(${indicatorX}px); display: ${indicator ? "block" : "none"};" class="indicator"></div>
