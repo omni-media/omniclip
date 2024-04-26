@@ -8,6 +8,9 @@ export const TimeRuler = shadow_view(use => (timeline: GoldElement) => {
 	const [timeCodes, setTimeCodes] = use.state<{time: string, offset: number, kind: "normal" | "dot"}[]>([])
 	const [_, setPrevTimecode, getPrevTimecode] = use.state<null | number>(null)
 	const [_p, setPrev, getPrev] = use.state<null | number>(null)
+	const [indicatorX, setIndicatorX] = use.state(0)
+	const [indicator, setIndicator] = use.state(false)
+
 	use.mount(() => {
 		const set_time_codes = () => setTimeCodes(generate_time_codes(use.context.state.timeline.zoom))
 		watch.track(() => use.context.state.timeline.zoom, (zoom) => setTimeCodes(generate_time_codes(zoom)))
@@ -128,13 +131,25 @@ export const TimeRuler = shadow_view(use => (timeline: GoldElement) => {
 		return time_codes as any
 	}
 
+	const translate_to_timecode_and_set = (x: number) => {
+		const zoom = use.context.state.timeline.zoom
+		const milliseconds = x * Math.pow(2, -zoom)
+		use.context.actions.timeline_actions.set_timecode(milliseconds)
+	}
+
 	return html`
-		<div class=time-ruler>
-		${timeCodes.map(({time, offset, kind}) => html`
+		<div
+			@pointerenter=${() => setIndicator(true)}
+			@pointerleave=${() => setIndicator(false)}
+			@pointermove=${(e: PointerEvent) => setIndicatorX(e.clientX - timeline.getBoundingClientRect().left)}
+			@click=${() => translate_to_timecode_and_set(indicatorX)} class=time-ruler
+		>
+			<div style="transform: translateX(${indicatorX}px); display: ${indicator ? "block" : "none"};" class="indicator"></div>
+			${timeCodes.map(({time, offset, kind}) => html`
 			<div class="time ${kind}" style="transform: translateX(${offset}px)">
 				<div class="content">${kind === "normal" ? time : null}</div>
 			</div>
-		`)}
+			`)}
 		</div>
 	`
 })

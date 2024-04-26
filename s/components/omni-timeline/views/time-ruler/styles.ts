@@ -8,8 +8,17 @@ export const styles = css`
 		align-items: center;
 	}
 
+	.indicator {
+		pointer-events: none;
+		z-index: 10;
+		width: 1px;
+		height: 100%;
+		background: yellow;
+	}
+
 	.time {
 		position: absolute;
+		pointer-events: none;
 	}
 
 	.dot {
