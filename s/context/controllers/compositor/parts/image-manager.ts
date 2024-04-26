@@ -38,7 +38,7 @@ export class ImageManager extends Map<string, {element: FabricImage, file: File}
 		let img = new Image()
 		img.src = effect.url
 		await new Promise(r => img.onload=r)
-		const image = new FabricImage(img, {width: effect.rect.width, height: effect.rect.height, top: 0, left: 0, objectCaching: false, effect})
+		const image = new FabricImage(img, {width: effect.rect.width, height: effect.rect.height, top: 0, left: 0, objectCaching: false, effect: {...effect}})
 		this.set(effect.id, {element: image, file})
 		this.actions.add_image_effect(effect)
 	}

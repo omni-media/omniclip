@@ -44,7 +44,7 @@ export class TextManager extends Map<string, FabricText> {
 
 	add_text_effect(effect: TextEffect) {
 		const {size, color, content} = effect
-		const text = new FabricText(content, {fill: color, fontSize: size, objectCaching: false, effect})
+		const text = new FabricText(content, {fill: color, fontSize: size, objectCaching: false, effect: {...effect}})
 		this.set(effect.id, text)
 		this.actions.add_text_effect(effect)
 	}
