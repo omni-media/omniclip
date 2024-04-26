@@ -23,6 +23,18 @@ export const styles = css`
 		align-items: center;
 		width: 98%;
 		justify-content: space-between;
+
+		& .flex {
+			display: flex;
+
+			& .split {margin: 0 1em;}
+
+			& .split, .remove {
+				& svg {
+					width: 17px;
+				}
+			}
+		}
 	}
 
 	.history {
@@ -41,14 +53,6 @@ export const styles = css`
 			}
 		}
 
-		& .split {
-			color: #555454;
-			margin-left: 50%;
-
-			& svg {
-				width: 17px;
-			}
-		}
 	}
 
 	.zoom {
@@ -71,7 +75,7 @@ export const styles = css`
 		opacity: 0.5;
 
 		& svg {
-			cursor: not-allowed;
+			cursor: default;
 		}
 	}
 `

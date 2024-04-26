@@ -210,5 +210,12 @@ export class Timeline {
 			compositor.canvas.discardActiveObject()
 		}
 	}
+
+	remove_selected_effect(timeline: XTimeline) {
+		if(timeline.selected_effect) {
+			this.timeline_actions.set_selected_effect(null)
+			this.timeline_actions.remove_effect(timeline.selected_effect)
+		}
+	}
 }
 

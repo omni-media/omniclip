@@ -131,6 +131,10 @@ export const timeline_historical_actions = actionize_historical({
 	set_effect_height: state => ({id}: TextEffect | ImageEffect | VideoEffect, height: number) => {
 		const effect = state.timeline.effects.find(effect => effect.id === id) as Exclude<AnyEffect, AudioEffect>
 		effect.rect.height = height
+	},
+	remove_effect: state => ({id}: AnyEffect) => {
+		const effects = state.timeline.effects.filter(effect => effect.id !== id)
+		state.timeline.effects = effects
 	}
 })
 

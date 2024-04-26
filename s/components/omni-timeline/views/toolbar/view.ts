@@ -2,6 +2,7 @@ import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
+import binSvg from "../../../../icons/gravity-ui/bin.svg.js"
 import scissorsSvg from "../../../../icons/gravity-ui/scissors.svg.js"
 import undoSvg from "../../../../icons/material-design-icons/undo.svg.js"
 import redoSvg from "../../../../icons/material-design-icons/redo.svg.js"
@@ -19,10 +20,15 @@ export const Toolbar = shadow_view(use => () => {
 	return html`
 		<div class="toolbar">
 			<div class=tools>
-				<div class=history>
-					<button ?data-past=${use.context.history.past.length !== 0} @click=${() => use.context.undo(use.context.state.timeline)}>${undoSvg}</button>
-					<button ?data-future=${use.context.history.future.length !== 0} @click=${() => use.context.redo(use.context.state.timeline)}>${redoSvg}</button>
+				<div class=flex>
+					<div class=history>
+						<button ?data-past=${use.context.history.past.length !== 0} @click=${() => use.context.undo(use.context.state.timeline)}>${undoSvg}</button>
+						<button ?data-future=${use.context.history.future.length !== 0} @click=${() => use.context.redo(use.context.state.timeline)}>${redoSvg}</button>
+					</div>
 					<button @click=${() => controller.split(use.context.state.timeline, use.context.controllers.compositor)} class="split">${scissorsSvg}</button>
+					<button class="remove" ?disabled=${!use.context.state.timeline.selected_effect} @click=${() => controller.remove_selected_effect(use.context.state.timeline)}>
+						${binSvg}
+					</button>
 				</div>
 				<div>${convert_ms_to_hmsms(use.context.state.timeline.timecode)}</div>
 				<div class="zoom">
