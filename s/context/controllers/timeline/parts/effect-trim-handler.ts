@@ -16,55 +16,52 @@ export class effectTrimHandler {
 	constructor(private actions: TimelineActions) {}
 
 	effect_dragover(clientX: number, timeline: XTimeline) {
-		if(!this.effect_resize_handle_drag.grabbed)
-			return
-		const get_effect = timeline.effects.find(({id}) => id === this.effect?.id)
-		const delta = clientX - this.initial_x;
+		if(!this.effect_resize_handle_drag.grabbed) {return}
+		const pointer_position = this.#get_pointer_position_relative_to_effect_right_or_left_side(clientX, timeline)
 		if(this.effect_resize_handle_drag.grabbed === "left") {
-			const is_within_boundary = delta < Math.abs(get_effect!.start_at_position - get_effect!.start)
-			if (is_within_boundary) {
-				const start_at = (this.initial_start_position + (delta  * Math.pow(2, -timeline.zoom))) < get_effect!.start_at_position - get_effect!.start
-				? this.initial_start_position - this.initial_start
-				: (this.initial_start_position + (delta  * Math.pow(2, -timeline.zoom)))
-				const start = (this.initial_start + delta * Math.pow(2, -timeline.zoom)) < 0
-				? 0
-				: (this.initial_start + delta * Math.pow(2, -timeline.zoom))
-				if(start_at >= get_effect!.start_at_position - get_effect!.start) {
+			const start_at = this.initial_start_position + pointer_position
+			const start = this.initial_start + pointer_position
+			if(start <= this.effect!.end - 1000/timeline.timebase) {
+				if(this.effect!.kind === "video" || this.effect!.kind === "audio") {
+					if(start >= 1000/timeline.timebase) {
+						this.actions.set_effect_start_position(this.effect!, start_at)
+						this.actions.set_effect_start(this.effect!, start)
+					}
+				} else {
 					this.actions.set_effect_start_position(this.effect!, start_at)
-					this.actions.set_effect_start(get_effect!, start)
+					this.actions.set_effect_start(this.effect!, start)
 				}
 			}
 		} else {
-			const is_within_boundary = delta < get_effect!.duration - get_effect!.end
-			if (is_within_boundary) {
-				const end = (this.initial_end + delta * Math.pow(2, -timeline.zoom)) < this.effect!.duration
-				? (this.initial_end + delta * Math.pow(2, -timeline.zoom))
-				: this.effect!.duration
-				this.actions.set_effect_end(get_effect!, end)
+			const end = this.initial_end + pointer_position
+			if(end >= this.effect!.start + 1000/timeline.timebase) {
+				if(this.effect!.kind === "video" || this.effect!.kind === "audio") {
+					if(end <= this.effect!.duration) {
+						this.actions.set_effect_end(this.effect!, end)
+					}
+				} else {
+					this.actions.set_effect_end(this.effect!, end)
+				}
 			}
 		}
 	}
 
 	#normalize_to_timebase_and_set(e: DragEvent, timeline: XTimeline) {
-		const get_effect = timeline.effects.find(({id}) => id === this.effect?.id)
+		const effect = timeline.effects.find(({id}) => id === this.effect?.id)!
 		const frame_duration = 1000/timeline.timebase
-		const delta = e.clientX - this.initial_x;
 		if(this.effect_resize_handle_drag.grabbed === "left") {
-			const start_at = Math.round((this.initial_start_position + (delta  * Math.pow(2, -timeline.zoom))) / frame_duration) * frame_duration
-			const start = Math.round((this.initial_start + delta * Math.pow(2, -timeline.zoom)) / frame_duration) * frame_duration
-			if(start_at >= get_effect!.start_at_position - get_effect!.start) {
-				this.actions.set_effect_start(get_effect!, start)
-				this.actions.set_effect_start_position(this.effect!, start_at)
-			}
+			const normalized_start = Math.round(effect!.start / frame_duration) * frame_duration
+			const normalized_start_at = Math.round(effect!.start_at_position / frame_duration) * frame_duration
+			this.actions.set_effect_start(this.effect!, normalized_start)
+			this.actions.set_effect_start_position(this.effect!, normalized_start_at)
 		} else {
-			const is_within_boundary = delta < get_effect!.duration - get_effect!.end
-			if (is_within_boundary) {
-				const end = Math.round((this.initial_end + delta * Math.pow(2, -timeline.zoom)) / frame_duration) * frame_duration < this.effect!.duration 
-					? Math.round((this.initial_end + delta * Math.pow(2, -timeline.zoom)) / frame_duration) * frame_duration
-					: this.effect!.duration
-				this.actions.set_effect_end(get_effect!, end)
-			}
+			const normalized_end = Math.round(effect.end / frame_duration) * frame_duration
+			this.actions.set_effect_end(effect, normalized_end)
 		}
+	}
+
+	#get_pointer_position_relative_to_effect_right_or_left_side(clientX: number, timeline: XTimeline) {
+		return (clientX - this.initial_x) * Math.pow(2, -timeline.zoom)
 	}
 
 	trim_start = (e: DragEvent, effect: AnyEffect, side: "left" | "right") => {
