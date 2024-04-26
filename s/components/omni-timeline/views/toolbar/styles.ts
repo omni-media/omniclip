@@ -8,7 +8,6 @@ export const styles = css`
 	}
 
 	.toolbar {
-		width: 99%;
 		justify-content: space-between;
 		display: flex;
 		align-items: center;
@@ -20,8 +19,8 @@ export const styles = css`
 		z-index: 2;
 		display: flex;
 		position: fixed;
+		padding-right: 2em;
 		align-items: center;
-		width: 98%;
 		justify-content: space-between;
 
 		& .flex {

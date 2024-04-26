@@ -1,4 +1,4 @@
-import {html} from "@benev/slate"
+import {GoldElement, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
@@ -10,16 +10,22 @@ import zoomInSvg from "../../../../icons/material-design-icons/zoom-in.svg.js"
 import {convert_ms_to_hmsms} from "../time-ruler/utils/convert_ms_to_hmsms.js"
 import zoomOutSvg from "../../../../icons/material-design-icons/zoom-out.svg.js"
 
-export const Toolbar = shadow_view(use => () => {
+export const Toolbar = shadow_view(use => (timeline: GoldElement) => {
 	use.styles(styles)
 	use.watch(() => use.context.state.timeline)
 	const actions = use.context.actions.timeline_actions
 	const zoom = use.context.state.timeline.zoom
 	const controller = use.context.controllers.timeline
 
+	use.mount(() => {
+		const observer = new ResizeObserver(() => use.rerender())
+		observer.observe(timeline)
+		return () => observer.disconnect()
+	})
+
 	return html`
 		<div class="toolbar">
-			<div class=tools>
+			<div style="width: ${timeline.offsetWidth}px;" class=tools>
 				<div class=flex>
 					<div class=history>
 						<button ?data-past=${use.context.history.past.length !== 0} @click=${() => use.context.undo(use.context.state.timeline)}>${undoSvg}</button>
