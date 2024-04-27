@@ -34,7 +34,7 @@ export const OmniMedia = shadow_component(use => {
 			if(change.action === "added") {
 				const video_files = change.files.filter(({kind}) => kind === "video") as VideoFile[]
 				const image_files = change.files.filter(({kind}) => kind === "image") as ImageFile[]
-				const audio_files = media.filter(({kind}) => kind === "audio") as AudioFile[]
+				const audio_files = change.files.filter(({kind}) => kind === "audio") as AudioFile[]
 				const video_elements = await media_controller.create_videos_from_video_files(video_files)
 				const image_elements = media_controller.create_image_elements(image_files)
 				const audio_elements = media_controller.create_audio_elements(audio_files)
