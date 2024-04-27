@@ -131,7 +131,7 @@ export class Compositor {
 		for(const effect of this.currently_played_effects.values()) {
 			if(effect.kind === "audio") {
 				const {element} = this.managers.audioManager.get(effect.id)!
-				if(!redraw && element.paused) {await element.play()}
+				if(!redraw && element.paused && this.#is_playing.value) {await element.play()}
 				if(redraw && timecode) {
 					const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
 					element.currentTime = current_time
@@ -140,7 +140,7 @@ export class Compositor {
 			if(effect.kind === "video") {
 				const {fabric} = this.managers.videoManager.get(effect.id)!
 				const element = fabric.getElement() as HTMLVideoElement
-				if(!redraw && element.paused) {await element.play()}
+				if(!redraw && element.paused && this.#is_playing.value) {await element.play(); console.log("play", this.#is_playing)}
 				if(redraw && timecode) {
 					const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
 					element.currentTime = current_time
@@ -158,6 +158,8 @@ export class Compositor {
 			else if(effect.kind === "video") {
 				this.currently_played_effects.set(effect.id, effect)
 				this.managers.videoManager.add_video_to_canvas(effect)
+				const element = this.managers.videoManager.get(effect.id)?.fabric.getElement() as HTMLVideoElement
+				if(element) {element.currentTime = 0}
 			}
 			else if(effect.kind === "text") {
 				this.currently_played_effects.set(effect.id, effect)
@@ -165,6 +167,8 @@ export class Compositor {
 			}
 			else if(effect.kind === "audio") {
 				this.currently_played_effects.set(effect.id, effect)
+				const element = this.managers.videoManager.get(effect.id)?.fabric.getElement() as HTMLAudioElement
+				if(element) {element.currentTime = 0}
 			}
 		}
 	}

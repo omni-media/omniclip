@@ -24,8 +24,14 @@ export const MediaPlayer = shadow_view(use => () => {
 		const dispose1 = watch.track(
 			() => use.context.state.timeline,
 			(timeline) => {
-				if(!timeline.is_exporting)
+				if(!timeline.is_exporting) {
 					compositor.compose_effects(timeline.effects, timeline.timecode)
+					if(!timeline.is_playing) {
+						compositor.set_current_time_of_audio_or_video_and_redraw(true, use.context.state.timeline.timecode)
+					} else {
+						compositor.set_current_time_of_audio_or_video_and_redraw(false, use.context.state.timeline.timecode)
+					}
+				}
 			}
 		)
 		const dispose2 = watch.track(
