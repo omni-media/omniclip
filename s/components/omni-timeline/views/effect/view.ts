@@ -128,11 +128,6 @@ export const Effect = shadow_view(use => ({id}: AnyEffect, timeline: GoldElement
 				}
 				wavesurfer.zoom(width / wavesurfer.getDuration())
 			})
-
-			watch.track(() => use.context.state.timeline, (state) => {
-				const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as AudioEffect
-				wave.style.transform = `translateX(${-get_effect.start * Math.pow(2, use.context.state.timeline.zoom)}px)`
-			})
 		}
 	})
 
@@ -156,7 +151,7 @@ export const Effect = shadow_view(use => ({id}: AnyEffect, timeline: GoldElement
 			${effect.kind === "video"
 			? Filmstrips([effect, timeline])
 			: effect.kind === "audio"
-			? wave
+			? html`<span style="transform: translateX(${-effect.start * Math.pow(2, use.context.state.timeline.zoom)}px)">${wave}</span>`
 			: null}
 		</span>
 	`
