@@ -16,7 +16,7 @@ export const OmniMedia = shadow_component(use => {
 	const media_controller = use.context.controllers.media
 	const managers = use.context.controllers.compositor.managers
 	const [media, setMedia, getMedia] = use.state<(Video | Image | Audio)[]>([])
-	const [placeholders, setPlaceholders] = use.state<any[]>([])
+	const [placeholders, setPlaceholders, getPlaceholders] = use.state<any[]>([])
 
 	use.mount(() => {
 		media_controller.get_imported_files().then(async media => {
@@ -28,6 +28,7 @@ export const OmniMedia = shadow_component(use => {
 			const image_elements = media_controller.create_image_elements(image_files)
 			const audio_elements = media_controller.create_audio_elements(audio_files)
 			setMedia([...getMedia(), ...video_elements, ...image_elements, ...audio_elements])
+			setPlaceholders([])
 		})
 		const unsub = media_controller.on_media_change(async (change) => {
 			if(change.action === "added") {
@@ -38,12 +39,18 @@ export const OmniMedia = shadow_component(use => {
 				const image_elements = media_controller.create_image_elements(image_files)
 				const audio_elements = media_controller.create_audio_elements(audio_files)
 				setMedia([...getMedia(), ...video_elements, ...image_elements, ...audio_elements])
+				const placeholders = [...getPlaceholders()]
+				placeholders.pop()
+				setPlaceholders(placeholders)
 			}
 			if(change.action === "removed") {
 				change.files.forEach(file => {
 					const filtered = getMedia().filter(a => a.hash !== file.hash)
 					setMedia(filtered)
 				})
+			}
+			if(change.action === "placeholder") {
+				setPlaceholders([...getPlaceholders(), ...Array.apply(null, Array(1))])
 			}
 		})
 		return () => unsub()
@@ -111,9 +118,7 @@ export const OmniMedia = shadow_component(use => {
 			<input type="file" accept="image/*, video/mp4, .mp3" id="import" class="hide" @change=${(e: Event) => media_controller.import_file(e.target as HTMLInputElement)}>
 		</form>
 		<div class="media">
-			${media.length === 0
-				? placeholders.map(_ => html`<div class="box placeholder">${loadingSvg}</div>`)
-				: null}
+			${placeholders.map(_ => html`<div class="box placeholder">${loadingSvg}</div>`)}
 			${media.map((media) => {
 				if(media.kind === "video")
 					return render_video_element(media)

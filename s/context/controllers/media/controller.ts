@@ -80,6 +80,7 @@ export class Media {
 	}
 
 	async import_file(input: HTMLInputElement) {
+		this.on_media_change.publish({files: [], action: "placeholder"})
 		const imported_file = input.files?.[0]
 		const frames = imported_file?.type.startsWith("video") ? await ffprobe.getFrames(imported_file, 1) : null
 		if(imported_file) {
