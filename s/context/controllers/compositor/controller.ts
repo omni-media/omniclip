@@ -140,7 +140,7 @@ export class Compositor {
 			if(effect.kind === "video") {
 				const {fabric} = this.managers.videoManager.get(effect.id)!
 				const element = fabric.getElement() as HTMLVideoElement
-				if(!redraw && element.paused && this.#is_playing.value) {await element.play(); console.log("play", this.#is_playing)}
+				if(!redraw && element.paused && this.#is_playing.value) {await element.play()}
 				if(redraw && timecode) {
 					const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
 					element.currentTime = current_time
@@ -202,7 +202,9 @@ export class Compositor {
 		})
 		guideline.init()
 		// add rect as big as canvas so it acts as guideline for canvas borders
-		this.canvas.add(new Rect({width: 1279, height: 719, fill: "transparent", selectable: false, evented: false}))
+		const rect = new Rect({width: 1279, height: 719, fill: "transparent", selectable: false, evented: false})
+		this.canvas.moveObjectTo(rect, 999)
+		this.canvas.add(rect)
 	}
 
 	#on_new_canvas_object_set_handle_styles() {
