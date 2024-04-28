@@ -17,14 +17,14 @@ export const Export = shadow_view(use => () => {
 	const state = use.context.state.timeline
 	const [logs, setLogs, getLogs] = use.state<string[]>([])
 
-	const [selectedResolution, setSelectedResolution] = use.state("1920x1080")
+	const [{width, height}, setSelectedResolution] = use.state({width: 1920, height: 1080})
 	const [selectedAsptectRatio, setSelectedAspectRatio] = use.state<AspectRatio>("16/9")
 
 	const render_export_props = () => {
 		const props = export_props.filter(prop => prop.aspect_ratio === selectedAsptectRatio)
-		return props.map(({width, height}) => {
-			const res = `${width}x${height}`
-			return html`<p @click=${() => setSelectedResolution(res)} ?data-selected=${res === selectedResolution}>${res} - ${height !== 2160 ? `${height}p` : "4K"}</p>`
+		return props.map(p => {
+			const res = `${p.width}x${p.height}`
+			return html`<p @click=${() => setSelectedResolution({width: p.width, height: p.height})} ?data-selected=${p.width === width && p.height === height}>${res} - ${p.height !== 2160 ? `${p.height}p` : "4K"}</p>`
 		})
 	}
 	
@@ -85,8 +85,8 @@ export const Export = shadow_view(use => () => {
 			</dialog>
 			${render_export_props()}
 			<div class=export>
-				<span class=info>${selectedResolution}@${use.context.state.timeline.timebase}fps</span>
-				<button class="sparkle-button" @click=${() => video_export.export_start(use.context.state.timeline)}>
+				<span class=info>${`${width}x${height}`}@${use.context.state.timeline.timebase}fps</span>
+				<button class="sparkle-button" @click=${() => video_export.export_start(use.context.state.timeline, [width, height])}>
 					<span class="text">${exportSvg}<span>Export</span></span>
 				</button>
 			</div>

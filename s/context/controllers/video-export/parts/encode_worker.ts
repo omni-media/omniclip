@@ -13,7 +13,7 @@ async function handle_chunk(chunk: EncodedVideoChunk) {
 
 // for later: https://github.com/gpac/mp4box.js/issues/243
 const config: VideoEncoderConfig = {
-	codec: "avc1.4d002a", // avc1.42001E / avc1.4d002a / avc1.640034
+	codec: "avc1.640034", // avc1.42001E / avc1.4d002a / avc1.640034
 	avc: {format: "annexb"},
 	width: 1280,
 	height: 720,
@@ -29,11 +29,10 @@ const encoder = new VideoEncoder({
 	},
 })
 
-encoder.configure(config)
-
 self.addEventListener("message", async message => {
-	if(message.data.action === "update-timebase") {
-		timebase = message.data.timebase as number
+	if(message.data.action === "configure") {
+		config.width = message.data.width
+		config.height = message.data.height
 		encoder.configure(config)
 	}
 	if(message.data.action === "encode") {

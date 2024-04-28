@@ -27,7 +27,8 @@ export class VideoExport {
 		await this.#FileSystemHelper.writeFile(handle, this.#Encoder.file!)
 	}
 
-	export_start(timeline: XTimeline) {
+	export_start(timeline: XTimeline, resolution: number[]) {
+		this.#Encoder.configure(resolution)
 		const sorted_effects = this.#sort_effects_by_track(timeline.effects)
 		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position - effect.start + effect.end))
 		this.#export_process(sorted_effects)
