@@ -8,6 +8,7 @@ import {Video} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
 export class VideoManager extends Map<string, {fabric: FabricImage, file: File}> {
+	#canvas = document.createElement("canvas")
 
 	constructor(private compositor: Compositor, private actions: TimelineActions) {super()}
 
@@ -75,11 +76,10 @@ export class VideoManager extends Map<string, {fabric: FabricImage, file: File}>
 
 	draw_decoded_frame(effect: VideoEffect, frame: VideoFrame) {
 		const video = this.get(effect.id)!.fabric
-		const canvas = document.createElement("canvas")
-		canvas.width = video.width
-		canvas.height = video.height
-		canvas.getContext("2d")!.drawImage(frame, 0,0, video.width, video.height)
-		video.setElement(canvas)
+		this.#canvas.width = video.width
+		this.#canvas.height = video.height
+		this.#canvas.getContext("2d")!.drawImage(frame, 0,0, video.width, video.height)
+		video.setElement(this.#canvas)
 	}
 
 	pause_videos() {
