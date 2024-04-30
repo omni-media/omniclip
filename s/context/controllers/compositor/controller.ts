@@ -159,7 +159,7 @@ export class Compositor {
 				this.currently_played_effects.set(effect.id, effect)
 				this.managers.videoManager.add_video_to_canvas(effect)
 				const element = this.managers.videoManager.get(effect.id)?.fabric.getElement() as HTMLVideoElement
-				if(element) {element.currentTime = 0}
+				if(element) {element.currentTime = effect.start}
 			}
 			else if(effect.kind === "text") {
 				this.currently_played_effects.set(effect.id, effect)
@@ -168,7 +168,7 @@ export class Compositor {
 			else if(effect.kind === "audio") {
 				this.currently_played_effects.set(effect.id, effect)
 				const element = this.managers.videoManager.get(effect.id)?.fabric.getElement() as HTMLAudioElement
-				if(element) {element.currentTime = 0}
+				if(element) {element.currentTime = effect.start}
 			}
 		}
 	}
