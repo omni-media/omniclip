@@ -80,9 +80,9 @@ export class Compositor {
 		return elapsed_time
 	}
 
-	compose_effects(effects: AnyEffect[], timecode: number) {
+	compose_effects(effects: AnyEffect[], timecode: number, exporting?: boolean) {
 		this.timecode = timecode
-		this.#update_currently_played_effects(effects, timecode)
+		this.#update_currently_played_effects(effects, timecode, exporting)
 		this.canvas.requestRenderAll()
 	}
 
@@ -95,11 +95,11 @@ export class Compositor {
 		return effects.filter(effect => effect.start_at_position <= timecode && timecode <= effect.start_at_position + (effect.end - effect.start))
 	}
 
-	#update_currently_played_effects(effects: AnyEffect[], timecode: number) {
+	#update_currently_played_effects(effects: AnyEffect[], timecode: number, exporting?: boolean) {
 		const effects_relative_to_timecode = this.get_effects_relative_to_timecode(effects, timecode)
 		const {add, remove} = compare_arrays([...this.currently_played_effects.values()], effects_relative_to_timecode)
 		this.#update_effects(effects_relative_to_timecode)
-		this.#remove_effects_from_canvas(remove)
+		this.#remove_effects_from_canvas(remove, exporting)
 		this.#add_effects_to_canvas(add)
 		this.#draw_in_correct_order(sort_effects_by_track(effects_relative_to_timecode))
 	}
@@ -173,20 +173,21 @@ export class Compositor {
 		}
 	}
 
-	#remove_effects_from_canvas(effects: AnyEffect[]) {
+	#remove_effects_from_canvas(effects: AnyEffect[], exporting?: boolean) {
 		for(const effect of effects) {
 			if(effect.kind === "image") {
 				this.currently_played_effects.delete(effect.id)
 				this.managers.imageManager.remove_image_from_canvas(effect)
 			}
+			else if(effect.kind === "text") {
+				this.currently_played_effects.delete(effect.id)
+				this.managers.textManager.remove_text_from_canvas(effect)
+			}
+			if(exporting) {return}
 			else if(effect.kind === "video") {
 				this.currently_played_effects.delete(effect.id)
 				this.managers.videoManager.remove_video_from_canvas(effect)
 				this.managers.videoManager.pause_video(effect)
-			}
-			else if(effect.kind === "text") {
-				this.currently_played_effects.delete(effect.id)
-				this.managers.textManager.remove_text_from_canvas(effect)
 			}
 			else if(effect.kind === "audio") {
 				this.managers.audioManager.pause_audio(effect)
