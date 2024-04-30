@@ -1,4 +1,5 @@
-import {TemplateResult, html} from "@benev/slate"
+import {html} from "@benev/slate"
+import {repeat} from "lit/directives/repeat.js"
 
 import {styles} from "./styles.js"
 import {Effect} from "./views/effect/view.js"
@@ -56,7 +57,7 @@ export const OmniTimeline = shadow_component(use => {
 	}
 
 	const render_tracks = () => state.tracks.map((_track, i) => Track([i], {attrs: {part: "add-track-indicator"}}))
-	const render_effects = () => use.context.state.timeline.effects.map((effect) => Effect([effect, use.element]))
+	const render_effects = () => repeat(use.context.state.timeline.effects, (effect) => effect.id, (effect) => Effect([effect, use.element]))
 
 	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<div
