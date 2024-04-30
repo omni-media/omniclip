@@ -5,6 +5,7 @@ export const styles = css`
 		display: flex;
 		overflow: scroll;
 		position: relative;
+		height: 1500px;
 	}
 
 	.timeline {

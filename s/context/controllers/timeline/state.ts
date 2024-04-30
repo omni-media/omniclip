@@ -28,6 +28,12 @@ export const timeline_state: XTimeline = {
 		{id: generate_id(),item: {type: "Video", source: "/public/bbb_video_avc_frag.mp4"},
 			start: 0, end: 60000, track: 1, start_at_position: 5000, duration: 60000
 		},
+		{id: generate_id(),item: {type: "Video", source: "/public/bbb_video_avc_frag.mp4"},
+			start: 0, end: 60000, track: 2, start_at_position: 5000, duration: 60000
+		},
+		{id: generate_id(),item: {type: "Video", source: "/public/bbb_video_avc_frag.mp4"},
+			start: 0, end: 60000, track: 3, start_at_position: 5000, duration: 60000
+		},
 		/*
 		{id: generate_id(),item: {type: "Image", source: ""},
 			start: 20000, end: 30000, track: 2, start_at_position: 20000, duration: 10000
