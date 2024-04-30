@@ -102,4 +102,15 @@ export class VideoManager extends Map<string, {fabric: FabricImage, file: File}>
 		}
 	}
 
+	pause_video(effect: VideoEffect) {
+		const {fabric} = this.get(effect.id)!
+		const element = fabric.getElement() as HTMLVideoElement
+		element.pause()
+	}
+
+	async play_video(effect: VideoEffect) {
+		const {fabric} = this.get(effect.id)!
+		const element = fabric.getElement() as HTMLVideoElement
+		await element.play()
+	}
 }

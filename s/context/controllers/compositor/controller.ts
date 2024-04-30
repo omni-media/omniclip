@@ -159,7 +159,7 @@ export class Compositor {
 				this.currently_played_effects.set(effect.id, effect)
 				this.managers.videoManager.add_video_to_canvas(effect)
 				const element = this.managers.videoManager.get(effect.id)?.fabric.getElement() as HTMLVideoElement
-				if(element) {element.currentTime = effect.start}
+				if(element) {element.currentTime = effect.start / 1000}
 			}
 			else if(effect.kind === "text") {
 				this.currently_played_effects.set(effect.id, effect)
@@ -167,8 +167,8 @@ export class Compositor {
 			}
 			else if(effect.kind === "audio") {
 				this.currently_played_effects.set(effect.id, effect)
-				const element = this.managers.videoManager.get(effect.id)?.fabric.getElement() as HTMLAudioElement
-				if(element) {element.currentTime = effect.start}
+				const element = this.managers.audioManager.get(effect.id)?.element as HTMLAudioElement
+				if(element) {element.currentTime = effect.start / 1000}
 			}
 		}
 	}
@@ -182,12 +182,14 @@ export class Compositor {
 			else if(effect.kind === "video") {
 				this.currently_played_effects.delete(effect.id)
 				this.managers.videoManager.remove_video_from_canvas(effect)
+				this.managers.videoManager.pause_video(effect)
 			}
 			else if(effect.kind === "text") {
 				this.currently_played_effects.delete(effect.id)
 				this.managers.textManager.remove_text_from_canvas(effect)
 			}
 			else if(effect.kind === "audio") {
+				this.managers.audioManager.pause_audio(effect)
 				this.currently_played_effects.delete(effect.id)
 			}
 		}

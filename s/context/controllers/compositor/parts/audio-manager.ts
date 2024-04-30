@@ -56,4 +56,14 @@ export class AudioManager extends Map<string, {element: HTMLAudioElement, file: 
 			}
 		}
 	}
+
+	pause_audio(effect: AudioEffect) {
+		const {element} = this.get(effect.id)!
+		element.pause()
+	}
+
+	async play_audio(effect: AudioEffect) {
+		const {element} = this.get(effect.id)!
+		await element.play()
+	}
 }
