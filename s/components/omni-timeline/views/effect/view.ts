@@ -1,14 +1,13 @@
-import WaveSurfer from 'wavesurfer.js'
 import {GoldElement, html, watch} from "@benev/slate"
-import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
 
 import {styles} from "./styles.js"
 import {Filmstrips} from "../filmstrips/view.js"
 import {V2} from "../../utils/coordinates_in_rect.js"
 import {shadow_view} from "../../../../context/slate.js"
+import {AnyEffect} from "../../../../context/controllers/timeline/types.js"
 import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
-import {AnyEffect, AudioEffect} from "../../../../context/controllers/timeline/types.js"
+import {Waveform} from '../../../../context/controllers/timeline/parts/waveform.js'
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
 
 export const Effect = shadow_view(use => ({id}: AnyEffect, timeline: GoldElement) => {
@@ -98,36 +97,21 @@ export const Effect = shadow_view(use => ({id}: AnyEffect, timeline: GoldElement
 			`
 	}
 
-	const wave = use.once(() => document.createElement("div"))
+	const [wave, setWave] = use.state<null | HTMLDivElement>(null)
 
-	use.once(async () => {
+	use.mount(() => {
+		let dispose: null | (() => boolean) = null
+		let wave: Waveform | null = null
 		if(effect.kind === "audio") {
-			const wavesurfer = WaveSurfer.create({
-				container: wave,
-				backend: "MediaElement",
-				autoScroll: true,
-				hideScrollbar: true,
-				interact: false,
-				height: 50
+			wave = new Waveform(effect, use.context.controllers.compositor, use.context.state.timeline)
+			setWave(wave.wave)
+			dispose = watch.track(() => use.context.state.timeline.zoom, (zoom) => {
+				wave!.update_waveform(use.context.state.timeline)
 			})
-
-			wavesurfer.setOptions({width: calculate_effect_width(effect, use.context.state.timeline.zoom)})
-			const {file} = use.context.controllers.compositor.managers.audioManager.get(id)!
-			const uint = await fetchFile(file)
-			const blob = new Blob([uint])
-			const url = URL.createObjectURL(blob)
-			await wavesurfer.load(url)
-
-			watch.track(() => use.context.state.timeline.zoom, (zoom) => {
-				const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id)! as AudioEffect
-				const width = get_effect.duration * Math.pow(2, use.context.state.timeline.zoom)
-				if(width < 4000) {
-					wavesurfer.setOptions({width})
-				} else {
-					wavesurfer.setOptions({width: 4000})
-				}
-				wavesurfer.zoom(width / wavesurfer.getDuration())
-			})
+		}
+		return () => {
+			if(dispose) dispose()
+			if(wave) {wave.dispose()}
 		}
 	})
 
