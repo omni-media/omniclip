@@ -10,7 +10,10 @@ import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new
 export class VideoManager extends Map<string, {fabric: FabricImage, file: File}> {
 	#canvas = document.createElement("canvas")
 
-	constructor(private compositor: Compositor, private actions: TimelineActions) {super()}
+	constructor(private compositor: Compositor, private actions: TimelineActions) {
+		super()
+		this.#canvas.getContext("2d")!.imageSmoothingEnabled = false
+	}
 
 	create_and_add_video_effect(video: Video, timeline: XTimeline) {
 		const duration = video.element.duration * 1000
@@ -28,34 +31,32 @@ export class VideoManager extends Map<string, {fabric: FabricImage, file: File}>
 			thumbnail: video.thumbnail,
 			rect: {
 				position_on_canvas: {x: 0, y: 0},
-				width: 1280,
-				height: 720,
-				rotation: 0,
+				width: video.element.videoWidth,
+				height: video.element.videoHeight,
+				rotation: 0
 			}
 		}
 		const {position, track} = find_place_for_new_effect(timeline.effects, timeline.tracks)
 		effect.start_at_position = position!
 		effect.track = track
-		this.add_video_effect(effect, video.file, video.element.videoWidth, video.element.videoHeight)
+		this.add_video_effect(effect, video.file)
 	}
 
-	add_video_effect(effect: VideoEffect, file: File, width: number, height: number) {
+	add_video_effect(effect: VideoEffect, file: File) {
 		const element = document.createElement('video')
 		const obj = URL.createObjectURL(file)
 		element.src = obj
 		element.load()
-		element.width = width
-		element.height = height
+		element.width = effect.rect.width
+		element.height = effect.rect.height
 		const video = new FabricImage(element, {
 			left: 0,
 			top: 0,
-			width,
-			height,
+			width: effect.rect.width,
+			height: effect.rect.height,
 			objectCaching: false,
 			effect: {...effect}
 		})
-		video.scaleToWidth(effect.rect.width)
-		video.scaleToHeight(effect.rect.height)
 		this.set(effect.id, {fabric: video, file})
 		this.actions.add_video_effect(effect)
 	}

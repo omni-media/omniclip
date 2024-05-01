@@ -17,7 +17,7 @@ const config: VideoEncoderConfig = {
 	avc: {format: "annexb"},
 	width: 1280,
 	height: 720,
-	bitrate: 4_000_000, // 2 Mbps
+	bitrate: 9_000_000, // 9 Mbps
 	framerate: timebase,
 	bitrateMode: "constant"
 }

@@ -34,7 +34,7 @@ export class Compositor {
 	managers: Managers
 
 	constructor(private actions: TimelineActions) {
-	this.canvas = new Canvas(this.canvas_element, {width: 1280, height: 720, renderOnAddRemove: true, preserveObjectStacking: true})
+	this.canvas = new Canvas(this.canvas_element, {width: 1920, height: 1080, renderOnAddRemove: true, preserveObjectStacking: true, imageSmoothingEnabled: false})
 	this.#init_guidelines()
 	this.#on_new_canvas_object_set_handle_styles()
 	this.#on_selected_canvas_object()
@@ -205,7 +205,7 @@ export class Compositor {
 		})
 		guideline.init()
 		// add rect as big as canvas so it acts as guideline for canvas borders
-		const rect = new Rect({width: 1279, height: 719, fill: "transparent", selectable: false, evented: false})
+		const rect = new Rect({width: 1919, height: 1079, fill: "transparent", selectable: false, evented: false})
 		this.canvas.moveObjectTo(rect, 999)
 		this.canvas.add(rect)
 	}

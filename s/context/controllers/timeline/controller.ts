@@ -140,10 +140,9 @@ export class Timeline {
 
 	add_split_effect(effect: AnyEffect, compositor: Compositor) {
 		if(effect.kind === "video") {
-			const {file, fabric} = compositor.managers.videoManager.get(effect.id)!
-			const element = fabric.getElement() as HTMLVideoElement
+			const {file} = compositor.managers.videoManager.get(effect.id)!
 			effect.id = generate_id()
-			compositor.managers.videoManager.add_video_effect(effect, file, element.videoWidth, element.videoHeight)
+			compositor.managers.videoManager.add_video_effect(effect, file)
 		}
 		else if(effect.kind === "text") {
 			effect.id = generate_id()
