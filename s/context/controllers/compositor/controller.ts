@@ -183,15 +183,18 @@ export class Compositor {
 				this.currently_played_effects.delete(effect.id)
 				this.managers.textManager.remove_text_from_canvas(effect)
 			}
-			if(exporting) {return}
 			else if(effect.kind === "video") {
 				this.currently_played_effects.delete(effect.id)
 				this.managers.videoManager.remove_video_from_canvas(effect)
-				this.managers.videoManager.pause_video(effect)
+				if(!exporting) {
+					this.managers.videoManager.pause_video(effect)
+				}
 			}
 			else if(effect.kind === "audio") {
-				this.managers.audioManager.pause_audio(effect)
 				this.currently_played_effects.delete(effect.id)
+				if(!exporting) {
+					this.managers.audioManager.pause_audio(effect)
+				}
 			}
 		}
 	}
