@@ -1,6 +1,15 @@
 import {css} from "@benev/slate"
 
 export const styles = css`
+
+.box {
+	margin: 1em;
+}
+
+ul {
+	margin-left: 1em
+}
+
 .container {
 	display: flex;
 	justify-content: center;

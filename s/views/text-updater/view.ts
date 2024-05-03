@@ -4,10 +4,10 @@ import {styles} from "./styles.js"
 import {shadow_view} from "../../context/slate.js"
 import boldSvg from "../../icons/remix-icon/bold.svg.js"
 import italicSvg from "../../icons/remix-icon/italic.svg.js"
+import {StateHandler} from "../../views/state-handler/view.js"
 import alignLeftSvg from "../../icons/remix-icon/align-left.svg.js"
 import alignRightSvg from "../../icons/remix-icon/align-right.svg.js"
 import alignCenterSvg from "../../icons/remix-icon/align-center.svg.js"
-import {loadingPlaceholder} from "../../views/loading-placeholder/view.js"
 import {Font, TextEffect} from "../../context/controllers/timeline/types.js"
 
 export const TextUpdater = shadow_view(use => (selected_effect: TextEffect) => {
@@ -41,7 +41,7 @@ export const TextUpdater = shadow_view(use => (selected_effect: TextEffect) => {
 
 	const update_compositor = () => use.context.controllers.compositor.compose_effects(use.context.state.timeline.effects, use.context.state.timeline.timecode)
 
-	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
+	return StateHandler(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<div
 			style="
 				transform:

@@ -1,4 +1,4 @@
-import {AppCore, Pojo, Nexus, ZipAction, watch} from "@benev/slate"
+import {AppCore, Pojo, Nexus, ZipAction, watch, signals} from "@benev/slate"
 import {slate, Context, PanelSpec} from "@benev/construct/x/mini.js"
 
 import {Media} from "./controllers/media/controller.js"
@@ -62,6 +62,8 @@ export class OmniContext extends Context {
 		ffmpeg: new FFmpegHelper(this.actions.timeline_actions)
 	}
 
+	is_webcodecs_supported = signals.op<any>()
+
 	controllers = {
 		timeline: new Timeline(this.actions.timeline_actions),
 		compositor: new Compositor(this.actions.timeline_actions),
@@ -75,6 +77,11 @@ export class OmniContext extends Context {
 
 	constructor(options: MiniContextOptions) {
 		super(options)
+		if(!window.VideoEncoder && !window.VideoDecoder) {
+			this.is_webcodecs_supported.setError("webcodecs-not-supported")
+		} else {
+			this.is_webcodecs_supported.setReady(true)
+		}
 		this.controllers = {
 			...this.controllers,
 			video_export: new VideoExport(this.actions.timeline_actions, this.controllers.compositor)

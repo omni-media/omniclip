@@ -1,12 +1,12 @@
-import {html, watch} from "@benev/slate"
+import {Op, html, watch} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/slate.js"
 import playSvg from "../../../../icons/gravity-ui/play.svg.js"
 import pauseSvg from "../../../../icons/gravity-ui/pause.svg.js"
 import {TextUpdater} from "../../../../views/text-updater/view.js"
+import {StateHandler} from "../../../../views/state-handler/view.js"
 import fullscreenSvg from "../../../../icons/gravity-ui/fullscreen.svg.js"
-import {loadingPlaceholder} from "../../../../views/loading-placeholder/view.js"
 
 export const MediaPlayer = shadow_view(use => () => {
 	use.styles(styles)
@@ -57,7 +57,9 @@ export const MediaPlayer = shadow_view(use => () => {
 		}
 	}
 
-	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
+	return StateHandler(Op.all(
+		use.context.helpers.ffmpeg.is_loading.value,
+		use.context.is_webcodecs_supported.value), () => html`
 		<div class="flex">
 			<figure>
 				<div class="canvas-container">

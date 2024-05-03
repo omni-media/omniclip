@@ -1,4 +1,4 @@
-import {html} from "@benev/slate"
+import {Op, html} from "@benev/slate"
 import {repeat} from "lit/directives/repeat.js"
 
 import {styles} from "./styles.js"
@@ -8,8 +8,8 @@ import {Toolbar} from "./views/toolbar/view.js"
 import {Playhead} from "./views/playhead/view.js"
 import {TimeRuler} from "./views/time-ruler/view.js"
 import {shadow_component} from "../../context/slate.js"
+import {StateHandler} from "../../views/state-handler/view.js"
 import {Indicator} from "../../context/controllers/timeline/types.js"
-import {loadingPlaceholder} from "../../views/loading-placeholder/view.js"
 import {ProposalIndicator} from "./views/indicators/proposal-indicator.js"
 import {calculate_timeline_width} from "./utils/calculate_timeline_width.js"
 
@@ -59,7 +59,9 @@ export const OmniTimeline = shadow_component(use => {
 	const render_tracks = () => state.tracks.map((_track, i) => Track([i], {attrs: {part: "add-track-indicator"}}))
 	const render_effects = () => repeat(use.context.state.timeline.effects, (effect) => effect.id, (effect) => Effect([effect, use.element]))
 
-	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
+	return StateHandler(Op.all(
+		use.context.helpers.ffmpeg.is_loading.value,
+		use.context.helpers.ffmpeg.is_loading.value), () => html`
 		<div
 			class="timeline"
 		>

@@ -1,4 +1,4 @@
-import {html} from "@benev/slate"
+import {Op, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import loadingSvg from "../../icons/loading.svg.js"
@@ -6,7 +6,7 @@ import addSvg from "../../icons/gravity-ui/add.svg.js"
 import binSvg from "../../icons/gravity-ui/bin.svg.js"
 import {shadow_component} from "../../context/slate.js"
 import importFileSvg from "../../icons/import-file.svg.js"
-import {loadingPlaceholder} from "../../views/loading-placeholder/view.js"
+import {StateHandler} from "../../views/state-handler/view.js"
 import audioWaveSvg from "../../icons/material-design-icons/audio-wave.svg.js"
 import {Audio, AudioFile, Image, ImageFile, Video, VideoFile} from "./types.js"
 
@@ -112,7 +112,9 @@ export const OmniMedia = shadow_component(use => {
 		`
 	}
 
-	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
+	return StateHandler(Op.all(
+		use.context.is_webcodecs_supported.value,
+		use.context.helpers.ffmpeg.is_loading.value), () => html`
 		<form>
 			<label class="import-btn" for="import">${importFileSvg} Import Multimedia</label>
 			<input type="file" accept="image/*, video/mp4, .mp3" id="import" class="hide" @change=${(e: Event) => media_controller.import_file(e.target as HTMLInputElement)}>

@@ -1,4 +1,4 @@
-import {html, watch} from "@benev/slate"
+import {Op, html, watch} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {AspectRatio} from "./types.js"
@@ -6,7 +6,7 @@ import {export_props} from "./constants.js"
 import {shadow_view} from "../../../../context/slate.js"
 import saveSvg from "../../../../icons/gravity-ui/save.svg.js"
 import exportSvg from "../../../../icons/gravity-ui/export.svg.js"
-import {loadingPlaceholder} from "../../../../views/loading-placeholder/view.js"
+import {StateHandler} from "../../../../views/state-handler/view.js"
 
 export const Export = shadow_view(use => () => {
 	use.styles(styles)
@@ -44,7 +44,9 @@ export const Export = shadow_view(use => () => {
 		dialog?.showModal()
 	}
 
-	return loadingPlaceholder(use.context.helpers.ffmpeg.is_loading.value, () => html`
+	return StateHandler(Op.all(
+		use.context.helpers.ffmpeg.is_loading.value,
+		use.context.is_webcodecs_supported.value), () => html`
 		<div class="flex">
 			<dialog @cancel=${(e: Event) => e.preventDefault()}>
 				<div class="box">
