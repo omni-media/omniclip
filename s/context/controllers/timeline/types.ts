@@ -18,6 +18,7 @@ export interface TimelineNonHistorical {
 	zoom: number
 	timebase: number
 	log: string
+	settings: Settings
 }
 
 export type XTimeline = TimelineNonHistorical & TimelineHistorical
@@ -124,6 +125,14 @@ export interface ProposedTimecode {
 	}
 	duration: number | null
 	effects_to_push: AnyEffect[] | null
+}
+
+export type AspectRatio = "16/9" | "16/10" | "4/3"
+
+export type Settings = {
+	width: number
+	height: number
+	aspect_ratio: AspectRatio
 }
 
 export type Indicator = "add-track-indicator"

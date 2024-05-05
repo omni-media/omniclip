@@ -23,19 +23,6 @@ export const styles = css`
 		letter-spacing: 0.5px;
 	}
 
-	p {
-		transition: all 0.3s ease;
-	}
-
-	p:hover {
-		scale: 1.1;
-		cursor: pointer;
-	}
-
-	p[data-selected] {
-		text-shadow: 0px 0px 5px gray;
-	}
-
 	.sparkle-button {
 		--active: 0;
 		background: #1d1c1c;

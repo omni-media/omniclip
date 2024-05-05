@@ -1,6 +1,6 @@
-import {ExportProps} from "./types.js"
+import {Settings} from "../../context/controllers/timeline/types.js"
 
-export const export_props: ExportProps = [{
+export const export_props: Settings[] = [{
 	width: 854,
 	height: 480,
 	aspect_ratio: "16/9"

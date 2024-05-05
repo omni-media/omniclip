@@ -24,8 +24,8 @@ type FabricEvent = BasicTransformEvent<TPointerEvent> & {
 }
 
 export class AlignGuidelines {
-	aligningLineMargin = 4;
-	aligningLineWidth = 0.75;
+	aligningLineMargin = 10;
+	aligningLineWidth = 6;
 	aligningLineColor = "#F68066";
 	ignoreObjTypes: IgnoreObjTypes = [];
 	pickObjTypes: IgnoreObjTypes = [];

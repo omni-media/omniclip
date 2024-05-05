@@ -23,5 +23,10 @@ export const timeline_non_historical_state: TimelineNonHistorical = {
 	timecode: 0,
 	length: 1000,
 	zoom: -3,
-	log: ""
+	log: "",
+	settings: {
+		width: 1920,
+		height: 1080,
+		aspect_ratio: "16/9"
+	}
 }

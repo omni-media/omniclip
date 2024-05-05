@@ -1,8 +1,6 @@
 import {Op, html, watch} from "@benev/slate"
 
 import {styles} from "./styles.js"
-import {AspectRatio} from "./types.js"
-import {export_props} from "./constants.js"
 import {shadow_view} from "../../../../context/slate.js"
 import saveSvg from "../../../../icons/gravity-ui/save.svg.js"
 import exportSvg from "../../../../icons/gravity-ui/export.svg.js"
@@ -13,20 +11,10 @@ export const Export = shadow_view(use => () => {
 	use.watch(() => use.context.state.timeline)
 
 	const compositor = use.context.controllers.compositor
+	const timeline_state = use.context.state.timeline
 	const video_export = use.context.controllers.video_export
 	const state = use.context.state.timeline
 	const [logs, setLogs, getLogs] = use.state<string[]>([])
-
-	const [{width, height}, setSelectedResolution] = use.state({width: 1920, height: 1080})
-	const [selectedAsptectRatio, setSelectedAspectRatio] = use.state<AspectRatio>("16/9")
-
-	const render_export_props = () => {
-		const props = export_props.filter(prop => prop.aspect_ratio === selectedAsptectRatio)
-		return props.map(p => {
-			const res = `${p.width}x${p.height}`
-			return html`<p @click=${() => setSelectedResolution({width: p.width, height: p.height})} ?data-selected=${p.width === width && p.height === height}>${res} - ${p.height !== 2160 ? `${p.height}p` : "4K"}</p>`
-		})
-	}
 	
 	use.mount(() => {
 		const dispose = watch.track(() => use.context.state.timeline.log, (log) => {
@@ -85,10 +73,9 @@ export const Export = shadow_view(use => () => {
 					</div>
 				</div>
 			</dialog>
-			${render_export_props()}
 			<div class=export>
-				<span class=info>${`${width}x${height}`}@${use.context.state.timeline.timebase}fps</span>
-				<button class="sparkle-button" @click=${() => video_export.export_start(use.context.state.timeline, [width, height])}>
+				<span class=info>${`${timeline_state.settings.width}x${timeline_state.settings.height}`}@${use.context.state.timeline.timebase}fps</span>
+				<button class="sparkle-button" @click=${() => video_export.export_start(use.context.state.timeline, [timeline_state.settings.width, timeline_state.settings.height])}>
 					<span class="text">${exportSvg}<span>Export</span></span>
 				</button>
 			</div>

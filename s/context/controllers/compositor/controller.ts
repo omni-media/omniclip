@@ -208,7 +208,7 @@ export class Compositor {
 		})
 		guideline.init()
 		// add rect as big as canvas so it acts as guideline for canvas borders
-		const rect = new Rect({width: 1919, height: 1079, fill: "transparent", selectable: false, evented: false})
+		const rect = new Rect({width: 1920, height: 1080, fill: "transparent", selectable: false, evented: false, rect_type: "guideline"})
 		this.canvas.moveObjectTo(rect, 999)
 		this.canvas.add(rect)
 	}
@@ -259,6 +259,17 @@ export class Compositor {
 				}
 			}
 		})
+	}
+
+	set_canvas_resolution(width: number, height: number) {
+		this.canvas.setDimensions({width, height})
+		const guideline_rect = this.canvas.getObjects().find(object => {
+			//@ts-ignore
+			if(object.rect_type === "guideline")
+				return object
+		})
+		guideline_rect?.scaleToWidth(width - 1)
+		guideline_rect?.scaleToHeight(height - 1)
 	}
 
 	set_video_playing = (playing: boolean) => {

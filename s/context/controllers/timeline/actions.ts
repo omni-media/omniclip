@@ -45,6 +45,13 @@ export const timeline_non_historical_actions = actionize_non_historical({
 	set_selected_effect: state => (effect: AnyEffect | null) => {
 		state.timeline.selected_effect = effect
 	},
+	set_project_resolution: state => (width: number, height: number) => {
+		state.timeline.settings = {
+			...state.timeline.settings,
+			width,
+			height
+		}
+	}
 })
 
 export const timeline_historical_actions = actionize_historical({
