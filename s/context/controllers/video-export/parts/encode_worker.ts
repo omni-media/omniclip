@@ -31,6 +31,7 @@ const encoder = new VideoEncoder({
 
 self.addEventListener("message", async message => {
 	if(message.data.action === "configure") {
+		config.bitrate = message.data.bitrate * 1000
 		config.width = message.data.width
 		config.height = message.data.height
 		encoder.configure(config)

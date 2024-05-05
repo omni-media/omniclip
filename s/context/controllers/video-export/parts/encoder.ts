@@ -43,8 +43,8 @@ export class Encoder {
 		}
 	}
 
-	configure([width, height]: number[]) {
-		this.#encode_worker.postMessage({action: "configure", width, height})
+	configure([width, height]: number[], bitrate: number) {
+		this.#encode_worker.postMessage({action: "configure", width, height, bitrate})
 	}
 
 }

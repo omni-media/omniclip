@@ -12,15 +12,33 @@ export const styles = css`
 		height: 300px !important;
 	}
 
+	h2 {
+		margin: 1em;
+		align-self: start;
+	}
+
+	.bitrate {
+		background: transparent;
+		color: gray;
+		border: 1px solid gray;
+		padding: 0.3em;
+	}
+
+	.setting-container {
+		& .error {
+			color: red;
+			font-size: 11px;
+		}
+	}
+
 	.flex {
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		flex-direction: column;
 		width: 100%;
-		height: 100%;
-		gap: 0.5em;
 		letter-spacing: 0.5px;
+		gap: 0.2em;
 	}
 
 	.sparkle-button {
@@ -34,6 +52,11 @@ export const styles = css`
 			0 0.05em 0 0 hsl(0 calc(var(--active) * 0%) calc((var(--active) * 50%) + 30%)) inset,
 			0 -0.05em 0 0 hsl(0 calc(var(--active) * 0%) calc(var(--active) * 60%)) inset;
 		transition: all 0.3s ease;
+
+		&:disabled {
+			opacity: 0.5;
+			box-shadow: none;
+		}
 	}
 
 	.sparkle-button:active {
