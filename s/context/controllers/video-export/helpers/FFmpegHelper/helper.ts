@@ -52,13 +52,21 @@ export class FFmpegHelper {
 			}
 		}
 
-		await this.ffmpeg.exec([
-			"-i", `${video_container_name}`, ...all_audio_effects.flatMap(({id}) => `-i, ${id}.mp3`.split(", ")),
-			"-filter_complex",
-			`${all_audio_effects.map((effect, i) => `[${i + 1}:a]adelay=${effect.start_at_position}:all=1[a${i + 1}];`).join("")}
-			${all_audio_effects.map((_, i) => `[a${i + 1}]`).join("")}amix=inputs=${all_audio_effects.length}[amixout]`,
-			"-map", "0:v:0", "-map", "[amixout]","-c:v" ,"copy", "-c:a", "aac","-b:a", "192k", "-y", `${output_file_name}`
-		])
+		const only_image_or_text = !effects.some(effect => effect.kind === "video") && !effects.some(effect => effect.kind === "audio")
+		if(only_image_or_text) {
+			await this.ffmpeg.exec([
+				"-i", `${video_container_name}`,
+				"-map", "0:v:0","-c:v" ,"copy", "-y", `${output_file_name}`
+			])
+		} else {
+			await this.ffmpeg.exec([
+				"-i", `${video_container_name}`, ...all_audio_effects.flatMap(({id}) => `-i, ${id}.mp3`.split(", ")),
+				"-filter_complex",
+				`${all_audio_effects.map((effect, i) => `[${i + 1}:a]adelay=${effect.start_at_position}:all=1[a${i + 1}];`).join("")}
+				${all_audio_effects.map((_, i) => `[a${i + 1}]`).join("")}amix=inputs=${all_audio_effects.length}[amixout]`,
+				"-map", "0:v:0", "-map", "[amixout]","-c:v" ,"copy", "-c:a", "aac","-b:a", "192k", "-y", `${output_file_name}`
+			])
+		}
 
 	}
 
