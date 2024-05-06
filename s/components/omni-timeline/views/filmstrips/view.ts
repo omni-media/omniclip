@@ -156,5 +156,11 @@ export const Filmstrips = shadow_view(use => (effect: VideoEffect, timeline: Gol
 		}
 	}
 
-	return html`${visibleFilmstrips.map(({url, left}, i) => html`<img data-index=${i}  class="thumbnail" style="position: absolute; transform: translateX(${left + (i * (effect.duration * Math.pow(2,2))/ getFilmstrips().length - (effect.start * Math.pow(2, use.context.state.timeline.zoom))) }px);height: 50px; width: ${effect.duration * Math.pow(2, 2) / getFilmstrips().length}px; pointer-events: none;" src=${url} />`)}`
+	return html`${visibleFilmstrips.map(({url, left}, i) => html`<img data-index=${i}  class="thumbnail" style="
+		position: absolute;
+		transform: translateX(${left + (i * (effect.duration * Math.pow(2,2)) / getFilmstrips().length)}px);
+		height: 50px;
+		width: ${effect.duration * Math.pow(2, 2) / getFilmstrips().length}px;
+		pointer-events: none;"
+		src=${url} />`)}`
 })

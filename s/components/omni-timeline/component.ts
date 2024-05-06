@@ -2,12 +2,15 @@ import {Op, html} from "@benev/slate"
 import {repeat} from "lit/directives/repeat.js"
 
 import {styles} from "./styles.js"
-import {Effect} from "./views/effect/view.js"
 import {Track} from "./views/track/view.js"
 import {Toolbar} from "./views/toolbar/view.js"
 import {Playhead} from "./views/playhead/view.js"
 import {TimeRuler} from "./views/time-ruler/view.js"
 import {shadow_component} from "../../context/slate.js"
+import {TextEffect} from "./views/effects/text-effect.js"
+import {VideoEffect} from "./views/effects/video-effect.js"
+import {AudioEffect} from "./views/effects/audio-effect.js"
+import {ImageEffect} from "./views/effects/image-effect.js"
 import {StateHandler} from "../../views/state-handler/view.js"
 import {Indicator} from "../../context/controllers/timeline/types.js"
 import {ProposalIndicator} from "./views/indicators/proposal-indicator.js"
@@ -56,8 +59,21 @@ export const OmniTimeline = shadow_component(use => {
 		effect_drag_over(event)
 	}
 
-	const render_tracks = () => state.tracks.map((_track, i) => Track([i], {attrs: {part: "add-track-indicator"}}))
-	const render_effects = () => repeat(use.context.state.timeline.effects, (effect) => effect.id, (effect) => Effect([effect, use.element]))
+	const render_tracks = () => use.context.state.timeline.tracks.map((_track, i) => Track([i], {attrs: {part: "add-track-indicator"}}))
+	const render_effects = () => repeat(use.context.state.timeline.effects, (effect) => effect.id, (effect) => {
+		if(effect.kind === "audio") {
+			return AudioEffect([effect])
+		}
+		else if (effect.kind === "video") {
+			return VideoEffect([effect, use.element])
+		}
+		else if (effect.kind === "text") {
+			return TextEffect([effect])
+		}
+		else if(effect.kind === "image") {
+			return ImageEffect([effect])
+		}
+	})
 
 	return StateHandler(Op.all(
 		use.context.helpers.ffmpeg.is_loading.value,
