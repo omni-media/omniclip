@@ -95,7 +95,7 @@ export const Effect = shadow_view(use => ({id}: AnyEffect, content: TemplateResu
 		>
 			${render_trim_handle("left")}
 			${render_trim_handle("right")}
-			<span style="transform: translateX(${-effect.start * Math.pow(2, use.context.state.timeline.zoom)}px)">${content}</span>
+			<span class="content" style="transform: translateX(${-effect.start * Math.pow(2, use.context.state.timeline.zoom)}px)">${content}</span>
 		</span>
 	`
 })
