@@ -1,7 +1,7 @@
 import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
-import {shadow_view} from "../../../../context/slate.js"
+import {shadow_view} from "../../../../context/context.js"
 import {AddTrackIndicator} from "../indicators/add-track-indicator.js"
 
 export const Track = shadow_view(use => (index :number) => {

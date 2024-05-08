@@ -1,7 +1,7 @@
 import {html, watch, css} from "@benev/slate"
 
 import {Effect} from "./parts/effect.js"
-import {shadow_view} from "../../../../context/slate.js"
+import {shadow_view} from "../../../../context/context.js"
 import {Waveform} from "../../../../context/controllers/timeline/parts/waveform.js"
 import {AudioEffect as XAudioEffect} from "../../../../context/controllers/timeline/types.js"
 

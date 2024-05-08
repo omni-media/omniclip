@@ -1,7 +1,7 @@
 import {Op, html, watch} from "@benev/slate"
 
 import {styles} from "./styles.js"
-import {shadow_view} from "../../../../context/slate.js"
+import {shadow_view} from "../../../../context/context.js"
 import saveSvg from "../../../../icons/gravity-ui/save.svg.js"
 import exportSvg from "../../../../icons/gravity-ui/export.svg.js"
 import {StateHandler} from "../../../../views/state-handler/view.js"

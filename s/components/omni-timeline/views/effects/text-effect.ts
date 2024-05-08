@@ -1,7 +1,7 @@
 import {html, css} from "@benev/slate"
 
 import {Effect} from "./parts/effect.js"
-import {shadow_view} from "../../../../context/slate.js"
+import {shadow_view} from "../../../../context/context.js"
 import {TextEffect as XTextEffect} from "../../../../context/controllers/timeline/types.js"
 
 export const TextEffect = shadow_view(use => (effect: XTextEffect) => {

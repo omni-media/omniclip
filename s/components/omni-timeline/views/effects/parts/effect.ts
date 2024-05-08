@@ -2,7 +2,7 @@ import {CSSResultGroup, TemplateResult, html, css} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {V2} from "../../../utils/coordinates_in_rect.js"
-import {shadow_view} from "../../../../../context/slate.js"
+import {shadow_view} from "../../../../../context/context.js"
 import {AnyEffect} from "../../../../../context/controllers/timeline/types.js"
 import {calculate_effect_width} from "../../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../../utils/calculate_start_position.js"

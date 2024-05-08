@@ -1,7 +1,7 @@
 import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
-import {shadow_view} from "../../context/slate.js"
+import {shadow_view} from "../../context/context.js"
 import boldSvg from "../../icons/remix-icon/bold.svg.js"
 import italicSvg from "../../icons/remix-icon/italic.svg.js"
 import {StateHandler} from "../../views/state-handler/view.js"

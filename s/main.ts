@@ -1,7 +1,7 @@
 import {register_to_dom} from "@benev/slate"
 import {ConstructEditor, single_panel_layout} from "@benev/construct/x/mini.js"
 
-import {omnislate, OmniContext} from "./context/slate.js"
+import {omnislate, OmniContext} from "./context/context.js"
 import {TextPanel} from "./components/omni-text/panel.js"
 import {MediaPanel} from "./components/omni-media/panel.js"
 import {OmniText} from "./components/omni-text/component.js"

@@ -2,7 +2,7 @@ import {Op, prep_render_op} from "@benev/slate"
 import {html, TemplateResult} from "@benev/slate"
 
 import {styles} from "./styles.js"
-import {shadow_view} from "../../context/slate.js"
+import {shadow_view} from "../../context/context.js"
 
 const loadingState = shadow_view(use => () => {
 	use.styles(styles)

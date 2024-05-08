@@ -1,6 +1,6 @@
 import {html} from "@benev/slate"
 
-import {light_view} from "../../../../context/slate.js"
+import {light_view} from "../../../../context/context.js"
 import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
 import {calculate_effect_track_index} from "../../utils/calculate_effect_track_index.js"

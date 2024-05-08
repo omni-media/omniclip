@@ -1,7 +1,7 @@
 import {Op, html, watch} from "@benev/slate"
 
 import {styles} from "./styles.js"
-import {shadow_view} from "../../../../context/slate.js"
+import {shadow_view} from "../../../../context/context.js"
 import playSvg from "../../../../icons/gravity-ui/play.svg.js"
 import pauseSvg from "../../../../icons/gravity-ui/pause.svg.js"
 import {TextUpdater} from "../../../../views/text-updater/view.js"

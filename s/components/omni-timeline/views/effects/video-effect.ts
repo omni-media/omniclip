@@ -1,7 +1,7 @@
 import {html, GoldElement, css, watch} from "@benev/slate"
 
 import {Effect} from "./parts/effect.js"
-import {shadow_view} from "../../../../context/slate.js"
+import {shadow_view} from "../../../../context/context.js"
 import {Filmstrip} from "../../../../context/controllers/timeline/parts/filmstrip.js"
 import {VideoEffect as XVideoEffect} from "../../../../context/controllers/timeline/types.js"
 

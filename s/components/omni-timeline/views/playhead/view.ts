@@ -1,7 +1,7 @@
 import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
-import {shadow_view} from "../../../../context/slate.js"
+import {shadow_view} from "../../../../context/context.js"
 import playheadSvg from "../../../../icons/remix-icon/playhead.svg.js"
 
 export const Playhead = shadow_view(use => () => {

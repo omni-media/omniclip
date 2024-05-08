@@ -2,7 +2,7 @@ import {Op, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import addSvg from "../../icons/gravity-ui/add.svg.js"
-import {shadow_component} from "../../context/slate.js"
+import {shadow_component} from "../../context/context.js"
 import {StateHandler} from "../../views/state-handler/view.js"
 
 export const OmniText = shadow_component(use => {

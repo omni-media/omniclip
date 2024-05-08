@@ -1,7 +1,7 @@
 import {GoldElement, html, watch} from "@benev/slate"
 
 import {styles} from "./styles.js"
-import {shadow_view} from "../../../../context/slate.js"
+import {shadow_view} from "../../../../context/context.js"
 
 export const TimeRuler = shadow_view(use => (timeline: GoldElement) => {
 	use.styles(styles)

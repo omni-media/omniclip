@@ -1,7 +1,7 @@
 import {GoldElement, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
-import {shadow_view} from "../../../../context/slate.js"
+import {shadow_view} from "../../../../context/context.js"
 import binSvg from "../../../../icons/gravity-ui/bin.svg.js"
 import scissorsSvg from "../../../../icons/gravity-ui/scissors.svg.js"
 import undoSvg from "../../../../icons/material-design-icons/undo.svg.js"

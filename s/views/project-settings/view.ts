@@ -2,7 +2,7 @@ import {Op, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {export_props} from "./constants.js"
-import {shadow_view} from "../../context/slate.js"
+import {shadow_view} from "../../context/context.js"
 import {StateHandler} from "../state-handler/view.js"
 import {AspectRatio} from "../../context/controllers/timeline/types.js"
 

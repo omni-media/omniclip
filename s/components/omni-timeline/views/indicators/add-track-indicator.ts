@@ -1,6 +1,6 @@
 import {html} from "@benev/slate"
 
-import {light_view} from "../../../../context/slate.js"
+import {light_view} from "../../../../context/context.js"
 
 export const AddTrackIndicator = light_view(use => () => {
 	const drag = use.context.controllers.timeline.effect_drag
