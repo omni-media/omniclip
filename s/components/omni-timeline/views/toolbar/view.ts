@@ -12,9 +12,9 @@ import zoomOutSvg from "../../../../icons/material-design-icons/zoom-out.svg.js"
 
 export const Toolbar = shadow_view(use => (timeline: GoldElement) => {
 	use.styles(styles)
-	use.watch(() => use.context.state.timeline)
-	const actions = use.context.actions.timeline_actions
-	const zoom = use.context.state.timeline.zoom
+	use.watch(() => use.context.state)
+	const actions = use.context.actions
+	const zoom = use.context.state.zoom
 	const controller = use.context.controllers.timeline
 
 	use.mount(() => {
@@ -28,15 +28,15 @@ export const Toolbar = shadow_view(use => (timeline: GoldElement) => {
 			<div style="width: ${timeline.offsetWidth}px;" class=tools>
 				<div class=flex>
 					<div class=history>
-						<button ?data-past=${use.context.history.past.length !== 0} @click=${() => use.context.undo(use.context.state.timeline)}>${undoSvg}</button>
-						<button ?data-future=${use.context.history.future.length !== 0} @click=${() => use.context.redo(use.context.state.timeline)}>${redoSvg}</button>
+						<button ?data-past=${use.context.history.past.length !== 0} @click=${() => use.context.undo(use.context.state)}>${undoSvg}</button>
+						<button ?data-future=${use.context.history.future.length !== 0} @click=${() => use.context.redo(use.context.state)}>${redoSvg}</button>
 					</div>
-					<button @click=${() => controller.split(use.context.state.timeline, use.context.controllers.compositor)} class="split">${scissorsSvg}</button>
-					<button class="remove" ?disabled=${!use.context.state.timeline.selected_effect} @click=${() => controller.remove_selected_effect(use.context.state.timeline)}>
+					<button @click=${() => controller.split(use.context.state, use.context.controllers.compositor)} class="split">${scissorsSvg}</button>
+					<button class="remove" ?disabled=${!use.context.state.selected_effect} @click=${() => controller.remove_selected_effect(use.context.state)}>
 						${binSvg}
 					</button>
 				</div>
-				<div>${convert_ms_to_hmsms(use.context.state.timeline.timecode)}</div>
+				<div>${convert_ms_to_hmsms(use.context.state.timecode)}</div>
 				<div class="zoom">
 					<button ?disabled=${zoom >= 2} @click=${actions.zoom_in} class="zoom-in">${zoomInSvg}</button>
 					<button ?disabled=${zoom <= -13} @click=${actions.zoom_out} class="zoom-out">${zoomOutSvg}</button>

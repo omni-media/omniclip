@@ -1,6 +1,6 @@
-import {AnyEffect} from "../../timeline/types.js"
+import {AnyEffect} from "../../../types.js"
+import {Actions} from "../../../actions.js"
 import {Compositor} from "../../compositor/controller.js"
-import {TimelineActions} from "../../timeline/actions.js"
 import {FFmpegHelper} from "../helpers/FFmpegHelper/helper.js"
 
 export class Encoder {
@@ -8,7 +8,7 @@ export class Encoder {
 	#ffmpeg: FFmpegHelper
 	file: Uint8Array | null = null
 
-	constructor(private actions: TimelineActions, private compositor: Compositor) {
+	constructor(private actions: Actions, private compositor: Compositor) {
 		this.#ffmpeg = new FFmpegHelper(actions)
 	}
 

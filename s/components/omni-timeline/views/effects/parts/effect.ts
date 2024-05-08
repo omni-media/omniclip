@@ -2,20 +2,20 @@ import {CSSResultGroup, TemplateResult, html, css} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {V2} from "../../../utils/coordinates_in_rect.js"
+import {AnyEffect} from "../../../../../context/types.js"
 import {shadow_view} from "../../../../../context/context.js"
-import {AnyEffect} from "../../../../../context/controllers/timeline/types.js"
 import {calculate_effect_width} from "../../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../../utils/calculate_start_position.js"
 import {calculate_effect_track_placement} from "../../../utils/calculate_effect_track_placement.js"
 
 export const Effect = shadow_view(use => ({id}: AnyEffect, content: TemplateResult, style?: CSSResultGroup, inline_css?: string) => {
 	use.styles([style ?? css``, styles])
-	use.watch(() => use.context.state.timeline)
+	use.watch(() => use.context.state)
 
-	const effect = use.context.state.timeline.effects.find(effect => effect.id === id)!
+	const effect = use.context.state.effects.find(effect => effect.id === id)!
 	const {effect_drag, on_drop} = use.context.controllers.timeline
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
-	const zoom = use.context.state.timeline.zoom
+	const zoom = use.context.state.zoom
 	const {grabbed, hovering} = effect_drag
 	const controller = use.context.controllers.timeline
 	const handler = controller.effect_trim_handler
@@ -35,7 +35,7 @@ export const Effect = shadow_view(use => ({id}: AnyEffect, content: TemplateResu
 		},
 		effect_trim_listener() {
 			if(handler.effect_resize_handle_drag.hovering) {
-				handler.effect_dragover(handler.effect_resize_handle_drag.hovering!.client_x, use.context.state.timeline)
+				handler.effect_dragover(handler.effect_resize_handle_drag.hovering!.client_x, use.context.state)
 				return
 			}
 		},
@@ -65,8 +65,8 @@ export const Effect = shadow_view(use => ({id}: AnyEffect, content: TemplateResu
 		return html`
 			<span
 				draggable="true"
-				@drop=${(e: DragEvent) => handler.trim_drop(e, use.context.state.timeline)}
-				@dragend=${(e: DragEvent) => handler.trim_end(e, use.context.state.timeline)}
+				@drop=${(e: DragEvent) => handler.trim_drop(e, use.context.state)}
+				@dragend=${(e: DragEvent) => handler.trim_end(e, use.context.state)}
 				@dragstart=${(e: DragEvent) => handler.trim_start(e, effect, side)}
 				class="trim-handle-${side}"
 			>
@@ -80,22 +80,22 @@ export const Effect = shadow_view(use => ({id}: AnyEffect, content: TemplateResu
 		<span
 			class="effect"
 			?data-grabbed=${grabbed?.effect === effect}
-			?data-selected=${use.context.state.timeline.selected_effect?.id === effect.id}
+			?data-selected=${use.context.state.selected_effect?.id === effect.id}
 			style="
 				${inline_css}
 				width: ${calculate_effect_width(effect, zoom)}px;
 				transform: translate(
 					${x ?? calculate_start_position(effect.start_at_position, zoom)}px,
-					${y ?? calculate_effect_track_placement(effect.track, use.context.state.timeline.effects)}px
+					${y ?? calculate_effect_track_placement(effect.track, use.context.state.effects)}px
 				);
 			"
 			draggable="true"
 			@dragstart=${drag_events.start}
-			@click=${() => use.context.controllers.timeline.set_selected_effect(effect, use.context.controllers.compositor, use.context.state.timeline)}
+			@click=${() => use.context.controllers.timeline.set_selected_effect(effect, use.context.controllers.compositor, use.context.state)}
 		>
 			${render_trim_handle("left")}
 			${render_trim_handle("right")}
-			<span class="content" style="transform: translateX(${-effect.start * Math.pow(2, use.context.state.timeline.zoom)}px)">${content}</span>
+			<span class="content" style="transform: translateX(${-effect.start * Math.pow(2, use.context.state.zoom)}px)">${content}</span>
 		</span>
 	`
 })

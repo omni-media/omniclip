@@ -7,7 +7,7 @@ import {AddTrackIndicator} from "../indicators/add-track-indicator.js"
 export const Track = shadow_view(use => (index :number) => {
 	use.styles(styles)
 	const controller = use.context.controllers.timeline
-	const track_effects = controller.get_effects_on_track(use.context.state.timeline, index)
+	const track_effects = controller.get_effects_on_track(use.context.state, index)
 
 	const if_text_on_track_styles = () => {
 		return track_effects.some(effect => effect.kind === "text") && !track_effects.some(effect => effect.kind !== "text")

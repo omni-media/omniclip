@@ -8,18 +8,18 @@ import {StateHandler} from "../../../../views/state-handler/view.js"
 
 export const Export = shadow_view(use => () => {
 	use.styles(styles)
-	use.watch(() => use.context.state.timeline)
+	use.watch(() => use.context.state)
 
 	const compositor = use.context.controllers.compositor
-	const timeline_state = use.context.state.timeline
+	const timeline_state = use.context.state
 	const video_export = use.context.controllers.video_export
-	const state = use.context.state.timeline
+	const state = use.context.state
 	const [logs, setLogs, getLogs] = use.state<string[]>([])
 
 	const [bitrate, setBitrate] = use.state(9000)
 
 	use.mount(() => {
-		const dispose = watch.track(() => use.context.state.timeline.log, (log) => {
+		const dispose = watch.track(() => use.context.state.log, (log) => {
 			if(getLogs().length === 20) {
 				const new_arr = getLogs().slice(1)
 				setLogs(new_arr)
@@ -29,7 +29,7 @@ export const Export = shadow_view(use => () => {
 		return () => dispose()
 	})
 
-	if(use.context.state.timeline.is_exporting) {
+	if(use.context.state.is_exporting) {
 		const dialog = use.shadow.querySelector("dialog")
 		dialog?.showModal()
 	}
@@ -82,8 +82,8 @@ export const Export = shadow_view(use => () => {
 				${bitrate <= 0 ? html`<span class="error">bitrate must be higher than 0</span>` : null}
 			</div>
 			<div class=export>
-				<span class=info>${`${timeline_state.settings.width}x${timeline_state.settings.height}`}@${use.context.state.timeline.timebase}fps</span>
-				<button ?disabled=${bitrate <= 0} class="sparkle-button" @click=${() => video_export.export_start(use.context.state.timeline, [timeline_state.settings.width, timeline_state.settings.height], bitrate)}>
+				<span class=info>${`${timeline_state.settings.width}x${timeline_state.settings.height}`}@${use.context.state.timebase}fps</span>
+				<button ?disabled=${bitrate <= 0} class="sparkle-button" @click=${() => video_export.export_start(use.context.state, [timeline_state.settings.width, timeline_state.settings.height], bitrate)}>
 					<span class="text">${exportSvg}<span>Export</span></span>
 				</button>
 			</div>

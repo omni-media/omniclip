@@ -1,14 +1,14 @@
 import {pub, reactor, signal} from "@benev/slate"
 import {Canvas, Rect} from "fabric/dist/fabric.mjs"
 
+import {Actions} from "../../actions.js"
 import {TextManager} from "./parts/text-manager.js"
 import {ImageManager} from "./parts/image-manager.js"
 import {AudioManager} from "./parts/audio-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
-import {TimelineActions} from "../timeline/actions.js"
 import {AlignGuidelines} from "./lib/aligning_guidelines.js"
+import {AnyEffect, AudioEffect, State} from "../../types.js"
 import {compare_arrays} from "../../../utils/compare_arrays.js"
-import {AnyEffect, AudioEffect, XTimeline} from "../timeline/types.js"
 import {sort_effects_by_track} from "../video-export/utils/sort_effects_by_track.js"
 
 export interface Managers {
@@ -33,7 +33,7 @@ export class Compositor {
 	
 	managers: Managers
 
-	constructor(private actions: TimelineActions) {
+	constructor(private actions: Actions) {
 	this.canvas = new Canvas(this.canvas_element, {width: 1920, height: 1080, renderOnAddRemove: true, preserveObjectStacking: true, imageSmoothingEnabled: false})
 	this.#init_guidelines()
 	this.#on_new_canvas_object_set_handle_styles()
@@ -245,12 +245,12 @@ export class Compositor {
 		})
 	}
 
-	undo_or_redo(timeline: XTimeline) {
+	undo_or_redo(state: State) {
 		this.canvas.getObjects().forEach(object => {
 			if(!(object instanceof Rect)) {
 				//@ts-ignore
 				const object_effect = object.effect as Exclude<AnyEffect, AudioEffect>
-				const effect = timeline.effects.find(effect => effect.id === object_effect.id)! as Exclude<AnyEffect, AudioEffect>
+				const effect = state.effects.find(effect => effect.id === object_effect.id)! as Exclude<AnyEffect, AudioEffect>
 				if(effect) {
 					object.left = effect.rect.position_on_canvas.x
 					object.top = effect.rect.position_on_canvas.y

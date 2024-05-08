@@ -4,16 +4,16 @@ import {FFmpeg} from "@ffmpeg/ffmpeg/dist/esm/index.js"
 import {toBlobURL} from "@ffmpeg/util/dist/esm/index.js"
 import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
 
+import {Actions} from "../../../../actions.js"
 import {Compositor} from "../../../compositor/controller.js"
-import {TimelineActions} from "../../../timeline/actions.js"
-import {AnyEffect, AudioEffect, VideoEffect} from "../../../timeline/types.js"
+import {AnyEffect, AudioEffect, VideoEffect} from "../../../../types.js"
 
 export class FFmpegHelper {
 	ffmpeg = new FFmpeg()
 	ffprobe = new FFprobeWorker()
 	is_loading = signals.op<any>()
 
-	constructor(actions: TimelineActions) {
+	constructor(actions: Actions) {
 		this.is_loading.load(async() => await this.#load_ffmpeg())
 		this.ffmpeg.on("log", (log) => actions.set_log(log.message))
 	}

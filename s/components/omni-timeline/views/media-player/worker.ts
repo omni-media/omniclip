@@ -1,5 +1,5 @@
+import {Status} from "../../../../context/types.js"
 import {Canvas2DRenderer} from "./utils/renderer_2d.js"
-import {Status} from "../../../../context/controllers/timeline/types.js"
 
 const decoder = new VideoDecoder({
 	output(frame) {

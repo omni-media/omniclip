@@ -1,4 +1,4 @@
-import {VideoEffect} from "../../timeline/types.js"
+import {VideoEffect} from "../../../types.js"
 import {MP4Demuxer} from "../../../../tools/mp4boxjs/demuxer.js"
 
 let timestamp = 0

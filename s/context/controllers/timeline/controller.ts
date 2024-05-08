@@ -2,13 +2,12 @@ import {generate_id} from "@benev/slate"
 import {pub} from "@benev/slate/x/tools/pub.js"
 import {ShockDragDrop} from "@benev/construct/x/tools/shockdrop/drag_drop.js"
 
-import {TimelineActions} from "./actions.js"
+import {Actions} from "../../actions.js"
 import {Compositor} from "../compositor/controller.js"
 import {effectTrimHandler} from "./parts/effect-trim-handler.js"
-import {Grabbed, At, ProposedTimecode, AnyEffect} from "./types.js"
-import {EffectTimecode, XTimeline as TimelineState, XTimeline} from "./types.js"
 import {get_effect_at_timestamp} from "../video-export/utils/get_effect_at_timestamp.js"
 import {get_effects_at_timestamp} from "../video-export/utils/get_effects_at_timestamp.js"
+import {Grabbed, At, ProposedTimecode, AnyEffect, EffectTimecode, State} from "../../types.js"
 
 export class Timeline {
 	effect_drag = new ShockDragDrop<Grabbed, At> ({handle_drop: (_event: DragEvent, grabbed, dropped_at) => this.on_drop.publish({grabbed, dropped_at})})
@@ -17,11 +16,11 @@ export class Timeline {
 	effect_trim_handler: effectTrimHandler
 	on_playhead_drag = pub()
 	
-	constructor(private timeline_actions: TimelineActions) {
-		this.effect_trim_handler = new effectTrimHandler(timeline_actions)
+	constructor(private actions: Actions) {
+		this.effect_trim_handler = new effectTrimHandler(actions)
 	}
 
-	calculate_proposed_timecode({timeline_end, timeline_start, track}: EffectTimecode, grabbed_effect_id: string, state: TimelineState) {
+	calculate_proposed_timecode({timeline_end, timeline_start, track}: EffectTimecode, grabbed_effect_id: string, state: State) {
 		const effects_to_propose_to = this.#exclude_grabbed_effect_from_proposals(grabbed_effect_id, state.effects)
 		const track_effects = effects_to_propose_to.filter(effect => effect.track === track)
 		const effect_before = this.#get_effects_positioned_before_grabbed_effect(track_effects, timeline_start)[0]
@@ -76,7 +75,7 @@ export class Timeline {
 	}
 
 	#push_effects_forward(effects_to_push: AnyEffect[], push_by: number) {
-		effects_to_push.forEach(c => this.timeline_actions.set_effect_start_position(c, c.start_at_position + push_by)
+		effects_to_push.forEach(c => this.actions.set_effect_start_position(c, c.start_at_position + push_by)
 		)
 	}
 
@@ -119,10 +118,10 @@ export class Timeline {
 	}
 
 	set_proposed_timecode(effect: AnyEffect, {proposed_place, duration, effects_to_push}: ProposedTimecode) {
-		this.timeline_actions.set_effect_start_position(effect, proposed_place.start_at_position)
-		this.timeline_actions.set_effect_track(effect, proposed_place.track)
+		this.actions.set_effect_start_position(effect, proposed_place.start_at_position)
+		this.actions.set_effect_track(effect, proposed_place.track)
 		if(duration && effect.duration !== duration) {
-			this.timeline_actions.set_effect_duration(effect, duration)
+			this.actions.set_effect_duration(effect, duration)
 		}
 		if(effects_to_push) {
 			this.#push_effects_forward(effects_to_push, (effect.end - effect.start))
@@ -134,8 +133,8 @@ export class Timeline {
 		return excluded
 	}
 
-	get_effects_on_track(timeline: XTimeline, track_id: number) {
-		return timeline.effects.filter(effect => effect.track === track_id)
+	get_effects_on_track(state: State, track_id: number) {
+		return state.effects.filter(effect => effect.track === track_id)
 	}
 
 	add_split_effect(effect: AnyEffect, compositor: Compositor) {
@@ -160,46 +159,46 @@ export class Timeline {
 		}
 	}
 
-	split(timeline: XTimeline, compositor: Compositor) {
-		const normalized_timecode = this.#normalize_to_timebase(timeline)
-		const selected = timeline.effects.find(effect => effect.id === timeline.selected_effect?.id)
-		const effects = get_effects_at_timestamp(timeline.effects, normalized_timecode)
+	split(state: State, compositor: Compositor) {
+		const normalized_timecode = this.#normalize_to_timebase(state)
+		const selected = state.effects.find(effect => effect.id === state.selected_effect?.id)
+		const effects = get_effects_at_timestamp(state.effects, normalized_timecode)
 		if(selected) {
-			this.#split(selected, timeline, compositor)
+			this.#split(selected, state, compositor)
 		} else if(effects.length !== 0) {
-			this.#split(effects[0], timeline, compositor)
+			this.#split(effects[0], state, compositor)
 		} 
 	}
 
-	#split(effect: AnyEffect, timeline: XTimeline, compositor: Compositor) {
-		const normalized_timecode = this.#normalize_to_timebase(timeline)
+	#split(effect: AnyEffect, state: State, compositor: Compositor) {
+		const normalized_timecode = this.#normalize_to_timebase(state)
 		const is_between = get_effects_at_timestamp([effect], normalized_timecode)
 		const if_split_effect_is_atleast_one_frame = 
-			normalized_timecode - effect.start_at_position >= timeline.timebase &&
-			(effect.start_at_position + effect.end) - normalized_timecode >= timeline.timebase
+			normalized_timecode - effect.start_at_position >= state.timebase &&
+			(effect.start_at_position + effect.end) - normalized_timecode >= state.timebase
 		if(is_between.length !== 0 && if_split_effect_is_atleast_one_frame) {
 			const end = normalized_timecode - (effect.start_at_position - effect.start)
-			this.timeline_actions.set_effect_end(effect, end)
+			this.actions.set_effect_end(effect, end)
 			const start = (normalized_timecode - effect.start_at_position) + effect.start
 			const split_effect = {...effect, start, start_at_position: normalized_timecode, end: effect.end}
 			this.add_split_effect(split_effect, compositor)
 		}
 	}
 
-	#normalize_to_timebase(timeline: XTimeline) {
-		const frame_duration = 1000/timeline.timebase
-		const normalized = Math.round(timeline.timecode / frame_duration) * frame_duration
+	#normalize_to_timebase(state: State) {
+		const frame_duration = 1000/state.timebase
+		const normalized = Math.round(state.timecode / frame_duration) * frame_duration
 		return normalized
 	}
 
-	set_selected_effect(effect: AnyEffect, compositor: Compositor, timeline: XTimeline) {
-		this.timeline_actions.set_selected_effect(effect)
+	set_selected_effect(effect: AnyEffect, compositor: Compositor, state: State) {
+		this.actions.set_selected_effect(effect)
 		if(effect.kind === "text") {compositor.managers.textManager.set_clicked_effect(effect)}
-		this.set_or_discard_active_object_on_canvas_for_selected_effect(effect, compositor, timeline)
+		this.set_or_discard_active_object_on_canvas_for_selected_effect(effect, compositor, state)
 	}
 
-	set_or_discard_active_object_on_canvas_for_selected_effect(selected_effect: AnyEffect, compositor: Compositor, timeline: XTimeline) {
-		const is_effect_on_canvas = get_effect_at_timestamp(selected_effect, timeline.timecode)
+	set_or_discard_active_object_on_canvas_for_selected_effect(selected_effect: AnyEffect, compositor: Compositor, state: State) {
+		const is_effect_on_canvas = get_effect_at_timestamp(selected_effect, state.timecode)
 		if(is_effect_on_canvas) {
 			const object = compositor.canvas.getObjects().find((object: any) => (object?.effect as AnyEffect)?.id === selected_effect.id)
 			if(object !== compositor.canvas.getActiveObject()) {
@@ -210,10 +209,10 @@ export class Timeline {
 		}
 	}
 
-	remove_selected_effect(timeline: XTimeline) {
-		if(timeline.selected_effect) {
-			this.timeline_actions.set_selected_effect(null)
-			this.timeline_actions.remove_effect(timeline.selected_effect)
+	remove_selected_effect(state: State) {
+		if(state.selected_effect) {
+			this.actions.set_selected_effect(null)
+			this.actions.remove_effect(state.selected_effect)
 		}
 	}
 }

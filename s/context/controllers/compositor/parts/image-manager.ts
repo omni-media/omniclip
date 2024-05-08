@@ -2,16 +2,16 @@ import {generate_id} from "@benev/slate"
 import {FabricImage} from "fabric/dist/index.mjs"
 
 import {Compositor} from "../controller.js"
-import {TimelineActions} from "../../timeline/actions.js"
-import {ImageEffect, XTimeline} from "../../timeline/types.js"
+import {Actions} from "../../../actions.js"
+import {ImageEffect, State} from "../../../types.js"
 import {Image} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
 export class ImageManager extends Map<string, {element: FabricImage, file: File}> {
 
-	constructor(private compositor: Compositor, private actions: TimelineActions) {super()}
+	constructor(private compositor: Compositor, private actions: Actions) {super()}
 
-	async create_and_add_image_effect(image: Image, timeline: XTimeline) {
+	async create_and_add_image_effect(image: Image, state: State) {
 		const effect: ImageEffect = {
 			id: generate_id(),
 			kind: "image",
@@ -28,7 +28,7 @@ export class ImageManager extends Map<string, {element: FabricImage, file: File}
 				rotation: 0,
 			}
 		}
-		const {position, track} = find_place_for_new_effect(timeline.effects, timeline.tracks)
+		const {position, track} = find_place_for_new_effect(state.effects, state.tracks)
 		effect.start_at_position = position!
 		effect.track = track
 		await this.add_image_effect(effect, image.file)

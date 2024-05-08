@@ -1,18 +1,18 @@
 import {generate_id} from "@benev/slate"
 
 import {Compositor} from "../controller.js"
-import {TimelineActions} from "../../timeline/actions.js"
-import {AudioEffect, XTimeline} from "../../timeline/types.js"
+import {Actions} from "../../../actions.js"
+import {AudioEffect, State} from "../../../types.js"
 import {Audio} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
 export class AudioManager extends Map<string, {element: HTMLAudioElement, file: File}> {
 
-	constructor(private compositor: Compositor, private actions: TimelineActions) {super()}
+	constructor(private compositor: Compositor, private actions: Actions) {super()}
 
-	create_and_add_audio_effect(audio: Audio, timeline: XTimeline) {
+	create_and_add_audio_effect(audio: Audio, state: State) {
 		const duration = audio.element.duration * 1000
-		const adjusted_duration_to_timebase = Math.floor(duration / (1000/timeline.timebase)) * (1000/timeline.timebase)
+		const adjusted_duration_to_timebase = Math.floor(duration / (1000/state.timebase)) * (1000/state.timebase)
 		const effect: AudioEffect = {
 			id: generate_id(),
 			kind: "audio",
@@ -23,7 +23,7 @@ export class AudioManager extends Map<string, {element: HTMLAudioElement, file: 
 			end: adjusted_duration_to_timebase,
 			track: 2,
 		}
-		const {position, track} = find_place_for_new_effect(timeline.effects, timeline.tracks)
+		const {position, track} = find_place_for_new_effect(state.effects, state.tracks)
 		effect.start_at_position = position!
 		effect.track = track
 		this.add_audio_effect(effect, audio.file)

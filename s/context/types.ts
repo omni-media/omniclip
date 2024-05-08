@@ -1,12 +1,24 @@
+// export interface OmniStateHistorical {
+// 	timeline: HistoricalState
+// }
+
+// export interface OmniStateNonHistorical {
+// 	timeline: NonHistoricalState
+// }
+
+// export type OmniState = OmniStateHistorical & OmniStateNonHistorical
+
+export type State = HistoricalState & NonHistoricalState
+
 export type V2 = [number, number]
 export type ExportStatus = "complete" | "composing" | "demuxing" | "flushing"
 
-export interface TimelineHistorical {
+export interface HistoricalState {
 	effects: AnyEffect[]
 	tracks: XTrack[]
 }
 
-export interface TimelineNonHistorical {
+export interface NonHistoricalState {
 	selected_effect: AnyEffect | null
 	is_playing: boolean
 	is_exporting: boolean
@@ -21,7 +33,7 @@ export interface TimelineNonHistorical {
 	settings: Settings
 }
 
-export type XTimeline = TimelineNonHistorical & TimelineHistorical
+// export type XTimeline = NonHistoricalState & HistoricalState
 
 export interface Effect {
 	id: string

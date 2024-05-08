@@ -1,7 +1,7 @@
 import WaveSurfer from 'wavesurfer.js'
 import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
 
-import {AudioEffect, XTimeline} from '../types.js'
+import {AudioEffect, State} from '../../../types.js'
 import {Compositor} from '../../compositor/controller.js'
 import {calculate_effect_width} from '../../../../components/omni-timeline/utils/calculate_effect_width.js'
 
@@ -10,9 +10,9 @@ export class Waveform {
 	#wavesurfer: WaveSurfer
 	#isReady = false
 
-	constructor(private effect: AudioEffect, private compositor: Compositor, timeline: XTimeline) {
+	constructor(private effect: AudioEffect, private compositor: Compositor, state: State) {
 		this.#wavesurfer = this.#create_waveform()
-		this.#load_audio_file(timeline)
+		this.#load_audio_file(state)
 		this.#wavesurfer.on("ready", () => {
 			this.#isReady = true
 		})
@@ -29,20 +29,20 @@ export class Waveform {
 		})
 	}
 
-	async #load_audio_file(timeline: XTimeline) {
-		this.#wavesurfer.setOptions({width: calculate_effect_width(this.effect, timeline.zoom)})
+	async #load_audio_file(state: State) {
+		this.#wavesurfer.setOptions({width: calculate_effect_width(this.effect, state.zoom)})
 		const {file} = this.compositor.managers.audioManager.get(this.effect.id)!
 		const uint = await fetchFile(file)
 		const blob = new Blob([uint])
 		const url = URL.createObjectURL(blob)
 		await this.#wavesurfer.load(url)
-		this.update_waveform(timeline)
+		this.update_waveform(state)
 	}
 
-	update_waveform(timeline: XTimeline) {
+	update_waveform(state: State) {
 		if(this.#isReady) {
-			const get_effect = timeline.effects.find(e => e.id === this.effect.id)! as AudioEffect
-			const width = get_effect.duration * Math.pow(2, timeline.zoom)
+			const get_effect = state.effects.find(e => e.id === this.effect.id)! as AudioEffect
+			const width = get_effect.duration * Math.pow(2, state.zoom)
 			if(width < 4000) {
 				this.#wavesurfer.setOptions({width})
 			} else {

@@ -6,9 +6,9 @@ import playheadSvg from "../../../../icons/remix-icon/playhead.svg.js"
 
 export const Playhead = shadow_view(use => () => {
 	use.styles(styles)
-	use.watch(() => use.context.state.timeline)
+	use.watch(() => use.context.state)
 	const controller = use.context.controllers.timeline
-	const actions = use.context.actions.timeline_actions
+	const actions = use.context.actions
 	const playhead_drag = use.context.controllers.timeline.playhead_drag
 	const [_pauseTime, setPauseTime, getPauseTime] = use.state(0)
 	const [_lastTime, setLastTime, getLastTime] = use.state(0)
@@ -36,9 +36,9 @@ export const Playhead = shadow_view(use => () => {
 	})
 
 	const translate_to_timecode = (x: number) => {
-		const zoom = use.context.state.timeline.zoom
+		const zoom = use.context.state.zoom
 		const milliseconds = x * Math.pow(2, -zoom)
-		use.context.actions.timeline_actions.set_timecode(milliseconds)
+		use.context.actions.set_timecode(milliseconds)
 	}
 
 	const drag_events = {
@@ -58,11 +58,11 @@ export const Playhead = shadow_view(use => () => {
 	}
 
 	const normalize_to_timebase = (timecode: number) => {
-		const frame_duration = 1000/use.context.state.timeline.timebase
+		const frame_duration = 1000/use.context.state.timebase
 		const normalized = Math.round(((timecode)) / frame_duration) * frame_duration
-		return normalized * Math.pow(2, use.context.state.timeline.zoom)
+		return normalized * Math.pow(2, use.context.state.zoom)
 	}
-	const normalized = normalize_to_timebase(use.context.state.timeline.timecode)
+	const normalized = normalize_to_timebase(use.context.state.timecode)
 
 	return html`
 		<div

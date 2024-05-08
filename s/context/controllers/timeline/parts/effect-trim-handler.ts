@@ -1,7 +1,7 @@
 import {ShockDragDrop} from "@benev/construct"
 
-import {TimelineActions} from "../actions.js"
-import {AnyEffect, XTimeline} from "../types.js"
+import {Actions} from "../../../actions.js"
+import {AnyEffect, State} from "../../../types.js"
 
 export class effectTrimHandler {
 	effect_resize_handle_drag = new ShockDragDrop<"right" | "left", {x: number, client_x: number}>({handle_drop: (_event: DragEvent) => {}})
@@ -13,17 +13,17 @@ export class effectTrimHandler {
 	effect: AnyEffect | null = null
 	dropped = false
 
-	constructor(private actions: TimelineActions) {}
+	constructor(private actions: Actions) {}
 
-	effect_dragover(clientX: number, timeline: XTimeline) {
+	effect_dragover(clientX: number, state: State) {
 		if(!this.effect_resize_handle_drag.grabbed) {return}
-		const pointer_position = this.#get_pointer_position_relative_to_effect_right_or_left_side(clientX, timeline)
+		const pointer_position = this.#get_pointer_position_relative_to_effect_right_or_left_side(clientX, state)
 		if(this.effect_resize_handle_drag.grabbed === "left") {
 			const start_at = this.initial_start_position + pointer_position
 			const start = this.initial_start + pointer_position
-			if(start <= this.effect!.end - 1000/timeline.timebase) {
+			if(start <= this.effect!.end - 1000/state.timebase) {
 				if(this.effect!.kind === "video" || this.effect!.kind === "audio") {
-					if(start >= 1000/timeline.timebase) {
+					if(start >= 1000/state.timebase) {
 						this.actions.set_effect_start_position(this.effect!, start_at)
 						this.actions.set_effect_start(this.effect!, start)
 					}
@@ -34,7 +34,7 @@ export class effectTrimHandler {
 			}
 		} else {
 			const end = this.initial_end + pointer_position
-			if(end >= this.effect!.start + 1000/timeline.timebase) {
+			if(end >= this.effect!.start + 1000/state.timebase) {
 				if(this.effect!.kind === "video" || this.effect!.kind === "audio") {
 					if(end <= this.effect!.duration) {
 						this.actions.set_effect_end(this.effect!, end)
@@ -46,9 +46,9 @@ export class effectTrimHandler {
 		}
 	}
 
-	#normalize_to_timebase_and_set(e: DragEvent, timeline: XTimeline) {
-		const effect = timeline.effects.find(({id}) => id === this.effect?.id)!
-		const frame_duration = 1000/timeline.timebase
+	#normalize_to_timebase_and_set(e: DragEvent, state: State) {
+		const effect = state.effects.find(({id}) => id === this.effect?.id)!
+		const frame_duration = 1000/state.timebase
 		if(this.effect_resize_handle_drag.grabbed === "left") {
 			const normalized_start = Math.round(effect!.start / frame_duration) * frame_duration
 			const normalized_start_at = Math.round(effect!.start_at_position / frame_duration) * frame_duration
@@ -60,8 +60,8 @@ export class effectTrimHandler {
 		}
 	}
 
-	#get_pointer_position_relative_to_effect_right_or_left_side(clientX: number, timeline: XTimeline) {
-		return (clientX - this.initial_x) * Math.pow(2, -timeline.zoom)
+	#get_pointer_position_relative_to_effect_right_or_left_side(clientX: number, state: State) {
+		return (clientX - this.initial_x) * Math.pow(2, -state.zoom)
 	}
 
 	trim_start = (e: DragEvent, effect: AnyEffect, side: "left" | "right") => {
@@ -75,16 +75,16 @@ export class effectTrimHandler {
 		this.effect_resize_handle_drag.dragzone.dragstart(side)(e)
 	}
 
-	trim_end = (e: DragEvent, timeline: XTimeline) => {
+	trim_end = (e: DragEvent, state: State) => {
 		if(this.dropped === false) {
-			this.#normalize_to_timebase_and_set(e, timeline)
+			this.#normalize_to_timebase_and_set(e, state)
 			this.effect_resize_handle_drag.dragzone.dragend()(e)
 		}
 	}
 
-	trim_drop = (e: DragEvent, timeline: XTimeline) => {
+	trim_drop = (e: DragEvent, state: State) => {
 		this.dropped = true
-		this.#normalize_to_timebase_and_set(e, timeline)
+		this.#normalize_to_timebase_and_set(e, state)
 		this.effect_resize_handle_drag.dropzone.drop(this.effect_resize_handle_drag.hovering!)(e)
 	}
 

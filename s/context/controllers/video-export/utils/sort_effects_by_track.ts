@@ -1,4 +1,4 @@
-import {AnyEffect} from "../../timeline/types.js"
+import {AnyEffect} from "../../../types.js"
 
 export function sort_effects_by_track(effects: AnyEffect[]) {
 	// so that effects on first track draw on top of things that are on second track

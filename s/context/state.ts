@@ -1,8 +1,8 @@
 import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 
-import {TimelineHistorical, TimelineNonHistorical} from "./types.js"
+import {HistoricalState, NonHistoricalState} from "./types.js"
 
-export const timeline_historical_state: TimelineHistorical = {
+export const historical_state: HistoricalState = {
 	tracks: [
 		{id: generate_id()},
 		{id: generate_id()},
@@ -12,7 +12,7 @@ export const timeline_historical_state: TimelineHistorical = {
 	effects: []
 }
 
-export const timeline_non_historical_state: TimelineNonHistorical = {
+export const non_historical_state: NonHistoricalState = {
 	selected_effect: null,
 	is_exporting: false,
 	export_progress: 0,

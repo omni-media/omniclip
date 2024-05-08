@@ -1,8 +1,8 @@
 import {generate_id} from "@benev/slate"
 
+import {Actions} from "../../../actions.js"
 import {Compositor} from "../../compositor/controller"
-import {TimelineActions} from "../../timeline/actions.js"
-import {AnyEffect, VideoEffect} from "../../timeline/types.js"
+import {AnyEffect, VideoEffect} from "../../../types.js"
 import {get_effects_at_timestamp} from "../utils/get_effects_at_timestamp.js"
 
 interface DecodedFrame {
@@ -17,7 +17,7 @@ export class Decoder {
 	decoded_frames: Map<string, DecodedFrame> = new Map()
 	decoded_effects = new Map<string, string>()
 
-	constructor(private actions: TimelineActions, private compositor: Compositor) {}
+	constructor(private actions: Actions, private compositor: Compositor) {}
 
 	async get_and_draw_decoded_frame(effects: AnyEffect[], timestamp: number) {
 		const effects_at_timestamp = get_effects_at_timestamp(effects, timestamp)

@@ -2,18 +2,18 @@ import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../context/context.js"
+import {Font, TextEffect} from "../../context/types.js"
 import boldSvg from "../../icons/remix-icon/bold.svg.js"
 import italicSvg from "../../icons/remix-icon/italic.svg.js"
 import {StateHandler} from "../../views/state-handler/view.js"
 import alignLeftSvg from "../../icons/remix-icon/align-left.svg.js"
 import alignRightSvg from "../../icons/remix-icon/align-right.svg.js"
 import alignCenterSvg from "../../icons/remix-icon/align-center.svg.js"
-import {Font, TextEffect} from "../../context/controllers/timeline/types.js"
 
 export const TextUpdater = shadow_view(use => (selected_effect: TextEffect) => {
 	use.styles(styles)
-	use.watch(() => use.context.state.timeline)
-	const effect = use.context.state.timeline.effects.find(effect => effect.id === selected_effect.id)! as TextEffect
+	use.watch(() => use.context.state)
+	const effect = use.context.state.effects.find(effect => effect.id === selected_effect.id)! as TextEffect
 
 	const text_manager = use.context.controllers.compositor.managers.textManager
 	const compositor = use.context.controllers.compositor
@@ -39,7 +39,7 @@ export const TextUpdater = shadow_view(use => (selected_effect: TextEffect) => {
 		})
 	})
 
-	const update_compositor = () => use.context.controllers.compositor.compose_effects(use.context.state.timeline.effects, use.context.state.timeline.timecode)
+	const update_compositor = () => use.context.controllers.compositor.compose_effects(use.context.state.effects, use.context.state.timecode)
 
 	return StateHandler(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<div

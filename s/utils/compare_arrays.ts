@@ -1,4 +1,4 @@
-import {AnyEffect} from "../context/controllers/timeline/types.js"
+import {AnyEffect} from "../context/types.js"
 
 export function compare_arrays(originalArray: AnyEffect[], newArray: AnyEffect[]) {
 	const add = []

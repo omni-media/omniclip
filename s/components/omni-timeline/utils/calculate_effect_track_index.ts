@@ -1,4 +1,4 @@
-import {AnyEffect} from "../../../context/controllers/timeline/types.js"
+import {AnyEffect} from "../../../context/types.js"
 
 export function calculate_effect_track_index(y: number, number_of_tracks: number, effects: AnyEffect[]) {
 	let acc = 0

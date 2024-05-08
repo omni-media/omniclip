@@ -11,7 +11,7 @@ import audioWaveSvg from "../../icons/material-design-icons/audio-wave.svg.js"
 import {Audio, AudioFile, Image, ImageFile, Video, VideoFile} from "./types.js"
 
 export const OmniMedia = shadow_component(use => {
-	use.watch(() => use.context.state.timeline)
+	use.watch(() => use.context.state)
 	use.styles(styles)
 	const media_controller = use.context.controllers.media
 	const managers = use.context.controllers.compositor.managers
@@ -75,7 +75,7 @@ export const OmniMedia = shadow_component(use => {
 			>
 				<div class="media-element">
 					${video.element}
-					<div @click=${() => managers.videoManager.create_and_add_video_effect(video, use.context.state.timeline)} class="add-btn">${addSvg}</div>
+					<div @click=${() => managers.videoManager.create_and_add_video_effect(video, use.context.state)} class="add-btn">${addSvg}</div>
 					<div @click=${() => media_controller.delete_file(video)} class="delete-btn">${binSvg}</div>
 				</div>
 				<span class="media-name">${video.file.name}</span>
@@ -89,7 +89,7 @@ export const OmniMedia = shadow_component(use => {
 			>
 				<div class="media-element">
 					${image.element}
-					<div @click=${() => managers.imageManager.create_and_add_image_effect(image, use.context.state.timeline)} class="add-btn">${addSvg}</div>
+					<div @click=${() => managers.imageManager.create_and_add_image_effect(image, use.context.state)} class="add-btn">${addSvg}</div>
 					<div @click=${() => media_controller.delete_file(image)} class="delete-btn">${binSvg}</div>
 				</div>
 				<span class="media-name">${image.file.name}</span>
@@ -104,7 +104,7 @@ export const OmniMedia = shadow_component(use => {
 				<div class="media-element audio">
 					${audio.element}
 					${audioWaveSvg}
-					<div @click=${() => managers.audioManager.create_and_add_audio_effect(audio, use.context.state.timeline)} class="add-btn">${addSvg}</div>
+					<div @click=${() => managers.audioManager.create_and_add_audio_effect(audio, use.context.state)} class="add-btn">${addSvg}</div>
 					<div @click=${() => media_controller.delete_file(audio)} class="delete-btn">${binSvg}</div>
 				</div>
 				<span class="media-name">${audio.file.name}</span>

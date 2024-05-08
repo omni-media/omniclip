@@ -1,4 +1,4 @@
-import {TextEffect} from "../timeline/types.js"
+import {TextEffect} from "../../types.js"
 
 let offscreen_canvas: OffscreenCanvas | undefined = undefined
 let ctx: OffscreenCanvasRenderingContext2D | null = null

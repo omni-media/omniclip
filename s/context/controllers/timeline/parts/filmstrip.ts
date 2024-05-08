@@ -1,6 +1,6 @@
 import {GoldElement} from "@benev/slate"
 
-import {VideoEffect} from "../types.js"
+import {VideoEffect} from "../../../types.js"
 import {Compositor} from "../../compositor/controller"
 import {FFmpegHelper} from "../../video-export/helpers/FFmpegHelper/helper.js"
 import {calculate_start_position} from "../../../../components/omni-timeline/utils/calculate_start_position.js"

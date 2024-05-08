@@ -2,15 +2,14 @@ import {AppCore, Pojo, Nexus, ZipAction, watch, signals} from "@benev/slate"
 import {slate, Context, PanelSpec} from "@benev/construct/x/mini.js"
 
 import {Media} from "./controllers/media/controller.js"
-import {XTimeline} from "./controllers/timeline/types.js"
 import {Timeline} from "./controllers/timeline/controller.js"
 import {Compositor} from "./controllers/compositor/controller.js"
+import {historical_state, non_historical_state} from "./state.js"
 import {VideoExport} from "./controllers/video-export/controller.js"
-import {OmniState, OmniStateHistorical, OmniStateNonHistorical} from "../types.js"
+import {HistoricalState, NonHistoricalState, State} from "./types.js"
+import {historical_actions, non_historical_actions} from "./actions.js"
 import {FFmpegHelper} from "./controllers/video-export/helpers/FFmpegHelper/helper.js"
 import {StockLayouts} from "@benev/construct/x/context/controllers/layout/parts/utils/stock_layouts.js"
-import {timeline_historical_state, timeline_non_historical_state} from "./controllers/timeline/state.js"
-import {timeline_historical_actions, timeline_non_historical_actions} from "./controllers/timeline/actions.js"
 
 export interface MiniContextOptions {
 	panels: Pojo<PanelSpec>,
@@ -18,40 +17,36 @@ export interface MiniContextOptions {
 }
 
 export class OmniContext extends Context {
-	#non_historical_state =  watch.stateTree<OmniStateNonHistorical>({
-		timeline: timeline_non_historical_state
-	})
+	#non_historical_state =  watch.stateTree<NonHistoricalState>(non_historical_state)
 
-	#non_historical_actions = ZipAction.actualize(this.#non_historical_state, {timeline_non_historical_actions})
+	#non_historical_actions = ZipAction.actualize(this.#non_historical_state, non_historical_actions)
 
 	// state tree with history
 	#core = new AppCore({
-		initial_state: {timeline: timeline_historical_state},
+		initial_state: historical_state,
 		history_limit: 64,
-		actions_blueprint: ZipAction.blueprint<OmniStateHistorical>()({timeline_historical_actions})
+		actions_blueprint: ZipAction.blueprint<HistoricalState>()(historical_actions)
 	})
 
-	get state(): OmniState {
-		return {timeline: {
-			...this.#non_historical_state.state.timeline, ...this.#core.state.timeline
-		}}
+	get state(): State {
+		return {...this.#non_historical_state.state, ...this.#core.state}
 	}
 
-	get actions() { 
-		return {timeline_actions: {
-			...this.#non_historical_actions.timeline_non_historical_actions,
-			...this.#core.actions.timeline_historical_actions
-		}}
+	get actions() {
+		return {
+			...this.#non_historical_actions,
+			...this.#core.actions
+		}
 	}
 
-	undo(timeline: XTimeline) {
+	undo(state: State) {
 		this.#core.history.undo()
-		this.controllers.compositor.undo_or_redo(timeline)
+		this.controllers.compositor.undo_or_redo(state)
 	}
 
-	redo(timeline: XTimeline) {
+	redo(state: State) {
 		this.#core.history.redo()
-		this.controllers.compositor.undo_or_redo(timeline)
+		this.controllers.compositor.undo_or_redo(state)
 	}
 
 	get history() {
@@ -59,15 +54,15 @@ export class OmniContext extends Context {
 	}
 
 	helpers = {
-		ffmpeg: new FFmpegHelper(this.actions.timeline_actions)
+		ffmpeg: new FFmpegHelper(this.actions)
 	}
 
 	is_webcodecs_supported = signals.op<any>()
 
 	controllers = {
-		timeline: new Timeline(this.actions.timeline_actions),
-		compositor: new Compositor(this.actions.timeline_actions),
-		media: new Media(this.actions.timeline_actions),
+		timeline: new Timeline(this.actions),
+		compositor: new Compositor(this.actions),
+		media: new Media(this.actions),
 	} as {
 		timeline: Timeline,
 		compositor: Compositor
@@ -84,7 +79,7 @@ export class OmniContext extends Context {
 		}
 		this.controllers = {
 			...this.controllers,
-			video_export: new VideoExport(this.actions.timeline_actions, this.controllers.compositor)
+			video_export: new VideoExport(this.actions, this.controllers.compositor)
 		}
 	}
 }

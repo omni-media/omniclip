@@ -2,16 +2,16 @@ import {generate_id} from "@benev/slate"
 import {FabricText} from "fabric/dist/index.mjs"
 
 import {Compositor} from "../controller.js"
-import {TimelineActions} from "../../timeline/actions.js"
-import {Font, FontStyle, TextAlign, TextEffect, XTimeline} from "../../timeline/types.js"
+import {Actions} from "../../../actions.js"
+import {Font, FontStyle, TextAlign, TextEffect, State} from "../../../types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
 export class TextManager extends Map<string, FabricText> {
 	#clicked_effect: TextEffect | null = null
 
-	constructor(private compositor: Compositor, private actions: TimelineActions) {super()}
+	constructor(private compositor: Compositor, private actions: Actions) {super()}
 
-	create_and_add_text_effect(timeline: XTimeline) {
+	create_and_add_text_effect(state: State) {
 		const effect: TextEffect = {
 			id: generate_id(),
 			kind: "text",
@@ -36,7 +36,7 @@ export class TextManager extends Map<string, FabricText> {
 				rotation: 0,
 			}
 		}
-		const {position, track} = find_place_for_new_effect(timeline.effects, timeline.tracks)
+		const {position, track} = find_place_for_new_effect(state.effects, state.tracks)
 		effect.start_at_position = position!
 		effect.track = track
 		this.add_text_effect(effect)

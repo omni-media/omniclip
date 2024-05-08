@@ -10,40 +10,40 @@ import fullscreenSvg from "../../../../icons/gravity-ui/fullscreen.svg.js"
 
 export const MediaPlayer = shadow_view(use => () => {
 	use.styles(styles)
-	use.watch(() => use.context.state.timeline)
-	const state = use.context.state.timeline
+	use.watch(() => use.context.state)
+	const state = use.context.state
 	const compositor = use.once(() => use.context.controllers.compositor)
 	const playhead = use.context.controllers.timeline
 	const [isVideoMuted, setIsVideoMuted] = use.state(false)
 
 	use.mount(() => {
 		const unsub_onplayhead = playhead.on_playhead_drag(() => {
-			if(use.context.state.timeline.is_playing) {compositor.set_video_playing(false)}
-			compositor.set_current_time_of_audio_or_video_and_redraw(true, use.context.state.timeline.timecode)
+			if(use.context.state.is_playing) {compositor.set_video_playing(false)}
+			compositor.set_current_time_of_audio_or_video_and_redraw(true, use.context.state.timecode)
 		})
 		const dispose1 = watch.track(
-			() => use.context.state.timeline,
+			() => use.context.state,
 			(timeline) => {
 				if(!timeline.is_exporting) {
 					compositor.compose_effects(timeline.effects, timeline.timecode)
 					if(!timeline.is_playing) {
-						compositor.set_current_time_of_audio_or_video_and_redraw(true, use.context.state.timeline.timecode)
+						compositor.set_current_time_of_audio_or_video_and_redraw(true, use.context.state.timecode)
 					} else {
-						compositor.set_current_time_of_audio_or_video_and_redraw(false, use.context.state.timeline.timecode)
+						compositor.set_current_time_of_audio_or_video_and_redraw(false, use.context.state.timecode)
 					}
 				}
 			}
 		)
 		const dispose2 = watch.track(
-			() => use.context.state.timeline.timecode,
+			() => use.context.state.timecode,
 			(timecode) => {
-				const selected_effect = use.context.state.timeline.selected_effect
+				const selected_effect = use.context.state.selected_effect
 				if(selected_effect) {
-					use.context.controllers.timeline.set_or_discard_active_object_on_canvas_for_selected_effect(selected_effect, compositor, use.context.state.timeline)
+					use.context.controllers.timeline.set_or_discard_active_object_on_canvas_for_selected_effect(selected_effect, compositor, use.context.state)
 				}
 			}
 		)
-		const unsub_on_playing = compositor.on_playing(() => compositor.compose_effects(use.context.state.timeline.effects, use.context.state.timeline.timecode))
+		const unsub_on_playing = compositor.on_playing(() => compositor.compose_effects(use.context.state.effects, use.context.state.timecode))
 		return () => {unsub_on_playing(), unsub_onplayhead(), dispose1(), dispose2()}
 	})
 
@@ -63,8 +63,8 @@ export const MediaPlayer = shadow_view(use => () => {
 		<div class="flex">
 			<figure>
 				<div class="canvas-container">
-					${use.context.state.timeline.selected_effect?.kind === "text" && compositor.canvas.getActiveObject()
-					? TextUpdater([use.context.state.timeline.selected_effect])
+					${use.context.state.selected_effect?.kind === "text" && compositor.canvas.getActiveObject()
+					? TextUpdater([use.context.state.selected_effect])
 					: null}
 					${compositor.canvas.getSelectionElement()}
 					${compositor.canvas.getElement()}

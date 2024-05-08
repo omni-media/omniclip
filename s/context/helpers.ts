@@ -1,7 +1,7 @@
-import {TimelineHistorical} from "./types.js"
+import {HistoricalState} from "./types.js"
 
-export class TimelineHelpers {
-	constructor(private timeline: TimelineHistorical) {}
+export class Helpers {
+	constructor(private timeline: HistoricalState) {}
 
 	get_effect(id: string) {
 		return this.timeline.effects.find(effect => effect.id === id)

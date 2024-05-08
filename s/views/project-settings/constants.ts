@@ -1,4 +1,4 @@
-import {Settings} from "../../context/controllers/timeline/types.js"
+import {Settings} from "../../context/types.js"
 
 export const export_props: Settings[] = [{
 	width: 854,

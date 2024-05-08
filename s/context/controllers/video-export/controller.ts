@@ -1,9 +1,9 @@
+import {Actions} from "../../actions.js"
 import {Decoder} from "./parts/decoder.js"
 import {Encoder} from "./parts/encoder.js"
+import {AnyEffect, State} from "../../types.js"
 import {FPSCounter} from "./tools/FPSCounter/tool.js"
-import {TimelineActions} from "../timeline/actions.js"
 import {Compositor} from "../compositor/controller.js"
-import {AnyEffect, XTimeline} from "../timeline/types.js"
 import {FileSystemHelper} from "./helpers/FileSystemHelper/helper.js"
 
 export class VideoExport {
@@ -16,7 +16,7 @@ export class VideoExport {
 	#Decoder: Decoder
 	#Encoder: Encoder
 
-	constructor(private actions: TimelineActions, private compositor: Compositor) {
+	constructor(private actions: Actions, private compositor: Compositor) {
 		this.#FPSCounter = new FPSCounter(this.actions.set_fps, 100)
 		this.#Decoder = new Decoder(actions, compositor)
 		this.#Encoder = new Encoder(actions, compositor)
@@ -27,9 +27,9 @@ export class VideoExport {
 		await this.#FileSystemHelper.writeFile(handle, this.#Encoder.file!)
 	}
 
-	export_start(timeline: XTimeline, resolution: number[], bitrate: number) {
+	export_start(state: State, resolution: number[], bitrate: number) {
 		this.#Encoder.configure(resolution, bitrate)
-		const sorted_effects = this.#sort_effects_by_track(timeline.effects)
+		const sorted_effects = this.#sort_effects_by_track(state.effects)
 		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position - effect.start + effect.end))
 		this.#export_process(sorted_effects)
 		this.actions.set_is_exporting(true)

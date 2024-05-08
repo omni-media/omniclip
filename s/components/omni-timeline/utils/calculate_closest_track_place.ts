@@ -1,6 +1,6 @@
 import {V2} from "./coordinates_in_rect.js"
+import {AnyEffect} from "../../../context/types.js"
 import {calculate_effect_width} from "./calculate_effect_width.js"
-import {AnyEffect} from "../../../context/controllers/timeline/types.js"
 
 export function calculate_closest_track_place(
 	effect: AnyEffect,

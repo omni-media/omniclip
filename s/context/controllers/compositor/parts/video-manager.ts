@@ -2,22 +2,22 @@ import {generate_id} from "@benev/slate"
 import {FabricImage} from "fabric/dist/index.mjs"
 
 import {Compositor} from "../controller.js"
-import {TimelineActions} from "../../timeline/actions.js"
-import {VideoEffect, XTimeline} from "../../timeline/types.js"
+import {Actions} from "../../../actions.js"
+import {VideoEffect, State} from "../../../types.js"
 import {Video} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
 export class VideoManager extends Map<string, {fabric: FabricImage, file: File}> {
 	#canvas = document.createElement("canvas")
 
-	constructor(private compositor: Compositor, private actions: TimelineActions) {
+	constructor(private compositor: Compositor, private actions: Actions) {
 		super()
 		this.#canvas.getContext("2d")!.imageSmoothingEnabled = false
 	}
 
-	create_and_add_video_effect(video: Video, timeline: XTimeline) {
+	create_and_add_video_effect(video: Video, state: State) {
 		const duration = video.element.duration * 1000
-		const adjusted_duration_to_timebase = Math.floor(duration / (1000/timeline.timebase)) * (1000/timeline.timebase) - 40
+		const adjusted_duration_to_timebase = Math.floor(duration / (1000/state.timebase)) * (1000/state.timebase) - 40
 		const effect: VideoEffect = {
 			frames: video.frames,
 			id: generate_id(),
@@ -36,7 +36,7 @@ export class VideoManager extends Map<string, {fabric: FabricImage, file: File}>
 				rotation: 0
 			}
 		}
-		const {position, track} = find_place_for_new_effect(timeline.effects, timeline.tracks)
+		const {position, track} = find_place_for_new_effect(state.effects, state.tracks)
 		effect.start_at_position = position!
 		effect.track = track
 		this.add_video_effect(effect, video.file)

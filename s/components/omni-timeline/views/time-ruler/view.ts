@@ -12,8 +12,8 @@ export const TimeRuler = shadow_view(use => (timeline: GoldElement) => {
 	const [indicator, setIndicator] = use.state(false)
 
 	use.mount(() => {
-		const set_time_codes = () => setTimeCodes(generate_time_codes(use.context.state.timeline.zoom))
-		watch.track(() => use.context.state.timeline.zoom, (zoom) => setTimeCodes(generate_time_codes(zoom)))
+		const set_time_codes = () => setTimeCodes(generate_time_codes(use.context.state.zoom))
+		watch.track(() => use.context.state.zoom, (zoom) => setTimeCodes(generate_time_codes(zoom)))
 		timeline.addEventListener("scroll", set_time_codes)
 		return () => timeline.removeEventListener("scroll",set_time_codes)
 	})
@@ -22,7 +22,7 @@ export const TimeRuler = shadow_view(use => (timeline: GoldElement) => {
 		let seconds = Math.floor(milliseconds / 1000)
 		let minutes = Math.floor(seconds / 60)
 		seconds = seconds % 60
-		const zoom_rounded = round_to_two_decimal_places(use.context.state.timeline.zoom)
+		const zoom_rounded = round_to_two_decimal_places(use.context.state.zoom)
 		if(zoom_rounded <= -9) {
 			return `${minutes}min`
 		} else {
@@ -65,7 +65,7 @@ export const TimeRuler = shadow_view(use => (timeline: GoldElement) => {
 		kind: "normal" | "dot"
 	}[] {
 		const time_codes = []
-		const ms = 1000/use.context.state.timeline.timebase
+		const ms = 1000/use.context.state.timebase
 		for(let time_code = timeline.scrollLeft; time_code <= timeline.scrollLeft + timeline.clientWidth; time_code+=5) {
 			const exact_time_code = time_code * Math.pow(2, -zoom)
 			const zoom_rounded = round_to_two_decimal_places(zoom)
@@ -132,9 +132,9 @@ export const TimeRuler = shadow_view(use => (timeline: GoldElement) => {
 	}
 
 	const translate_to_timecode_and_set = (x: number) => {
-		const zoom = use.context.state.timeline.zoom
+		const zoom = use.context.state.zoom
 		const milliseconds = x * Math.pow(2, -zoom)
-		use.context.actions.timeline_actions.set_timecode(milliseconds)
+		use.context.actions.set_timecode(milliseconds)
 	}
 
 	return html`

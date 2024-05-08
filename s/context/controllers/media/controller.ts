@@ -2,7 +2,7 @@ import {pub} from "@benev/slate"
 import {quick_hash} from "@benev/construct"
 import {FFprobeWorker} from "ffprobe-wasm/browser.mjs"
 
-import {TimelineActions} from "../timeline/actions.js"
+import {Actions} from "../../actions.js"
 import {Video, VideoFile, AnyMedia, ImageFile, Image, AudioFile, Audio} from "../../../components/omni-media/types.js"
 
 const ffprobe = new FFprobeWorker()
@@ -12,7 +12,7 @@ export class Media {
 	#opened = false
 	on_media_change = pub<{files: AnyMedia[], action: "removed" | "added" | "placeholder"}>()
 
-	constructor(private actions: TimelineActions) {
+	constructor(private actions: Actions) {
 		this.#database_request.onerror = (event) => {
 			console.error("Why didn't you allow my web app to use IndexedDB?!")
 		}

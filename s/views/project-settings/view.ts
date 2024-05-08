@@ -2,17 +2,17 @@ import {Op, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {export_props} from "./constants.js"
+import {AspectRatio} from "../../context/types.js"
 import {shadow_view} from "../../context/context.js"
 import {StateHandler} from "../state-handler/view.js"
-import {AspectRatio} from "../../context/controllers/timeline/types.js"
 
 export const ProjectSettings = shadow_view(use => () => {
 	use.styles(styles)
-	use.watch(() => use.context.state.timeline)
+	use.watch(() => use.context.state)
 
-	const actions = use.context.actions.timeline_actions
+	const actions = use.context.actions
 	const compositor = use.context.controllers.compositor
-	const timeline_state = use.context.state.timeline
+	const timeline_state = use.context.state
 	const [selectedAsptectRatio, setSelectedAspectRatio] = use.state<AspectRatio>("16/9")
 
 	const set_project_resolution = (width: number, height: number) => {

@@ -7,7 +7,7 @@ import {StateHandler} from "../../views/state-handler/view.js"
 
 export const OmniText = shadow_component(use => {
 	use.styles(styles)
-	use.watch(() => use.context.state.timeline)
+	use.watch(() => use.context.state)
 	const manager = use.context.controllers.compositor.managers.textManager
 
 	return StateHandler(Op.all(
@@ -18,7 +18,7 @@ export const OmniText = shadow_component(use => {
 				<span style="color: #e66465; font-family: Lato;" class="text">
 					example
 				</span>
-				<div @click=${() => manager.create_and_add_text_effect(use.context.state.timeline)} class="add-btn">${addSvg}</div>
+				<div @click=${() => manager.create_and_add_text_effect(use.context.state)} class="add-btn">${addSvg}</div>
 			</div>
 		</div>
 	`)

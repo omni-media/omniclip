@@ -2,20 +2,18 @@ import {WatchTower} from "@benev/slate/x/watch/tower.js"
 import {SignalTower} from "@benev/slate/x/signals/tower.js"
 import {ZipAction} from "@benev/slate/x/watch/zip/action.js"
 
+import {State} from "../../../types.js"
 import {Timeline} from "../controller.js"
-import {timeline_historical_state, timeline_non_historical_state} from "../state.js"
-import {timeline_historical_actions, timeline_non_historical_actions} from "../actions.js"
-import {OmniState} from "../../../../types.js"
+import {historical_state, non_historical_state} from "../../../state.js"
+import {historical_actions, non_historical_actions} from "../../../actions.js"
 
-const actions = {...timeline_non_historical_actions, ...timeline_historical_actions}
-const state = {...timeline_historical_state, ...timeline_non_historical_state}
+const actions = {...non_historical_actions, ...historical_actions}
+const state = {...historical_state, ...non_historical_state}
 
 export function setup() {
 	const signals = new SignalTower()
 	const watch = new WatchTower(signals)
-	const timelineTree = watch.stateTree<OmniState>({
-		timeline: state
-	})
+	const timelineTree = watch.stateTree<State>(state)
 	const actions_timeline = ZipAction.actualize(timelineTree, actions)
 	return {
 		timelineTree,

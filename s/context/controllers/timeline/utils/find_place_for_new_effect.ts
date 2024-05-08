@@ -1,4 +1,4 @@
-import {AnyEffect, XTrack} from "../types.js"
+import {AnyEffect, XTrack} from "../../../types.js"
 
 // it kind of works like timeline proposals, but less sophisticated, no shrinking or pushing effects etc, just
 // placing new effect after last effect on some of the tracks that is closest to the start of timeline

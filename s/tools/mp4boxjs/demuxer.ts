@@ -1,4 +1,4 @@
-import {Status} from "../../context/controllers/timeline/types.js"
+import {Status} from "../../context/types.js"
 import MP4Box, {MP4File, MP4Info, MP4MediaTrack} from "./mp4box.adapter.js"
 
 type SetStatus = (status: Status, message: string) => void

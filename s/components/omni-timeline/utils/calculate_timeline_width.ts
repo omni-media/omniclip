@@ -1,4 +1,4 @@
-import {AnyEffect} from "../../../context/controllers/timeline/types.js"
+import {AnyEffect} from "../../../context/types.js"
 
 export function calculate_timeline_width (effects: AnyEffect[], zoom: number) {
 	const last_effect = [...effects].sort((a, b) => {

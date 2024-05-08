@@ -1,16 +1,16 @@
 import {html} from "@benev/slate"
 
 import {light_view} from "../../../../context/context.js"
+import {At, ProposedTimecode, Grabbed} from "../../../../context/types.js"
 import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
 import {calculate_effect_track_index} from "../../utils/calculate_effect_track_index.js"
-import {At, ProposedTimecode, Grabbed} from "../../../../context/controllers/timeline/types.js"
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
 
 export const ProposalIndicator = light_view(use => () => {
 	const controller = use.context.controllers.timeline
-	const actions = use.context.actions.timeline_actions
-	const zoom = use.context.state.timeline.zoom
+	const actions = use.context.actions
+	const zoom = use.context.state.zoom
 	const {effect_drag: {hovering, grabbed}, on_drop} = controller
 	const [proposedTimecode, setProposedTimecode, getProposedTimecode] = use.state<ProposedTimecode>({
 		proposed_place: {track: 0, start_at_position: 0},
@@ -18,18 +18,18 @@ export const ProposalIndicator = light_view(use => () => {
 		effects_to_push: null
 	})
 
-	const track_effects = controller.get_effects_on_track(use.context.state.timeline, proposedTimecode.proposed_place.track)
+	const track_effects = controller.get_effects_on_track(use.context.state, proposedTimecode.proposed_place.track)
 
 	function translate_to_timecode(grabbed: Grabbed, hovering: At) {
-		const baseline_zoom = use.context.state.timeline.zoom
+		const baseline_zoom = use.context.state.zoom
 		const [x, y] = hovering.coordinates
 		const start = ((x - grabbed.offset.x) * Math.pow(2, -baseline_zoom))
 		const timeline_start = start >= 0 ? start : 0
 		const timeline_end = ((x - grabbed.offset.x) * Math.pow(2, -baseline_zoom)) + (grabbed.effect.end - grabbed.effect.start)
 		// limit to 4 tracks for now
-		const track = calculate_effect_track_index(y, use.context.state.timeline.tracks.length, use.context.state.timeline.effects) > 3
+		const track = calculate_effect_track_index(y, use.context.state.tracks.length, use.context.state.effects) > 3
 			? 3
-			: calculate_effect_track_index(y, use.context.state.timeline.tracks.length, use.context.state.timeline.effects)
+			: calculate_effect_track_index(y, use.context.state.tracks.length, use.context.state.effects)
 		return {
 			timeline_start,
 			timeline_end,
@@ -49,7 +49,7 @@ export const ProposalIndicator = light_view(use => () => {
 		.calculate_proposed_timecode(
 			timecode,
 			grabbed!.effect.id,
-			use.context.state.timeline
+			use.context.state
 		)
 		setProposedTimecode(proposed_timecode)
 	}
@@ -77,7 +77,7 @@ export const ProposalIndicator = light_view(use => () => {
 				}px;
 				transform: translate(
 					${calculate_start_position(proposedTimecode.proposed_place.start_at_position, zoom)}px,
-					${calculate_effect_track_placement(proposedTimecode!.proposed_place.track, use.context.state.timeline.effects)}px
+					${calculate_effect_track_placement(proposedTimecode!.proposed_place.track, use.context.state.effects)}px
 				);
 			"
 			data-indicator="drop-indicator"

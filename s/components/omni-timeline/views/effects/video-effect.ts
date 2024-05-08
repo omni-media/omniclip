@@ -2,8 +2,8 @@ import {html, GoldElement, css, watch} from "@benev/slate"
 
 import {Effect} from "./parts/effect.js"
 import {shadow_view} from "../../../../context/context.js"
+import {VideoEffect as XVideoEffect} from "../../../../context/types.js"
 import {Filmstrip} from "../../../../context/controllers/timeline/parts/filmstrip.js"
-import {VideoEffect as XVideoEffect} from "../../../../context/controllers/timeline/types.js"
 
 export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: GoldElement) => {
 
@@ -13,8 +13,8 @@ export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: G
 		const filmstrip = new Filmstrip(effect, use.context.controllers.compositor, use.context.helpers.ffmpeg)
 
 		const recalculate_filmstrip_frames = async (force_recalculate?: boolean) => {
-			const get_effect = use.context.state.timeline.effects.find(e => e.id === effect.id) as XVideoEffect
-			for await(const {url, normalized_left, i} of filmstrip.recalculate_all_visible_filmstrip_frames(get_effect, timeline, use.context.state.timeline.zoom, force_recalculate)) {
+			const get_effect = use.context.state.effects.find(e => e.id === effect.id) as XVideoEffect
+			for await(const {url, normalized_left, i} of filmstrip.recalculate_all_visible_filmstrip_frames(get_effect, timeline, use.context.state.zoom, force_recalculate)) {
 				let new_visible = getVisibleFilmstripFrames()
 				new_visible[i] = {url, left: normalized_left}
 				setVisibleFilmstripFrames(new_visible)
@@ -32,7 +32,7 @@ export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: G
 
 	use.mount(() => {
 		timeline.addEventListener("scroll", () => recalculate_filmstrip_frames())
-		const dispose = watch.track(() => use.context.state.timeline.zoom, async (zoom) => recalculate_filmstrip_frames(true))
+		const dispose = watch.track(() => use.context.state.zoom, async (zoom) => recalculate_filmstrip_frames(true))
 		return () => {dispose(), timeline.removeEventListener("scroll", () => recalculate_filmstrip_frames()), filmstrip.dispose()}
 	})
 
