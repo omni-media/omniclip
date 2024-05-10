@@ -7,12 +7,14 @@ import {Video, VideoFile, AnyMedia, ImageFile, Image, AudioFile, Audio} from "..
 
 const ffprobe = new FFprobeWorker()
 
-export class Media {
+export class Media extends Map<string, File> {
 	#database_request = window.indexedDB.open("database", 3)
 	#opened = false
+	#files_ready = false
 	on_media_change = pub<{files: AnyMedia[], action: "removed" | "added" | "placeholder"}>()
 
 	constructor(private actions: Actions) {
+		super()
 		this.#database_request.onerror = (event) => {
 			console.error("Why didn't you allow my web app to use IndexedDB?!")
 		}
@@ -47,6 +49,26 @@ export class Media {
 		})
 	}
 
+	are_files_ready() {
+		return new Promise((resolve) => {
+			if(this.#files_ready) {
+				resolve(true)
+			} else {
+				const interval = setInterval(() => {
+					if(this.#files_ready) {
+						resolve(true)
+						clearInterval(interval)
+					}
+				}, 100)
+			}
+		})
+	}
+
+	async get_file(file_hash: string) {
+		await this.are_files_ready()
+		return this.get(file_hash)
+	}
+
 	async get_imported_files(): Promise<AnyMedia[]> {
 		return new Promise(async (resolve, reject) => {
 			await this.#is_db_opened()
@@ -57,6 +79,10 @@ export class Media {
 			request.onsuccess = async () => {
 				try {
 					const files: AnyMedia[] = request.result || []
+					for(const {hash, file} of files) {
+						this.set(hash, file)
+					}
+					this.#files_ready = true
 					resolve(files)
 				} catch (error) {
 					reject(error)
@@ -80,6 +106,7 @@ export class Media {
 	}
 
 	async import_file(input: HTMLInputElement) {
+		this.#files_ready = false
 		this.on_media_change.publish({files: [], action: "placeholder"})
 		const imported_file = input.files?.[0]
 		const frames = imported_file?.type.startsWith("video") ? await ffprobe.getFrames(imported_file, 1) : null
@@ -88,7 +115,7 @@ export class Media {
 			const transaction = this.#database_request.result.transaction(["files"], "readwrite")
 			const files_store = transaction.objectStore("files")
 			const check_if_duplicate = files_store.count(hash)
-
+			this.set(hash, imported_file)
 			check_if_duplicate!.onsuccess = () => {
 				const not_duplicate = check_if_duplicate.result === 0
 				if(not_duplicate) {
@@ -105,6 +132,7 @@ export class Media {
 						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "audio"}], action: "added"})
 					}
 				}
+				this.#files_ready = true
 			}
 			check_if_duplicate!.onerror = (error) => console.log("error")
 		}
