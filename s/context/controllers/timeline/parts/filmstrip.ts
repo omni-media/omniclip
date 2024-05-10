@@ -1,7 +1,7 @@
 import {GoldElement} from "@benev/slate"
 
 import {VideoEffect} from "../../../types.js"
-import {Compositor} from "../../compositor/controller"
+import {Media} from "../../media/controller.js"
 import {FFmpegHelper} from "../../video-export/helpers/FFmpegHelper/helper.js"
 import {calculate_start_position} from "../../../../components/omni-timeline/utils/calculate_start_position.js"
 
@@ -16,21 +16,29 @@ export class Filmstrip {
 	#canvas = document.createElement("canvas")
 	#ctx = this.#canvas.getContext("2d")
 
-	constructor(private effect: VideoEffect, private compositor: Compositor, private ffmpeg: FFmpegHelper) {
+	constructor(private effect: VideoEffect, private media: Media, private ffmpeg: FFmpegHelper) {
 		this.#load_video_for_filmstrip()
+		this.#init_filmstrip()
 		this.#canvas.width = 150
 		this.#canvas.height = 50
 	}
 
-	#load_video_for_filmstrip() {
-		const {file} = this.compositor.managers.videoManager.get(this.effect.id)!
-		this.#video.src = URL.createObjectURL(file)
-		this.#video.load()
-		this.#video.addEventListener("seeked", () => {
-			const res = this.#resolve
-			if(res)
-				res(true)
-		})
+	async on_file_found() {
+		await this.#load_video_for_filmstrip()
+		await this.#init_filmstrip()
+	}
+
+	async #load_video_for_filmstrip() {
+		const file = await this.media.get_file(this.effect.file_hash)
+		if(file) {
+			this.#video.src = URL.createObjectURL(file)
+			this.#video.load()
+			this.#video.addEventListener("seeked", () => {
+				const res = this.#resolve
+				if(res)
+					res(true)
+			})
+		}
 	}
 
 	dispose() {
@@ -39,12 +47,14 @@ export class Filmstrip {
 		}
 	}
 
-	async init_filmstrip() {
-		const {file} = this.compositor.managers.videoManager.get(this.effect.id)!
-		const frames = await this.ffmpeg.get_frames_count(file)
-		this.frames_count = frames
-		const placeholders = this.#generate_filmstrip_placeholders(frames)
-		this.#filmstrip_frames = placeholders
+	async #init_filmstrip() {
+		const file = await this.media.get_file(this.effect.file_hash)
+		if(file) {
+			const frames = await this.ffmpeg.get_frames_count(file)
+			this.frames_count = frames
+			const placeholders = this.#generate_filmstrip_placeholders(frames)
+			this.#filmstrip_frames = placeholders
+		}
 	}
 
 	#is_scrolling_left(left: number) {

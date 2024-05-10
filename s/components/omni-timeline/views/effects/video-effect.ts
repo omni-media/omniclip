@@ -6,11 +6,12 @@ import {VideoEffect as XVideoEffect} from "../../../../context/types.js"
 import {Filmstrip} from "../../../../context/controllers/timeline/parts/filmstrip.js"
 
 export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: GoldElement) => {
-
+	const media = use.context.controllers.media
+	const compositor = use.context.controllers.compositor
 	const [visibleFilmstripFrames, setVisibleFilmstripFrames, getVisibleFilmstripFrames] = use.state<{url: string, left: number}[]>([])
 
 	const {recalculate_filmstrip_frames, filmstrip} = use.once(() => {
-		const filmstrip = new Filmstrip(effect, use.context.controllers.compositor, use.context.helpers.ffmpeg)
+		const filmstrip = new Filmstrip(effect, use.context.controllers.media, use.context.helpers.ffmpeg)
 
 		const recalculate_filmstrip_frames = async (force_recalculate?: boolean) => {
 			const get_effect = use.context.state.effects.find(e => e.id === effect.id) as XVideoEffect
@@ -22,12 +23,25 @@ export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: G
 			}
 		}
 
+		recalculate_filmstrip_frames(true)
+
 		return {filmstrip, recalculate_filmstrip_frames}
 	})
 
-	use.once(async () => {
-		await filmstrip.init_filmstrip()
-		recalculate_filmstrip_frames(true)
+	use.mount(() => {
+		const dispose = media.on_media_change(async ({files, action}) => {
+			if(action === "added") {
+				for(const {hash} of files) {
+					const is_effect_already_composed = compositor.managers.videoManager.get(effect.id)
+					if(hash === effect.file_hash && !is_effect_already_composed) {
+						await filmstrip.on_file_found()
+						compositor.recreate([effect], media)
+						recalculate_filmstrip_frames(true)
+					}
+				}
+			}
+		})
+		return () => dispose()
 	})
 
 	use.mount(() => {
@@ -52,7 +66,7 @@ export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: G
 			</div>`
 	}
 
-	return html`${Effect([effect, html`${render_filmstrip()}`, css`
+	return html`${Effect([timeline, effect, html`${render_filmstrip()}`, css`
 		.content {
 			width: 100%;
 		}
