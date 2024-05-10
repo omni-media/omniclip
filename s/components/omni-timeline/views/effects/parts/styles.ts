@@ -22,6 +22,11 @@ export const styles = css`
 		& .trim-handle-right, .trim-handle-left {
 			display: none;
 		}
+
+		&[data-no-file] {
+			border: 3px dotted red;
+			color: red;
+		}
 		
 		&[data-selected] {
 			& .trim-handle-right, & .trim-handle-left {
