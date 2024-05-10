@@ -6,7 +6,7 @@ import {AudioEffect, State} from "../../../types.js"
 import {Audio} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
-export class AudioManager extends Map<string, {element: HTMLAudioElement, file: File}> {
+export class AudioManager extends Map<string, HTMLAudioElement> {
 
 	constructor(private compositor: Compositor, private actions: Actions) {super()}
 
@@ -16,6 +16,8 @@ export class AudioManager extends Map<string, {element: HTMLAudioElement, file: 
 		const effect: AudioEffect = {
 			id: generate_id(),
 			kind: "audio",
+			name: audio.file.name,
+			file_hash: audio.hash,
 			raw_duration: duration,
 			duration: adjusted_duration_to_timebase,
 			start_at_position: 0,
@@ -29,21 +31,23 @@ export class AudioManager extends Map<string, {element: HTMLAudioElement, file: 
 		this.add_audio_effect(effect, audio.file)
 	}
 
-	add_audio_effect(effect: AudioEffect, file: File) {
+	add_audio_effect(effect: AudioEffect, file: File, recreate?: boolean) {
 		const audio = document.createElement("audio")
 		const source = document.createElement("source")
 		source.type = "audio/mp3"
 		source.src = URL.createObjectURL(file)
 		audio.append(source)
-		this.set(effect.id, {element: audio, file})
+		this.set(effect.id, audio)
+		if(recreate) {return}
 		this.actions.add_audio_effect(effect)
 	}
 
 	pause_audios() {
 		for(const effect of this.compositor.currently_played_effects.values()) {
 			if(effect.kind === "audio") {
-				const {element} = this.get(effect.id)!
-				element.pause()
+				const element = this.get(effect.id)
+				if(element)
+					element.pause()
 			}
 		}
 	}
@@ -51,19 +55,22 @@ export class AudioManager extends Map<string, {element: HTMLAudioElement, file: 
 	async play_audios() {
 		for(const effect of this.compositor.currently_played_effects.values()) {
 			if(effect.kind === "audio") {
-				const {element} = this.get(effect.id)!
-				await element.play()
+				const element = this.get(effect.id)
+				if(element)
+					await element.play()
 			}
 		}
 	}
 
 	pause_audio(effect: AudioEffect) {
-		const {element} = this.get(effect.id)!
-		element.pause()
+		const element = this.get(effect.id)
+		if(element)
+			element.pause()
 	}
 
 	async play_audio(effect: AudioEffect) {
-		const {element} = this.get(effect.id)!
-		await element.play()
+		const element = this.get(effect.id)
+		if(element)
+			await element.play()
 	}
 }

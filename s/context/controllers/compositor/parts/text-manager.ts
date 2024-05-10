@@ -31,6 +31,8 @@ export class TextManager extends Map<string, FabricText> {
 					x: 100,
 					y: 50,
 				},
+				scaleX: 1,
+				scaleY: 1,
 				width: 100,
 				height: 20,
 				rotation: 0,
@@ -42,10 +44,21 @@ export class TextManager extends Map<string, FabricText> {
 		this.add_text_effect(effect)
 	}
 
-	add_text_effect(effect: TextEffect) {
+	add_text_effect(effect: TextEffect, recreate?: boolean) {
 		const {size, color, content} = effect
-		const text = new FabricText(content, {fill: color, fontSize: size, objectCaching: false, effect: {...effect}})
+		const text = new FabricText(content, {
+			fill: color,
+			fontSize: size,
+			objectCaching: false,
+			scaleX: effect.rect.scaleX,
+			scaleY: effect.rect.scaleY,
+			top: effect.rect.position_on_canvas.y,
+			left: effect.rect.position_on_canvas.x,
+			angle: effect.rect.rotation,
+			effect: {...effect}
+		})
 		this.set(effect.id, text)
+		if(recreate) {return}
 		this.actions.add_text_effect(effect)
 	}
 
