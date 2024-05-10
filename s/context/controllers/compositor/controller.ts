@@ -255,9 +255,9 @@ export class Compositor {
 		})
 	}
 
-	async recreate(state: State, media: Media) {
+	async recreate(effects: AnyEffect[], media: Media) {
 		await media.are_files_ready()
-		for(const effect of state.effects) {
+		for(const effect of effects) {
 			if(effect.kind === "image") {
 				const file = media.get(effect.file_hash)
 				if(file) {
@@ -278,7 +278,7 @@ export class Compositor {
 				this.managers.textManager.add_text_effect(effect, true)
 			}
 		}
-		this.compose_effects(state.effects, this.timecode)
+		this.compose_effects(effects, this.timecode)
 	}
 
 	update_canvas_objects(state: State) {
