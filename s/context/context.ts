@@ -1,6 +1,7 @@
 import {AppCore, Pojo, Nexus, ZipAction, watch, signals} from "@benev/slate"
 import {slate, Context, PanelSpec} from "@benev/construct/x/mini.js"
 
+import {store} from "./controllers/store/store.js"
 import {Media} from "./controllers/media/controller.js"
 import {Timeline} from "./controllers/timeline/controller.js"
 import {Compositor} from "./controllers/compositor/controller.js"
@@ -21,9 +22,24 @@ export class OmniContext extends Context {
 
 	#non_historical_actions = ZipAction.actualize(this.#non_historical_state, non_historical_actions)
 
+	#store = store(localStorage)
+
+	#listen_for_state_changes_and_save_to_storage() {
+		watch.track(() => this.#core.state, (state) => {
+			this.#store.effects = state.effects
+			this.#store.tracks = state.tracks
+		})
+	}
+
+	get #state_from_storage() {
+		if(this.#store.effects && this.#store.tracks) {
+			return {effects: this.#store.effects, tracks: this.#store.tracks}
+		} else return undefined
+	}
+
 	// state tree with history
 	#core = new AppCore({
-		initial_state: historical_state,
+		initial_state: this.#state_from_storage ?? historical_state,
 		history_limit: 64,
 		actions_blueprint: ZipAction.blueprint<HistoricalState>()(historical_actions)
 	})
@@ -41,12 +57,12 @@ export class OmniContext extends Context {
 
 	undo(state: State) {
 		this.#core.history.undo()
-		this.controllers.compositor.undo_or_redo(state)
+		this.controllers.compositor.update_canvas_objects(state)
 	}
 
 	redo(state: State) {
 		this.#core.history.redo()
-		this.controllers.compositor.undo_or_redo(state)
+		this.controllers.compositor.update_canvas_objects(state)
 	}
 
 	get history() {
@@ -60,7 +76,6 @@ export class OmniContext extends Context {
 	is_webcodecs_supported = signals.op<any>()
 
 	controllers = {
-		timeline: new Timeline(this.actions),
 		compositor: new Compositor(this.actions),
 		media: new Media(this.actions),
 	} as {
@@ -70,18 +85,31 @@ export class OmniContext extends Context {
 		video_export: VideoExport
 	}
 
-	constructor(options: MiniContextOptions) {
-		super(options)
+	#check_if_webcodecs_supported() {
 		if(!window.VideoEncoder && !window.VideoDecoder) {
 			this.is_webcodecs_supported.setError("webcodecs-not-supported")
 		} else {
 			this.is_webcodecs_supported.setReady(true)
 		}
+	}
+	
+	//after loading state from localstorage, compositor objects must be recreated
+	#recreate_project_from_localstorage_state(state: State, media: Media) {
+		this.controllers.compositor.recreate(state, media)
+	}
+
+	constructor(options: MiniContextOptions) {
+		super(options)
+		this.#check_if_webcodecs_supported()
+		this.#listen_for_state_changes_and_save_to_storage()
 		this.controllers = {
 			...this.controllers,
-			video_export: new VideoExport(this.actions, this.controllers.compositor)
+			timeline: new Timeline(this.actions, this.controllers.media, this.controllers.compositor),
+			video_export: new VideoExport(this.actions, this.controllers.compositor, this.controllers.media)
 		}
+		this.#recreate_project_from_localstorage_state(this.state, this.controllers.media)
 	}
 }
+
 export const omnislate = slate as Nexus<OmniContext>
 export const {shadow_component, shadow_view, light_view} = omnislate
