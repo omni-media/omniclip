@@ -95,7 +95,7 @@ export class OmniContext extends Context {
 	
 	//after loading state from localstorage, compositor objects must be recreated
 	#recreate_project_from_localstorage_state(state: State, media: Media) {
-		this.controllers.compositor.recreate(state, media)
+		this.controllers.compositor.recreate(state.effects, media)
 	}
 
 	constructor(options: MiniContextOptions) {
