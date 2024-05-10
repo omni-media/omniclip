@@ -138,31 +138,25 @@ export class Timeline {
 		return state.effects.filter(effect => effect.track === track_id)
 	}
 
-	async add_split_effect(effect: AnyEffect) {
+	async #add_split_effect(effect: AnyEffect) {
+		const file = effect.kind !== "text" ? await this.media.get_file(effect.file_hash) : null
 		if(effect.kind === "video") {
-			const file = await this.media.get_file(effect.file_hash)
 			if(file) {
-				effect.id = generate_id()
 				this.compositor.managers.videoManager.add_video_effect(effect, file)
-			}
+			} else this.actions.add_video_effect(effect)
 		}
 		else if(effect.kind === "text") {
-			effect.id = generate_id()
 			this.compositor.managers.textManager.add_text_effect(effect)
 		}
 		else if(effect.kind === "image") {
-			const file = await this.media.get_file(effect.file_hash)
 			if(file) {
-				effect.id = generate_id()
 				this.compositor.managers.imageManager.add_image_effect(effect, file)
-			}
+			} else this.actions.add_image_effect(effect)
 		}
 		else if(effect.kind === "audio") {
-			const file = await this.media.get_file(effect.file_hash)
 			if(file) {
-				effect.id = generate_id()
 				this.compositor.managers.audioManager.add_audio_effect(effect, file)
-			}
+			} else this.actions.add_audio_effect(effect)
 		}
 	}
 
@@ -187,8 +181,8 @@ export class Timeline {
 			const end = normalized_timecode - (effect.start_at_position - effect.start)
 			this.actions.set_effect_end(effect, end)
 			const start = (normalized_timecode - effect.start_at_position) + effect.start
-			const split_effect = {...effect, start, start_at_position: normalized_timecode, end: effect.end}
-			this.add_split_effect(split_effect)
+			const split_effect = {...effect, start, start_at_position: normalized_timecode, end: effect.end, id: generate_id()}
+			this.#add_split_effect(split_effect)
 		}
 	}
 
