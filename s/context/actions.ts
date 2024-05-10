@@ -141,6 +141,15 @@ export const historical_actions = actionize_historical({
 	remove_effect: state => ({id}: AnyEffect) => {
 		const effects = state.effects.filter(effect => effect.id !== id)
 		state.effects = effects
+	},
+	// set_effect_url: state => (effect: ImageEffect, url: string) => {
+	// 	const eff = state.effects.find(({id}) => effect.id === id) as ImageEffect
+	// 	eff.url = url
+	// },
+	set_effect_scale: state => (effect: TextEffect | ImageEffect | VideoEffect, scale: {x: number, y: number}) => {
+		const eff = state.effects.find(({id}) => effect.id === id) as TextEffect | VideoEffect | ImageEffect
+		eff.rect.scaleX = scale.x
+		eff.rect.scaleY = scale.y
 	}
 })
 

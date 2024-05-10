@@ -7,6 +7,7 @@ import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
 import {Actions} from "../../../../actions.js"
 import {Compositor} from "../../../compositor/controller.js"
 import {AnyEffect, AudioEffect, VideoEffect} from "../../../../types.js"
+import { Media } from "../../../media/controller.js"
 
 export class FFmpegHelper {
 	ffmpeg = new FFmpeg()
@@ -30,7 +31,7 @@ export class FFmpegHelper {
 		await this.ffmpeg.writeFile(`${container_name}`, binary)
 	}
 
-	async merge_audio_with_video_and_mux(effects: AnyEffect[], video_container_name: string, output_file_name: string, compositor: Compositor) {
+	async merge_audio_with_video_and_mux(effects: AnyEffect[], video_container_name: string, output_file_name: string, media: Media) {
 		/* audio from video to add back to the raw video we composed that consitsts of just frames,
 		* i decided to not use AudioDecoder etc, instead im just using ffmpeg to encode back audio to video
 		*/
@@ -40,13 +41,13 @@ export class FFmpegHelper {
 
 		const all_audio_effects = [...audio_from_video_effects, ...added_audio_effects]
 
-		for(const {id, kind, start, end} of all_audio_effects) {
+		for(const {id, kind, start, end, file_hash} of all_audio_effects) {
 			if(kind === "video") {
-				const {file} = compositor.managers.videoManager.get(id)!
+				const file = await media.get_file(file_hash)
 				await this.ffmpeg.writeFile(`${id}.mp4`,  await fetchFile(file))
 				await this.ffmpeg.exec(["-ss", `${start / 1000}`,"-i", `${id}.mp4`,"-t" ,`${(end - start) / 1000}`, "-vn", `${id}.mp3`])
 			} else {
-				const {file} = compositor.managers.audioManager.get(id)!
+				const file = await media.get_file(file_hash)
 				await this.ffmpeg.writeFile(`${id}x.mp3`,  await fetchFile(file))
 				await this.ffmpeg.exec(["-ss", `${start / 1000}`,"-i", `${id}x.mp3`,"-t" ,`${(end - start) / 1000}`, "-vn", `${id}.mp3`])
 			}

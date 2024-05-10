@@ -21,6 +21,7 @@ export class VideoManager extends Map<string, FabricImage> {
 		const effect: VideoEffect = {
 			frames: video.frames,
 			id: generate_id(),
+			name: video.file.name,
 			kind: "video",
 			file_hash: video.hash,
 			raw_duration: duration,
@@ -34,6 +35,9 @@ export class VideoManager extends Map<string, FabricImage> {
 				position_on_canvas: {x: 0, y: 0},
 				width: video.element.videoWidth,
 				height: video.element.videoHeight,
+				rotation: 0,
+				scaleX: 1,
+				scaleY: 1
 			}
 		}
 		const {position, track} = find_place_for_new_effect(state.effects, state.tracks)
@@ -42,7 +46,7 @@ export class VideoManager extends Map<string, FabricImage> {
 		this.add_video_effect(effect, video.file)
 	}
 
-	add_video_effect(effect: VideoEffect, file: File) {
+	add_video_effect(effect: VideoEffect, file: File, recreate?: boolean) {
 		const element = document.createElement('video')
 		const obj = URL.createObjectURL(file)
 		element.src = obj
@@ -52,10 +56,13 @@ export class VideoManager extends Map<string, FabricImage> {
 		const video = new FabricImage(element, {
 			top: effect.rect.position_on_canvas.y,
 			left: effect.rect.position_on_canvas.x,
+			scaleX: effect.rect.scaleX,
+			scaleY: effect.rect.scaleY,
 			objectCaching: false,
 			effect: {...effect}
 		})
 		this.set(effect.id, video)
+		if(recreate) {return}
 		this.actions.add_video_effect(effect)
 	}
 

@@ -23,8 +23,9 @@ export const MediaPlayer = shadow_view(use => () => {
 		})
 		const dispose1 = watch.track(
 			() => use.context.state,
-			(timeline) => {
-				if(!timeline.is_exporting) {
+			async (timeline) => {
+				const files_ready = await use.context.controllers.media.are_files_ready()
+				if(!timeline.is_exporting && files_ready) {
 					compositor.compose_effects(timeline.effects, timeline.timecode)
 					if(!timeline.is_playing) {
 						compositor.set_current_time_of_audio_or_video_and_redraw(true, use.context.state.timecode)

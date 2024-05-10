@@ -8,6 +8,7 @@ import {effectTrimHandler} from "./parts/effect-trim-handler.js"
 import {get_effect_at_timestamp} from "../video-export/utils/get_effect_at_timestamp.js"
 import {get_effects_at_timestamp} from "../video-export/utils/get_effects_at_timestamp.js"
 import {Grabbed, At, ProposedTimecode, AnyEffect, EffectTimecode, State} from "../../types.js"
+import { Media } from "../media/controller.js"
 
 export class Timeline {
 	effect_drag = new ShockDragDrop<Grabbed, At> ({handle_drop: (_event: DragEvent, grabbed, dropped_at) => this.on_drop.publish({grabbed, dropped_at})})
@@ -16,7 +17,7 @@ export class Timeline {
 	effect_trim_handler: effectTrimHandler
 	on_playhead_drag = pub()
 	
-	constructor(private actions: Actions) {
+	constructor(private actions: Actions, private media: Media, private compositor: Compositor) {
 		this.effect_trim_handler = new effectTrimHandler(actions)
 	}
 
@@ -137,40 +138,46 @@ export class Timeline {
 		return state.effects.filter(effect => effect.track === track_id)
 	}
 
-	add_split_effect(effect: AnyEffect, compositor: Compositor) {
+	async add_split_effect(effect: AnyEffect) {
 		if(effect.kind === "video") {
-			const {file} = compositor.managers.videoManager.get(effect.id)!
-			effect.id = generate_id()
-			compositor.managers.videoManager.add_video_effect(effect, file)
+			const file = await this.media.get_file(effect.file_hash)
+			if(file) {
+				effect.id = generate_id()
+				this.compositor.managers.videoManager.add_video_effect(effect, file)
+			}
 		}
 		else if(effect.kind === "text") {
 			effect.id = generate_id()
-			compositor.managers.textManager.add_text_effect(effect)
+			this.compositor.managers.textManager.add_text_effect(effect)
 		}
 		else if(effect.kind === "image") {
-			const {file} = compositor.managers.imageManager.get(effect.id)!
-			effect.id = generate_id()
-			compositor.managers.imageManager.add_image_effect(effect, file)
+			const file = await this.media.get_file(effect.file_hash)
+			if(file) {
+				effect.id = generate_id()
+				this.compositor.managers.imageManager.add_image_effect(effect, file)
+			}
 		}
 		else if(effect.kind === "audio") {
-			const {file} = compositor.managers.audioManager.get(effect.id)!
-			effect.id = generate_id()
-			compositor.managers.audioManager.add_audio_effect(effect, file)
+			const file = await this.media.get_file(effect.file_hash)
+			if(file) {
+				effect.id = generate_id()
+				this.compositor.managers.audioManager.add_audio_effect(effect, file)
+			}
 		}
 	}
 
-	split(state: State, compositor: Compositor) {
+	split(state: State) {
 		const normalized_timecode = this.#normalize_to_timebase(state)
 		const selected = state.effects.find(effect => effect.id === state.selected_effect?.id)
 		const effects = get_effects_at_timestamp(state.effects, normalized_timecode)
 		if(selected) {
-			this.#split(selected, state, compositor)
+			this.#split(selected, state)
 		} else if(effects.length !== 0) {
-			this.#split(effects[0], state, compositor)
+			this.#split(effects[0], state)
 		} 
 	}
 
-	#split(effect: AnyEffect, state: State, compositor: Compositor) {
+	#split(effect: AnyEffect, state: State) {
 		const normalized_timecode = this.#normalize_to_timebase(state)
 		const is_between = get_effects_at_timestamp([effect], normalized_timecode)
 		const if_split_effect_is_atleast_one_frame = 
@@ -181,7 +188,7 @@ export class Timeline {
 			this.actions.set_effect_end(effect, end)
 			const start = (normalized_timecode - effect.start_at_position) + effect.start
 			const split_effect = {...effect, start, start_at_position: normalized_timecode, end: effect.end}
-			this.add_split_effect(split_effect, compositor)
+			this.add_split_effect(split_effect)
 		}
 	}
 

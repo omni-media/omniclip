@@ -10,6 +10,7 @@ import {AlignGuidelines} from "./lib/aligning_guidelines.js"
 import {AnyEffect, AudioEffect, State} from "../../types.js"
 import {compare_arrays} from "../../../utils/compare_arrays.js"
 import {sort_effects_by_track} from "../video-export/utils/sort_effects_by_track.js"
+import { Media } from "../media/controller.js"
 
 export interface Managers {
 	videoManager: VideoManager
@@ -113,12 +114,15 @@ export class Compositor {
 		const max_track = 4 // lower track means it should draw on top of higher tracks, although moveObjectTo z-index works in reverse
 		for(const effect of effects) {
 			if(effect.kind === "image") {
-				const {element} = this.managers.imageManager.get(effect.id)!
-				this.canvas.moveObjectTo(element, max_track - effect.track)
+				const image = this.managers.imageManager.get(effect.id)
+				if(image)
+					this.canvas.moveObjectTo(image, max_track - effect.track)
 			}
 			else if(effect.kind === "video") {
-				const {fabric} = this.managers.videoManager.get(effect.id)!
-				this.canvas.moveObjectTo(fabric, max_track - effect.track)
+				const video = this.managers.videoManager.get(effect.id)
+				if(video) {
+					this.canvas.moveObjectTo(video, max_track - effect.track)
+				}
 			}
 			else if(effect.kind === "text") {
 				const text = this.managers.textManager.get(effect.id)!
@@ -130,18 +134,18 @@ export class Compositor {
 	async set_current_time_of_audio_or_video_and_redraw(redraw?: boolean, timecode?: number) {
 		for(const effect of this.currently_played_effects.values()) {
 			if(effect.kind === "audio") {
-				const {element} = this.managers.audioManager.get(effect.id)!
-				if(!redraw && element.paused && this.#is_playing.value) {await element.play()}
-				if(redraw && timecode) {
+				const audio = this.managers.audioManager.get(effect.id)
+				if(!redraw && audio?.paused && this.#is_playing.value) {await audio.play()}
+				if(redraw && timecode && audio) {
 					const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
-					element.currentTime = current_time
+					audio.currentTime = current_time
 				}
 			}
 			if(effect.kind === "video") {
-				const {fabric} = this.managers.videoManager.get(effect.id)!
-				const element = fabric.getElement() as HTMLVideoElement
-				if(!redraw && element.paused && this.#is_playing.value) {await element.play()}
-				if(redraw && timecode) {
+				const video = this.managers.videoManager.get(effect.id)
+				const element = video?.getElement() as HTMLVideoElement | null
+				if(!redraw && element?.paused && this.#is_playing.value) {await element.play()}
+				if(redraw && timecode && element) {
 					const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
 					element.currentTime = current_time
 				}
@@ -158,7 +162,7 @@ export class Compositor {
 			else if(effect.kind === "video") {
 				this.currently_played_effects.set(effect.id, effect)
 				this.managers.videoManager.add_video_to_canvas(effect)
-				const element = this.managers.videoManager.get(effect.id)?.fabric.getElement() as HTMLVideoElement
+				const element = this.managers.videoManager.get(effect.id)?.getElement() as HTMLVideoElement
 				if(element) {element.currentTime = effect.start / 1000}
 			}
 			else if(effect.kind === "text") {
@@ -167,7 +171,7 @@ export class Compositor {
 			}
 			else if(effect.kind === "audio") {
 				this.currently_played_effects.set(effect.id, effect)
-				const element = this.managers.audioManager.get(effect.id)?.element as HTMLAudioElement
+				const element = this.managers.audioManager.get(effect.id)
 				if(element) {element.currentTime = effect.start / 1000}
 			}
 		}
@@ -238,14 +242,47 @@ export class Compositor {
 				const {rect: {position_on_canvas: {x, y}}} = selected_effect
 				if(x !== e.target!.left || y !== e.target!.top) {
 					this.actions.set_position_on_canvas(selected_effect, e.target!.left, e.target!.top);
+					this.actions.set_rotation(selected_effect, e.target!.angle)
+					this.actions.set_effect_scale(selected_effect, e.target!.getObjectScaling())
 					//@ts-ignore
-					(e.target.effect as Exclude<AnyEffect, AudioEffect>).rect.position_on_canvas = {x: e.target!.left, y: e.target!.top}
+					e.target.effect = {...e.target.effect,
+						rect: {position_on_canvas: {x: e.target!.left, y: e.target!.top},
+						rotation: e.target!.angle,
+						scaleX: e.target!.getObjectScaling().x,
+						scaleY: e.target!.getObjectScaling().y}
+					} as Exclude<AnyEffect, AudioEffect>
 				}
 			}
 		})
 	}
 
-	undo_or_redo(state: State) {
+	async recreate(state: State, media: Media) {
+		await media.are_files_ready()
+		for(const effect of state.effects) {
+			if(effect.kind === "image") {
+				const file = media.get(effect.file_hash)
+				if(file) {
+					await this.managers.imageManager.add_image_effect(effect , file, true)
+				}
+			}
+			else if(effect.kind === "video") {
+				const file = media.get(effect.file_hash)
+				if(file)
+					this.managers.videoManager.add_video_effect(effect, file, true)
+			}
+			else if(effect.kind === "audio") {
+				const file = media.get(effect.file_hash)
+				if(file)
+					this.managers.audioManager.add_audio_effect(effect, file, true)
+			}
+			else if(effect.kind === "text") {
+				this.managers.textManager.add_text_effect(effect, true)
+			}
+		}
+		this.compose_effects(state.effects, this.timecode)
+	}
+
+	update_canvas_objects(state: State) {
 		this.canvas.getObjects().forEach(object => {
 			if(!(object instanceof Rect)) {
 				//@ts-ignore
@@ -254,6 +291,9 @@ export class Compositor {
 				if(effect) {
 					object.left = effect.rect.position_on_canvas.x
 					object.top = effect.rect.position_on_canvas.y
+					object.angle = effect.rect.rotation
+					object.scaleX = effect.rect.scaleX
+					object.scaleY = effect.rect.scaleY
 					object.setCoords()
 					this.canvas.renderAll()
 				}

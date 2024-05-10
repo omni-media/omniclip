@@ -6,11 +6,11 @@ import {VideoEffect as XVideoEffect} from "../../../../context/types.js"
 import {Filmstrip} from "../../../../context/controllers/timeline/parts/filmstrip.js"
 
 export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: GoldElement) => {
-
+	const media_controller = use.context.controllers.media
 	const [visibleFilmstripFrames, setVisibleFilmstripFrames, getVisibleFilmstripFrames] = use.state<{url: string, left: number}[]>([])
 
 	const {recalculate_filmstrip_frames, filmstrip} = use.once(() => {
-		const filmstrip = new Filmstrip(effect, use.context.controllers.compositor, use.context.helpers.ffmpeg)
+		const filmstrip = new Filmstrip(effect, use.context.controllers.media, use.context.helpers.ffmpeg)
 
 		const recalculate_filmstrip_frames = async (force_recalculate?: boolean) => {
 			const get_effect = use.context.state.effects.find(e => e.id === effect.id) as XVideoEffect
@@ -22,12 +22,20 @@ export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: G
 			}
 		}
 
+		recalculate_filmstrip_frames(true)
+
 		return {filmstrip, recalculate_filmstrip_frames}
 	})
 
 	use.once(async () => {
-		await filmstrip.init_filmstrip()
-		recalculate_filmstrip_frames(true)
+		media_controller.on_media_change(async ({files, action}) => {
+			for(const {hash} of files) {
+				if(hash === effect.file_hash && action === "added") {
+					await filmstrip.on_file_found()
+					recalculate_filmstrip_frames(true)
+				}
+			}
+		})
 	})
 
 	use.mount(() => {
@@ -52,7 +60,7 @@ export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: G
 			</div>`
 	}
 
-	return html`${Effect([effect, html`${render_filmstrip()}`, css`
+	return html`${Effect([timeline, effect, html`${render_filmstrip()}`, css`
 		.content {
 			width: 100%;
 		}

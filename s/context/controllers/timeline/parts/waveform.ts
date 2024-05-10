@@ -1,8 +1,8 @@
 import WaveSurfer from 'wavesurfer.js'
 import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
 
+import {Media} from '../../media/controller.js'
 import {AudioEffect, State} from '../../../types.js'
-import {Compositor} from '../../compositor/controller.js'
 import {calculate_effect_width} from '../../../../components/omni-timeline/utils/calculate_effect_width.js'
 
 export class Waveform {
@@ -10,7 +10,7 @@ export class Waveform {
 	#wavesurfer: WaveSurfer
 	#isReady = false
 
-	constructor(private effect: AudioEffect, private compositor: Compositor, state: State) {
+	constructor(private effect: AudioEffect, private media: Media, state: State) {
 		this.#wavesurfer = this.#create_waveform()
 		this.#load_audio_file(state)
 		this.#wavesurfer.on("ready", () => {
@@ -29,14 +29,20 @@ export class Waveform {
 		})
 	}
 
+	async on_file_found(state: State) {
+		await this.#load_audio_file(state)
+	}
+
 	async #load_audio_file(state: State) {
 		this.#wavesurfer.setOptions({width: calculate_effect_width(this.effect, state.zoom)})
-		const {file} = this.compositor.managers.audioManager.get(this.effect.id)!
-		const uint = await fetchFile(file)
-		const blob = new Blob([uint])
-		const url = URL.createObjectURL(blob)
-		await this.#wavesurfer.load(url)
-		this.update_waveform(state)
+		const file = await this.media.get_file(this.effect.file_hash)!
+		if(file) {
+			const uint = await fetchFile(file)
+			const blob = new Blob([uint])
+			const url = URL.createObjectURL(blob)
+			await this.#wavesurfer.load(url)
+			this.update_waveform(state)
+		}
 	}
 
 	update_waveform(state: State) {

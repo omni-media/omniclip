@@ -31,7 +31,7 @@ export const Toolbar = shadow_view(use => (timeline: GoldElement) => {
 						<button ?data-past=${use.context.history.past.length !== 0} @click=${() => use.context.undo(use.context.state)}>${undoSvg}</button>
 						<button ?data-future=${use.context.history.future.length !== 0} @click=${() => use.context.redo(use.context.state)}>${redoSvg}</button>
 					</div>
-					<button @click=${() => controller.split(use.context.state, use.context.controllers.compositor)} class="split">${scissorsSvg}</button>
+					<button @click=${() => controller.split(use.context.state)} class="split">${scissorsSvg}</button>
 					<button class="remove" ?disabled=${!use.context.state.selected_effect} @click=${() => controller.remove_selected_effect(use.context.state)}>
 						${binSvg}
 					</button>

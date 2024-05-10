@@ -5,6 +5,7 @@ import {AnyEffect, State} from "../../types.js"
 import {FPSCounter} from "./tools/FPSCounter/tool.js"
 import {Compositor} from "../compositor/controller.js"
 import {FileSystemHelper} from "./helpers/FileSystemHelper/helper.js"
+import { Media } from "../media/controller.js"
 
 export class VideoExport {
 	#FileSystemHelper = new FileSystemHelper()
@@ -16,10 +17,10 @@ export class VideoExport {
 	#Decoder: Decoder
 	#Encoder: Encoder
 
-	constructor(private actions: Actions, private compositor: Compositor) {
+	constructor(private actions: Actions, private compositor: Compositor, private media: Media) {
 		this.#FPSCounter = new FPSCounter(this.actions.set_fps, 100)
-		this.#Decoder = new Decoder(actions, compositor)
-		this.#Encoder = new Encoder(actions, compositor)
+		this.#Decoder = new Decoder(actions, media, compositor)
+		this.#Encoder = new Encoder(actions, compositor, media)
 	}
 
 	async save_file() {
@@ -33,6 +34,7 @@ export class VideoExport {
 		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position - effect.start + effect.end))
 		this.#export_process(sorted_effects)
 		this.actions.set_is_exporting(true)
+		console.log(this.compositor, "EEE")
 		this.compositor.currently_played_effects.clear()
 		this.compositor.canvas.clear()
 	}

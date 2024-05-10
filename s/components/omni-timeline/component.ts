@@ -1,4 +1,4 @@
-import {Op, html} from "@benev/slate"
+import {Op, html, watch} from "@benev/slate"
 import {repeat} from "lit/directives/repeat.js"
 
 import {styles} from "./styles.js"
@@ -62,16 +62,16 @@ export const OmniTimeline = shadow_component(use => {
 	const render_tracks = () => use.context.state.tracks.map((_track, i) => Track([i], {attrs: {part: "add-track-indicator"}}))
 	const render_effects = () => repeat(use.context.state.effects, (effect) => effect.id, (effect) => {
 		if(effect.kind === "audio") {
-			return AudioEffect([effect])
+			return AudioEffect([effect, use.element])
 		}
 		else if (effect.kind === "video") {
 			return VideoEffect([effect, use.element])
 		}
 		else if (effect.kind === "text") {
-			return TextEffect([effect])
+			return TextEffect([effect, use.element])
 		}
 		else if(effect.kind === "image") {
-			return ImageEffect([effect])
+			return ImageEffect([effect, use.element])
 		}
 	})
 

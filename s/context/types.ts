@@ -50,17 +50,22 @@ export interface VideoEffect extends Effect {
 	raw_duration: number
 	frames: number
 	rect: EffectRect
+	file_hash: string
+	name: string
 }
 
 export interface AudioEffect extends Effect {
 	kind: "audio"
 	raw_duration: number
+	file_hash: string
+	name: string
 }
 
 export interface ImageEffect extends Effect {
 	kind: "image"
-	url: string
 	rect: EffectRect
+	file_hash: string
+	name: string
 }
 
 export type TextEffectProps = Omit<TextEffect, keyof Effect | "kind">
@@ -71,6 +76,8 @@ export type TextAlign = "left" | "right" | "center"
 export interface EffectRect {
 	width: number
 	height: number
+	scaleX: number
+	scaleY: number
 	position_on_canvas: {
 		x: number
 		y: number
