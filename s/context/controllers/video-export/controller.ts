@@ -1,6 +1,7 @@
 import {Actions} from "../../actions.js"
 import {Decoder} from "./parts/decoder.js"
 import {Encoder} from "./parts/encoder.js"
+import {Media} from "../media/controller.js"
 import {AnyEffect, State} from "../../types.js"
 import {FPSCounter} from "./tools/FPSCounter/tool.js"
 import {Compositor} from "../compositor/controller.js"
@@ -16,10 +17,10 @@ export class VideoExport {
 	#Decoder: Decoder
 	#Encoder: Encoder
 
-	constructor(private actions: Actions, private compositor: Compositor) {
+	constructor(private actions: Actions, private compositor: Compositor, media: Media) {
 		this.#FPSCounter = new FPSCounter(this.actions.set_fps, 100)
-		this.#Decoder = new Decoder(actions, compositor)
-		this.#Encoder = new Encoder(actions, compositor)
+		this.#Decoder = new Decoder(actions, media, compositor)
+		this.#Encoder = new Encoder(actions, compositor, media)
 	}
 
 	async save_file() {

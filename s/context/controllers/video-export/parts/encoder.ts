@@ -1,5 +1,6 @@
 import {AnyEffect} from "../../../types.js"
 import {Actions} from "../../../actions.js"
+import {Media} from "../../media/controller.js"
 import {Compositor} from "../../compositor/controller.js"
 import {FFmpegHelper} from "../helpers/FFmpegHelper/helper.js"
 
@@ -8,7 +9,7 @@ export class Encoder {
 	#ffmpeg: FFmpegHelper
 	file: Uint8Array | null = null
 
-	constructor(private actions: Actions, private compositor: Compositor) {
+	constructor(private actions: Actions, private compositor: Compositor, private media: Media) {
 		this.#ffmpeg = new FFmpegHelper(actions)
 	}
 
@@ -19,7 +20,7 @@ export class Encoder {
 			if(msg.data.action === "binary") {
 				const output_name = "output.mp4"
 				await this.#ffmpeg.write_composed_data(msg.data.binary, "composed.h264")
-				await this.#ffmpeg.merge_audio_with_video_and_mux(effects, "composed.h264", "output.mp4", this.compositor)
+				await this.#ffmpeg.merge_audio_with_video_and_mux(effects, "composed.h264", "output.mp4", this.media)
 				const muxed_file = await this.#ffmpeg.get_muxed_file(output_name)
 				this.file = muxed_file
 				this.actions.set_export_status("complete")

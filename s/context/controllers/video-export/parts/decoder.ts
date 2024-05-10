@@ -1,6 +1,7 @@
 import {generate_id} from "@benev/slate"
 
 import {Actions} from "../../../actions.js"
+import {Media} from "../../media/controller.js"
 import {Compositor} from "../../compositor/controller"
 import {AnyEffect, VideoEffect} from "../../../types.js"
 import {get_effects_at_timestamp} from "../utils/get_effects_at_timestamp.js"
@@ -17,7 +18,7 @@ export class Decoder {
 	decoded_frames: Map<string, DecodedFrame> = new Map()
 	decoded_effects = new Map<string, string>()
 
-	constructor(private actions: Actions, private compositor: Compositor) {}
+	constructor(private actions: Actions, private media: Media, private compositor: Compositor) {}
 
 	async get_and_draw_decoded_frame(effects: AnyEffect[], timestamp: number) {
 		const effects_at_timestamp = get_effects_at_timestamp(effects, timestamp)
@@ -52,7 +53,7 @@ export class Decoder {
 		})
 	}
 
-	#extract_frames_from_video(effect: VideoEffect, timestamp: number) {
+	async #extract_frames_from_video(effect: VideoEffect, timestamp: number) {
 		this.actions.set_export_status("demuxing")
 		const worker = new Worker(new URL("./decode_worker.js", import.meta.url), {type: "module"})
 		worker.addEventListener("message", (msg) => {
@@ -61,7 +62,7 @@ export class Decoder {
 				this.decoded_frames.set(id, {...msg.data.frame, frame_id: id})
 			}
 		})
-		const {file} = this.compositor.managers.videoManager.get(effect.id)!
+		const file = await this.media.get_file(effect.file_hash)
 		worker.postMessage({action: "demux", effect: {
 			...effect,
 			file
