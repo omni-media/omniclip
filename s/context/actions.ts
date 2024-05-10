@@ -1,6 +1,7 @@
 import {ZipAction} from "@benev/slate/x/watch/zip/action.js"
 import {generate_id} from "@benev/slate/x/tools/generate_id.js"
-import { Helpers } from "./helpers.js"
+
+import {Helpers} from "./helpers.js"
 import {actionize_historical, actionize_non_historical} from "./../utils/actionize.js"
 import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, EffectRect, VideoEffect} from "./types.js"
 
@@ -141,6 +142,11 @@ export const historical_actions = actionize_historical({
 	remove_effect: state => ({id}: AnyEffect) => {
 		const effects = state.effects.filter(effect => effect.id !== id)
 		state.effects = effects
+	},
+	set_effect_scale: state => (effect: TextEffect | ImageEffect | VideoEffect, scale: {x: number, y: number}) => {
+		const eff = state.effects.find(({id}) => effect.id === id) as TextEffect | VideoEffect | ImageEffect
+		eff.rect.scaleX = scale.x
+		eff.rect.scaleY = scale.y
 	}
 })
 
