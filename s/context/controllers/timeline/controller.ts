@@ -203,7 +203,8 @@ export class Timeline {
 		if(is_effect_on_canvas) {
 			const object = compositor.canvas.getObjects().find((object: any) => (object?.effect as AnyEffect)?.id === selected_effect.id)
 			if(object !== compositor.canvas.getActiveObject()) {
-				compositor.canvas.setActiveObject(object!)
+				if(object)
+					compositor.canvas.setActiveObject(object)
 			}
 		} else {
 			compositor.canvas.discardActiveObject()
