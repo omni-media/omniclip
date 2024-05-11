@@ -37,8 +37,20 @@ To start contirbuting you need to do those steps first:
 1. Clone the repository: `git clone git@github.com:aegir-assembly/omni-clip.git` or fork it
 2. Install the dependencies: `npm install`
 3. Build the project: `npm run build`
-4. Start developing!: `npm start` 
-### Project architecture
+4. Start developing!: `npm start`
+
+#### Project architecture
+This project leverages the following key components for managing application state:
+  1. State
+  2. Actions
+  3. Controllers
+  4. Components/Views
+
+The architecture follows a unidirectional data flow model, where data flows in a single direction from actions to state and from state to components.
+
+#### Tech Stack
+- Typescript
+- @benev/slate
 
 ## License
 
