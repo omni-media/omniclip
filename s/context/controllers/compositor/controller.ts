@@ -36,7 +36,7 @@ export class Compositor {
 
 	constructor(private actions: Actions) {
 	this.canvas = new Canvas(this.canvas_element, {width: 1920, height: 1080, renderOnAddRemove: true, preserveObjectStacking: true, imageSmoothingEnabled: false})
-	this.#init_guidelines()
+	this.init_guidelines()
 	this.#on_new_canvas_object_set_handle_styles()
 	this.#on_selected_canvas_object()
 	this.managers = {
@@ -202,7 +202,7 @@ export class Compositor {
 		}
 	}
 
-	#init_guidelines() {
+	init_guidelines() {
 		const guideline = new AlignGuidelines({
 			canvas: this.canvas,
 			aligningOptions: {

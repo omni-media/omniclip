@@ -3,6 +3,7 @@ import {GoldElement, html} from "@benev/slate"
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/context.js"
 import binSvg from "../../../../icons/gravity-ui/bin.svg.js"
+import cleanSvg from "../../../../icons/carbon-icons/clean.svg.js"
 import scissorsSvg from "../../../../icons/gravity-ui/scissors.svg.js"
 import undoSvg from "../../../../icons/material-design-icons/undo.svg.js"
 import redoSvg from "../../../../icons/material-design-icons/redo.svg.js"
@@ -35,6 +36,7 @@ export const Toolbar = shadow_view(use => (timeline: GoldElement) => {
 					<button class="remove" ?disabled=${!use.context.state.selected_effect} @click=${() => controller.remove_selected_effect(use.context.state)}>
 						${binSvg}
 					</button>
+					<button @click=${() => use.context.clear_project()} class="clean">${cleanSvg}</button>
 				</div>
 				<div>${convert_ms_to_hmsms(use.context.state.timecode)}</div>
 				<div class="zoom">

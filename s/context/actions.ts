@@ -147,6 +147,9 @@ export const historical_actions = actionize_historical({
 		const eff = state.effects.find(({id}) => effect.id === id) as TextEffect | VideoEffect | ImageEffect
 		eff.rect.scaleX = scale.x
 		eff.rect.scaleY = scale.y
+	},
+	remove_all_effects: state => () => {
+		state.effects = []
 	}
 })
 

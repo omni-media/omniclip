@@ -65,6 +65,12 @@ export class OmniContext extends Context {
 		this.controllers.compositor.update_canvas_objects(state)
 	}
 
+	clear_project() {
+		this.actions.remove_all_effects()
+		this.controllers.compositor.canvas.clear()
+		this.controllers.compositor.init_guidelines()
+	}
+
 	get history() {
 		return this.#core.history.annals
 	}

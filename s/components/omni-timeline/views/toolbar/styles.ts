@@ -23,6 +23,11 @@ export const styles = css`
 		align-items: center;
 		justify-content: space-between;
 
+		& .clean {
+			margin-left: 2em;
+			color: #f13131;
+		}
+
 		& .flex {
 			display: flex;
 
