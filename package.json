@@ -1,8 +1,12 @@
 {
   "name": "omni-clip",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "x/index.js",
+	"files": [
+		"x",
+		"s"
+	],
   "type": "module",
   "scripts": {
     "test": "cynic node ./x/tests.test.js",
