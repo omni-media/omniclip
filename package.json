@@ -1,6 +1,6 @@
 {
   "name": "omni-clip",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
 	"main": "x/index.js",
 	"files": [
@@ -10,6 +10,7 @@
   "type": "module",
   "scripts": {
     "test": "cynic node ./x/tests.test.js",
+		"prepare": "run-s build-production",
     "build": "turtle-standard && run-p copy-coi copy-assets",
     "build-production": "turtle-standard && run-p copy-coi copy-assets",
     "start": "turtle-standard-watch",
