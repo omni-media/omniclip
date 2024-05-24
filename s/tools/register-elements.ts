@@ -1,4 +1,4 @@
-import {dashify} from "./dashify"
+import {dashify} from "./dashify.js"
 
 export function registerElements(elements: {
 		[name: string]: {new(): HTMLElement}

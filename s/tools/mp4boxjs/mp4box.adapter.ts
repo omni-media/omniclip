@@ -1,5 +1,5 @@
 // @ts-ignore
-import * as bundle from "./mp4box.js"
+import {mp4box} from "./mp4box.js"
 
 export interface MP4MediaTrack {
 	id: number;
@@ -144,5 +144,5 @@ export interface Trak {
 	}
 	// TODO: Complete interface
 }
-export default bundle.mp4box as MP4Box;
-export const DataStream = bundle.DataStream as XDataStream
+export default mp4box as MP4Box;
+export const DataStreamx = mp4box.DataStream as XDataStream
