@@ -12,19 +12,24 @@ import {ProjectSettingsPanel} from "./views/project-settings/panel.js"
 import {ExportPanel} from "./components/omni-timeline/views/export/panel.js"
 import {MediaPlayerPanel} from "./components/omni-timeline/views/media-player/panel.js"
 
-omnislate.context = new OmniContext({
-	panels: {
-		TimelinePanel,
-		MediaPanel,
-		MediaPlayerPanel,
-		TextPanel,
-		ExportPanel,
-		ProjectSettingsPanel
-	},
-	layouts: {
-		empty: single_panel_layout("TimelinePanel"),
-		default: single_panel_layout("TimelinePanel"),
-	},
-})
+export function setupContext() {
+	omnislate.context = new OmniContext({
+		panels: {
+			TimelinePanel,
+			MediaPanel,
+			MediaPlayerPanel,
+			TextPanel,
+			ExportPanel,
+			ProjectSettingsPanel
+		},
+		layouts: {
+			empty: single_panel_layout("TimelinePanel"),
+			default: single_panel_layout("TimelinePanel"),
+		},
+	})
+}
+
+setupContext()
+
 
 register_to_dom({ConstructEditor, OmniTimeline, OmniText, OmniMedia})
