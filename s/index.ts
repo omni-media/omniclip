@@ -1,3 +1,5 @@
+export { OmniContext } from "./context/context.js"
+
 export {register_to_dom} from "@benev/slate"
 
 export * from "./main.js"
