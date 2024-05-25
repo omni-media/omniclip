@@ -6,6 +6,26 @@
 If you are tired of paying to use all the features of existing video editing applications then you might have found a gem! Turns out omniclip is fully free and on top of that its open source.
 Everything works inside browser, theres no private data being used, everything is kept within your device disk space.
 
+## How to
+  #### Use omni-clip components in your app:
+  1. Install omni-clip:  
+  ```sh
+  npm install omni-clip
+  ```
+  2. Import components and register them to the dom
+  ```js
+  import {getComponents, registerElements} from 'omni-clip'
+  registerElements(getComponents())
+  ```
+  3. Simply put the components you would like to use, or all components for whole experience:
+  ```html
+  <omni-text></omni-text>
+  <omni-media></omni-media>
+  <omni-timeline></omni-timeline>
+  ```
+  #### Use omni-clip tools:
+  // no tools yet
+
 ## Features
   Note that it is quite basic video editor, but it is my main project and I will keep working on it and improving.
   It utilizes webcodecs API, it means that the rendering process is fastest it can be on web browsers.
