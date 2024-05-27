@@ -24,7 +24,7 @@ Everything works inside browser, theres no private data being used, everything i
   <omni-timeline></omni-timeline>
   ```
   #### Use omniclip tools:
-  // no tools yet
+  // no tools yet, but will be added here: https://github.com/omni-media/omnitool
 
 ## Features
   Note that it is quite basic video editor, but it is my main project and I will keep working on it and improving.
