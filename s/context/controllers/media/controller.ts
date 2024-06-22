@@ -176,7 +176,7 @@ export class Media extends Map<string, File> {
 		return audios
 	}
 
-	async create_videos_from_video_files(files: VideoFile[]) {
+	async create_video_elements(files: VideoFile[]) {
 		const videos: Video[] = []
 		for(const {file, hash, frames} of files) {
 			const video = document.createElement('video')
