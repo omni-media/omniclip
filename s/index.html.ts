@@ -22,7 +22,9 @@ export default template(async basic => {
 			<title>omni-clip</title>
 		`,
 		body: html`
-			<construct-editor></construct-editor>
-		`,
+			<div class="loading-page-indicator">
+				<span class=shine>Omniclip</span>
+				<div class="loader"><div class="loaderBar"></div></div>
+			</div>`
 	})
 })

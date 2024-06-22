@@ -114,6 +114,10 @@ export class OmniContext extends Context {
 			video_export: new VideoExport(this.actions, this.controllers.compositor, this.controllers.media)
 		}
 		this.#recreate_project_from_localstorage_state(this.state, this.controllers.media)
+		const loadingPageIndicatorElement = document.querySelector(".loading-page-indicator")
+		const editor = document.createElement("construct-editor")
+		document.body.removeChild(loadingPageIndicatorElement!)
+		document.body.appendChild(editor)
 	}
 }
 
