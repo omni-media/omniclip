@@ -16,6 +16,8 @@ export class Filmstrip {
 	#canvas = document.createElement("canvas")
 	#ctx = this.#canvas.getContext("2d")
 
+	#is_file_ready = false
+
 	constructor(private effect: VideoEffect, private media: Media, private ffmpeg: FFmpegHelper) {
 		this.#load_video_for_filmstrip()
 		this.#init_filmstrip()
@@ -47,12 +49,27 @@ export class Filmstrip {
 		}
 	}
 
+	#file_ready() {
+		return new Promise((resolve) => {
+			if(this.#is_file_ready) {
+				resolve(true)
+			} else {
+					const interval = setInterval(() => {
+					if(this.#is_file_ready) {
+						resolve(true)
+						clearInterval(interval)
+					}
+				}, 100)
+			}
+		})
+	}
+
 	async #init_filmstrip() {
 		const file = await this.media.get_file(this.effect.file_hash)
 		if(file) {
-			const frames = await this.ffmpeg.get_frames_count(file)
-			this.frames_count = frames
-			const placeholders = this.#generate_filmstrip_placeholders(frames)
+			this.#is_file_ready = true
+			this.frames_count = this.effect.frames
+			const placeholders = this.#generate_filmstrip_placeholders(this.effect.frames)
 			this.#filmstrip_frames = placeholders
 		}
 	}
@@ -121,8 +138,10 @@ export class Filmstrip {
 		normalized_left: number
 		i:number
 	}>{
+		await this.#file_ready()
 		const margin = this.#width_of_frame * 2
-		const frame_count = this.effect_width < timeline.clientWidth ? this.effect_width / 100 : timeline.clientWidth / 100
+		const timeline_width = timeline.clientWidth ? timeline.clientWidth : 2000
+		const frame_count = this.effect_width < timeline_width ? this.effect_width / 100 : timeline_width / 100
 		const effect_left = calculate_start_position((effect.start_at_position - effect.start), zoom)
 		const normalized_left = Math.floor((timeline.scrollLeft - effect_left) / this.#width_of_frame) * this.#width_of_frame - margin < 0
 			? 0
