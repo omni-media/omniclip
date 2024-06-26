@@ -1,3 +1,4 @@
+import posthog from 'posthog-js'
 import {register_to_dom} from "@benev/slate"
 import {ConstructEditor, single_panel_layout} from "@benev/construct/x/mini.js"
 
@@ -11,6 +12,14 @@ import {OmniTimeline} from "./components/omni-timeline/component.js"
 import {ProjectSettingsPanel} from "./views/project-settings/panel.js"
 import {ExportPanel} from "./components/omni-timeline/views/export/panel.js"
 import {MediaPlayerPanel} from "./components/omni-timeline/views/media-player/panel.js"
+
+posthog.init('phc_CMbHMWGVJSqM1RqGyGxWCyqgaSGbGFKl964fIN3NDwU',
+	{
+			api_host: 'https://eu.i.posthog.com',
+			person_profiles: 'identified_only', // or 'always' to create profiles for anonymous users as well
+			autocapture: false
+	}
+)
 
 export function setupContext() {
 	omnislate.context = new OmniContext({
