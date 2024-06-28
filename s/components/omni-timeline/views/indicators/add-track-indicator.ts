@@ -11,7 +11,14 @@ export const AddTrackIndicator = light_view(use => () => {
 			if(drag.hovering) {
 				drag.dropzone.drop(drag.hovering)(e)
 				setIndicator(false)
+			} else {
+				setIndicator(false)
+				drag.dragzone.dragend()(e)
 			}
+		},
+		end(e: DragEvent) {
+			drag.dragzone.dragend()(e)
+			setIndicator(false)
 		},
 		enter: () => setIndicator(true),
 		leave: () => setIndicator(false)
@@ -28,6 +35,7 @@ export const AddTrackIndicator = light_view(use => () => {
 			@dragenter=${drag_events.enter}
 			@dragleave=${drag_events.leave}
 			@drop=${drag_events.drop}
+			@dragend=${drag_events.end}
 			class="indicator-area"
 		>
 		</div>
