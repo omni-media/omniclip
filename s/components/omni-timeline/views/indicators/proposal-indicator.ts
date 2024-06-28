@@ -11,6 +11,7 @@ export const ProposalIndicator = light_view(use => () => {
 	const controller = use.context.controllers.timeline
 	const actions = use.context.actions
 	const zoom = use.context.state.zoom
+	const trim_handler = use.context.controllers.timeline.effect_trim_handler
 	const {effect_drag: {hovering, grabbed}, on_drop} = controller
 	const [proposedTimecode, setProposedTimecode, getProposedTimecode] = use.state<ProposedTimecode>({
 		proposed_place: {track: 0, start_at_position: 0},
@@ -65,7 +66,7 @@ export const ProposalIndicator = light_view(use => () => {
 			?data-push-effects=${proposedTimecode?.effects_to_push}
 			style="
 				${text_effect_specific_styles()}
-				display: ${grabbed ? "block" : "none"};
+				display: ${grabbed && !trim_handler.effect_resize_handle_drag.grabbed ? "block" : "none"};
 				width: ${
 					proposedTimecode.effects_to_push
 					? 0
