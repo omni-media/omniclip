@@ -72,13 +72,19 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 			const hovering = use.context.controllers.timeline.effect_drag.hovering
 			if(hovering) {
 				effect_drag.dropzone.drop(hovering)(event)
+			} else {
+				effect_drag.dragzone.dragend()(event)
 			}
+		},
+		end(event: DragEvent) {
+			effect_drag.dragzone.dragend()(event)
 		}
 	}
 
 	use.mount(() => {
-		window.addEventListener("drop", (e) => drag_events.drop(e))
-		return () => removeEventListener("drop", drag_events.drop)
+		window.addEventListener("dragend", drag_events.end)
+		window.addEventListener("drop", drag_events.drop)
+		return () => {removeEventListener("drop", drag_events.drop); removeEventListener("dragend", drag_events.end)}
 	})
 
 	drag_events.effect_drag_listener()
