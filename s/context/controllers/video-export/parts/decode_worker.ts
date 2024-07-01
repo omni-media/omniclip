@@ -1,6 +1,6 @@
 import {VideoEffect} from "../../../types.js"
-import {MP4Demuxer} from "../../../../tools/mp4boxjs/demuxer.js"
-
+// import { demuxer } from "../../../../tools/mp4boxjs/demuxer.js"
+console.log("HALo")
 let timestamp = 0
 let end_timestamp = 0
 let wait_time = 0
@@ -27,28 +27,38 @@ const decoder = new VideoDecoder({
 const interval = () => setInterval(async () => {
 	wait_time += 100
 	if(wait_time === 200) {
-		if(decoder.state === "configured")
-			await decoder.flush()
+		// if(decoder.state === "configured")
+		// 	await decoder.flush()
+		// 	console.log("H")
 	}
 	if(timestamp >= end_timestamp) {
 		clearInterval(interval_number)
 	}
 }, 100)
 
-const demux = (file: File) => new MP4Demuxer(file, {
-	async onConfig(config: VideoDecoderConfig) {
-		decoder.configure({...config})
-		await decoder.flush()
-	},
-	async onChunk(chunk: EncodedVideoChunk) {
-		decoder.decode(chunk)
-	},
-	framesCount(frames_count) {
-		frames = frames_count
-	},
-	setStatus() {}
+decoder.addEventListener("dequeue", () => {
+	self.postMessage({action: "dequeue", size: decoder.decodeQueueSize})
 })
 
+
+
+// const demux = (file: File) => new MP4Demuxer(file, {
+// 	async onConfig(config: VideoDecoderConfig) {
+// 		decoder.configure({...config})
+// 		await decoder.flush()
+// 	},
+// 	async onChunk(chunk: EncodedVideoChunk) {
+// 		decoder.decode(chunk)
+// 	},
+// 	framesCount(frames_count) {
+// 		frames = frames_count
+// 	},
+// 	setStatus() {}
+// })
+
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
 self.addEventListener("message", async message => {
 	if(message.data.action === "demux") {
 		timestamp_start = message.data.starting_timestamp
@@ -57,6 +67,19 @@ self.addEventListener("message", async message => {
 		end_timestamp = (message.data.starting_timestamp) + message.data.effect.end
 		interval_number = interval()
 		timebase = message.data.timebase
-		demux(message.data.effect.file)
+		frames = message.data.frames
+	}
+	if(message.data.action === "configure") {
+		decoder.configure(message.data.config)
+		await decoder.flush()
+		console.log("FLUSHED")
+	}
+	if(message.data.action === "chunk") {
+		console.log(decoder.decodeQueueSize, "DECODER QUEUE")
+		decoder.decode(message.data.chunk)
+		// console.log("CHUNK!!!")
+	}
+	if(message.data.action === "get-queue") {
+		self.postMessage({action: "dequeue", size: decoder.decodeQueueSize})
 	}
 })
