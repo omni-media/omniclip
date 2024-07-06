@@ -1,12 +1,13 @@
 import {generate_id} from "@benev/slate"
 
+import {Encoder} from "./encoder.js"
 import {Actions} from "../../../actions.js"
+import {VideoExport} from "../controller.js"
 import {Media} from "../../media/controller.js"
 import {Compositor} from "../../compositor/controller"
 import {AnyEffect, VideoEffect} from "../../../types.js"
+import {demuxer} from "../../../../tools/mp4boxjs/demuxer.js"
 import {get_effects_at_timestamp} from "../utils/get_effects_at_timestamp.js"
-import { demuxer } from "../../../../tools/mp4boxjs/demuxer.js"
-import { Encoder } from "./encoder.js"
 
 interface DecodedFrame {
 	frame: VideoFrame
@@ -19,8 +20,8 @@ interface DecodedFrame {
 export class Decoder {
 	decoded_frames: Map<string, DecodedFrame> = new Map()
 	decoded_effects = new Map<string, string>()
-		number = 0
-	constructor(private actions: Actions, private media: Media, private compositor: Compositor, private encoder: Encoder) {}
+
+	constructor(private actions: Actions, private media: Media, private compositor: Compositor, private encoder: Encoder, private videoExport: VideoExport) {}
 
 	async get_and_draw_decoded_frame(effects: AnyEffect[], timestamp: number) {
 		const effects_at_timestamp = get_effects_at_timestamp(effects, timestamp)
@@ -61,21 +62,21 @@ export class Decoder {
 		worker.addEventListener("message", (msg) => {
 			if(msg.data.action === "new-frame") {
 				const id = generate_id()
-				this.number += 1
 				this.decoded_frames.set(id, {...msg.data.frame, frame_id: id})
 			}
 		})
 		const file = await this.media.get_file(effect.file_hash)
-		worker.postMessage({action: "demux", effect: {
-			...effect,
-		}, starting_timestamp: timestamp, timebase: this.compositor.timebase, frames: effect.frames})
+		this.videoExport.on_timestamp_change(timestamp => {
+			if(timestamp === effect.end) {
+				worker.postMessage({action: "end"})
+			}
+		})
+		worker.postMessage({action: "demux", effect: {...effect}, starting_timestamp: timestamp, timebase: this.compositor.timebase, frames: effect.frames})
 		demuxer(
 			file!,
 			this.encoder.encode_worker,
 			(config) => worker.postMessage({action: "configure", config}),
-			(chunk) => {
-						worker.postMessage({action: "chunk", chunk})
-			}
+			(chunk) => worker.postMessage({action: "chunk", chunk})
 		)
 		this.decoded_effects.set(effect.id, effect.id)
 	}

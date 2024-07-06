@@ -9,7 +9,6 @@ async function handle_chunk(chunk: EncodedVideoChunk) {
 	binary_accumulator.add_chunk(chunk_data)
 	//@ts-ignore
 	chunk_data = null
-	self.postMessage({action: "encoded"})
 }
 
 // for later: https://github.com/gpac/mp4box.js/issues/243
@@ -29,11 +28,11 @@ const encoder = new VideoEncoder({
 		console.log(e.message)
 	},
 })
-let number = 0
 
 encoder.addEventListener("dequeue", () => {
 	self.postMessage({action: "dequeue", size: encoder.encodeQueueSize})
 })
+
 self.addEventListener("message", async message => {
 	if(message.data.action === "configure") {
 		config.bitrate = message.data.bitrate * 1000
@@ -43,11 +42,8 @@ self.addEventListener("message", async message => {
 	}
 	if(message.data.action === "encode") {
 		const frame = message.data.frame as VideoFrame
-		// if(number % 2 === 0)
 		encoder.encode(frame)
-		console.log(encoder.encodeQueueSize, "ENCODER QUEUE")
 		frame.close()
-		number += 1
 	}
 	if(message.data.action === "get-binary") {
 		await encoder.flush()

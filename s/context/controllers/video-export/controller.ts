@@ -1,3 +1,5 @@
+import {pub} from "@benev/slate"
+
 import {Actions} from "../../actions.js"
 import {Decoder} from "./parts/decoder.js"
 import {Encoder} from "./parts/encoder.js"
@@ -10,6 +12,7 @@ import {FileSystemHelper} from "./helpers/FileSystemHelper/helper.js"
 export class VideoExport {
 	#FileSystemHelper = new FileSystemHelper()
 
+	on_timestamp_change = pub<number>()
 	#timestamp = 0
 	#timestamp_end = 0
 
@@ -20,7 +23,7 @@ export class VideoExport {
 	constructor(private actions: Actions, private compositor: Compositor, media: Media) {
 		this.#FPSCounter = new FPSCounter(this.actions.set_fps, 100)
 		this.#Encoder = new Encoder(actions, compositor, media)
-		this.#Decoder = new Decoder(actions, media, compositor, this.#Encoder)
+		this.#Decoder = new Decoder(actions, media, compositor, this.#Encoder, this)
 	}
 
 	async save_file() {
@@ -44,6 +47,7 @@ export class VideoExport {
 		this.actions.set_export_status("composing")
 		await this.#Encoder.encode_composed_frame(this.compositor.canvas.lowerCanvasEl, this.#timestamp)
 		this.#timestamp += 1000/this.compositor.timebase
+		this.on_timestamp_change.publish(this.#timestamp)
 		const progress = this.#timestamp / this.#timestamp_end * 100 // for progress bar
 		this.actions.set_export_progress(progress)
 
