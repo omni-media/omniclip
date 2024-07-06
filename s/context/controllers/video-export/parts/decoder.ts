@@ -67,7 +67,8 @@ export class Decoder {
 		})
 		const file = await this.media.get_file(effect.file_hash)
 		this.videoExport.on_timestamp_change(timestamp => {
-			if(timestamp === effect.end) {
+			const margin = 1000/this.compositor.timebase * 2 // basically flush decoder 2 frames faster
+			if(timestamp === effect.start_at_position + effect.end - margin) {
 				worker.postMessage({action: "end"})
 			}
 		})
