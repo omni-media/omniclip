@@ -15,7 +15,7 @@
     "start": "turtle-standard-watch",
     "override-turle-importmap": "importly --host=node_modules --root=/omni-clip/ < package-lock.json > x/importmap.json",
     "copy-coi": "cp node_modules/coi-serviceworker/coi-serviceworker.js x/",
-    "copy-assets": "cp -r assets x/ && cp -r public x/"
+    "copy-assets": "cp -r assets x/"
   },
   "author": "zenkyuv",
   "license": "ISC",
