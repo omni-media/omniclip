@@ -1,30 +1,53 @@
 import {VideoEffect} from "../../../types.js"
 
 let timestamp = 0
-let end_timestamp = 0
-let interval_number = 0
 let decoded_effect: VideoEffect
 let frames = 0
-let timestamp_start = 0
-let timebase = 25
+let number = 0
+let timebase = 0
+let timestamp_end = 0
+let fps = 0
+let wait_time = 0
 
 const decoder = new VideoDecoder({
 	output(frame) {
-		timestamp += (decoded_effect.duration / decoded_effect.frames)
-		if(timestamp >= timestamp_start + decoded_effect.start && timestamp <= timestamp_start + decoded_effect.end + 100) {
-			self.postMessage({action: "new-frame", frame: {timestamp: timestamp - decoded_effect.start, frame, effect_id: decoded_effect.id, frames_count: frames}}, [frame])
-			frame.close()
-		} else {
+		wait_time = 0
+		number += 1
+		const skipEvery = Math.ceil(fps / (fps - timebase))
+		// skipping frames to normalize to timebase
+		if (number % skipEvery === 0) {
 			frame.close()
 		}
+
+		else {
+			timestamp += (decoded_effect.duration / decoded_effect.frames)
+			self.postMessage({
+				action: "new-frame",
+				frame: {
+					timestamp: timestamp,
+					frame,
+					effect_id: decoded_effect.id,
+					frames_count: frames
+				}
+			})
+			frame.close()
+		}
+
 	},
 	error: (e) => console.log(e)
 })
 
-const interval = () => setInterval(async () => {
-	if(timestamp >= end_timestamp) {
-		clearInterval(interval_number)
+const interval = setInterval(async()  => {
+	if(wait_time >= 5000 && wait_time % 1000 === 0 && decoder.state === "configured") {
+		await decoder.flush()
 	}
+	if(timestamp >= timestamp_end) {
+		clearInterval(interval)
+		self.postMessage({action: "end"})
+		decoder.close()
+		self.close()
+	}
+	wait_time += 100
 }, 100)
 
 decoder.addEventListener("dequeue", () => {
@@ -33,13 +56,12 @@ decoder.addEventListener("dequeue", () => {
 
 self.addEventListener("message", async message => {
 	if(message.data.action === "demux") {
-		timestamp_start = message.data.starting_timestamp
 		decoded_effect = message.data.effect
 		timestamp = message.data.starting_timestamp
-		end_timestamp = (message.data.starting_timestamp) + message.data.effect.end
-		interval_number = interval()
-		timebase = message.data.timebase
 		frames = message.data.frames
+		timebase = message.data.timebase
+		timestamp_end = (message.data.starting_timestamp) + message.data.effect.end
+		fps = (message.data.frames - 2) / (message.data.effect.duration / 1000)
 	}
 	if(message.data.action === "configure") {
 		decoder.configure(message.data.config)
@@ -47,11 +69,5 @@ self.addEventListener("message", async message => {
 	}
 	if(message.data.action === "chunk") {
 		decoder.decode(message.data.chunk)
-	}
-	if(message.data.action === "get-queue") {
-		self.postMessage({action: "dequeue", size: decoder.decodeQueueSize})
-	}
-	if(message.data.action === "end") {
-		await decoder.flush()
 	}
 })

@@ -23,7 +23,7 @@ export class VideoExport {
 	constructor(private actions: Actions, private compositor: Compositor, media: Media) {
 		this.#FPSCounter = new FPSCounter(this.actions.set_fps, 100)
 		this.#Encoder = new Encoder(actions, compositor, media)
-		this.#Decoder = new Decoder(actions, media, compositor, this.#Encoder, this)
+		this.#Decoder = new Decoder(actions, media, compositor, this.#Encoder)
 	}
 
 	async save_file() {
