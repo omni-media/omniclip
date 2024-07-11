@@ -8,11 +8,10 @@ import {Video} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
 export class VideoManager extends Map<string, FabricImage> {
-	#canvas = document.createElement("canvas")
+	#effect_canvas = new Map<string, HTMLCanvasElement>()
 
 	constructor(private compositor: Compositor, private actions: Actions) {
 		super()
-		this.#canvas.getContext("2d")!.imageSmoothingEnabled = false
 	}
 
 	create_and_add_video_effect(video: Video, state: State) {
@@ -62,6 +61,9 @@ export class VideoManager extends Map<string, FabricImage> {
 			effect: {...effect}
 		})
 		this.set(effect.id, video)
+		const canvas = document.createElement("canvas")
+		canvas.getContext("2d")!.imageSmoothingEnabled = false
+		this.#effect_canvas.set(effect.id, canvas)
 		if(recreate) {return}
 		this.actions.add_video_effect(effect)
 	}
@@ -87,10 +89,11 @@ export class VideoManager extends Map<string, FabricImage> {
 	draw_decoded_frame(effect: VideoEffect, frame: VideoFrame) {
 		const video = this.get(effect.id)
 		if(video) {
-			this.#canvas.width = video.width
-			this.#canvas.height = video.height
-			this.#canvas.getContext("2d")!.drawImage(frame, 0,0, video.width, video.height)
-			video.setElement(this.#canvas)
+			const canvas = this.#effect_canvas.get(effect.id)!
+			canvas.width = video.width
+			canvas.height = video.height
+			canvas.getContext("2d")!.drawImage(frame, 0,0, video.width, video.height)
+			video.setElement(canvas)
 		}
 	}
 
