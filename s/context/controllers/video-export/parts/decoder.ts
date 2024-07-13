@@ -12,7 +12,6 @@ interface DecodedFrame {
 	frame: VideoFrame
 	effect_id: string
 	timestamp: number
-	frames_count: number
 	frame_id: string
 }
 
@@ -63,11 +62,15 @@ export class Decoder {
 				this.decoded_frames.set(id, {...msg.data.frame, frame_id: id})
 			}
 			if(msg.data.action === "end") {
-				Array.from(this.decoded_frames.values()).forEach(value => {
-					if(value.effect_id === effect.id) {
-						this.decoded_frames.delete(value.frame_id)
-					}
-				})
+				if(!this.compositor.currently_played_effects.get(effect.id)) {
+					worker.terminate()
+					Array.from(this.decoded_frames.values()).forEach(value => {
+						if(value.effect_id === effect.id) {
+							value.frame.close()
+							this.decoded_frames.delete(value.frame_id)
+						}
+					})
+				}
 			}
 		})
 		const file = await this.media.get_file(effect.file_hash)

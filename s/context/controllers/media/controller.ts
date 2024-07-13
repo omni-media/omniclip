@@ -109,7 +109,7 @@ export class Media extends Map<string, File> {
 		this.#files_ready = false
 		this.on_media_change.publish({files: [], action: "placeholder"})
 		const imported_file = input.files?.[0]
-		const frames = imported_file?.type.startsWith("video") ? await ffprobe.getFrames(imported_file, 1) : null
+		const video_info = imported_file?.type.startsWith("video") ? await ffprobe.getFrames(imported_file, 1) : null
 		if(imported_file) {
 			const hash = await quick_hash(imported_file)
 			const transaction = this.#database_request.result.transaction(["files"], "readwrite")
@@ -124,8 +124,9 @@ export class Media extends Map<string, File> {
 						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "image"}], action: "added"})
 					}
 					else if(imported_file.type.startsWith("video")) {
-						files_store.add({file: imported_file, hash, kind: "video", frames: frames?.nb_frames!})
-						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "video", frames: frames?.nb_frames!}], action: "added"})
+						const duration = video_info!.nb_frames / video_info!.avg_frame_rate * 1000
+						files_store.add({file: imported_file, hash, kind: "video", frames: video_info?.nb_frames!, duration})
+						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "video", frames: video_info?.nb_frames!, duration}], action: "added"})
 					}
 					else if(imported_file.type.startsWith("audio")) {
 						files_store.add({file: imported_file, hash, kind: "audio"})
@@ -178,12 +179,12 @@ export class Media extends Map<string, File> {
 
 	async create_video_elements(files: VideoFile[]) {
 		const videos: Video[] = []
-		for(const {file, hash, frames} of files) {
+		for(const {file, hash, frames, duration} of files) {
 			const video = document.createElement('video')
 			video.src = URL.createObjectURL(file)
 			video.load()
 			const url = await this.create_video_thumbnail(video)
-			videos.push({element: video, file, hash, kind: "video", thumbnail: url, frames})
+			videos.push({element: video, file, hash, kind: "video", thumbnail: url, frames, duration})
 		}
 		return videos
 	}

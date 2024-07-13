@@ -1,4 +1,4 @@
-import { WebDemuxer } from "web-demuxer/dist/web-demuxer.js"
+import {WebDemuxer} from "web-demuxer/dist/web-demuxer.js"
 
 export async function demuxer(
 	file: File,
@@ -17,7 +17,14 @@ export async function demuxer(
 	await webdemuxer.load(file)
 	const config = await webdemuxer.getVideoDecoderConfig()
 	onConfig(config)
-	const reader = webdemuxer.readAVPacket(start / 1000, end / 1000).getReader()
+	/*
+		* starting demuxing one second sooner because sometimes demuxer
+		* starts demuxing from keyframe that is too far ahead from effect.start
+		* causing rendering to be stuck because of too few frames,
+		* also ending demuxing one second later just in case too
+		* */
+	const oneSecondOffset = 1000 
+	const reader = webdemuxer.readAVPacket((start - oneSecondOffset) / 1000, (end + oneSecondOffset) / 1000).getReader()
 	worker.addEventListener("message", (msg) => {
 		if(msg.data.action === "dequeue") {
 			queue = msg.data.size

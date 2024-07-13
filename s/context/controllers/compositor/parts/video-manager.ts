@@ -15,15 +15,14 @@ export class VideoManager extends Map<string, FabricImage> {
 	}
 
 	create_and_add_video_effect(video: Video, state: State) {
-		const duration = video.element.duration * 1000
-		const adjusted_duration_to_timebase = Math.floor(duration / (1000/state.timebase)) * (1000/state.timebase)
+		const adjusted_duration_to_timebase = Math.floor(video.duration / (1000/state.timebase)) * (1000/state.timebase) - 200
 		const effect: VideoEffect = {
 			frames: video.frames,
 			id: generate_id(),
 			name: video.file.name,
 			kind: "video",
 			file_hash: video.hash,
-			raw_duration: duration,
+			raw_duration: video.duration,
 			duration: adjusted_duration_to_timebase,
 			start_at_position: 0,
 			start: 0,
