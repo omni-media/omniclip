@@ -1,11 +1,9 @@
 import {pub} from "@benev/slate"
 import {quick_hash} from "@benev/construct"
-import {FFprobeWorker} from "ffprobe-wasm/browser.mjs"
 
 import {Actions} from "../../actions.js"
+import { getVideoInfo } from "../../../tools/get-video-info.js"
 import {Video, VideoFile, AnyMedia, ImageFile, Image, AudioFile, Audio} from "../../../components/omni-media/types.js"
-
-const ffprobe = new FFprobeWorker()
 
 export class Media extends Map<string, File> {
 	#database_request = window.indexedDB.open("database", 3)
@@ -109,7 +107,7 @@ export class Media extends Map<string, File> {
 		this.#files_ready = false
 		this.on_media_change.publish({files: [], action: "placeholder"})
 		const imported_file = input.files?.[0]
-		const video_info = imported_file?.type.startsWith("video") ? await ffprobe.getFrames(imported_file, 1) : null
+		const video_info = imported_file?.type.startsWith("video") ? await getVideoInfo(imported_file) : null
 		if(imported_file) {
 			const hash = await quick_hash(imported_file)
 			const transaction = this.#database_request.result.transaction(["files"], "readwrite")
@@ -124,9 +122,9 @@ export class Media extends Map<string, File> {
 						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "image"}], action: "added"})
 					}
 					else if(imported_file.type.startsWith("video")) {
-						const duration = video_info!.nb_frames / video_info!.avg_frame_rate * 1000
-						files_store.add({file: imported_file, hash, kind: "video", frames: video_info?.nb_frames!, duration})
-						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "video", frames: video_info?.nb_frames!, duration}], action: "added"})
+						const duration = video_info!.duration / video_info!.timescale * 1000
+						files_store.add({file: imported_file, hash, kind: "video", frames: video_info?.nb_samples!, duration})
+						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "video", frames: video_info?.nb_samples!, duration}], action: "added"})
 					}
 					else if(imported_file.type.startsWith("audio")) {
 						files_store.add({file: imported_file, hash, kind: "audio"})
