@@ -6,6 +6,7 @@ export interface MP4MediaTrack {
 	created: Date;
 	modified: Date;
 	movie_duration: number;
+	samples_duration: number;
 	layer: number;
 	alternate_group: number;
 	volume: number;

@@ -122,7 +122,7 @@ export class Media extends Map<string, File> {
 						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "image"}], action: "added"})
 					}
 					else if(imported_file.type.startsWith("video")) {
-						const duration = video_info!.duration / video_info!.timescale * 1000
+						const duration = video_info!.samples_duration / video_info!.timescale * 1000
 						files_store.add({file: imported_file, hash, kind: "video", frames: video_info?.nb_samples!, duration})
 						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "video", frames: video_info?.nb_samples!, duration}], action: "added"})
 					}
