@@ -36,7 +36,6 @@ export const styles = css`
 		aspect-ratio: 16/9;
 		display: flex;
 		justify-content: center;
-		margin: 1em;
 	}
 	
 	video {
@@ -46,11 +45,8 @@ export const styles = css`
 	.controls {
 		display: flex;
 		justify-content: center;
-		position: absolute;
 		width: 100%;
-		bottom: 0;
-		right: 0;
-		margin: 0.5em;
+		margin: 0.5em 0;
 		z-index: 999;
 
 		& button {
@@ -60,7 +56,7 @@ export const styles = css`
 
 		& .fs {
 			position: absolute;
-			right: 0;
+			right: 1em;
 		}
 	}
 

@@ -70,18 +70,18 @@ export const MediaPlayer = shadow_view(use => () => {
 					${compositor.canvas.getSelectionElement()}
 					${compositor.canvas.getElement()}
 				</div>
-				<div id="video-controls" class="controls">
-					<button
-						@click=${compositor.toggle_video_playing}
-						id="playpause"
-						type="button"
-						data-state="${state.is_playing ? 'pause' : 'play'}"
-					>
-						${state.is_playing ? pauseSvg : playSvg}
-					</button>
-					<button @click=${toggle_fullScreen} class="fs" type="button" data-state="go-fullscreen">${fullscreenSvg}</button>
-				</div>
 			</figure>
+			<div id="video-controls" class="controls">
+				<button
+					@click=${compositor.toggle_video_playing}
+					id="playpause"
+					type="button"
+					data-state="${state.is_playing ? 'pause' : 'play'}"
+				>
+					${state.is_playing ? pauseSvg : playSvg}
+				</button>
+				<button @click=${toggle_fullScreen} class="fs" type="button" data-state="go-fullscreen">${fullscreenSvg}</button>
+			</div>
 		</div>
 	`)
 })
