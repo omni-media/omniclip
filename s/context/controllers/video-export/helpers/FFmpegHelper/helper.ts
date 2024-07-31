@@ -40,11 +40,17 @@ export class FFmpegHelper {
 
 		const all_audio_effects = [...audio_from_video_effects, ...added_audio_effects]
 
+		const noAudioVideos: string[] = []
+
 		for(const {id, kind, start, end, file_hash} of all_audio_effects) {
 			if(kind === "video") {
 				const file = await media.get_file(file_hash)
 				await this.ffmpeg.writeFile(`${id}.mp4`,  await fetchFile(file))
 				await this.ffmpeg.exec(["-ss", `${start / 1000}`,"-i", `${id}.mp4`,"-t" ,`${(end - start) / 1000}`, "-vn", `${id}.mp3`])
+				await this.ffmpeg.readFile(`${id}.mp3`).catch(() => {
+					// if error then most likely video dont have audio so theres no audio file to read
+					noAudioVideos.push(id)
+				})
 			} else {
 				const file = await media.get_file(file_hash)
 				await this.ffmpeg.writeFile(`${id}x.mp3`,  await fetchFile(file))
@@ -52,18 +58,23 @@ export class FFmpegHelper {
 			}
 		}
 
-		const only_image_or_text = !effects.some(effect => effect.kind === "video") && !effects.some(effect => effect.kind === "audio")
-		if(only_image_or_text) {
+		const filtered_audios = all_audio_effects.filter(
+			(element) => !noAudioVideos.includes(element.id)
+		)
+		const noAudio = filtered_audios.length === 0
+
+		const only_image_or_text_or_videos_without_audio = noAudio
+		if(only_image_or_text_or_videos_without_audio) {
 			await this.ffmpeg.exec([
 				"-i", `${video_container_name}`,
 				"-map", "0:v:0","-c:v" ,"copy", "-y", `${output_file_name}`
 			])
 		} else {
 			await this.ffmpeg.exec([
-				"-i", `${video_container_name}`, ...all_audio_effects.flatMap(({id}) => `-i, ${id}.mp3`.split(", ")),
+				"-i", `${video_container_name}`, ...filtered_audios.flatMap(({id}) => `-i, ${id}.mp3`.split(", ")),
 				"-filter_complex",
-				`${all_audio_effects.map((effect, i) => `[${i + 1}:a]adelay=${effect.start_at_position}:all=1[a${i + 1}];`).join("")}
-				${all_audio_effects.map((_, i) => `[a${i + 1}]`).join("")}amix=inputs=${all_audio_effects.length}[amixout]`,
+				`${filtered_audios.map((effect, i) => `[${i + 1}:a]adelay=${effect.start_at_position}:all=1[a${i + 1}];`).join("")}
+				${filtered_audios.map((_, i) => `[a${i + 1}]`).join("")}amix=inputs=${filtered_audios.length}[amixout]`,
 				"-map", "0:v:0", "-map", "[amixout]","-c:v" ,"copy", "-c:a", "aac","-b:a", "192k", "-y", `${output_file_name}`
 			])
 		}
