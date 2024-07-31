@@ -15,7 +15,7 @@ const decoder = new VideoDecoder({
 		number += 1
 
 		const frameTimestamp = frame.timestamp / 1000
-		if(frameTimestamp <= decoded_effect.start) {
+		if(frameTimestamp < decoded_effect.start) {
 			frame.close()
 			return
 		}
