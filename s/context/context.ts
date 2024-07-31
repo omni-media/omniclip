@@ -115,11 +115,9 @@ export class OmniContext extends Context {
 		}
 		this.#recreate_project_from_localstorage_state(this.state, this.controllers.media)
 		const loadingPageIndicatorElement = document.querySelector(".loading-page-indicator")
-		const editor = document.createElement("construct-editor")
 		document.body.removeChild(loadingPageIndicatorElement!)
-		document.body.appendChild(editor)
 	}
 }
 
 export const omnislate = slate as Nexus<OmniContext>
-export const {shadow_component, shadow_view, light_view} = omnislate
+export const {shadow_component, shadow_view, light_view, light_component} = omnislate

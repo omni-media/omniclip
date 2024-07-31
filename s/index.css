@@ -14,7 +14,7 @@ html, body {
 	min-height: 100%;
 
 	color: gray;
-	background: black;
+	background: #1b1b22;
 }
 
 construct-editor {
@@ -27,6 +27,11 @@ construct-editor {
 	--bg-b: #000;
 	--bg-c: #333;
 	--taskbar-size: 1em;
+}
+
+.logo-loader {
+	max-width: 350px;
+	margin-bottom: 1em;
 }
 
 .loading-page-indicator {
@@ -122,3 +127,294 @@ construct-editor {
     width:0%;
   }
 }
+
+/*Landing page styles start*/
+
+@keyframes changeword {
+  0% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  
+  5% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  30% {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  
+  80% {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+}
+
+.landing-page {
+	font-size: 16px;
+	color: #aaaaaa;
+	background: #1b1b22;
+	& * {
+		font-family: sans-serif;
+	}
+	
+	& h2 {
+		font-size: 3em;
+		text-align: center;
+	}
+	
+	& .header-text {
+		display: flex;
+		gap: 0.3em;
+	}
+
+	& .word-switch {
+		width: 200px;
+		height: 30px;
+		display: inline-block;
+		text-align: right;
+		position: relative;
+
+		& .switch {
+			top: 0;
+			left: 0;
+			opacity: 0;
+			width: 100%;
+			position: absolute;
+			animation: changeword 12s linear infinite;
+		}
+		& .switch:nth-child(1) {
+			animation-delay: 0s;
+		}
+		& .switch:nth-child(2) {
+			animation-delay: 3s;
+		}
+		& .switch:nth-child(3) {
+			animation-delay: 6s;
+		}
+		& .switch:nth-child(4) {
+			animation-delay: 9s;
+		}
+	}
+}
+
+.welcome {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 15em 0;
+	background: #000814;
+
+	& .logo {
+		max-width: 500px;
+		width: 100%;
+		padding: 0 2em;
+	}
+
+	& p {
+		font-size: 2em;
+	}
+
+	& .btns {
+		display: flex;
+		gap: 5px;
+	}
+
+	& .discord {
+		color: #5865F2;
+		border: 1px solid #5865F2;
+		gap: 5px;
+	}
+
+	& .try {
+		color: #10ff10;
+		border: 1px solid #10ff10;
+	}
+
+	& button, a {
+		text-decoration: none;
+		color: #aaaaaa;
+		background: transparent;
+		display: flex;
+		margin-top: 3rem;
+		align-items: center;
+		padding: 0.5em;
+		border-radius: 10px;
+		cursor: pointer;
+
+		& svg {
+			width: 24px;
+		}
+	} 
+}
+
+.core {
+	background: #001d3d;
+	padding: 3em;
+
+	& h2 {
+		margin-bottom: 3em;
+	}
+
+	& .items {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+
+		& .item {
+			display: flex;
+			align-items: center;
+			flex: 33%;
+			flex-direction: column;
+			margin-bottom: 5em;
+
+			& h3 {
+				color: #ffc300;
+				font-size: 1.5em;
+				margin-bottom: 0.5em;
+			}
+
+			& p {
+				text-align: center;
+				width: 300px;
+				height: 150px;
+				font-size: 1.1em;
+				line-height: 1.3rem;
+			}
+		}
+	}
+}
+
+.capabilities {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background: #000814;
+	padding: 3em;
+
+	& h2 {
+		margin-bottom: 3em;
+	}
+
+	& .items {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+
+		& .item {
+			display: flex;
+			align-items: center;
+			flex: 33%;
+			flex-direction: column;
+			margin-bottom: 5em;
+
+			& h3 {
+				margin-bottom: 0.5em;
+			}
+
+			& p {
+				text-align: center;
+				width: 150px;
+				height: 100px;
+				line-height: 1.3rem;
+			}
+		}
+	}
+}
+
+.soon {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 3em;
+	background: #001d3d;
+
+	& h2 {
+		margin-bottom: 3em;
+	}
+
+	& .items {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+
+		& .item {
+			display: flex;
+			align-items: center;
+			flex-direction: column;
+			margin: 0 2em 5em 2em;
+
+			& h3 {
+				margin-bottom: 0.5em;
+			}
+
+			& p {
+				text-align: center;
+				width: 150px;
+				height: 100px;
+				line-height: 1.3rem;
+			}
+		}
+	}
+}
+
+@media only screen and (max-width: 768px) {
+	.landing-page {
+		& h2 {
+			font-size: 2.5em;
+		}
+	}
+}
+
+@media only screen and (max-width: 640px) {
+	.landing-page {
+		& h2 {
+			font-size: 2em;
+		}
+
+		.header-text {
+			font-size: 1.5em;
+		}
+
+		.word-switch {
+			width: 150px;
+		}
+	}
+}
+
+@media only screen and (max-width: 480px) {
+	.landing-page {
+		font-size: 13px;
+
+		.header-text {
+			flex-wrap: wrap;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.word-switch {
+			width: 100%;
+			text-align: center;
+		}
+
+		.welcome {
+			& .logo {
+				padding: 0 2em;
+			}
+			& p {
+				font-size: 1.7em;
+			}
+		}
+	}
+}
+
+/*Landing page styles end*/

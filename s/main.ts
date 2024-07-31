@@ -8,6 +8,7 @@ import {MediaPanel} from "./components/omni-media/panel.js"
 import {OmniText} from "./components/omni-text/component.js"
 import {OmniMedia} from "./components/omni-media/component.js"
 import {TimelinePanel} from "./components/omni-timeline/panel.js"
+import {LandingPage} from './components/landingpage/component.js'
 import {OmniTimeline} from "./components/omni-timeline/component.js"
 import {ProjectSettingsPanel} from "./views/project-settings/panel.js"
 import {ExportPanel} from "./components/omni-timeline/views/export/panel.js"
@@ -40,5 +41,4 @@ export function setupContext() {
 
 setupContext()
 
-
-register_to_dom({ConstructEditor, OmniTimeline, OmniText, OmniMedia})
+register_to_dom({ConstructEditor, OmniTimeline, OmniText, OmniMedia, LandingPage})
