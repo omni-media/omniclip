@@ -71,9 +71,7 @@ self.addEventListener("message", async message => {
 		await decoder.flush()
 	}
 	if(message.data.action === "chunk") {
-		try {
-			decoder.decode(message.data.chunk)
-		} catch(e) {}
+		decoder.decode(message.data.chunk)
 	}
 })
 
