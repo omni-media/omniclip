@@ -1,9 +1,24 @@
 import {pub} from "@benev/slate"
 import {quick_hash} from "@benev/construct"
+import type { ReadChunkFunc, VideoTrack, MediaInfo } from 'mediainfo.js'
+//@ts-ignore
+import {mediaInfoFactory} from 'mediainfo.js/dist/esm-bundle/index.min.js'
 
 import {Actions} from "../../actions.js"
-import { getVideoInfo } from "../../../tools/get-video-info.js"
 import {Video, VideoFile, AnyMedia, ImageFile, Image, AudioFile, Audio} from "../../../components/omni-media/types.js"
+
+function makeReadChunk(file: File): ReadChunkFunc {
+	return async (chunkSize: number, offset: number) =>
+		new Uint8Array(await file.slice(offset, offset + chunkSize).arrayBuffer())
+}
+
+async function getMediaInfo() {
+	return await new mediaInfoFactory({
+		locateFile: () => `${window.location.origin}/assets/MediaInfoModule.wasm` // Path to the wasm file
+	})
+}
+
+const mediainfo = await getMediaInfo() as MediaInfo
 
 export class Media extends Map<string, File> {
 	#database_request = window.indexedDB.open("database", 3)
@@ -107,7 +122,12 @@ export class Media extends Map<string, File> {
 		this.#files_ready = false
 		this.on_media_change.publish({files: [], action: "placeholder"})
 		const imported_file = input.files?.[0]
-		const video_info = imported_file?.type.startsWith("video") ? await getVideoInfo(imported_file) : null
+		const video_info = imported_file?.type.startsWith('video')
+			? await mediainfo.analyzeData(
+					imported_file.size,
+					makeReadChunk(imported_file)
+				)
+			: null
 		if(imported_file) {
 			const hash = await quick_hash(imported_file)
 			const transaction = this.#database_request.result.transaction(["files"], "readwrite")
@@ -122,9 +142,11 @@ export class Media extends Map<string, File> {
 						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "image"}], action: "added"})
 					}
 					else if(imported_file.type.startsWith("video")) {
-						const duration = video_info!.samples_duration / video_info!.timescale * 1000
-						files_store.add({file: imported_file, hash, kind: "video", frames: video_info?.nb_samples!, duration})
-						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "video", frames: video_info?.nb_samples!, duration}], action: "added"})
+						const track = video_info!.media?.track[0] as VideoTrack
+						const duration = track?.Duration! * 1000
+						const frames = track.FrameCount!
+						files_store.add({file: imported_file, hash, kind: "video", frames, duration})
+						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "video", frames, duration}], action: "added"})
 					}
 					else if(imported_file.type.startsWith("audio")) {
 						files_store.add({file: imported_file, hash, kind: "audio"})
