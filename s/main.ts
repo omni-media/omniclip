@@ -4,8 +4,10 @@ import {ConstructEditor, single_panel_layout} from "@benev/construct/x/mini.js"
 
 import {omnislate, OmniContext} from "./context/context.js"
 import {TextPanel} from "./components/omni-text/panel.js"
+import {AnimPanel} from "./components/omni-anim/panel.js"
 import {MediaPanel} from "./components/omni-media/panel.js"
 import {OmniText} from "./components/omni-text/component.js"
+import {OmniAnim} from "./components/omni-anim/component.js"
 import {OmniMedia} from "./components/omni-media/component.js"
 import {TimelinePanel} from "./components/omni-timeline/panel.js"
 import {LandingPage} from './components/landingpage/component.js'
@@ -30,7 +32,8 @@ export function setupContext() {
 			MediaPlayerPanel,
 			TextPanel,
 			ExportPanel,
-			ProjectSettingsPanel
+			ProjectSettingsPanel,
+			AnimPanel
 		},
 		layouts: {
 			empty: single_panel_layout("TimelinePanel"),
@@ -41,4 +44,5 @@ export function setupContext() {
 
 setupContext()
 
-register_to_dom({ConstructEditor, OmniTimeline, OmniText, OmniMedia, LandingPage})
+//@ts-ignore
+register_to_dom({ConstructEditor, OmniTimeline, OmniText, OmniMedia, LandingPage, OmniAnim})

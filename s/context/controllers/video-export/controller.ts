@@ -34,7 +34,7 @@ export class VideoExport {
 	export_start(state: State, resolution: number[], bitrate: number) {
 		this.#Encoder.configure(resolution, bitrate)
 		const sorted_effects = this.#sort_effects_by_track(state.effects)
-		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position - effect.start + effect.end))
+		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position + (effect.end - effect.start)))
 		this.#export_process(sorted_effects)
 		this.actions.set_is_exporting(true)
 		this.compositor.currently_played_effects.clear()
@@ -45,8 +45,9 @@ export class VideoExport {
 		await this.#Decoder.get_and_draw_decoded_frame(effects, this.#timestamp)
 		this.compositor.compose_effects(effects, this.#timestamp, true)
 		this.actions.set_export_status("composing")
-		await this.#Encoder.encode_composed_frame(this.compositor.canvas.lowerCanvasEl, this.#timestamp)
+		this.#Encoder.encode_composed_frame(this.compositor.canvas_element, this.#timestamp)
 		this.#timestamp += 1000/this.compositor.timebase
+		this.compositor.managers.animationManager.seek(this.#timestamp)
 		this.on_timestamp_change.publish(this.#timestamp)
 		const progress = this.#timestamp / this.#timestamp_end * 100 // for progress bar
 		this.actions.set_export_progress(progress)

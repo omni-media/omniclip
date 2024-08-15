@@ -24,11 +24,21 @@ export class OmniContext extends Context {
 
 	#store = store(localStorage)
 
-	#listen_for_state_changes_and_save_to_storage() {
+	#listen_for_state_changes() {
 		watch.track(() => this.#core.state, (state) => {
-			this.#store.effects = state.effects
-			this.#store.tracks = state.tracks
+			this.#save_to_storage(state)
+			this.#updateAnimationTimeline(state)
 		})
+	}
+
+	#save_to_storage(state: HistoricalState) {
+		this.#store.effects = state.effects
+		this.#store.tracks = state.tracks
+	}
+
+	#updateAnimationTimeline(state: HistoricalState) {
+		const timelineDuration = Math.max(...state.effects.map(effect => effect.start_at_position + (effect.end - effect.start)))
+		this.controllers.compositor.managers.animationManager.updateTimelineDuration(timelineDuration)
 	}
 
 	get #state_from_storage() {
@@ -107,7 +117,7 @@ export class OmniContext extends Context {
 	constructor(options: MiniContextOptions) {
 		super(options)
 		this.#check_if_webcodecs_supported()
-		this.#listen_for_state_changes_and_save_to_storage()
+		this.#listen_for_state_changes()
 		this.controllers = {
 			...this.controllers,
 			timeline: new Timeline(this.actions, this.controllers.media, this.controllers.compositor),

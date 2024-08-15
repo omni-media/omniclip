@@ -9,6 +9,7 @@ import {AudioManager} from "./parts/audio-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
 import {AlignGuidelines} from "./lib/aligning_guidelines.js"
 import {AnyEffect, AudioEffect, State} from "../../types.js"
+import {AnimationManager} from "./parts/animation-manager.js"
 import {compare_arrays} from "../../../utils/compare_arrays.js"
 import {sort_effects_by_track} from "../video-export/utils/sort_effects_by_track.js"
 
@@ -17,6 +18,7 @@ export interface Managers {
 	textManager: TextManager
 	imageManager: ImageManager
 	audioManager: AudioManager
+	animationManager: AnimationManager
 }
 
 export class Compositor {
@@ -39,11 +41,13 @@ export class Compositor {
 	this.init_guidelines()
 	this.#on_new_canvas_object_set_handle_styles()
 	this.#on_selected_canvas_object()
+
 	this.managers = {
 		videoManager: new VideoManager(this, actions),
 		textManager: new TextManager(this, actions),
 		imageManager: new ImageManager(this, actions),
-		audioManager: new AudioManager(this, actions)
+		audioManager: new AudioManager(this, actions),
+		animationManager: new AnimationManager(this)
 	}
 
 		this.#on_playing()
@@ -51,9 +55,11 @@ export class Compositor {
 			() => this.#is_playing.value,
 			(is_playing) => {
 				if(is_playing) {
+					this.managers.animationManager.play()
 					this.managers.videoManager.play_videos()
 					this.managers.audioManager.play_audios()
 				} else {
+					this.managers.animationManager.pause()
 					this.managers.videoManager.pause_videos()
 					this.managers.audioManager.pause_audios()
 				}
@@ -130,7 +136,8 @@ export class Compositor {
 		}
 	}
 
-	async set_current_time_of_audio_or_video_and_redraw(redraw?: boolean, timecode?: number) {
+	async seek(timecode: number, redraw?: boolean) {
+		this.managers.animationManager.seek(timecode)
 		for(const effect of this.currently_played_effects.values()) {
 			if(effect.kind === "audio") {
 				const audio = this.managers.audioManager.get(effect.id)
