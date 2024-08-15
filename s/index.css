@@ -731,6 +731,11 @@ construct-editor {
 }
 
 @media only screen and (max-width: 480px) {
+	.landing-page {
+		& footer {
+			padding: 2em;
+		}
+	}
 	.welcome {
 		padding: 5em 1em;
 	}
