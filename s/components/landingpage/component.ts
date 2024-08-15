@@ -202,7 +202,7 @@ export const LandingPage = light_component((use) => {
 							</div>
 						</section>
 						<footer>
-							<span>Copyright 2024 Omniclip All Rights Reserved.</span>
+							<span>Copyright © 2024 Omniclip All Rights Reserved.</span>
 							<div>
 								<a>Terms & Conditions</a>
 								<a>Privacy Policy</a>
