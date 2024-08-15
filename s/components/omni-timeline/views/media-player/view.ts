@@ -19,7 +19,7 @@ export const MediaPlayer = shadow_view(use => () => {
 	use.mount(() => {
 		const unsub_onplayhead = playhead.on_playhead_drag(() => {
 			if(use.context.state.is_playing) {compositor.set_video_playing(false)}
-			compositor.set_current_time_of_audio_or_video_and_redraw(true, use.context.state.timecode)
+			compositor.seek(use.context.state.timecode, true)
 		})
 		const dispose1 = watch.track(
 			() => use.context.state,
@@ -28,9 +28,9 @@ export const MediaPlayer = shadow_view(use => () => {
 				if(!timeline.is_exporting && files_ready) {
 					compositor.compose_effects(timeline.effects, timeline.timecode)
 					if(!timeline.is_playing) {
-						compositor.set_current_time_of_audio_or_video_and_redraw(true, use.context.state.timecode)
+						compositor.seek(use.context.state.timecode, true)
 					} else {
-						compositor.set_current_time_of_audio_or_video_and_redraw(false, use.context.state.timecode)
+						compositor.seek(use.context.state.timecode, false)
 					}
 				}
 			}
