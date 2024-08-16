@@ -7,7 +7,8 @@ let timebase = 0
 let timestamp_end = 0
 let fps = 0
 let wait_time = 0
-let skipped = 0
+let lastProcessedTimestamp = 0
+const timebaseInMicroseconds = 1000/25 * 1000
 
 const decoder = new VideoDecoder({
 	output(frame) {
@@ -20,26 +21,7 @@ const decoder = new VideoDecoder({
 			return
 		}
 
-		const skipEvery = Math.ceil(fps / (fps - timebase))
-		// skipping frames to normalize to timebase
-		if ((number) % skipEvery === 0) {
-			frame.close()
-			skipped += 1
-		}
-
-		else {
-			timestamp += 1000/25
-			self.postMessage({
-				action: "new-frame",
-				frame: {
-					timestamp: timestamp,
-					frame,
-					effect_id: decoded_effect.id,
-				}
-			})
-			frame.close()
-		}
-		frame.close()
+		processFrame(frame, timebaseInMicroseconds)
 	},
 	error: (e) => console.log(e)
 })
@@ -78,4 +60,49 @@ self.addEventListener("message", async message => {
 function calculateAmountOfFramesToDecode(effect: VideoEffect) {
 	const fps = effect.frames / (effect.raw_duration / 1000)
 	return Math.round((effect.end - effect.start) / 1000 * fps)
+}
+
+
+/*
+* -- processFrame --
+* Function responsible for maintaining
+* video framerate to desired timebase
+*/
+
+function processFrame(currentFrame: VideoFrame, targetFrameInterval: number) {
+	if(lastProcessedTimestamp === 0) {
+		lastProcessedTimestamp += currentFrame.timestamp
+	}
+
+	// if met frame is duplicated
+	while (currentFrame.timestamp >= lastProcessedTimestamp + targetFrameInterval) {
+		self.postMessage({
+				action: "new-frame",
+				frame: {
+					timestamp,
+					frame: currentFrame,
+					effect_id: decoded_effect.id,
+				}
+		})
+
+		timestamp += 1000 / 25
+		lastProcessedTimestamp += targetFrameInterval
+	}
+	
+	// if not met frame is skipped
+	if (currentFrame.timestamp >= lastProcessedTimestamp) {
+		self.postMessage({
+				action: "new-frame",
+				frame: {
+					timestamp,
+					frame: currentFrame,
+					effect_id: decoded_effect.id,
+				}
+		})
+
+		timestamp += 1000 / 25
+		lastProcessedTimestamp += targetFrameInterval
+	}
+
+	currentFrame.close()
 }
