@@ -139,13 +139,12 @@ export class Filmstrip {
 		i:number
 	}>{
 		await this.#file_ready()
-		const margin = this.#width_of_frame * 2
 		const timeline_width = timeline.clientWidth ? timeline.clientWidth : 2000
-		const frame_count = this.effect_width < timeline_width ? this.effect_width / 100 : timeline_width / 100
+		const frame_count = this.effect_width < timeline_width ? this.effect_width / this.#width_of_frame : timeline_width / this.#width_of_frame
 		const effect_left = calculate_start_position((effect.start_at_position - effect.start), zoom)
-		const normalized_left = Math.floor((timeline.scrollLeft - effect_left) / this.#width_of_frame) * this.#width_of_frame - margin < 0
+		const normalized_left = Math.floor((timeline.scrollLeft - effect_left) / this.#width_of_frame) * this.#width_of_frame < 0
 			? 0
-			: Math.floor((timeline.scrollLeft - effect_left) / this.#width_of_frame) * this.#width_of_frame - margin
+			: Math.floor((timeline.scrollLeft - effect_left) / this.#width_of_frame) * this.#width_of_frame
 		const scroll_move_is_bigger_than_width_of_frame = Math.abs(normalized_left - this.effect_last_offset_left_position) >= Math.floor(this.#width_of_frame)
 		const should_load_new_filmstrip_frames = force_recalculate ?? scroll_move_is_bigger_than_width_of_frame
 
