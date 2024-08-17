@@ -45,9 +45,10 @@ export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: G
 	})
 
 	use.mount(() => {
-		timeline.addEventListener("scroll", () => recalculate_filmstrip_frames())
+		const recalculate = () => recalculate_filmstrip_frames()
+		timeline.addEventListener("scroll", recalculate)
 		const dispose = watch.track(() => use.context.state.zoom, async (zoom) => recalculate_filmstrip_frames(true))
-		return () => {dispose(), timeline.removeEventListener("scroll", () => recalculate_filmstrip_frames()), filmstrip.dispose()}
+		return () => {dispose(), timeline.removeEventListener("scroll", recalculate), filmstrip.dispose()}
 	})
 
 	const render_filmstrip = () => {
