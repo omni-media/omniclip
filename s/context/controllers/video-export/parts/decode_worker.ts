@@ -71,6 +71,15 @@ function calculateAmountOfFramesToDecode(effect: VideoEffect) {
 
 function processFrame(currentFrame: VideoFrame, targetFrameInterval: number) {
 	if(lastProcessedTimestamp === 0) {
+		self.postMessage({
+				action: "new-frame",
+				frame: {
+					timestamp,
+					frame: currentFrame,
+					effect_id: decoded_effect.id,
+				}
+		})
+		timestamp += 1000 / 25
 		lastProcessedTimestamp += currentFrame.timestamp
 	}
 
