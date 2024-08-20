@@ -22,8 +22,33 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 	const handler = controller.effect_trim_handler
 	const [fileNotFound, setFileNotFound] = use.state(false)
 	const [timelineScrollLeft, setTimelineScrollLeft] = use.state(0)
+	const [previewPosition, setPreviewPosition] = use.state<{start: null | number; startAtPosition: null | number; end: number | null}>({
+		start: null,
+		startAtPosition: null,
+		end: null
+	})
 
-	use.mount(() => on_drop(() => setCords([null, null])))
+	use.mount(() => handler.onDrop(({effectId}) => {
+		if(effectId === effect.id) {
+			setPreviewPosition({
+				startAtPosition: null,
+				start: null,
+				end: null
+			})
+		}
+	}))
+
+	use.mount(() => on_drop(({grabbed}) => {
+		if(grabbed.effect.id === effect.id) {
+			setPreviewPosition({
+				startAtPosition: null,
+				start: null,
+				end: null
+			})
+			setCords([null, null])
+		}
+	}))
+
 	use.mount(() => {
 		const dispose = media_controller.on_media_change(({files, action}) => {
 			if(action === "added") {
@@ -54,12 +79,6 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 					hovering.coordinates[1] - grabbed.offset.y
 				]
 				setCords(center_of_effect)
-		}
-		},
-		effect_trim_listener() {
-			if(handler.effect_resize_handle_drag.hovering) {
-				handler.effect_dragover(handler.effect_resize_handle_drag.hovering!.client_x, use.context.state)
-				return
 			}
 		},
 		start(event: DragEvent) {
@@ -82,13 +101,21 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 	}
 
 	use.mount(() => {
+		const dispose = handler.onDragOver(({start_at_position, effectId, start, end}) => {
+			if(effectId === effect.id) {
+				setPreviewPosition({
+					start,
+					startAtPosition: start_at_position,
+					end
+				})
+			}
+		})
 		window.addEventListener("dragend", drag_events.end)
 		window.addEventListener("drop", drag_events.drop)
-		return () => {removeEventListener("drop", drag_events.drop); removeEventListener("dragend", drag_events.end)}
+		return () => {removeEventListener("drop", drag_events.drop); removeEventListener("dragend", drag_events.end); dispose()}
 	})
 
 	drag_events.effect_drag_listener()
-	drag_events.effect_trim_listener()
 	
 	const render_trim_handle = (side: "left" | "right") => {
 		return html`
@@ -105,7 +132,32 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 			`
 	}
 
+	const renderPreview = () => {
+		return html`
+			<div
+				?data-grabbed=${grabbed?.effect === effect}
+				?data-selected=${use.context.state.selected_effect?.id === effect.id}
+				style="
+					${inline_css}
+					width: ${((previewPosition.end ?? effect.end) - (previewPosition.start ?? effect.start)) * Math.pow(2, zoom)}px;
+					height: 50px;
+					transform: translate(
+						${x ?? calculate_start_position(previewPosition.startAtPosition ?? effect.start_at_position, use.context.state.zoom)}px,
+						${y ?? calculate_effect_track_placement(effect.track, use.context.state.effects)}px
+					);
+				"
+				@dragstart=${drag_events.start}
+				draggable="true"
+				class="trim-handles"
+			>
+				${render_trim_handle("left")}
+				${render_trim_handle("right")}
+			</div>
+		`
+	}
+
 	return html`
+		${renderPreview()}
 		<span
 			class="effect"
 			?data-no-file=${fileNotFound}
@@ -123,8 +175,6 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 			@dragstart=${drag_events.start}
 			@click=${() => use.context.controllers.timeline.set_selected_effect(effect, use.context.controllers.compositor, use.context.state)}
 		>
-			${render_trim_handle("left")}
-			${render_trim_handle("right")}
 			${fileNotFound
 				? html`<span style="width: 100%; transform: translateX(${timelineScrollLeft}px)">File Not Found: ${effect.kind !== "text" ? effect.name : null}</span>`
 				: null

@@ -52,7 +52,7 @@ export const OmniTimeline = shadow_component(use => {
 
 	function augmented_dragover(event: DragEvent) {
 		if(use.context.controllers.timeline.effect_trim_handler.effect_resize_handle_drag.grabbed) {
-			handler.effect_resize_handle_drag.dropzone.dragover({x: use.element.clientLeft, client_x: event.clientX})(event)
+			handler.effect_dragover(event.clientX, use.context.state)
 			return
 		}
 		playhead_drag_over(event)

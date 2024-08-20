@@ -1,3 +1,4 @@
+import {pub} from "@benev/slate"
 import {ShockDragDrop} from "@benev/construct"
 
 import {Actions} from "../../../actions.js"
@@ -13,34 +14,46 @@ export class effectTrimHandler {
 	effect: AnyEffect | null = null
 	dropped = false
 
+	#start_at = 0
+	#start = 0
+	#end = 0
+
+	onDragOver = pub<{start_at_position: number, start: number, end: number, effectId: string}>()
+	onDrop = pub<{effectId: string}>()
+
 	constructor(private actions: Actions) {}
 
 	effect_dragover(clientX: number, state: State) {
 		if(!this.effect_resize_handle_drag.grabbed) {return}
+		const effect = state.effects.find(({id}) => id === this.effect?.id)!
 		const pointer_position = this.#get_pointer_position_relative_to_effect_right_or_left_side(clientX, state)
 		if(this.effect_resize_handle_drag.grabbed === "left") {
 			const start_at = this.initial_start_position + pointer_position
 			const start = this.initial_start + pointer_position
-			if(start <= this.effect!.end - 1000/state.timebase) {
+			if(start <= effect!.end - 1000/state.timebase) {
 				if(this.effect!.kind === "video" || this.effect!.kind === "audio") {
 					if(start >= 1000/state.timebase) {
-						this.actions.set_effect_start_position(this.effect!, start_at)
-						this.actions.set_effect_start(this.effect!, start)
+						this.#start_at = start_at
+						this.#start = start
+						this.onDragOver.publish({start_at_position: start_at, start, end: effect!.end, effectId: this.effect!.id})
 					}
 				} else {
-					this.actions.set_effect_start_position(this.effect!, start_at)
-					this.actions.set_effect_start(this.effect!, start)
+					this.#start_at = start_at
+					this.#start = start
+					this.onDragOver.publish({start_at_position: start_at, start, end: effect!.end, effectId: this.effect!.id})
 				}
 			}
 		} else {
 			const end = this.initial_end + pointer_position
-			if(end >= this.effect!.start + 1000/state.timebase) {
+			if(end >= effect!.start + 1000/state.timebase) {
 				if(this.effect!.kind === "video" || this.effect!.kind === "audio") {
 					if(end <= this.effect!.duration) {
-						this.actions.set_effect_end(this.effect!, end)
+						this.#end = end
+						this.onDragOver.publish({end, start_at_position: effect!.start_at_position, start: effect!.start, effectId: this.effect!.id})
 					}
 				} else {
-					this.actions.set_effect_end(this.effect!, end)
+					this.#end = end
+					this.onDragOver.publish({end, start_at_position: effect!.start_at_position, start: effect!.start, effectId: this.effect!.id})
 				}
 			}
 		}
@@ -50,13 +63,15 @@ export class effectTrimHandler {
 		const effect = state.effects.find(({id}) => id === this.effect?.id)!
 		const frame_duration = 1000/state.timebase
 		if(this.effect_resize_handle_drag.grabbed === "left") {
-			const normalized_start = Math.round(effect!.start / frame_duration) * frame_duration
-			const normalized_start_at = Math.round(effect!.start_at_position / frame_duration) * frame_duration
+			const normalized_start = Math.round(this.#start / frame_duration) * frame_duration
+			const normalized_start_at = Math.round(this.#start_at / frame_duration) * frame_duration
 			this.actions.set_effect_start(this.effect!, normalized_start)
 			this.actions.set_effect_start_position(this.effect!, normalized_start_at)
+			this.onDrop.publish({effectId: effect.id})
 		} else {
-			const normalized_end = Math.round(effect.end / frame_duration) * frame_duration
+			const normalized_end = Math.round(this.#end / frame_duration) * frame_duration
 			this.actions.set_effect_end(effect, normalized_end)
+			this.onDrop.publish({effectId: effect.id})
 		}
 	}
 

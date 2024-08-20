@@ -122,7 +122,8 @@ export class Timeline {
 		this.actions.set_effect_start_position(effect, proposed_place.start_at_position)
 		this.actions.set_effect_track(effect, proposed_place.track)
 		if(duration && effect.duration !== duration) {
-			this.actions.set_effect_duration(effect, duration)
+			const end = effect.start + duration
+			this.actions.set_effect_end(effect, end)
 		}
 		if(effects_to_push) {
 			this.#push_effects_forward(effects_to_push, (effect.end - effect.start))

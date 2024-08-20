@@ -7,6 +7,61 @@ export const styles = css`
 		overflow-y: visible;
 	}
 
+	.trim-handles {
+		cursor: grab;
+		position: absolute;
+		top: 0;
+		z-index: 1;
+
+		&[data-no-file] {
+			border: 3px dotted red;
+			color: red;
+		}
+		
+		&[data-selected] {
+			z-index: 5;
+			mix-blend-mode: overlay;
+			background: rgb(255,255,255,0.8);
+
+			& .trim-handle-right, .trim-handle-left {
+				filter: drop-shadow(2px 4px 6px black);
+				background: white;
+				display: flex;
+				z-index: 3;
+				align-items: center;
+				justify-content: center;
+				gap: 3px;
+				z-index: 1;
+				position: absolute;
+				width: 18px;
+				height: 100%;
+				cursor: e-resize;
+
+				& .line {
+					opacity: 0.7;
+					width: 3px;
+					height: 40%;
+					background: #333;
+					border-radius: 5px;
+				}
+			}
+		}
+
+		& .trim-handle-left {
+			left: 0;
+			z-index: 3;
+			border-top-left-radius: 5px;
+			border-bottom-left-radius: 5px;
+		}
+
+		& .trim-handle-right {
+			right: 0;
+			z-index: 3;
+			border-top-right-radius: 5px;
+			border-bottom-right-radius: 5px;
+		}
+	}
+
 	.effect {
 		display: flex;
 		z-index: 1;
@@ -19,56 +74,14 @@ export const styles = css`
 		height: 50px;
 		overflow: hidden;
 		
-		& .trim-handle-right, .trim-handle-left {
-			display: none;
-		}
-
-		&[data-no-file] {
-			border: 3px dotted red;
-			color: red;
-		}
-		
-		&[data-selected] {
-			& .trim-handle-right, & .trim-handle-left {
-				display: flex;
-				opacity: 0.4;
-				z-index: 3;
-				align-items: center;
-				justify-content: center;
-				gap: 3px;
-				z-index: 1;
-				position: absolute;
-				background: white;
-				width: 18px;
-				height: 100%;
-				cursor: e-resize;
-
-				& .line {
-					width: 3px;
-					height: 40%;
-					background: #333;
-					border-radius: 5px;
-				}
-			}
-
-			& .trim-handle-left {
-				left: 0;
-				z-index: 3;
-				border-top-left-radius: 5px;
-				border-bottom-left-radius: 5px;
-			}
-
-			& .trim-handle-right {
-				right: 0;
-				z-index: 3;
-				border-top-right-radius: 5px;
-				border-bottom-right-radius: 5px;
-			}
-		}
 
 		&[data-grabbed] {
+			filter: brightness(0.5);
 			z-index: 2;
-			opacity: 0.5;
+		}
+
+		&[data-selected] {
+			filter: brightness(0.5);
 		}
 
 		&[data-selected]::after {
@@ -87,7 +100,3 @@ export const styles = css`
 		}
 	}
 `
-
-
-//justify-content: center;
-// padding: 0.5em;
