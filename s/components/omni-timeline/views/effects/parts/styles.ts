@@ -12,6 +12,7 @@ export const styles = css`
 		position: absolute;
 		top: 0;
 		z-index: 1;
+		height: 50px;
 
 		&[data-no-file] {
 			border: 3px dotted red;

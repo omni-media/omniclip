@@ -140,7 +140,6 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 				style="
 					${inline_css}
 					width: ${((previewPosition.end ?? effect.end) - (previewPosition.start ?? effect.start)) * Math.pow(2, zoom)}px;
-					height: 50px;
 					transform: translate(
 						${x ?? calculate_start_position(previewPosition.startAtPosition ?? effect.start_at_position, use.context.state.zoom)}px,
 						${y ?? calculate_effect_track_placement(effect.track, use.context.state.effects)}px
