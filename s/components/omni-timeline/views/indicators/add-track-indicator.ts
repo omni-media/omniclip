@@ -3,21 +3,21 @@ import {html} from "@benev/slate"
 import {light_view} from "../../../../context/context.js"
 
 export const AddTrackIndicator = light_view(use => () => {
-	const drag = use.context.controllers.timeline.effect_drag
+	const drag = use.context.controllers.timeline.effectDragHandler
 	const [indicator, setIndicator] = use.state(false)
 
 	const drag_events = {
 		drop(e: DragEvent) {
-			if(drag.hovering) {
-				drag.dropzone.drop(drag.hovering)(e)
+			if(drag.grabbed) {
+				// drag.dropzone.drop(drag.hovering)(e)
 				setIndicator(false)
 			} else {
 				setIndicator(false)
-				drag.dragzone.dragend()(e)
+				// drag.dragzone.dragend()(e)
 			}
 		},
 		end(e: DragEvent) {
-			drag.dragzone.dragend()(e)
+			// drag.dragzone.dragend()(e)
 			setIndicator(false)
 		},
 		enter: () => setIndicator(true),
@@ -31,11 +31,11 @@ export const AddTrackIndicator = light_view(use => () => {
 		>
 		</div>
 		<div
+			@pointerenter=${drag_events.enter}
+			@pointerleave=${drag_events.leave}
+			@pointerup=${drag_events.drop}
+			@pointercancel=${drag_events.end}
 			data-indicator="add-track"
-			@dragenter=${drag_events.enter}
-			@dragleave=${drag_events.leave}
-			@drop=${drag_events.drop}
-			@dragend=${drag_events.end}
 			class="indicator-area"
 		>
 		</div>

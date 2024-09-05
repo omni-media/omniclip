@@ -20,42 +20,43 @@ export const OmniTimeline = shadow_component(use => {
 	use.styles(styles)
 	use.watch(() => use.context.state)
 	const state = use.context.state
-	const effect_drag = use.context.controllers.timeline.effect_drag
-	const playhead_drag = use.context.controllers.timeline.playhead_drag
-	const handler = use.context.controllers.timeline.effect_trim_handler
+	const effectTrim = use.context.controllers.timeline.effect_trim_handler
+	const effectDrag = use.context.controllers.timeline.effectDragHandler
+	const playheadDrag = use.context.controllers.timeline.playheadDragHandler
 
 	use.mount(() => {
-		window.addEventListener("dragover", augmented_dragover)
-		return () => removeEventListener("dragover", augmented_dragover)
+		window.addEventListener("pointermove", augmented_dragover)
+		return () => removeEventListener("pointermove", augmented_dragover)
 	})
 
-	const playhead_drag_over = (event: DragEvent) => {
+	const playheadDragOver = (event: PointerEvent) => {
 		const timeline = use.shadow.querySelector(".timeline-relative")
 		const bounds = timeline?.getBoundingClientRect()
-		const x = event.clientX - bounds!.left
-		if(x >= 0) {
-			playhead_drag.dropzone.dragover({x})(event)
-		} else playhead_drag.dropzone.dragover({x: 0})(event)
+		if(bounds) {
+			const x = event.clientX - bounds?.left
+			if(x >= 0) {
+				playheadDrag.move(x)
+			} else playheadDrag.move(0)
+		}
 	}
 
-	const effect_drag_over = (event: DragEvent) => {
+	const effect_drag_over = (event: PointerEvent) => {
 		const timeline = use.shadow.querySelector(".timeline-relative")
 		const indicator = (event.target as HTMLElement).part.value as Indicator
 		const bounds = timeline?.getBoundingClientRect()
-		const x = event.clientX - bounds!.left
-		const y = event.clientY - bounds!.top
-		effect_drag.dropzone.dragover({
-			coordinates: [x >= 0 ? x : 0, y >= 0 ? y : 0],
-			indicator: indicator,
-		})(event)
+		if(bounds) {
+			const x = event.clientX - bounds.left
+			const y = event.clientY - bounds.top
+			effectDrag.move({coordinates: [x >= 0 ? x : 0, y >= 0 ? y : 0], indicator})
+		}
 	}
 
-	function augmented_dragover(event: DragEvent) {
-		if(use.context.controllers.timeline.effect_trim_handler.effect_resize_handle_drag.grabbed) {
-			handler.effect_dragover(event.clientX, use.context.state)
+	function augmented_dragover(event: PointerEvent) {
+		if(effectTrim.grabbed) {
+			effectTrim.effect_dragover(event.clientX, use.context.state)
 			return
 		}
-		playhead_drag_over(event)
+		playheadDragOver(event)
 		effect_drag_over(event)
 	}
 

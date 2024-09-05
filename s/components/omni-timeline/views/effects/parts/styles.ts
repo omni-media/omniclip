@@ -23,6 +23,7 @@ export const styles = css`
 			z-index: 5;
 			mix-blend-mode: overlay;
 			background: rgb(255,255,255,0.8);
+			touch-action: none;
 
 			& .trim-handle-right, .trim-handle-left {
 				filter: drop-shadow(2px 4px 6px black);

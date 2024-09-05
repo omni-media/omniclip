@@ -69,6 +69,7 @@ export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: G
 
 	return html`${Effect([timeline, effect, html`${render_filmstrip()}`, css`
 		.content {
+			pointer-events: none;
 			width: 100%;
 		}
 

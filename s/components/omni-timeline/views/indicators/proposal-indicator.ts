@@ -12,8 +12,8 @@ export const ProposalIndicator = light_view(use => () => {
 	const actions = use.context.actions
 	const zoom = use.context.state.zoom
 	const trim_handler = use.context.controllers.timeline.effect_trim_handler
-	const {effect_drag: {hovering, grabbed}, on_drop} = controller
-	const [proposedTimecode, setProposedTimecode, getProposedTimecode] = use.state<ProposedTimecode>({
+	const effectDragHandler = controller.effectDragHandler
+	const [proposedTimecode, setProposedTimecode] = use.state<ProposedTimecode>({
 		proposed_place: {track: 0, start_at_position: 0},
 		duration: null,
 		effects_to_push: null
@@ -38,22 +38,33 @@ export const ProposalIndicator = light_view(use => () => {
 		}
 	}
 
-	use.mount(() => on_drop(({grabbed, dropped_at}) => {
-		const proposed_timecode = getProposedTimecode()
-		controller.set_proposed_timecode(grabbed.effect, proposed_timecode)
-		if(dropped_at.indicator === "add-track-indicator") {actions.add_track()}
-	}))
+	use.mount(() => {
+		const disposeDrop = effectDragHandler.onDrop(({grabbed, droppedAt}) => {
+			const timecode = translate_to_timecode(grabbed, droppedAt)
+			const proposed_timecode = use.context.controllers.timeline
+			.calculate_proposed_timecode(
+				timecode,
+				grabbed!.effect.id,
+				use.context.state
+			)
+			controller.set_proposed_timecode(grabbed.effect, proposed_timecode)
+			if(droppedAt && droppedAt.indicator === "add-track-indicator") {actions.add_track()}
+		})
 
-	if(hovering && grabbed) {
-		const timecode = translate_to_timecode(grabbed, hovering)
-		const proposed_timecode = use.context.controllers.timeline
-		.calculate_proposed_timecode(
-			timecode,
-			grabbed!.effect.id,
-			use.context.state
-		)
-		setProposedTimecode(proposed_timecode)
-	}
+		const disposeDrag = effectDragHandler.onEffectDrag(({grabbed, hovering}) => {
+			if(hovering && grabbed) {
+				const timecode = translate_to_timecode(grabbed, hovering)
+				const proposed_timecode = use.context.controllers.timeline
+				.calculate_proposed_timecode(
+					timecode,
+					grabbed!.effect.id,
+					use.context.state
+				)
+				setProposedTimecode(proposed_timecode)
+			}
+		})
+		return () => {disposeDrag(); disposeDrop()}
+	})
 
 	const text_effect_specific_styles = () => {
 		return !track_effects.some(effect => effect.kind !== "text") && track_effects.find(effect => effect.kind === "text")
@@ -66,14 +77,14 @@ export const ProposalIndicator = light_view(use => () => {
 			?data-push-effects=${proposedTimecode?.effects_to_push}
 			style="
 				${text_effect_specific_styles()}
-				display: ${grabbed && !trim_handler.effect_resize_handle_drag.grabbed ? "block" : "none"};
+				display: ${effectDragHandler.grabbed && !trim_handler.grabbed ? "block" : "none"};
 				width: ${
 					proposedTimecode.effects_to_push
 					? 0
 					: proposedTimecode.duration
 					? proposedTimecode.duration * Math.pow(2, zoom)
-					: grabbed
-					? calculate_effect_width(grabbed.effect, zoom)
+					: effectDragHandler.grabbed
+					? calculate_effect_width(effectDragHandler.grabbed.effect, zoom)
 					: 0
 				}px;
 				transform: translate(

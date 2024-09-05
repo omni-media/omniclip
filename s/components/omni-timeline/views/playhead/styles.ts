@@ -10,6 +10,11 @@ export const styles = css`
 		background: var(--alpha);
 		z-index: 3;
 		cursor: pointer;
+		touch-action: none;
+
+		& > * {
+			touch-action: none;
+		}
 
 		& .head {
 			transform: rotate(180deg);
@@ -20,4 +25,5 @@ export const styles = css`
 			position: absolute;
 		}
 	}
+
 `

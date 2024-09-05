@@ -1,22 +1,20 @@
 import {generate_id} from "@benev/slate"
-import {pub} from "@benev/slate/x/tools/pub.js"
-import {ShockDragDrop} from "@benev/construct/x/tools/shockdrop/drag_drop.js"
 
 import {Actions} from "../../actions.js"
 import {Media} from "../media/controller.js"
 import {Compositor} from "../compositor/controller.js"
-import {effectTrimHandler} from "./parts/effect-trim-handler.js"
+import {PlayheadDrag} from "./parts/drag-related/playhead-drag.js"
+import {effectTrimHandler} from "./parts/drag-related/effect-trim.js"
+import {EffectDragHandler} from "./parts/drag-related/effect-drag.js"
+import {ProposedTimecode, AnyEffect, EffectTimecode, State} from "../../types.js"
 import {get_effect_at_timestamp} from "../video-export/utils/get_effect_at_timestamp.js"
 import {get_effects_at_timestamp} from "../video-export/utils/get_effects_at_timestamp.js"
-import {Grabbed, At, ProposedTimecode, AnyEffect, EffectTimecode, State} from "../../types.js"
 
 export class Timeline {
-	effect_drag = new ShockDragDrop<Grabbed, At> ({handle_drop: (_event: DragEvent, grabbed, dropped_at) => this.on_drop.publish({grabbed, dropped_at})})
-	playhead_drag = new ShockDragDrop<boolean, {x: number}>({handle_drop: (_event: DragEvent) => {}})
-	on_drop = pub<{grabbed: Grabbed, dropped_at: At}>()
 	effect_trim_handler: effectTrimHandler
-	on_playhead_drag = pub()
-	
+	effectDragHandler = new EffectDragHandler()
+	playheadDragHandler = new PlayheadDrag()
+
 	constructor(private actions: Actions, private media: Media, private compositor: Compositor) {
 		this.effect_trim_handler = new effectTrimHandler(actions)
 	}

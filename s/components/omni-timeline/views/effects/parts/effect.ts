@@ -2,7 +2,7 @@ import {CSSResultGroup, TemplateResult, html, css, GoldElement} from "@benev/sla
 
 import {styles} from "./styles.js"
 import {V2} from "../../../utils/coordinates_in_rect.js"
-import {AnyEffect} from "../../../../../context/types.js"
+import {AnyEffect, At, Indicator} from "../../../../../context/types.js"
 import {shadow_view} from "../../../../../context/context.js"
 import {calculate_effect_width} from "../../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../../utils/calculate_start_position.js"
@@ -13,12 +13,11 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 	use.watch(() => use.context.state)
 
 	const effect = use.context.state.effects.find(effect => effect.id === any_effect.id)!
-	const {effect_drag, on_drop} = use.context.controllers.timeline
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
 	const zoom = use.context.state.zoom
-	const {grabbed, hovering} = effect_drag
 	const controller = use.context.controllers.timeline
 	const media_controller = use.context.controllers.media
+	const effectDragHandler = use.context.controllers.timeline.effectDragHandler
 	const handler = controller.effect_trim_handler
 	const [fileNotFound, setFileNotFound] = use.state(false)
 	const [timelineScrollLeft, setTimelineScrollLeft] = use.state(0)
@@ -38,8 +37,8 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 		}
 	}))
 
-	use.mount(() => on_drop(({grabbed}) => {
-		if(grabbed.effect.id === effect.id) {
+	use.mount(() => effectDragHandler.onDrop(({grabbed}) => {
+		if(grabbed?.effect?.id === effect?.id) {
 			setPreviewPosition({
 				startAtPosition: null,
 				start: null,
@@ -72,36 +71,40 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 
 	const drag_events = {
 		effect_drag_listener() {
-			const effect_is_dragged = hovering?.coordinates && grabbed?.effect.id === effect.id
-			if(effect_is_dragged) {
-				const center_of_effect: V2 = [
-					hovering.coordinates[0] - grabbed.offset.x,
-					hovering.coordinates[1] - grabbed.offset.y
-				]
-				setCords(center_of_effect)
+			const dispose = effectDragHandler.onEffectDrag((e) => {
+				const isDragged = e.grabbed.effect.id === effect.id
+				if(isDragged) {
+					const center_of_effect: V2 = [
+						e.hovering.coordinates[0] - e.grabbed.offset.x,
+						e.hovering.coordinates[1] - e.grabbed.offset.y
+					]
+					setCords(center_of_effect)
+				}
+			})
+			return () => dispose()
+		},
+		start(event: PointerEvent) {
+			const timelineElement = timeline.shadowRoot?.querySelector(".timeline-relative")
+			const bounds = timelineElement?.getBoundingClientRect()
+			const indicator = (event.target as HTMLElement).part.value as Indicator
+			if(bounds && !handler.grabbed) {
+				const x = event.clientX - bounds.left
+				const y = event.clientY - bounds.top
+				const at = {coordinates: [x >= 0 ? x : 0, y >= 0 ? y : 0], indicator} satisfies At
+				effectDragHandler.start({effect, offset: {x: event.offsetX, y: event.offsetY}}, at)
 			}
 		},
-		start(event: DragEvent) {
-			const img = new Image()
-			img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
-			event.dataTransfer?.setDragImage(img, 0, 0)
-			effect_drag.dragzone.dragstart({effect, offset: {x: event.offsetX, y: event.offsetY}})(event)
+		drop() {
+			effectDragHandler.drop()
 		},
-		drop(event: DragEvent) {
-			const hovering = use.context.controllers.timeline.effect_drag.hovering
-			if(hovering) {
-				effect_drag.dropzone.drop(hovering)(event)
-			} else {
-				effect_drag.dragzone.dragend()(event)
-			}
-		},
-		end(event: DragEvent) {
-			effect_drag.dragzone.dragend()(event)
+		end() {
+			effectDragHandler.end()
 		}
 	}
 
 	use.mount(() => {
-		const dispose = handler.onDragOver(({start_at_position, effectId, start, end}) => {
+		const dispose = drag_events.effect_drag_listener()
+		const dispose1 = handler.onDragOver(({start_at_position, effectId, start, end}) => {
 			if(effectId === effect.id) {
 				setPreviewPosition({
 					start,
@@ -110,20 +113,25 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 				})
 			}
 		})
-		window.addEventListener("dragend", drag_events.end)
-		window.addEventListener("drop", drag_events.drop)
-		return () => {removeEventListener("drop", drag_events.drop); removeEventListener("dragend", drag_events.end); dispose()}
+		const dropevents = (e: PointerEvent) => {
+			drag_events.drop()
+			handler.trim_drop(e, use.context.state)
+		}
+		const endevents = (e: PointerEvent) => {
+			drag_events.end()
+			handler.trim_end(e, use.context.state)
+		}
+		window.addEventListener("pointercancel", endevents)
+		window.addEventListener("pointerup", dropevents)
+		return () => {removeEventListener("pointerup", dropevents); removeEventListener("pointercancel", endevents); dispose(); dispose1()}
 	})
 
-	drag_events.effect_drag_listener()
-	
 	const render_trim_handle = (side: "left" | "right") => {
 		return html`
 			<span
-				draggable="true"
-				@drop=${(e: DragEvent) => handler.trim_drop(e, use.context.state)}
-				@dragend=${(e: DragEvent) => handler.trim_end(e, use.context.state)}
-				@dragstart=${(e: DragEvent) => handler.trim_start(e, effect, side)}
+				@pointerup=${(e: PointerEvent) => handler.trim_drop(e, use.context.state)}
+				@pointercancel=${(e: PointerEvent) => handler.trim_end(e, use.context.state)}
+				@pointerdown=${(e: PointerEvent) => handler.trim_start(e, effect, side)}
 				class="trim-handle-${side}"
 			>
 				<span class=line></span>
@@ -132,21 +140,23 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 			`
 	}
 
+	const grabbed = effectDragHandler.grabbed?.effect === effect
+
 	const renderPreview = () => {
 		return html`
 			<div
-				?data-grabbed=${grabbed?.effect === effect}
+				?data-grabbed=${grabbed}
 				?data-selected=${use.context.state.selected_effect?.id === effect.id}
 				style="
 					${inline_css}
+					background-image: none;
 					width: ${((previewPosition.end ?? effect.end) - (previewPosition.start ?? effect.start)) * Math.pow(2, zoom)}px;
 					transform: translate(
 						${x ?? calculate_start_position(previewPosition.startAtPosition ?? effect.start_at_position, use.context.state.zoom)}px,
 						${y ?? calculate_effect_track_placement(effect.track, use.context.state.effects)}px
 					);
 				"
-				@dragstart=${drag_events.start}
-				draggable="true"
+				@pointerdown=${drag_events.start}
 				class="trim-handles"
 			>
 				${render_trim_handle("left")}
@@ -160,7 +170,7 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 		<span
 			class="effect"
 			?data-no-file=${fileNotFound}
-			?data-grabbed=${grabbed?.effect === effect}
+			?data-grabbed=${grabbed}
 			?data-selected=${use.context.state.selected_effect?.id === effect.id}
 			style="
 				${inline_css}
@@ -170,8 +180,7 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 					${y ?? calculate_effect_track_placement(effect.track, use.context.state.effects)}px
 				);
 			"
-			draggable="true"
-			@dragstart=${drag_events.start}
+			@pointerdown=${drag_events.start}
 			@click=${() => use.context.controllers.timeline.set_selected_effect(effect, use.context.controllers.compositor, use.context.state)}
 		>
 			${fileNotFound

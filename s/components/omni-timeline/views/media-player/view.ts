@@ -13,11 +13,11 @@ export const MediaPlayer = shadow_view(use => () => {
 	use.watch(() => use.context.state)
 	const state = use.context.state
 	const compositor = use.once(() => use.context.controllers.compositor)
-	const playhead = use.context.controllers.timeline
+	const playhead = use.context.controllers.timeline.playheadDragHandler
 	const [isVideoMuted, setIsVideoMuted] = use.state(false)
 
 	use.mount(() => {
-		const unsub_onplayhead = playhead.on_playhead_drag(() => {
+		const unsub_onplayhead = playhead.onPlayheadMoveThrottled(() => {
 			if(use.context.state.is_playing) {compositor.set_video_playing(false)}
 			compositor.seek(use.context.state.timecode, true)
 		})

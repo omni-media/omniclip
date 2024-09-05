@@ -10,7 +10,8 @@ export const styles = css`
 	.timeline {
 		display: flex;
 		flex-direction: column;
-		
+		user-select: none;
+
 		& .timeline-relative {
 			position: relative;
 
