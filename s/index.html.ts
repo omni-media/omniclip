@@ -1,4 +1,4 @@
-import {template, html, easypage, startup_scripts_with_dev_mode} from "@benev/turtle"
+import {template, html, easypage} from "@benev/turtle"
 export default template(async basic => {
 	const path = basic.path(import.meta.url)
 
@@ -25,7 +25,6 @@ export default template(async basic => {
 				<img class="logo-loader" src="/assets/icon3.png" />
 				<div class="loader"><div class="loaderBar"></div></div>
 			</div>
-			<landing-page></landing-page>
-			`
+		`
 	})
 })

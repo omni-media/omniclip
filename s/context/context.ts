@@ -2,6 +2,7 @@ import {AppCore, Pojo, Nexus, ZipAction, watch, signals} from "@benev/slate"
 import {slate, Context, PanelSpec} from "@benev/construct/x/mini.js"
 
 import {store} from "./controllers/store/store.js"
+import {removeLoadingPageIndicator} from "../main.js"
 import {Media} from "./controllers/media/controller.js"
 import {Timeline} from "./controllers/timeline/controller.js"
 import {Compositor} from "./controllers/compositor/controller.js"
@@ -13,6 +14,7 @@ import {FFmpegHelper} from "./controllers/video-export/helpers/FFmpegHelper/help
 import {StockLayouts} from "@benev/construct/x/context/controllers/layout/parts/utils/stock_layouts.js"
 
 export interface MiniContextOptions {
+	projectId: string
 	panels: Pojo<PanelSpec>,
 	layouts: StockLayouts
 }
@@ -32,8 +34,14 @@ export class OmniContext extends Context {
 	}
 
 	#save_to_storage(state: HistoricalState) {
-		this.#store.effects = state.effects
-		this.#store.tracks = state.tracks
+		if(state.projectId) {
+			this.#store[state.projectId] = {
+				projectName: state.projectName,
+				projectId: state.projectId,
+				effects: state.effects,
+				tracks: state.tracks
+			}
+		}
 	}
 
 	#updateAnimationTimeline(state: HistoricalState) {
@@ -41,18 +49,12 @@ export class OmniContext extends Context {
 		this.controllers.compositor.managers.animationManager.updateTimelineDuration(timelineDuration)
 	}
 
-	get #state_from_storage() {
-		if(this.#store.effects && this.#store.tracks) {
-			return {effects: this.#store.effects, tracks: this.#store.tracks}
-		} else return undefined
+	#state_from_storage(projectId: string): HistoricalState {
+		return this.#store[projectId]
 	}
 
 	// state tree with history
-	#core = new AppCore({
-		initial_state: this.#state_from_storage ?? historical_state,
-		history_limit: 64,
-		actions_blueprint: ZipAction.blueprint<HistoricalState>()(historical_actions)
-	})
+	#core: AppCore<HistoricalState, typeof historical_actions>
 
 	get state(): State {
 		return {...this.#non_historical_state.state, ...this.#core.state}
@@ -61,7 +63,7 @@ export class OmniContext extends Context {
 	get actions() {
 		return {
 			...this.#non_historical_actions,
-			...this.#core.actions
+			...this.#core?.actions
 		}
 	}
 
@@ -91,10 +93,7 @@ export class OmniContext extends Context {
 
 	is_webcodecs_supported = signals.op<any>()
 
-	controllers = {
-		compositor: new Compositor(this.actions),
-		media: new Media(this.actions),
-	} as {
+	controllers: {
 		timeline: Timeline,
 		compositor: Compositor
 		media: Media
@@ -116,16 +115,23 @@ export class OmniContext extends Context {
 
 	constructor(options: MiniContextOptions) {
 		super(options)
+		this.#core = new AppCore({
+			initial_state: this.#state_from_storage(options.projectId) ?? {...historical_state, projectId: options.projectId},
+			history_limit: 64,
+			actions_blueprint: ZipAction.blueprint<HistoricalState>()(historical_actions)
+		})
 		this.#check_if_webcodecs_supported()
-		this.#listen_for_state_changes()
+		const compositor = new Compositor(this.actions)
+		const media = new Media(this.actions) 
 		this.controllers = {
-			...this.controllers,
-			timeline: new Timeline(this.actions, this.controllers.media, this.controllers.compositor),
-			video_export: new VideoExport(this.actions, this.controllers.compositor, this.controllers.media)
+			compositor,
+			media,
+			timeline: new Timeline(this.actions, media, compositor),
+			video_export: new VideoExport(this.actions, compositor, media),
 		}
+		this.#listen_for_state_changes()
 		this.#recreate_project_from_localstorage_state(this.state, this.controllers.media)
-		const loadingPageIndicatorElement = document.querySelector(".loading-page-indicator")
-		document.body.removeChild(loadingPageIndicatorElement!)
+		removeLoadingPageIndicator()
 	}
 }
 

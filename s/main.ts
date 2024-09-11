@@ -1,7 +1,8 @@
 import posthog from 'posthog-js'
-import {register_to_dom} from "@benev/slate"
+import {register_to_dom, html} from "@benev/slate"
 import {ConstructEditor, single_panel_layout} from "@benev/construct/x/mini.js"
 
+import {HashRouter} from './tools/hash-router.js'
 import {omnislate, OmniContext} from "./context/context.js"
 import {TextPanel} from "./components/omni-text/panel.js"
 import {AnimPanel} from "./components/omni-anim/panel.js"
@@ -11,6 +12,7 @@ import {OmniAnim} from "./components/omni-anim/component.js"
 import {OmniMedia} from "./components/omni-media/component.js"
 import {TimelinePanel} from "./components/omni-timeline/panel.js"
 import {LandingPage} from './components/landingpage/component.js'
+import {OmniManager} from './components/omni-manager/component.js'
 import {OmniTimeline} from "./components/omni-timeline/component.js"
 import {ProjectSettingsPanel} from "./views/project-settings/panel.js"
 import {ExportPanel} from "./components/omni-timeline/views/export/panel.js"
@@ -24,8 +26,9 @@ posthog.init('phc_CMbHMWGVJSqM1RqGyGxWCyqgaSGbGFKl964fIN3NDwU',
 	}
 )
 
-export function setupContext() {
+export function setupContext(projectId: string) {
 	omnislate.context = new OmniContext({
+		projectId,
 		panels: {
 			TimelinePanel,
 			MediaPanel,
@@ -42,7 +45,32 @@ export function setupContext() {
 	})
 }
 
-setupContext()
+register_to_dom({OmniManager, LandingPage})
+let registered = false
+
+export function removeLoadingPageIndicator() {
+	const loadingPageIndicatorElement = document.querySelector(".loading-page-indicator")
+	if(loadingPageIndicatorElement)
+		document.body.removeChild(loadingPageIndicatorElement!)
+}
+
+const router = new HashRouter({
+  '/': () => {
+		return html`<landing-page></landing-page>`
+	},
+  '/editor': () => {
+		return html`<omni-manager></omni-manager>`
+	},
+  '/editor/*': (projectId) => {
+		if(!registered) {
+			register_to_dom({OmniTimeline, OmniText, OmniMedia, OmniAnim, ConstructEditor})
+			registered = true
+		}
+		setupContext(projectId)
+		return html`<construct-editor></construct-editor>`
+	},
+})
+
+document.body.append(router.element)
 
 //@ts-ignore
-register_to_dom({ConstructEditor, OmniTimeline, OmniText, OmniMedia, LandingPage, OmniAnim})

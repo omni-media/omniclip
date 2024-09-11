@@ -14,6 +14,8 @@ export type V2 = [number, number]
 export type ExportStatus = "complete" | "composing" | "demuxing" | "flushing"
 
 export interface HistoricalState {
+	projectName: string
+	projectId: string
 	effects: AnyEffect[]
 	tracks: XTrack[]
 }

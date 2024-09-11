@@ -11,6 +11,19 @@ export const styles = css`
 		flex-direction: column;
 	}
 
+	.project-name {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5em;
+
+		& span {
+			border: 1px solid;
+			border-radius: 10px;
+			padding: 0.5em;
+		}
+	}
+
 	canvas {
 		height: 100% !important;
 		width: 100% !important;

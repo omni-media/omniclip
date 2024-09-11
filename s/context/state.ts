@@ -3,6 +3,8 @@ import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 import {HistoricalState, NonHistoricalState} from "./types.js"
 
 export const historical_state: HistoricalState = {
+	projectName: `project-${generate_id().slice(0, 6)}`,
+	projectId: generate_id(),
 	tracks: [
 		{id: generate_id()},
 		{id: generate_id()},

@@ -62,6 +62,7 @@ export const MediaPlayer = shadow_view(use => () => {
 		use.context.helpers.ffmpeg.is_loading.value,
 		use.context.is_webcodecs_supported.value), () => html`
 		<div class="flex">
+			<div class="project-name"><span>${use.context.state.projectName}</span></div>
 			<figure>
 				<div class="canvas-container">
 					${use.context.state.selected_effect?.kind === "text" && compositor.canvas.getActiveObject()
