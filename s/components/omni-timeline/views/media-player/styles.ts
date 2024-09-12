@@ -17,10 +17,31 @@ export const styles = css`
 		justify-content: center;
 		padding: 0.5em;
 
-		& span {
+		& .box {
+			display: flex;
+			align-items: center;
 			border: 1px solid;
 			border-radius: 10px;
-			padding: 0.5em;
+
+			& .icons {
+				display: flex;
+				cursor: pointer;
+
+				& .check {
+					display: flex;
+					color: green;
+				}
+			}
+
+			& input {
+				background: none;
+				border: none;
+				padding: 0.5em;
+			}
+
+			& svg {
+				margin: 0.5em;
+			}
 		}
 	}
 

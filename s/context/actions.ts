@@ -55,6 +55,9 @@ export const non_historical_actions = actionize_non_historical({
 })
 
 export const historical_actions = actionize_historical({
+	set_project_name: state => (value: string) => {
+		state.projectName = value
+	},
 	add_text_effect: state => (effect: TextEffect) => {
 		state.effects.push(effect)
 	},
