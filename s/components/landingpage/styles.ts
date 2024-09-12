@@ -181,8 +181,8 @@ export default css`
 	}
 
 	& .try {
+		border: 2px solid rgba(255, 255, 255, 1);
 		font-weight: bold;
-		border: none;
 		border-radius: 6px;
 		background: rgba(255, 255, 255, 1);
 		color: rgba(0, 0, 0, 1);
@@ -602,6 +602,11 @@ export default css`
 	}
 	.welcome {
 		padding: 5em 1em;
+
+		& .try, .discord {
+			font-size: 0.7rem;
+			padding: 0;
+		}
 	}
 
 	.core {
