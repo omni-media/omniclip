@@ -27,6 +27,12 @@ export const styles = css`
 			& svg {
 				color: green;
 			}
+
+			&:hover {
+				& svg {
+					opacity: 1;
+				}
+			}
 		}
 
 		& .project, .new-project {
