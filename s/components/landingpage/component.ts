@@ -58,8 +58,9 @@ export class LandingPage extends LitElement {
 					this.requestUpdate()
 				}} class="menu-icon" src="/assets/hamburger.svg">
 				<div class="menu" ?data-opened=${this.menuOpened}>
-					<a href="#welcome">Home</a>
-					<a href="#core">Principles</a> <a href="#capabilities">Capabilities</a>
+					<a @click=${() => this.scrollIntoElementView("welcome")} href="#welcome">Home</a>
+					<a @click=${() => this.scrollIntoElementView("core")} href="#core">Principles</a>
+					<a @click=${() => this.scrollIntoElementView("capabilities")} href="#capabilities">Capabilities</a>
 				</div>
 				<div class="nav">
 					<a @click=${() => this.scrollIntoElementView("welcome")} href="#welcome">Home</a>
