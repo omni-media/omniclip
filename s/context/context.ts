@@ -32,7 +32,7 @@ export class OmniContext extends Context {
 			this.#updateAnimationTimeline(state)
 		})
 		watch.track(() => this.#core.state.effects, (effects) => {
-			this.controllers.compositor.managers.animationManager.refreshAnimations(effects)
+			this.controllers.compositor.managers.animationManager.refreshAnimations(effects, this.state)
 		})
 	}
 

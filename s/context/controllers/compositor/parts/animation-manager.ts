@@ -68,7 +68,8 @@ export class AnimationManager {
 	}
 
 	refreshAnimations(
-		effects: AnyEffect[]
+		effects: AnyEffect[],
+		state: State
 	) {
 		anime.remove(this.timeline)
 		this.timeline = anime.timeline({
@@ -82,7 +83,10 @@ export class AnimationManager {
 			targetEffect: effect ?? animation.targetEffect
 		}})
 		this.#animations = updated
-		this.#animations.forEach(animation => this.addAnimationToEffect(animation.targetEffect, animation))
+		this.#animations.forEach(animation => {
+			this.removeAnimationFromEffect(animation.targetEffect, animation.type.includes("In") ? "In" : "Out", state)
+			this.addAnimationToEffect(animation.targetEffect, animation)
+		})
 	}
 
 	addAnimationToEffect(
@@ -161,7 +165,7 @@ export class AnimationManager {
 		anime.remove(object!)
 		const filtered = this.#animations.filter(animation => !(animation.targetEffect.id === effect.id && animation.type.includes(type)))
 		this.#animations = filtered
-		this.refreshAnimations(state.effects)
+		this.refreshAnimations(state.effects, state)
 		this.onChange.publish(true)
 	}
 
@@ -171,7 +175,7 @@ export class AnimationManager {
 		anime.remove(object!)
 		const filtered = this.#animations.filter(animation => !(animation.targetEffect.id === effect.id))
 		this.#animations = filtered
-		this.refreshAnimations(state.effects)
+		this.refreshAnimations(state.effects, state)
 		this.onChange.publish(true)
 	}
 }
