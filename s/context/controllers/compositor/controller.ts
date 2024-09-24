@@ -55,7 +55,7 @@ export class Compositor {
 			() => this.#is_playing.value,
 			(is_playing) => {
 				if(is_playing) {
-					this.managers.animationManager.play()
+					this.managers.animationManager.play(this.timecode)
 					this.managers.videoManager.play_videos()
 					this.managers.audioManager.play_audios()
 				} else {
@@ -137,7 +137,6 @@ export class Compositor {
 	}
 
 	async seek(timecode: number, redraw?: boolean) {
-		this.managers.animationManager.seek(timecode)
 		for(const effect of this.currently_played_effects.values()) {
 			if(effect.kind === "audio") {
 				const audio = this.managers.audioManager.get(effect.id)

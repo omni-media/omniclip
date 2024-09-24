@@ -27,21 +27,38 @@ export const styles = css`
 		& .btn-cnt {
 			display: flex;
 			align-items: center;
+			gap: 0.5em;
 
 			& button {
 				padding: 1em 2em;
 				border-radius: 10px;
-				background: gray;
+				background: #363636;
+				cursor: pointer;
+
+				&[data-selected] {
+					border: 2px solid gray;
+				}
 			}
 		}
 
 		& .animation {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 150px;
+			height: 150px;
 			background: black;
+			cursor: pointer;
 			font-size: 1.5em;
 			border-radius: 5px;
 			margin: 1em;
 			padding: 3em 2em;
 			position: relative;
+			border: 1px solid #373535;
+
+			&[data-selected] {
+				border: 2px solid gray;
+			}
 			
 			&:hover {
 				& .add-btn {

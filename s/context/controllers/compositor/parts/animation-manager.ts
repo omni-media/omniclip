@@ -1,11 +1,22 @@
+import {pub} from "@benev/slate"
+import {FabricObject} from "fabric"
 import anime from "animejs/lib/anime.es.js"
-import {Compositor} from "../controller.js"
-import {ImageEffect, VideoEffect} from "../../../types.js"
 
+import {Compositor} from "../controller.js"
+import {AnyEffect, ImageEffect, State, VideoEffect} from "../../../types.js"
+import { calculateProjectDuration } from "../../../../utils/calculate-project-duration.js"
+
+interface AnimationBase<T = AnimationIn | AnimationOut> {
+	targetEffect: VideoEffect | ImageEffect
+	type: T
+}
+export const animationNone = "none" as const
 export const animationIn = ["slideIn"] as const
 export const animationOut = ["slideOut"] as const
-export type AnimationIn = (typeof animationIn)[number]
-export type AnimationOut = (typeof animationOut)[number]
+export type AnimationIn = AnimationBase<(typeof animationIn)[number]>
+export type AnimationOut = AnimationBase<(typeof animationOut)[number]>
+export type AnimationNone = AnimationBase<(typeof animationNone)[number]>
+export type Animation = AnimationIn | AnimationOut
 
 export class AnimationManager {
 	timeline = anime.timeline({
@@ -13,28 +24,76 @@ export class AnimationManager {
 		autoplay: false,
 	})
 
+	#animations: Animation[] = []
+	onChange = pub()
+
 	constructor(private compositor: Compositor) {}
+
+	selectedAnimationForEffect(effect: AnyEffect | null, animation: Animation) {
+		if(!effect) return
+		const haveAnimation = this.#animations.find(anim => anim.targetEffect.id === effect.id && animation.type === anim.type)
+		if(haveAnimation) {
+			return true
+		} else return false
+	}
+
+	isAnyAnimationInSelected(effect: AnyEffect | null) {
+		if(!effect) return
+		const haveAnimation = this.#animations.find(animation => animation.targetEffect.id === effect.id && animation.type.includes("In"))
+		if(haveAnimation) {
+			return true
+		} else false
+	}
+
+	isAnyAnimationOutSelected(effect: AnyEffect | null) {
+		if(!effect) return
+		const haveAnimation = this.#animations.find(animation => animation.targetEffect.id === effect.id && animation.type.includes("Out"))
+		if(haveAnimation) {
+			return true
+		} else false
+	}
 
 	updateTimelineDuration(duration: number) {
 		this.timeline.duration = duration
 	}
 
 	#getObject(effect: VideoEffect | ImageEffect) {
-		return this.compositor.canvas.getObjects().find((object) => {
-			//@ts-ignore
-			const effectObject = object.effect as ImageEffect | VideoEffect
-			if (effect.id === effectObject?.id) {
-				return object
-			}
-		})
+		const videoObject = this.compositor.managers.videoManager.get(effect.id)
+		const imageObject = this.compositor.managers.imageManager.get(effect.id)
+		if(videoObject) {
+			return videoObject
+		} else if(imageObject) {
+			return imageObject
+		}
 	}
 
-	addAnimationToObject(
+	refreshAnimations(
+		effects: AnyEffect[]
+	) {
+		anime.remove(this.timeline)
+		this.timeline = anime.timeline({
+			duration: this.timeline.duration,
+			autoplay: false,
+		})
+		const updated = this.#animations.map(animation => {
+			const effect = effects.find(effect => effect.id === animation.targetEffect.id) as ImageEffect | VideoEffect | undefined
+			return {
+			...animation,
+			targetEffect: effect ?? animation.targetEffect
+		}})
+		this.#animations = updated
+		this.#animations.forEach(animation => this.addAnimationToEffect(animation.targetEffect, animation))
+	}
+
+	addAnimationToEffect(
 		effect: ImageEffect | VideoEffect,
 		animation: AnimationIn | AnimationOut,
+		state?: State
 	) {
+		if(state) {this.timeline.duration = calculateProjectDuration(state.effects)}
 		const object = this.#getObject(effect)
-		switch (animation) {
+		this.#animations.push(animation)
+		switch (animation.type) {
 			case "slideIn": {
 				const targetPosition = {left: effect.rect.position_on_canvas.x}
 				const startPosition = {left: -effect.rect.width}
@@ -64,10 +123,14 @@ export class AnimationManager {
 				break
 			}
 		}
+		this.onChange.publish(true)
 	}
 
-	play() {
-		this.timeline.play()
+	play(time: number) {
+		// console.log(this.timeline.currentTime, this.timeline.progress, "PLAYI", time)
+		// this.timeline.seek(time)
+		// this.timeline.play()
+		// console.log("anim plays", this.timeline)
 	}
 
 	pause() {
@@ -82,8 +145,33 @@ export class AnimationManager {
 		this.timeline.duration = duration
 	}
 
-	removeAnimationFromObject(effect: ImageEffect | VideoEffect) {
+	#resetObjectProperties(fabric: FabricObject, effect: ImageEffect | VideoEffect) {
+		fabric.left = effect.rect.position_on_canvas.x
+		fabric.top = effect.rect.position_on_canvas.y
+		fabric.scaleX = effect.rect.scaleX
+		fabric.scaleY = effect.rect.scaleY
+		fabric.angle = effect.rect.rotation
+		fabric.width = effect.rect.width
+		fabric.height = effect.rect.height
+	}
+
+	removeAnimationFromEffect(effect: ImageEffect | VideoEffect, type: "In" | "Out", state: State) {
 		const object = this.#getObject(effect)
+		this.#resetObjectProperties(object!, effect)
 		anime.remove(object!)
+		const filtered = this.#animations.filter(animation => !(animation.targetEffect.id === effect.id && animation.type.includes(type)))
+		this.#animations = filtered
+		this.refreshAnimations(state.effects)
+		this.onChange.publish(true)
+	}
+
+	removeAllAnimationsFromEffect(effect: ImageEffect | VideoEffect, state: State) {
+		const object = this.#getObject(effect)
+		this.#resetObjectProperties(object!, effect)
+		anime.remove(object!)
+		const filtered = this.#animations.filter(animation => !(animation.targetEffect.id === effect.id))
+		this.#animations = filtered
+		this.refreshAnimations(state.effects)
+		this.onChange.publish(true)
 	}
 }

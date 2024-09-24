@@ -214,6 +214,9 @@ export class Timeline {
 		if(state.selected_effect) {
 			this.actions.set_selected_effect(null)
 			this.actions.remove_effect(state.selected_effect)
+			if(state.selected_effect.kind === "video" || state.selected_effect.kind === "image") {
+				this.compositor.managers.animationManager.removeAllAnimationsFromEffect(state.selected_effect, state)
+			}
 		}
 	}
 }
