@@ -16,16 +16,15 @@ export const MediaPlayer = shadow_view(use => () => {
 	const state = use.context.state
 	const compositor = use.once(() => use.context.controllers.compositor)
 	const playhead = use.context.controllers.timeline.playheadDragHandler
-	const [isVideoMuted, setIsVideoMuted] = use.state(false)
 
 	use.mount(() => {
-		const unsub_onplayhead1 = playhead.onPlayheadMove(() => {
-			compositor.managers.animationManager.seek(use.context.state.timecode)
-		})
-		const unsub_onplayhead = playhead.onPlayheadMoveThrottled(() => {
+		const unsub_onplayhead1 = playhead.onPlayheadMove(async (x) => {
 			if(use.context.state.is_playing) {compositor.set_video_playing(false)}
-			compositor.seek(use.context.state.timecode, true)
 			compositor.compose_effects(use.context.state.effects, use.context.state.timecode)
+			compositor.managers.animationManager.seek(use.context.state.timecode)
+			compositor.seek(use.context.state.timecode, true).then(() =>
+				compositor.compose_effects(use.context.state.effects, use.context.state.timecode)
+			)
 		})
 		const dispose1 = watch.track(
 			() => use.context.state,
@@ -49,7 +48,7 @@ export const MediaPlayer = shadow_view(use => () => {
 			}
 		)
 		const unsub_on_playing = compositor.on_playing(() => compositor.compose_effects(use.context.state.effects, use.context.state.timecode))
-		return () => {unsub_on_playing(), unsub_onplayhead(), dispose1(), dispose2(), unsub_onplayhead1()}
+		return () => {unsub_on_playing(), dispose1(), dispose2(), unsub_onplayhead1()}
 	})
 
 	const figure = use.defer(() => use.shadow.querySelector("figure"))!

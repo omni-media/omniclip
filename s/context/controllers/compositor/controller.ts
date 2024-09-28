@@ -33,6 +33,7 @@ export class Compositor {
 	canvas_element = document.createElement("canvas")
 	canvas: Canvas
 	ctx = this.canvas_element.getContext("2d")
+	#seekedResolve: ((value: unknown) => void) | null = null
 	
 	managers: Managers
 
@@ -144,6 +145,7 @@ export class Compositor {
 				if(redraw && timecode && audio) {
 					const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
 					audio.currentTime = current_time
+					await this.#onSeeked(audio)
 				}
 			}
 			if(effect.kind === "video") {
@@ -153,9 +155,25 @@ export class Compositor {
 				if(redraw && timecode && element) {
 					const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
 					element.currentTime = current_time
+					await this.#onSeeked(element)
 				}
 			}
 		}
+	}
+
+	#onSeeked(element: HTMLVideoElement | HTMLAudioElement) {
+		const onSeekedEvent = () => {
+			if(this.#seekedResolve) {
+				element.removeEventListener("seeked", onSeekedEvent)
+				this.#seekedResolve(true)
+				this.#seekedResolve = null
+			}
+		}
+		onSeekedEvent()
+		return new Promise((resolve) => {
+			this.#seekedResolve = resolve
+			element.addEventListener("seeked", onSeekedEvent, { once: true })
+		})
 	}
 
 	#add_effects_to_canvas(effects: AnyEffect[]) {

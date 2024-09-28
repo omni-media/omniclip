@@ -135,6 +135,7 @@ export const TimeRuler = shadow_view(use => (timeline: GoldElement) => {
 		const zoom = use.context.state.zoom
 		const milliseconds = x * Math.pow(2, -zoom)
 		use.context.actions.set_timecode(milliseconds)
+		use.context.controllers.timeline.playheadDragHandler.onPlayheadMove.publish({x})
 	}
 
 	return html`
