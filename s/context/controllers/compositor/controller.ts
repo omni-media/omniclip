@@ -7,6 +7,7 @@ import {TextManager} from "./parts/text-manager.js"
 import {ImageManager} from "./parts/image-manager.js"
 import {AudioManager} from "./parts/audio-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
+import {FiltersManager} from "./parts/filter-manager.js"
 import {AlignGuidelines} from "./lib/aligning_guidelines.js"
 import {AnyEffect, AudioEffect, State} from "../../types.js"
 import {AnimationManager} from "./parts/animation-manager.js"
@@ -19,6 +20,7 @@ export interface Managers {
 	imageManager: ImageManager
 	audioManager: AudioManager
 	animationManager: AnimationManager
+	filtersManager: FiltersManager
 }
 
 export class Compositor {
@@ -48,7 +50,8 @@ export class Compositor {
 		textManager: new TextManager(this, actions),
 		imageManager: new ImageManager(this, actions),
 		audioManager: new AudioManager(this, actions),
-		animationManager: new AnimationManager(this)
+		animationManager: new AnimationManager(this),
+		filtersManager: new FiltersManager(this)
 	}
 
 		this.#on_playing()

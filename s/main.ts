@@ -10,8 +10,10 @@ import {MediaPanel} from "./components/omni-media/panel.js"
 import {OmniText} from "./components/omni-text/component.js"
 import {OmniAnim} from "./components/omni-anim/component.js"
 import {OmniMedia} from "./components/omni-media/component.js"
+import {FiltersPanel} from './components/omni-filters/panel.js'
 import {TimelinePanel} from "./components/omni-timeline/panel.js"
 import {LandingPage} from './components/landingpage/component.js'
+import {OmniFilters} from './components/omni-filters/component.js'
 import {OmniManager} from './components/omni-manager/component.js'
 import {OmniTimeline} from "./components/omni-timeline/component.js"
 import {ProjectSettingsPanel} from "./views/project-settings/panel.js"
@@ -36,7 +38,8 @@ export function setupContext(projectId: string) {
 			TextPanel,
 			ExportPanel,
 			ProjectSettingsPanel,
-			AnimPanel
+			AnimPanel,
+			FiltersPanel
 		},
 		layouts: {
 			empty: single_panel_layout("TimelinePanel"),
@@ -63,7 +66,7 @@ const router = new HashRouter({
 	},
   '/editor/*': (projectId) => {
 		if(!registered) {
-			register_to_dom({OmniTimeline, OmniText, OmniMedia, OmniAnim, ConstructEditor})
+			register_to_dom({OmniTimeline, OmniText, OmniMedia, OmniAnim, ConstructEditor, OmniFilters})
 			registered = true
 		}
 		setupContext(projectId)

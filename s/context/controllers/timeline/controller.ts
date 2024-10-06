@@ -191,10 +191,16 @@ export class Timeline {
 		return normalized
 	}
 
-	set_selected_effect(effect: AnyEffect, compositor: Compositor, state: State) {
-		this.actions.set_selected_effect(effect)
-		if(effect.kind === "text") {compositor.managers.textManager.set_clicked_effect(effect)}
-		this.set_or_discard_active_object_on_canvas_for_selected_effect(effect, compositor, state)
+	set_selected_effect(effect: AnyEffect | undefined | null, compositor: Compositor, state: State) {
+		if(!effect) {
+			compositor.canvas.discardActiveObject()
+			this.actions.set_selected_effect(null)
+		} else {
+			this.actions.set_selected_effect(effect)
+			if(effect.kind === "text") {compositor.managers.textManager.set_clicked_effect(effect)}
+			this.set_or_discard_active_object_on_canvas_for_selected_effect(effect, compositor, state)
+		}
+		compositor.canvas.renderAll()
 	}
 
 	set_or_discard_active_object_on_canvas_for_selected_effect(selected_effect: AnyEffect, compositor: Compositor, state: State) {
