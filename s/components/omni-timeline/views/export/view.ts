@@ -11,7 +11,6 @@ export const Export = shadow_view(use => () => {
 	use.watch(() => use.context.state)
 
 	const compositor = use.context.controllers.compositor
-	const timeline_state = use.context.state
 	const video_export = use.context.controllers.video_export
 	const state = use.context.state
 	const [logs, setLogs, getLogs] = use.state<string[]>([])
@@ -82,8 +81,8 @@ export const Export = shadow_view(use => () => {
 				${bitrate <= 0 ? html`<span class="error">bitrate must be higher than 0</span>` : null}
 			</div>
 			<div class=export>
-				<span class=info>${`${timeline_state.settings.width}x${timeline_state.settings.height}`}@${use.context.state.timebase}fps</span>
-				<button ?disabled=${bitrate <= 0} class="sparkle-button" @click=${() => video_export.export_start(use.context.state, [timeline_state.settings.width, timeline_state.settings.height], bitrate)}>
+				<span class=info>${`${state.settings.width}x${state.settings.height}`}@${state.timebase}fps</span>
+				<button ?disabled=${bitrate <= 0} class="sparkle-button" @click=${() => video_export.export_start(use.context.state, bitrate)}>
 					<span class="text">${exportSvg}<span>Export</span></span>
 				</button>
 			</div>

@@ -30,7 +30,7 @@ export class FFmpegHelper {
 		await this.ffmpeg.writeFile(`${container_name}`, binary)
 	}
 
-	async merge_audio_with_video_and_mux(effects: AnyEffect[], video_container_name: string, output_file_name: string, media: Media) {
+	async merge_audio_with_video_and_mux(effects: AnyEffect[], video_container_name: string, output_file_name: string, media: Media, timebase: number) {
 		/* audio from video to add back to the raw video we composed that consitsts of just frames,
 		* i decided to not use AudioDecoder etc, instead im just using ffmpeg to encode back audio to video
 		*/
@@ -65,12 +65,12 @@ export class FFmpegHelper {
 
 		const only_image_or_text_or_videos_without_audio = noAudio
 		if(only_image_or_text_or_videos_without_audio) {
-			await this.ffmpeg.exec([
+			await this.ffmpeg.exec(["-r", `${timebase}`,
 				"-i", `${video_container_name}`,
 				"-map", "0:v:0","-c:v" ,"copy", "-y", `${output_file_name}`
 			])
 		} else {
-			await this.ffmpeg.exec([
+			await this.ffmpeg.exec(["-r", `${timebase}`,
 				"-i", `${video_container_name}`, ...filtered_audios.flatMap(({id}) => `-i, ${id}.mp3`.split(", ")),
 				"-filter_complex",
 				`${filtered_audios.map((effect, i) => `[${i + 1}:a]adelay=${effect.start_at_position}:all=1[a${i + 1}];`).join("")}

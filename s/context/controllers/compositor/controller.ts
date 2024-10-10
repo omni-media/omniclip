@@ -338,6 +338,10 @@ export class Compositor {
 		guideline_rect?.scaleToHeight(height - 1)
 	}
 
+	set_timebase(value: number) {
+		this.timebase = value
+	}
+
 	set_video_playing = (playing: boolean) => {
 		this.#is_playing.value = playing
 		this.actions.set_is_playing(playing)

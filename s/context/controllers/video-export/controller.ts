@@ -31,17 +31,17 @@ export class VideoExport {
 		await this.#FileSystemHelper.writeFile(handle, this.#Encoder.file!)
 	}
 
-	export_start(state: State, resolution: number[], bitrate: number) {
-		this.#Encoder.configure(resolution, bitrate)
+	export_start(state: State, bitrate: number) {
+		this.#Encoder.configure([state.settings.width, state.settings.height], bitrate, state.timebase)
 		const sorted_effects = this.#sort_effects_by_track(state.effects)
 		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position + (effect.end - effect.start)))
-		this.#export_process(sorted_effects)
+		this.#export_process(sorted_effects, state.timebase)
 		this.actions.set_is_exporting(true)
 		this.compositor.currently_played_effects.clear()
 		this.compositor.canvas.clear()
 	}
 
-	async #export_process(effects: AnyEffect[]) {
+	async #export_process(effects: AnyEffect[], timebase: number) {
 		await this.#Decoder.get_and_draw_decoded_frame(effects, this.#timestamp)
 		this.compositor.compose_effects(effects, this.#timestamp, true)
 		this.actions.set_export_status("composing")
@@ -53,12 +53,12 @@ export class VideoExport {
 		this.actions.set_export_progress(progress)
 
 		if(Math.ceil(this.#timestamp) >= this.#timestamp_end) {
-			this.#Encoder.export_process_end(effects)
+			this.#Encoder.export_process_end(effects, timebase)
 			return
 		}
 
 		requestAnimationFrame(() => {
-			this.#export_process(effects)
+			this.#export_process(effects, timebase)
 			this.#FPSCounter.update()
 		})
 	}

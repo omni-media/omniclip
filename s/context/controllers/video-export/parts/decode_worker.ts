@@ -8,7 +8,7 @@ let timestamp_end = 0
 let fps = 0
 let wait_time = 0
 let lastProcessedTimestamp = 0
-const timebaseInMicroseconds = 1000/25 * 1000
+let timebaseInMicroseconds = 1000/25 * 1000
 
 const decoder = new VideoDecoder({
 	output(frame) {
@@ -42,6 +42,7 @@ self.addEventListener("message", async message => {
 		decoded_effect = message.data.effect
 		timestamp = message.data.starting_timestamp
 		timebase = message.data.timebase
+		timebaseInMicroseconds = 1000/timebase * 1000
 		timestamp_end = (message.data.starting_timestamp) + (message.data.effect.end - decoded_effect.start)
 		// frames = message.data.frames
 		// fps = (message.data.frames) / (message.data.effect.raw_duration / 1000)
@@ -79,7 +80,7 @@ function processFrame(currentFrame: VideoFrame, targetFrameInterval: number) {
 					effect_id: decoded_effect.id,
 				}
 		})
-		timestamp += 1000 / 25
+		timestamp += 1000 / timebase
 		lastProcessedTimestamp += currentFrame.timestamp
 	}
 
@@ -94,7 +95,7 @@ function processFrame(currentFrame: VideoFrame, targetFrameInterval: number) {
 				}
 		})
 
-		timestamp += 1000 / 25
+		timestamp += 1000 / timebase
 		lastProcessedTimestamp += targetFrameInterval
 	}
 	
@@ -109,7 +110,7 @@ function processFrame(currentFrame: VideoFrame, targetFrameInterval: number) {
 				}
 		})
 
-		timestamp += 1000 / 25
+		timestamp += 1000 / timebase
 		lastProcessedTimestamp += targetFrameInterval
 	}
 

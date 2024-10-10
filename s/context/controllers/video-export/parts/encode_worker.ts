@@ -1,6 +1,5 @@
 import {BinaryAccumulator} from "../tools/BinaryAccumulator/tool.js"
 
-let timebase = 25
 const binary_accumulator = new BinaryAccumulator()
 
 async function handle_chunk(chunk: EncodedVideoChunk) {
@@ -18,7 +17,7 @@ const config: VideoEncoderConfig = {
 	width: 1280,
 	height: 720,
 	bitrate: 9_000_000, // 9 Mbps
-	framerate: timebase,
+	framerate: 60,
 	bitrateMode: "constant"
 }
 
@@ -38,6 +37,7 @@ self.addEventListener("message", async message => {
 		config.bitrate = message.data.bitrate * 1000
 		config.width = message.data.width
 		config.height = message.data.height
+		config.framerate = message.data.timebase
 		encoder.configure(config)
 	}
 	if(message.data.action === "encode") {

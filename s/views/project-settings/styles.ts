@@ -4,14 +4,24 @@ export const styles = css`
 	:host {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
+		align-items: start;
 		width: 100%;
 		height: 100%;
 	}
 
+	.settings {
+		display: flex;
+		gap: 1em;
+		flex-direction: column;
+		padding: 1em;
+
+		& select {
+			cursor: pointer;
+		}
+	}
+
 	h2 {
-		align-self: start;
-		margin: 1em;
+		margin-bottom: 0.5em;
 	}
 
 	h4 {

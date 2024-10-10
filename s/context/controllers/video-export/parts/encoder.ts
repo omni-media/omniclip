@@ -13,14 +13,14 @@ export class Encoder {
 		this.#ffmpeg = new FFmpegHelper(actions)
 	}
 
-	export_process_end(effects: AnyEffect[]) {
+	export_process_end(effects: AnyEffect[], timebase: number) {
 		this.actions.set_export_status("flushing")
 		this.encode_worker.postMessage({action: "get-binary"})
 		this.encode_worker.onmessage = async (msg) => {
 			if(msg.data.action === "binary") {
 				const output_name = "output.mp4"
 				await this.#ffmpeg.write_composed_data(msg.data.binary, "composed.h264")
-				await this.#ffmpeg.merge_audio_with_video_and_mux(effects, "composed.h264", output_name, this.media)
+				await this.#ffmpeg.merge_audio_with_video_and_mux(effects, "composed.h264", output_name, this.media, timebase)
 				const muxed_file = await this.#ffmpeg.get_muxed_file(output_name)
 				this.file = muxed_file
 				this.actions.set_export_status("complete")
@@ -44,8 +44,8 @@ export class Encoder {
 		}
 	}
 
-	configure([width, height]: number[], bitrate: number) {
-		this.encode_worker.postMessage({action: "configure", width, height, bitrate})
+	configure([width, height]: number[], bitrate: number, timebase: number) {
+		this.encode_worker.postMessage({action: "configure", width, height, bitrate, timebase})
 	}
 
 }
