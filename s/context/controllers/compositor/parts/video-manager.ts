@@ -101,7 +101,7 @@ export class VideoManager extends Map<string, FabricImage> {
 			if(effect.kind === "video") {
 				const video = this.get(effect.id)
 				if(video) {
-					const element = video.getElement() as HTMLVideoElement
+					const element = video._originalElement as HTMLVideoElement
 					element.pause()
 				}
 			}
@@ -113,7 +113,7 @@ export class VideoManager extends Map<string, FabricImage> {
 			if(effect.kind === "video") {
 				const video = this.get(effect.id)
 				if(video) {
-					const element = video.getElement() as HTMLVideoElement
+					const element = video._originalElement as HTMLVideoElement
 					await	element.play()
 				}
 			}
@@ -123,7 +123,7 @@ export class VideoManager extends Map<string, FabricImage> {
 	pause_video(effect: VideoEffect) {
 		const video = this.get(effect.id)
 		if(video) {
-			const element = video.getElement() as HTMLVideoElement
+			const element = video._originalElement as HTMLVideoElement
 			element.pause()
 		}
 	}
@@ -131,7 +131,7 @@ export class VideoManager extends Map<string, FabricImage> {
 	async play_video(effect: VideoEffect) {
 		const video = this.get(effect.id)
 		if(video) {
-			const element = video.getElement() as HTMLVideoElement
+			const element = video._originalElement as HTMLVideoElement
 			await element.play()
 		}
 	}

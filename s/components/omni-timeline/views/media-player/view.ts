@@ -21,7 +21,6 @@ export const MediaPlayer = shadow_view(use => () => {
 		const unsub_onplayhead1 = playhead.onPlayheadMove(async (x) => {
 			if(use.context.state.is_playing) {compositor.set_video_playing(false)}
 			compositor.compose_effects(use.context.state.effects, use.context.state.timecode)
-			compositor.managers.animationManager.seek(use.context.state.timecode)
 			compositor.seek(use.context.state.timecode, true).then(() =>
 				compositor.compose_effects(use.context.state.effects, use.context.state.timecode)
 			)
@@ -32,7 +31,6 @@ export const MediaPlayer = shadow_view(use => () => {
 				const files_ready = await use.context.controllers.media.are_files_ready()
 				if(!timeline.is_exporting && files_ready) {
 					if(timeline.is_playing) {
-						compositor.managers.animationManager.seek(use.context.state.timecode)
 						compositor.seek(use.context.state.timecode, false)
 					}
 				}

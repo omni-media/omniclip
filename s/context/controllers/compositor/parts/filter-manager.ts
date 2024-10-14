@@ -1,5 +1,5 @@
 import {pub} from "@benev/slate"
-import {filters} from "fabric"
+import {FabricImage, filters} from "fabric"
 
 import {Compositor} from "../controller.js"
 import {AnyEffect, ImageEffect, State, VideoEffect} from "../../../types.js"
@@ -75,5 +75,14 @@ export class FiltersManager {
 
 	removeAllAnimationsFromEffect(effect: ImageEffect | VideoEffect, state: State) {
 		this.onChange.publish(true)
+	}
+
+	onseek(effect: VideoEffect | ImageEffect) {
+		const object = this.#getObject(effect)! as FabricImage
+		if(object.filters.length > 0) {
+			object.removeTexture(object.cacheKey)
+			object.removeTexture(object.cacheKey + "_filtered")
+			object.applyFilters()
+		}
 	}
 }
