@@ -2,7 +2,7 @@ import {pub} from "@benev/slate"
 import {FabricImage, filters} from "fabric"
 
 import {Compositor} from "../controller.js"
-import {AnyEffect, ImageEffect, State, VideoEffect} from "../../../types.js"
+import {AnyEffect, ImageEffect, VideoEffect} from "../../../types.js"
 
 export const IgnoredFilters = ["BaseFilter", "Resize", "RemoveColor", "Gamma", "Convolute", "ColorMatrix", "BlendImage", "BlendColor", "Composed"]
 export type FilterType = keyof Omit<typeof filters, "BaseFilter" | "Resize" | "RemoveColor" | "Gamma" | "Convolute" | "ColorMatrix" | "BlendImage" | "BlendColor" | "Composed">
@@ -39,9 +39,10 @@ export class FiltersManager {
 		effect: ImageEffect | VideoEffect,
 		type: FilterType,
 	) {
-		const filter = new filters[type]()
+		const filter = new filters[type]() as filters.BaseFilter
+		filter.for = "filter"
 		const object = this.#getObject(effect)!
-		const alreadyHasThisFilter = object.filters.find(filter => filter.type === type)
+		const alreadyHasThisFilter = object.filters.find(filter => filter.type === type && filter.for === "filter")
 		if(alreadyHasThisFilter) {
 			this.removeFilterFromEffect(effect, type)
 		} else {
@@ -57,7 +58,7 @@ export class FiltersManager {
 	removeFilterFromEffect(effect: ImageEffect | VideoEffect, type: FilterType) {
 		const object = this.#getObject(effect)!
 		this.#filters = this.#filters.filter(filter => !(filter.targetEffectId === effect.id && filter.type === type))
-		object.filters = object.filters.filter(filter => filter.type !== type)
+		object.filters = object.filters.filter(filter => !(filter.type === type && filter.for === "filter"))
 		object.applyFilters()
 		this.onChange.publish(true)
 		this.compositor.canvas.renderAll()
@@ -65,16 +66,12 @@ export class FiltersManager {
 
 	updateEffectFilter(effect: ImageEffect | VideoEffect, filterName: FilterType, value: number) {
 		const object = this.#getObject(effect)!
-		const filter = object.filters.find(filter => filter.type === filterName)
+		const filter = object.filters.find(filter => filter.type === filterName && filter.for === "filter")
 		if(filter) {
 			filter.setMainParameter(value)
 			object.applyFilters()
 			this.compositor.canvas.renderAll()
 		}
-	}
-
-	removeAllAnimationsFromEffect(effect: ImageEffect | VideoEffect, state: State) {
-		this.onChange.publish(true)
 	}
 
 	onseek(effect: VideoEffect | ImageEffect) {

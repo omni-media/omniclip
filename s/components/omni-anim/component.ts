@@ -31,7 +31,7 @@ export const OmniAnim = shadow_component(use => {
 				<div
 					?data-selected=${manager.selectedAnimationForEffect(selectedImageOrVideoEffect, anim)}
 					?disabled=${!selectedImageOrVideoEffect}
-					@click=${() => manager.addAnimationToEffect(selectedImageOrVideoEffect!, anim, use.context.state)}
+					@click=${() => manager.selectAnimation(selectedImageOrVideoEffect!, anim, use.context.state)}
 					class="animation"
 				>
 					<span style="color: #e66465; font-family: Lato;" class="text">
@@ -48,7 +48,7 @@ export const OmniAnim = shadow_component(use => {
 				<div
 					?data-selected=${manager.selectedAnimationForEffect(selectedImageOrVideoEffect, anim)}
 					?disabled=${!selectedImageOrVideoEffect}
-					@click=${() => manager.addAnimationToEffect(selectedImageOrVideoEffect!, anim, use.context.state)}
+					@click=${() => manager.selectAnimation(selectedImageOrVideoEffect!, anim, use.context.state)}
 					class="animation"
 				>
 					<span style="color: #e66465; font-family: Lato;" class="text">
@@ -63,7 +63,7 @@ export const OmniAnim = shadow_component(use => {
 				<div
 					?data-selected=${type === "In" ? !manager.isAnyAnimationInSelected(selectedImageOrVideoEffect) : !manager.isAnyAnimationOutSelected(selectedImageOrVideoEffect)}
 					?disabled=${!selectedImageOrVideoEffect}
-					@click=${() => manager.removeAnimationFromEffect(selectedImageOrVideoEffect!, type, use.context.state)}
+					@click=${() => manager.deselectAnimation(selectedImageOrVideoEffect!, use.context.state, type)}
 					class="animation"
 				>
 					<span style="color: #e66465; font-family: Lato;" class="text">

@@ -16,6 +16,9 @@ export const styles = css`
 		align-items: flex-start;
 
 		& .anim-cnt {
+			display: flex;
+			flex-wrap: wrap;
+
 			&[disabled] {
 				pointer-events: none;
 				filter: blur(5px);
