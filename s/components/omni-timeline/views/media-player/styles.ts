@@ -37,6 +37,11 @@ export const styles = css`
 				background: none;
 				border: none;
 				padding: 0.5em;
+				color: gray;
+
+				&:not(:disabled) {
+					color: white;
+				}
 			}
 
 			& svg {
