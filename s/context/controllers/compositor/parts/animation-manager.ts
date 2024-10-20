@@ -87,7 +87,7 @@ export class AnimationManager {
 		})
 	}
 
-	selectAnimation(
+	async selectAnimation(
 		effect: ImageEffect | VideoEffect,
 		animation: AnimationIn | AnimationOut,
 		state: State
@@ -112,14 +112,32 @@ export class AnimationManager {
 		const object = this.#getObject(effect)!
 		this.#animations.push(animation)
 
+		await this.compositor.seek(state.timecode, true)
+
+		const currentTime = this.compositor.get_effect_current_time_relative_to_timecode(effect, state.timecode)
+		const duration = 1
+		let animationInProgress = currentTime / duration >= duration ? 1 : currentTime / duration
+		const animationInProgressInWidth = effect.rect.width * animationInProgress
+
+		const animationOutStartTime = effect.end / 1000 - duration
+		let animationOutProgress = 0
+
+		if (currentTime >= animationOutStartTime) {
+			const elapsedTime = currentTime - animationOutStartTime
+			animationOutProgress = elapsedTime / duration >= 1 ? 1 : elapsedTime / duration
+		}
+
+		const animationOutProgressInWidth = effect.rect.width * animationOutProgress
+
 		switch (animation.type) {
 			case "slideIn": {
-				const targetPosition = { left: effect.rect.position_on_canvas.x }
-				const startPosition = { left: -effect.rect.width }
+				const targetPosition = {left: effect.rect.position_on_canvas.x + (effect.rect.width - animationInProgressInWidth)}
+				const startPosition = {left: effect.rect.position_on_canvas.x - animationInProgressInWidth}
+
 				gsap.set(object, { left: startPosition.left })
 				this.timeline.add(
 					gsap.to(object, {
-						duration: 1,
+						duration,
 						left: targetPosition.left,
 						ease: "linear",
 						onUpdate: () => this.compositor.canvas.renderAll()
@@ -131,12 +149,13 @@ export class AnimationManager {
 			}
 
 			case "slideOut": {
-				const targetPosition = { left: effect.rect.width }
-				const startPosition = { left: effect.rect.position_on_canvas.x }
+				const targetPosition = {left: effect.rect.position_on_canvas.x + (effect.rect.width - animationOutProgressInWidth)}
+				const startPosition = {left: effect.rect.position_on_canvas.x - animationOutProgressInWidth}
+
 				gsap.set(object, { left: startPosition.left })
 				this.timeline.add(
 					gsap.to(object, {
-						duration: 1,
+						duration,
 						left: targetPosition.left,
 						ease: "linear",
 						onUpdate: () => this.compositor.canvas.renderAll()
@@ -342,6 +361,7 @@ export class AnimationManager {
 			}
 		}
 
+		await this.compositor.seek(state.timecode, true)
 		this.onChange.publish(true)
 	}
 
