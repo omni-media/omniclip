@@ -3,8 +3,8 @@ import {Op, html} from "@benev/slate"
 import {styles} from "./styles.js"
 import {shadow_component} from "../../context/context.js"
 import {StateHandler} from "../../views/state-handler/view.js"
-import {ImageEffect, VideoEffect} from "../../context/types.js"
-import {animationIn, animationNone, animationOut} from "../../context/controllers/compositor/parts/animation-manager.js"
+import {ImageEffect, TextEffect, VideoEffect} from "../../context/types.js"
+import {animationIn, animationNone, animationOut, textAnimationIn} from "../../context/controllers/compositor/parts/animation-manager.js"
 
 export const OmniAnim = shadow_component(use => {
 	use.styles(styles)
@@ -13,8 +13,8 @@ export const OmniAnim = shadow_component(use => {
 	const [kind, setKind] = use.state<"In" | "Out">("In")
 	const manager = use.context.controllers.compositor.managers.animationManager
 
-	const selectedImageOrVideoEffect = use.context.state.selected_effect?.kind === "video" || use.context.state.selected_effect?.kind === "image"
-		? use.context.state.effects.find(effect => effect.id === use.context.state.selected_effect!.id)! as ImageEffect | VideoEffect
+	const selectedAnimatableEffect = use.context.state.selected_effect && use.context.state.selected_effect.kind !== "audio"
+		? use.context.state.effects.find(effect => effect.id === use.context.state.selected_effect?.id)! as ImageEffect | VideoEffect | TextEffect
 		: null
 
 	use.mount(() => {
@@ -22,16 +22,33 @@ export const OmniAnim = shadow_component(use => {
 		return () => dispose()
 	})
 
-	const imageAndVideoEffects = () => use.context.state.effects.filter(effect => effect.kind === "image" || effect.kind === "video") as VideoEffect[] | ImageEffect[]
+	const ImageTextVideoEffects = () => use.context.state.effects.filter(effect => effect.kind === "image" || effect.kind === "video" || effect.kind === "text") as VideoEffect[] | ImageEffect[] | TextEffect[]
 
 	const renderAnimationsIn = () => {
 		return animationIn.map(animation => {
-			const anim = {type: animation, targetEffect: selectedImageOrVideoEffect!}
+			const anim = {type: animation, targetEffect: selectedAnimatableEffect!}
 			return html`
 				<div
-					?data-selected=${manager.selectedAnimationForEffect(selectedImageOrVideoEffect, anim)}
-					?disabled=${!selectedImageOrVideoEffect}
-					@click=${() => manager.selectAnimation(selectedImageOrVideoEffect!, anim, use.context.state)}
+					?data-selected=${manager.selectedAnimationForEffect(selectedAnimatableEffect, anim)}
+					?disabled=${!selectedAnimatableEffect}
+					@click=${() => manager.selectAnimation(selectedAnimatableEffect!, anim, use.context.state)}
+					class="animation"
+				>
+					<span style="color: #e66465; font-family: Lato;" class="text">
+						${animation}
+					</span>
+				</div>
+		`})
+	}
+
+	const renderTextAnimationsIn = () => {
+		return textAnimationIn.map(animation => {
+			const anim = {type: animation, targetEffect: selectedAnimatableEffect!}
+			return html`
+				<div
+					?data-selected=${manager.selectedAnimationForEffect(selectedAnimatableEffect, anim)}
+					?disabled=${!selectedAnimatableEffect}
+					@click=${() => manager.selectAnimation(selectedAnimatableEffect!, anim, use.context.state)}
 					class="animation"
 				>
 					<span style="color: #e66465; font-family: Lato;" class="text">
@@ -43,12 +60,12 @@ export const OmniAnim = shadow_component(use => {
 
 	const renderAnimationsOut = () => {
 		return animationOut.map(animation => {
-			const anim = {type: animation, targetEffect: selectedImageOrVideoEffect!}
+			const anim = {type: animation, targetEffect: selectedAnimatableEffect!}
 			return html`
 				<div
-					?data-selected=${manager.selectedAnimationForEffect(selectedImageOrVideoEffect, anim)}
-					?disabled=${!selectedImageOrVideoEffect}
-					@click=${() => manager.selectAnimation(selectedImageOrVideoEffect!, anim, use.context.state)}
+					?data-selected=${manager.selectedAnimationForEffect(selectedAnimatableEffect, anim)}
+					?disabled=${!selectedAnimatableEffect}
+					@click=${() => manager.selectAnimation(selectedAnimatableEffect!, anim, use.context.state)}
 					class="animation"
 				>
 					<span style="color: #e66465; font-family: Lato;" class="text">
@@ -61,9 +78,9 @@ export const OmniAnim = shadow_component(use => {
 	const renderAnimationNone = (type: "In" | "Out") => {
 			return html`
 				<div
-					?data-selected=${type === "In" ? !manager.isAnyAnimationInSelected(selectedImageOrVideoEffect) : !manager.isAnyAnimationOutSelected(selectedImageOrVideoEffect)}
-					?disabled=${!selectedImageOrVideoEffect}
-					@click=${() => manager.deselectAnimation(selectedImageOrVideoEffect!, use.context.state, type)}
+					?data-selected=${type === "In" ? !manager.isAnyAnimationInSelected(selectedAnimatableEffect) : !manager.isAnyAnimationOutSelected(selectedAnimatableEffect)}
+					?disabled=${!selectedAnimatableEffect}
+					@click=${() => manager.deselectAnimation(selectedAnimatableEffect!, use.context.state, type)}
 					class="animation"
 				>
 					<span style="color: #e66465; font-family: Lato;" class="text">
@@ -85,10 +102,29 @@ export const OmniAnim = shadow_component(use => {
 				id="clip"
 				name="clip"
 			>
-				<option .selected=${!selectedImageOrVideoEffect} value=none>none</option>
-				${imageAndVideoEffects().map(effect => html`<option .selected=${selectedImageOrVideoEffect?.id === effect.id} value=${effect.id}>${effect.name}</option>`)}
+				<option .selected=${!selectedAnimatableEffect} value=none>none</option>
+				${ImageTextVideoEffects().map((effect, i) => html`
+					<option
+						.selected=${selectedAnimatableEffect?.id === effect.id}
+						value=${effect.id}
+					>
+						${effect.kind !== "text" ? effect.name : `text-${i}`}
+					</option>
+				`)}
 			</select>
 		`
+	}
+
+	const renderImageAndVideoAnimations = () => {
+		return kind === "In"
+			? renderAnimationsIn()
+			: renderAnimationsOut()
+	}
+
+	const renderTextAnimations = () => {
+		return kind === "In"
+			? renderTextAnimationsIn()
+			: "out"
 	}
 
 	return StateHandler(Op.all(
@@ -100,15 +136,15 @@ export const OmniAnim = shadow_component(use => {
 				<button ?data-selected=${kind === "Out"} @click=${() => setKind("Out")}>Out</button>
 			</div>
 			${renderEffectSelectionDropdown()}
-			${selectedImageOrVideoEffect
-				? html`<div>add animation for: ${selectedImageOrVideoEffect.name}</div>`
-				: html`<div>select video or image either from dropdown menu here, timeline or scene</div>`
+			${selectedAnimatableEffect
+				? html`<div>add animation for: ${selectedAnimatableEffect.kind !== "text" ? selectedAnimatableEffect.name : selectedAnimatableEffect.content}</div>`
+				: html`<div>select video, text or image either from dropdown menu here, timeline or scene</div>`
 			}
-			<div class="anim-cnt" ?disabled=${!selectedImageOrVideoEffect}>
+			<div class="anim-cnt" ?disabled=${!selectedAnimatableEffect}>
 				${renderAnimationNone(kind)}
-				${kind === "In"
-					? renderAnimationsIn()
-					: renderAnimationsOut()
+				${selectedAnimatableEffect?.kind === "text"
+					? renderTextAnimations()
+					: renderImageAndVideoAnimations()
 				}
 			</div>
 		</div>

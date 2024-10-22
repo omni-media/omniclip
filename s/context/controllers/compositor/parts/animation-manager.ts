@@ -3,17 +3,19 @@ import {pub} from "@benev/slate"
 import {FabricObject, Rect, filters} from "fabric"
 
 import {Compositor} from "../controller.js"
-import {AnyEffect, ImageEffect, State, VideoEffect} from "../../../types.js"
+import {AnyEffect, ImageEffect, State, TextEffect, VideoEffect} from "../../../types.js"
 import {calculateProjectDuration} from "../../../../utils/calculate-project-duration.js"
 
+type AnimatableEffect = TextEffect | ImageEffect | VideoEffect
 interface AnimationBase<T = AnimationIn | AnimationOut> {
-	targetEffect: VideoEffect | ImageEffect
+	targetEffect: AnimatableEffect
 	type: T
 }
 export const animationNone = "none" as const
 export const animationIn = ["slideIn", "fadeIn", "spinIn", "bounceIn", "wipeIn", "blurIn"] as const
 export const animationOut = ["slideOut", "fadeOut", "spinOut", "bounceOut", "wipeOut", "blurOut"] as const
-export type AnimationIn = AnimationBase<(typeof animationIn)[number]>
+export const textAnimationIn = ["bounceIn"] as const
+export type AnimationIn = AnimationBase<(typeof animationIn | typeof textAnimationIn)[number]>
 export type AnimationOut = AnimationBase<(typeof animationOut)[number]>
 export type AnimationNone = AnimationBase<(typeof animationNone)[number]>
 export type Animation = AnimationIn | AnimationOut
@@ -29,7 +31,7 @@ export class AnimationManager {
 
 	constructor(private compositor: Compositor) {}
 
-	selectedAnimationForEffect(effect: AnyEffect | null, animation: Animation) {
+	selectedAnimationForEffect(effect: AnimatableEffect | null, animation: Animation) {
 		if (!effect) return
 		const haveAnimation = this.#animations.find(
 			(anim) => anim.targetEffect.id === effect.id && animation.type === anim.type
@@ -57,13 +59,16 @@ export class AnimationManager {
 		this.timeline.duration(duration / 1000) // GSAP duration in seconds
 	}
 
-	#getObject(effect: VideoEffect | ImageEffect) {
+	#getObject(effect: AnimatableEffect) {
 		const videoObject = this.compositor.managers.videoManager.get(effect.id)
 		const imageObject = this.compositor.managers.imageManager.get(effect.id)
+		const textObject = this.compositor.managers.textManager.get(effect.id)
 		if (videoObject) {
 			return videoObject
 		} else if (imageObject) {
 			return imageObject
+		} else if(textObject) {
+			return textObject
 		}
 	}
 
@@ -88,7 +93,7 @@ export class AnimationManager {
 	}
 
 	async selectAnimation(
-		effect: ImageEffect | VideoEffect,
+		effect: AnimatableEffect,
 		animation: AnimationIn | AnimationOut,
 		state: State
 	) {
@@ -381,7 +386,7 @@ export class AnimationManager {
 		this.timeline.duration(duration / 1000)
 	}
 
-	#resetObjectProperties(fabric: FabricObject, effect: ImageEffect | VideoEffect) {
+	#resetObjectProperties(fabric: FabricObject, effect: AnimatableEffect) {
 		fabric.left = effect.rect.position_on_canvas.x
 		fabric.top = effect.rect.position_on_canvas.y
 		fabric.scaleX = effect.rect.scaleX
@@ -392,7 +397,7 @@ export class AnimationManager {
 		fabric.opacity = 1
 	}
 
-	deselectAnimation(effect: ImageEffect | VideoEffect, state: State, type: "In" | "Out") {
+	deselectAnimation(effect: AnimatableEffect, state: State, type: "In" | "Out") {
 		const object = this.#getObject(effect)
 		this.#resetObjectProperties(object!, effect)
 		gsap.killTweensOf(object!)
