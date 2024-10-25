@@ -87,6 +87,26 @@ export class AnimationManager {
 		})
 	}
 
+	#onAnimationUpdate(object: FabricObject, animationName: Animation) {
+		const animation = this.timeline.getTweensOf(object).find(a => a.vars.animationName === animationName.type)
+		if(!animation) return
+		const isAnimating = animation.progress() < 1 && animation.progress() > 0
+		if(isAnimating) {
+			if(object.selectable && object.evented) {
+				this.compositor.canvas.discardActiveObject()
+				object.selectable = false
+				object.evented = false
+			}
+		} else {
+			if(!object.selectable && !object.evented) {
+				this.compositor.canvas.setActiveObject(object)
+				object.selectable = true
+				object.evented = true
+			}
+		}
+		this.compositor.canvas.renderAll()
+	}
+
 	async selectAnimation(
 		effect: ImageEffect | VideoEffect,
 		animation: AnimationIn | AnimationOut,
@@ -114,51 +134,37 @@ export class AnimationManager {
 
 		await this.compositor.seek(state.timecode, true)
 
-		const currentTime = this.compositor.get_effect_current_time_relative_to_timecode(effect, state.timecode)
-		const duration = 1
-		let animationInProgress = currentTime / duration >= duration ? 1 : currentTime / duration
-		const animationInProgressInWidth = effect.rect.width * animationInProgress
-
-		const animationOutStartTime = effect.end / 1000 - duration
-		let animationOutProgress = 0
-
-		if (currentTime >= animationOutStartTime) {
-			const elapsedTime = currentTime - animationOutStartTime
-			animationOutProgress = elapsedTime / duration >= 1 ? 1 : elapsedTime / duration
-		}
-
-		const animationOutProgressInWidth = effect.rect.width * animationOutProgress
-
 		switch (animation.type) {
 			case "slideIn": {
-				const targetPosition = {left: effect.rect.position_on_canvas.x + (effect.rect.width - animationInProgressInWidth)}
-				const startPosition = {left: effect.rect.position_on_canvas.x - animationInProgressInWidth}
+				const targetPosition = {left: effect.rect.position_on_canvas.x}
+				const startPosition = {left: effect.rect.position_on_canvas.x - effect.rect.width}
 
 				gsap.set(object, { left: startPosition.left })
 				this.timeline.add(
 					gsap.to(object, {
-						duration,
+						animationName: animation.type,
+						duration: 1,
 						left: targetPosition.left,
 						ease: "linear",
-						onUpdate: () => this.compositor.canvas.renderAll()
+						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					effect.start_at_position / 1000
 				)
-
 				break
 			}
 
 			case "slideOut": {
-				const targetPosition = {left: effect.rect.position_on_canvas.x + (effect.rect.width - animationOutProgressInWidth)}
-				const startPosition = {left: effect.rect.position_on_canvas.x - animationOutProgressInWidth}
+				const targetPosition = {left: effect.rect.position_on_canvas.x + effect.rect.width}
+				const startPosition = {left: effect.rect.position_on_canvas.x}
 
 				gsap.set(object, { left: startPosition.left })
 				this.timeline.add(
 					gsap.to(object, {
-						duration,
+						animationName: animation.type,
+						duration: 1,
 						left: targetPosition.left,
 						ease: "linear",
-						onUpdate: () => this.compositor.canvas.renderAll()
+						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					(effect.start_at_position + (effect.end - effect.start) - 1000) / 1000
 				)
@@ -201,10 +207,11 @@ export class AnimationManager {
 				gsap.set(object, { angle: -180 })
 				this.timeline.add(
 					gsap.to(object, {
+						animationName: animation.type,
 						duration: 1,
 						angle: 0,
 						ease: "linear",
-						onUpdate: () => this.compositor.canvas.renderAll(),
+						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					effect.start_at_position / 1000
 				)
@@ -217,10 +224,11 @@ export class AnimationManager {
 				gsap.set(object, { angle: 0 })
 				this.timeline.add(
 					gsap.to(object, {
+						animationName: animation.type,
 						duration: 1,
 						angle: 180,
 						ease: "linear",
-						onUpdate: () => this.compositor.canvas.renderAll()
+						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					(effect.start_at_position + (effect.end - effect.start) - 1000) / 1000
 				)
@@ -234,10 +242,11 @@ export class AnimationManager {
 				gsap.set(object, { left: startPosition.left })
 				this.timeline.add(
 					gsap.to(object, {
+						animationName: animation.type,
 						duration: 1,
 						left: targetPosition.left,
 						ease: "bounce.out",
-						onUpdate: () => this.compositor.canvas.renderAll()
+						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					effect.start_at_position / 1000
 				)
@@ -251,10 +260,11 @@ export class AnimationManager {
 				gsap.set(object, { left: startPosition.left })
 				this.timeline.add(
 					gsap.to(object, {
+						animationName: animation.type,
 						duration: 1,
 						left: targetPosition.left,
 						ease: "bounce.in",
-						onUpdate: () => this.compositor.canvas.renderAll()
+						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					(effect.start_at_position + (effect.end - effect.start) - 1000) / 1000
 				)
