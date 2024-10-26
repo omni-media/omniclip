@@ -11,8 +11,8 @@ interface AnimationBase<T = AnimationIn | AnimationOut> {
 	type: T
 }
 export const animationNone = "none" as const
-export const animationIn = ["slideIn", "fadeIn", "spinIn", "bounceIn", "wipeIn", "blurIn"] as const
-export const animationOut = ["slideOut", "fadeOut", "spinOut", "bounceOut", "wipeOut", "blurOut"] as const
+export const animationIn = ["slideIn", "fadeIn", "spinIn", "bounceIn", "wipeIn", "blurIn", "zoomIn"] as const
+export const animationOut = ["slideOut", "fadeOut", "spinOut", "bounceOut", "wipeOut", "blurOut", "zoomOut"] as const
 export type AnimationIn = AnimationBase<(typeof animationIn)[number]>
 export type AnimationOut = AnimationBase<(typeof animationOut)[number]>
 export type AnimationNone = AnimationBase<(typeof animationNone)[number]>
@@ -363,6 +363,72 @@ export class AnimationManager {
 							object.applyFilters()
 							this.compositor.canvas.renderAll()
 						}
+					}),
+					(effect.start_at_position + (effect.end - effect.start) - 1000) / 1000
+				)
+
+				break
+			}
+
+			case "zoomIn": {
+				const originalLeft = object.left
+				const originalTop = object.top
+				const originalWidth = object.getScaledWidth()
+				const originalHeight = object.getScaledHeight()
+
+				if(object.originX !== "center" && object.originY !== "center") {
+					object.set({
+						originX: "center",
+						originY: "center"
+					})
+
+					object.left = originalLeft + originalWidth / 2
+					object.top = originalTop + originalHeight / 2
+				}
+
+				gsap.set(object, { scaleX: 0.5, scaleY: 0.5 })
+
+				this.timeline.add(
+					gsap.to(object, {
+						animationName: animation.type,
+						duration: 1,
+						scaleX: 1,
+						scaleY: 1,
+						ease: "linear",
+						onUpdate: () => this.#onAnimationUpdate(object, animation)
+					}),
+					effect.start_at_position / 1000
+				)
+
+				break
+			}
+
+			case "zoomOut": {
+				const originalLeft = object.left
+				const originalTop = object.top
+				const originalWidth = object.getScaledWidth()
+				const originalHeight = object.getScaledHeight()
+				
+				if(object.originX !== "center" && object.originY !== "center") {
+					object.set({
+						originX: "center",
+						originY: "center"
+					})
+
+					object.left = originalLeft + originalWidth / 2
+					object.top = originalTop + originalHeight / 2
+				}
+
+				gsap.set(object, { scaleX: 1, scaleY: 1 })
+
+				this.timeline.add(
+					gsap.to(object, {
+						animationName: animation.type,
+						duration: 1,
+						scaleX: 0.5,
+						scaleY: 0.5,
+						ease: "linear",
+						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					(effect.start_at_position + (effect.end - effect.start) - 1000) / 1000
 				)
