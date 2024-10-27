@@ -9,6 +9,7 @@ import {calculateProjectDuration} from "../../../../utils/calculate-project-dura
 interface AnimationBase<T = AnimationIn | AnimationOut> {
 	targetEffect: VideoEffect | ImageEffect
 	type: T
+	duration: number
 }
 export const animationNone = "none" as const
 export const animationIn = ["slideIn", "fadeIn", "spinIn", "bounceIn", "wipeIn", "blurIn", "zoomIn"] as const
@@ -17,6 +18,10 @@ export type AnimationIn = AnimationBase<(typeof animationIn)[number]>
 export type AnimationOut = AnimationBase<(typeof animationOut)[number]>
 export type AnimationNone = AnimationBase<(typeof animationNone)[number]>
 export type Animation = AnimationIn | AnimationOut
+type UpdatedProps = {
+	duration: number
+	kind: "In" | "Out"
+}
 
 export class AnimationManager {
 	timeline = gsap.timeline({
@@ -67,10 +72,10 @@ export class AnimationManager {
 		}
 	}
 
-	refreshAnimations(effects: AnyEffect[], state: State) {
+	refreshAnimations(state: State, updatedProps?: UpdatedProps) {
 		this.timeline.clear()
 		const updated = this.#animations.map((animation) => {
-			const effect = effects.find((effect) => effect.id === animation.targetEffect.id) as ImageEffect | VideoEffect | undefined
+			const effect = state.effects.find((effect) => effect.id === animation.targetEffect.id) as ImageEffect | VideoEffect | undefined
 			return {
 				...animation,
 				targetEffect: effect ?? animation.targetEffect,
@@ -83,8 +88,14 @@ export class AnimationManager {
 				state,
 				animation.type.includes("In") ? "In" : "Out",
 			)
-			this.selectAnimation(animation.targetEffect, animation, state)
+			this.selectAnimation(animation.targetEffect, updatedProps ? this.#refreshAnimation(updatedProps, animation) : animation, state)
 		})
+	}
+
+	#refreshAnimation({kind, duration}: UpdatedProps, animation: Animation): Animation {
+		if(animation.type.includes(kind)) {
+			return {...animation, duration}
+		} else return animation
 	}
 
 	#onAnimationUpdate(object: FabricObject, animationName: Animation) {
@@ -143,7 +154,7 @@ export class AnimationManager {
 				this.timeline.add(
 					gsap.to(object, {
 						animationName: animation.type,
-						duration: 1,
+						duration: animation.duration,
 						left: targetPosition.left,
 						ease: "linear",
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
@@ -161,12 +172,12 @@ export class AnimationManager {
 				this.timeline.add(
 					gsap.to(object, {
 						animationName: animation.type,
-						duration: 1,
+						duration: animation.duration,
 						left: targetPosition.left,
 						ease: "linear",
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
 				)
 
 				break
@@ -176,7 +187,7 @@ export class AnimationManager {
 				gsap.set(object, { opacity: 0 })
 				this.timeline.add(
 					gsap.to(object, {
-						duration: 1,
+						duration: animation.duration,
 						opacity: 1,
 						ease: "linear",
 						onUpdate: () => this.compositor.canvas.renderAll()
@@ -191,12 +202,12 @@ export class AnimationManager {
 				gsap.set(object, { opacity: 1 })
 				this.timeline.add(
 					gsap.to(object, {
-						duration: 1,
+						duration: animation.duration,
 						opacity: 0,
 						ease: "linear",
 						onUpdate: () => this.compositor.canvas.renderAll()
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
 				)
 
 				break
@@ -208,7 +219,7 @@ export class AnimationManager {
 				this.timeline.add(
 					gsap.to(object, {
 						animationName: animation.type,
-						duration: 1,
+						duration: animation.duration,
 						angle: 0,
 						ease: "linear",
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
@@ -225,12 +236,12 @@ export class AnimationManager {
 				this.timeline.add(
 					gsap.to(object, {
 						animationName: animation.type,
-						duration: 1,
+						duration: animation.duration,
 						angle: 180,
 						ease: "linear",
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
 				)
 
 				break
@@ -243,7 +254,7 @@ export class AnimationManager {
 				this.timeline.add(
 					gsap.to(object, {
 						animationName: animation.type,
-						duration: 1,
+						duration: animation.duration,
 						left: targetPosition.left,
 						ease: "bounce.out",
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
@@ -261,12 +272,12 @@ export class AnimationManager {
 				this.timeline.add(
 					gsap.to(object, {
 						animationName: animation.type,
-						duration: 1,
+						duration: animation.duration,
 						left: targetPosition.left,
 						ease: "bounce.in",
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
 				)
 
 				break
@@ -285,7 +296,7 @@ export class AnimationManager {
 				object.set({ clipPath: clipRect })
 				this.timeline.add(
 					gsap.to(clipRect, {
-						duration: 1,
+						duration: animation.duration,
 						width: fullWidth,
 						ease: "linear",
 						onUpdate: () => {
@@ -312,7 +323,7 @@ export class AnimationManager {
 				object.set({ clipPath: clipRect })
 				this.timeline.add(
 					gsap.to(clipRect, {
-						duration: 1,
+						duration: animation.duration,
 						width: 0,
 						ease: "linear",
 						onUpdate: () => {
@@ -320,7 +331,7 @@ export class AnimationManager {
 							this.compositor.canvas.renderAll()
 						}
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
 				)
 
 				break
@@ -334,7 +345,7 @@ export class AnimationManager {
 				object.applyFilters()
 				this.timeline.add(
 					gsap.to(blurFilter, {
-						duration: 1,
+						duration: animation.duration,
 						blur: 0,
 						ease: "linear",
 						onUpdate: () => {
@@ -356,7 +367,7 @@ export class AnimationManager {
 				object.applyFilters()
 				this.timeline.add(
 					gsap.to(blurFilter, {
-						duration: 1,
+						duration: animation.duration,
 						blur: 1,
 						ease: "linear",
 						onUpdate: () => {
@@ -364,7 +375,7 @@ export class AnimationManager {
 							this.compositor.canvas.renderAll()
 						}
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
 				)
 
 				break
@@ -391,7 +402,7 @@ export class AnimationManager {
 				this.timeline.add(
 					gsap.to(object, {
 						animationName: animation.type,
-						duration: 1,
+						duration: animation.duration,
 						scaleX: 1,
 						scaleY: 1,
 						ease: "linear",
@@ -424,13 +435,13 @@ export class AnimationManager {
 				this.timeline.add(
 					gsap.to(object, {
 						animationName: animation.type,
-						duration: 1,
+						duration: animation.duration,
 						scaleX: 0.5,
 						scaleY: 0.5,
 						ease: "linear",
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
 				)
 
 				break
@@ -475,7 +486,7 @@ export class AnimationManager {
 		this.#animations = this.#animations.filter((animation) => !(animation.targetEffect.id === effect.id && animation.type.includes(type)))
 		object!.filters = object!.filters.filter(f => f.for !== "animation")
 		object!.applyFilters()
-		this.refreshAnimations(state.effects, state)
+		this.refreshAnimations(state)
 		this.onChange.publish(true)
 	}
 }

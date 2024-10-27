@@ -11,6 +11,8 @@ export const OmniAnim = shadow_component(use => {
 	use.watch(() => use.context.state)
 	const controllers = use.context.controllers
 	const [kind, setKind] = use.state<"In" | "Out">("In")
+	const [animationInDuration, setAnimationInDuration] = use.state(0.5)
+	const [animationOutDuration, setAnimationOutDuration] = use.state(0.5)
 	const manager = use.context.controllers.compositor.managers.animationManager
 
 	const selectedImageOrVideoEffect = use.context.state.selected_effect?.kind === "video" || use.context.state.selected_effect?.kind === "image"
@@ -22,11 +24,13 @@ export const OmniAnim = shadow_component(use => {
 		return () => dispose()
 	})
 
+	const animationDuration = kind === "In" ? animationInDuration : animationOutDuration
+
 	const imageAndVideoEffects = () => use.context.state.effects.filter(effect => effect.kind === "image" || effect.kind === "video") as VideoEffect[] | ImageEffect[]
 
 	const renderAnimationsIn = () => {
 		return animationIn.map(animation => {
-			const anim = {type: animation, targetEffect: selectedImageOrVideoEffect!}
+			const anim = {type: animation, targetEffect: selectedImageOrVideoEffect!, duration: animationDuration}
 			return html`
 				<div
 					?data-selected=${manager.selectedAnimationForEffect(selectedImageOrVideoEffect, anim)}
@@ -43,7 +47,7 @@ export const OmniAnim = shadow_component(use => {
 
 	const renderAnimationsOut = () => {
 		return animationOut.map(animation => {
-			const anim = {type: animation, targetEffect: selectedImageOrVideoEffect!}
+			const anim = {type: animation, targetEffect: selectedImageOrVideoEffect!, duration: animationDuration}
 			return html`
 				<div
 					?data-selected=${manager.selectedAnimationForEffect(selectedImageOrVideoEffect, anim)}
@@ -91,6 +95,29 @@ export const OmniAnim = shadow_component(use => {
 		`
 	}
 
+	const renderDurationSlider = () => {
+		return html`
+			<div>
+				<label for="duration">Duration:</label>
+				<input
+					@input=${(e: InputEvent) => kind === "In"
+						? setAnimationInDuration(+(e.target as HTMLInputElement).value)
+						: setAnimationOutDuration(+(e.target as HTMLInputElement).value)
+					}
+					@change=${() => manager.refreshAnimations(use.context.state, {duration: animationDuration, kind})}
+					type="range"
+					min="0.5"
+					max="10"
+					step="0.1"
+					value=${animationDuration}
+					name="duration"
+					id="duration"
+				>
+				<span>${animationDuration}s</span>
+			</div>
+		`
+	}
+
 	return StateHandler(Op.all(
 		use.context.helpers.ffmpeg.is_loading.value,
 		use.context.is_webcodecs_supported.value), () => html`
@@ -104,6 +131,7 @@ export const OmniAnim = shadow_component(use => {
 				? html`<div>add animation for: ${selectedImageOrVideoEffect.name}</div>`
 				: html`<div>select video or image either from dropdown menu here, timeline or scene</div>`
 			}
+			${renderDurationSlider()}
 			<div class="anim-cnt" ?disabled=${!selectedImageOrVideoEffect}>
 				${renderAnimationNone(kind)}
 				${kind === "In"
