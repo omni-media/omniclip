@@ -3,11 +3,14 @@ import {FabricText} from "fabric/dist/index.mjs"
 
 import {Compositor} from "../controller.js"
 import {Actions} from "../../../actions.js"
+import {FontMetadata} from "../../../global.js"
 import {Font, FontStyle, TextAlign, TextEffect, State} from "../../../types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
 export class TextManager extends Map<string, FabricText> {
 	#clicked_effect: TextEffect | null = null
+	#setPermissionStatus: (() => void) | null = null
+	#permissionStatus: PermissionStatus | null = null
 
 	constructor(private compositor: Compositor, private actions: Actions) {super()}
 
@@ -86,9 +89,11 @@ export class TextManager extends Map<string, FabricText> {
 		return this.compositor.ctx?.measureText(content).actualBoundingBoxAscent! + this.compositor.ctx?.measureText(content).actualBoundingBoxDescent!
 	}
 
-	set_text_font(effect: TextEffect, font: Font, update_compositor: () => void) {
+	set_text_font(effect: TextEffect, font: string, update_compositor: () => void) {
 		this.actions.set_text_font(effect, font)
 		this.#clicked_effect!.font = font
+		const text = this.compositor.canvas.getActiveObject()! as FabricText
+		text.set("fontFamily", font)
 		update_compositor()
 	}
 
@@ -148,5 +153,47 @@ export class TextManager extends Map<string, FabricText> {
 		}
 		this.#clicked_effect!.rect = rect
 		this.actions.set_text_rect(this.#clicked_effect!, {...rect})
+	}
+
+	destroy() {
+		if(this.#setPermissionStatus) {
+			this.#permissionStatus?.removeEventListener("change", this.#setPermissionStatus)
+		}
+	}
+
+	async getFonts(onPermissionStateChange: (state: PermissionState, deniedStateText: string, fonts?: FontMetadata[]) => void): Promise<FontMetadata[]> {
+		//@ts-ignore
+		const permissionStatus = this.#permissionStatus = await navigator.permissions.query({ name: 'local-fonts' })
+		const deniedStateText = "To enable local fonts, go to browser settings > site permissions, and allow fonts for this site."
+		const setStatus = this.#setPermissionStatus = async () => {
+			if(permissionStatus.state === "granted") {
+				const fonts = await window.queryLocalFonts()
+				onPermissionStateChange(permissionStatus.state, "", fonts)
+			} else if (permissionStatus.state === "denied") {
+				onPermissionStateChange(permissionStatus.state, deniedStateText)
+			}
+		}
+		return new Promise((resolve, reject) => {
+			if ('permissions' in navigator && 'queryLocalFonts' in window) {
+				async function checkFontAccess() {
+					try {
+						permissionStatus.addEventListener("change", setStatus)
+						if (permissionStatus.state === 'granted') {
+							const fonts = await window.queryLocalFonts()
+							resolve(fonts)
+						} else if (permissionStatus.state === "prompt") {
+							reject("User needs to grant permission for local fonts.")
+						} else if(permissionStatus.state === "denied") {
+							reject(deniedStateText)
+						}
+					} catch (err) {
+						reject(err)
+					}
+				}
+				checkFontAccess()
+			} else {
+				reject("Local Font Access API is not supported in this browser.")
+			}
+		})
 	}
 }

@@ -72,7 +72,7 @@ export interface ImageEffect extends Effect {
 
 export type TextEffectProps = Omit<TextEffect, keyof Effect | "kind">
 export type FontStyle = "italic" | "bold" | "normal"
-export type Font = "Arial" | "Lato"
+export type Font = string
 export type TextAlign = "left" | "right" | "center"
 
 export interface EffectRect {

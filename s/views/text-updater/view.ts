@@ -1,14 +1,17 @@
 import {html} from "@benev/slate"
 
 import {styles} from "./styles.js"
+import {TextEffect} from "../../context/types.js"
+import {FontMetadata} from "../../context/global.js"
 import {shadow_view} from "../../context/context.js"
-import {Font, TextEffect} from "../../context/types.js"
 import boldSvg from "../../icons/remix-icon/bold.svg.js"
 import italicSvg from "../../icons/remix-icon/italic.svg.js"
+import warningSvg from "../../icons/gravity-ui/warning.svg.js"
 import {StateHandler} from "../../views/state-handler/view.js"
 import alignLeftSvg from "../../icons/remix-icon/align-left.svg.js"
 import alignRightSvg from "../../icons/remix-icon/align-right.svg.js"
 import alignCenterSvg from "../../icons/remix-icon/align-center.svg.js"
+import {removeDuplicatesByKey} from "../../utils/remove-duplicates-by-key.js"
 
 export const TextUpdater = shadow_view(use => (selected_effect: TextEffect) => {
 	use.styles(styles)
@@ -28,6 +31,9 @@ export const TextUpdater = shadow_view(use => (selected_effect: TextEffect) => {
 		return [object.left, object.top + object.getScaledHeight()]
 	})
 
+	const [fonts, setFonts] = use.state<FontMetadata[]>([])
+	const [fontsDenied, setFontsDenied] = use.state<null | string>(null) // when user granted permission or not
+
 	const canvasRect = compositor.canvas_element.getBoundingClientRect()
 	const scaleX = compositor.canvas.width / canvasRect.width
 	const scaleY = compositor.canvas.height / canvasRect.height
@@ -39,7 +45,44 @@ export const TextUpdater = shadow_view(use => (selected_effect: TextEffect) => {
 		})
 	})
 
+	use.once(async () => {
+		try {
+			const fonts = await text_manager.getFonts((status, deniedStateText, fonts) => {
+				// listener for changes in permission
+				if(status === "denied") {
+					setFontsDenied(deniedStateText)
+					setFonts([])
+				} else if (status === "granted") {
+					setFontsDenied(null)
+					setFonts(fonts!)
+				}
+			})
+			setFonts(fonts)
+		} catch (e) {
+			const event = e as string
+			setFontsDenied(event)
+		}
+	})
+
+	use.mount(() => () => text_manager.destroy())
+
 	const update_compositor = () => use.context.controllers.compositor.compose_effects(use.context.state.effects, use.context.state.timecode)
+
+	const renderWarningIfFontsAccessNotGranted = () => {
+		return html`
+			<div class="btn btn-primary tooltip">
+				${warningSvg}
+				<div class="top">
+					<h3>Fonts Access Denied</h3>
+					<p>
+						To enable local fonts, go to browser settings > site permissions, and allow fonts for this site.
+					</p>
+					<img src="/assets/fontinfo.png" />
+					<i></i>
+				</div>
+			</div>
+		`
+	}
 
 	return StateHandler(use.context.helpers.ffmpeg.is_loading.value, () => html`
 		<div
@@ -54,8 +97,10 @@ export const TextUpdater = shadow_view(use => (selected_effect: TextEffect) => {
 		>
 			<div class=flex>
 				<div class="flex-hover">
-					<select @change=${(e: Event) => text_manager.set_text_font(effect, (e.target as HTMLSelectElement).value as Font, update_compositor)} name="fonts" id="font-select">
-						<option value="Arial">Arial</option>
+					${fontsDenied ? renderWarningIfFontsAccessNotGranted() : null}
+					<select @change=${(e: Event) => text_manager.set_text_font(effect, (e.target as HTMLSelectElement).value, update_compositor)} name="fonts" id="font-select">
+						${fonts.find(font => font.family === "Arial") ? null : html`<option .selected=${effect.font === "Arial"} value="Arial">Arial</option>`}
+						${removeDuplicatesByKey(fonts, "family").map(font => html`<option .selected=${effect.font === font.family} value=${font.family}>${font.family}</option>`)}
 					</select>
 					<input @change=${(e: Event) => text_manager.set_font_size(effect, +(e.target as HTMLInputElement).value, update_compositor)} class="font-size" value=${effect.size}>
 				</div>
