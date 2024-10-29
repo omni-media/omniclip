@@ -15,6 +15,12 @@ export const styles = css`
 		flex-direction: column;
 		align-items: flex-start;
 
+		& .duration-slider {
+			display: flex;
+			gap: 0.3em;
+			align-items: center;
+		}
+
 		& .anim-cnt {
 			display: flex;
 			flex-wrap: wrap;

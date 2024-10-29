@@ -97,7 +97,7 @@ export const OmniAnim = shadow_component(use => {
 
 	const renderDurationSlider = () => {
 		return html`
-			<div>
+			<div class=duration-slider>
 				<label for="duration">Duration:</label>
 				<input
 					@input=${(e: InputEvent) => kind === "In"
