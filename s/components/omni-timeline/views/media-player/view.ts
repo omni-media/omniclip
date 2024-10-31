@@ -41,7 +41,7 @@ export const MediaPlayer = shadow_view(use => () => {
 			(timecode) => {
 				const selected_effect = use.context.state.selected_effect
 				if(selected_effect) {
-					use.context.controllers.timeline.set_or_discard_active_object_on_canvas_for_selected_effect(selected_effect, compositor, use.context.state)
+					use.context.controllers.timeline.setOrDiscardActiveObjectOnCanvas(selected_effect, use.context.state)
 				}
 			}
 		)

@@ -16,7 +16,7 @@ import {removeDuplicatesByKey} from "../../utils/remove-duplicates-by-key.js"
 export const TextUpdater = shadow_view(use => (selected_effect: TextEffect) => {
 	use.styles(styles)
 	use.watch(() => use.context.state)
-	const effect = use.context.state.effects.find(effect => effect.id === selected_effect.id)! as TextEffect
+	const effect = use.context.state.effects.find(effect => effect.id === selected_effect.id) as TextEffect | undefined
 
 	const text_manager = use.context.controllers.compositor.managers.textManager
 	const compositor = use.context.controllers.compositor
@@ -84,7 +84,7 @@ export const TextUpdater = shadow_view(use => (selected_effect: TextEffect) => {
 		`
 	}
 
-	return StateHandler(use.context.helpers.ffmpeg.is_loading.value, () => html`
+	return StateHandler(use.context.helpers.ffmpeg.is_loading.value, () => effect ? html`
 		<div
 			style="
 				transform:
@@ -130,5 +130,5 @@ export const TextUpdater = shadow_view(use => (selected_effect: TextEffect) => {
 				class="content"
 			>${effect.content.trim()}</textarea>
 		</div>
-	`)
+	` : html``)
 })

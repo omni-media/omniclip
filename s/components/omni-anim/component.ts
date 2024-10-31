@@ -84,7 +84,7 @@ export const OmniAnim = shadow_component(use => {
 					const target = event.target as HTMLSelectElement
 					const effectId = target.value
 					const effect = use.context.state.effects.find(effect => effect.id === effectId)!
-					controllers.timeline.set_selected_effect(effect, controllers.compositor, use.context.state)
+					controllers.timeline.set_selected_effect(effect, use.context.state)
 				}}
 				id="clip"
 				name="clip"

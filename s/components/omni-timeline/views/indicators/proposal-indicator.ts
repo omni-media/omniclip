@@ -6,12 +6,13 @@ import {calculate_effect_width} from "../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
 import {calculate_effect_track_index} from "../../utils/calculate_effect_track_index.js"
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
+import {getEffectsOnTrack} from "../../../../context/controllers/timeline/utils/get-effects-on-track.js"
 
 export const ProposalIndicator = light_view(use => () => {
 	const controller = use.context.controllers.timeline
 	const actions = use.context.actions
 	const zoom = use.context.state.zoom
-	const trim_handler = use.context.controllers.timeline.effect_trim_handler
+	const trim_handler = use.context.controllers.timeline.effectTrimHandler
 	const effectDragHandler = controller.effectDragHandler
 	const [proposedTimecode, setProposedTimecode] = use.state<ProposedTimecode>({
 		proposed_place: {track: 0, start_at_position: 0},
@@ -19,7 +20,7 @@ export const ProposalIndicator = light_view(use => () => {
 		effects_to_push: null
 	})
 
-	const track_effects = controller.get_effects_on_track(use.context.state, proposedTimecode.proposed_place.track)
+	const track_effects = getEffectsOnTrack(use.context.state, proposedTimecode.proposed_place.track)
 
 	function translate_to_timecode(grabbed: Grabbed, hovering: At) {
 		const baseline_zoom = use.context.state.zoom

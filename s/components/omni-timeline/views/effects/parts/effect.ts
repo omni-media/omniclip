@@ -18,7 +18,7 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 	const controller = use.context.controllers.timeline
 	const media_controller = use.context.controllers.media
 	const effectDragHandler = use.context.controllers.timeline.effectDragHandler
-	const handler = controller.effect_trim_handler
+	const handler = controller.effectTrimHandler
 	const [fileNotFound, setFileNotFound] = use.state(false)
 	const [timelineScrollLeft, setTimelineScrollLeft] = use.state(0)
 	const [previewPosition, setPreviewPosition] = use.state<{start: null | number; startAtPosition: null | number; end: number | null}>({
@@ -181,7 +181,7 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 				);
 			"
 			@pointerdown=${drag_events.start}
-			@click=${() => use.context.controllers.timeline.set_selected_effect(effect, use.context.controllers.compositor, use.context.state)}
+			@click=${() => use.context.controllers.timeline.set_selected_effect(effect, use.context.state)}
 		>
 			${fileNotFound
 				? html`<span style="width: 100%; transform: translateX(${timelineScrollLeft}px)">File Not Found: ${effect.kind !== "text" ? effect.name : null}</span>`

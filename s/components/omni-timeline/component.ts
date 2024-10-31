@@ -20,7 +20,7 @@ export const OmniTimeline = shadow_component(use => {
 	use.styles(styles)
 	use.watch(() => use.context.state)
 	const state = use.context.state
-	const effectTrim = use.context.controllers.timeline.effect_trim_handler
+	const effectTrim = use.context.controllers.timeline.effectTrimHandler
 	const effectDrag = use.context.controllers.timeline.effectDragHandler
 	const playheadDrag = use.context.controllers.timeline.playheadDragHandler
 
