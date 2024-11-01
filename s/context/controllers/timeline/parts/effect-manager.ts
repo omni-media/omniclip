@@ -34,11 +34,6 @@ export class EffectManager {
 		})
 	}
 
-	/**
-		* Splits an effect at a specified time, creating a new effect from the split point.
-		* If no specific effect is selected, splits any effect present at the timestamp.
-		* @param state - The current application state.
-	*/
 	splitEffectAtTimestamp(state: State) {
 		const normalizedTimecode = this.#normalizeToTimebase(state)
 		const selectedEffect = state.selected_effect
@@ -56,12 +51,6 @@ export class EffectManager {
 		}
 	}
 
-	/**
-		* Splits a given effect at a specified timecode, updating its end and creating a new split effect.
-		* @param effect - The effect to split.
-		* @param timecode - The timecode at which to split the effect.
-		* @param state - The current application state.
-	*/
 	#splitEffect(effect: AnyEffect, timecode: number, state: State) {
 		const isEffectInRange = get_effects_at_timestamp([effect], timecode)
 
@@ -89,10 +78,6 @@ export class EffectManager {
 		}
 	}
 
-	/**
-		* Adds a new split effect to the timeline.
-		* @param effect - The newly created split effect.
-	*/
 	async #addSplitEffect(effect: AnyEffect) {
 		const file = effect.kind !== "text" ? await this.media.get_file(effect.file_hash) : null
 
@@ -107,11 +92,23 @@ export class EffectManager {
 		}
 	}
 
-	/**
-		* Normalizes the timecode to the nearest frame based on the state's timebase.
-		* @param state - The application state.
-		* @returns The normalized timecode.
-	*/
+	setSelectedEffect(effect: AnyEffect | undefined, state: State) {
+		if (!effect) {
+			// Clear selection if no effect is provided
+			this.compositor.canvas.discardActiveObject()
+			this.actions.set_selected_effect(null)
+		} else {
+			// Set the effect as selected in actions and update canvas
+			this.actions.set_selected_effect(effect)
+			if (effect.kind === "text") {
+				this.compositor.managers.textManager.set_clicked_effect(effect)
+			}
+			this.compositor.setOrDiscardActiveObjectOnCanvas(effect, state)
+		}
+
+		this.compositor.canvas.renderAll()
+	}
+
 	#normalizeToTimebase(state: State): number {
 		const frameDuration = 1000 / state.timebase
 		return Math.round(state.timecode / frameDuration) * frameDuration

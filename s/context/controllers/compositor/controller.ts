@@ -13,6 +13,7 @@ import {AnyEffect, AudioEffect, State} from "../../types.js"
 import {AnimationManager} from "./parts/animation-manager.js"
 import {compare_arrays} from "../../../utils/compare_arrays.js"
 import {sort_effects_by_track} from "../video-export/utils/sort_effects_by_track.js"
+import {get_effect_at_timestamp} from "../video-export/utils/get_effect_at_timestamp.js"
 
 export interface Managers {
 	videoManager: VideoManager
@@ -342,6 +343,28 @@ export class Compositor {
 
 	set_timebase(value: number) {
 		this.timebase = value
+	}
+
+	setOrDiscardActiveObjectOnCanvas(selectedEffect: AnyEffect | null, state: State) {
+		if (!selectedEffect) {
+			// Discard any active object if no effect is selected
+			this.canvas.discardActiveObject()
+			return
+		}
+
+		const isEffectOnCanvas = get_effect_at_timestamp(selectedEffect, state.timecode)
+
+		if (isEffectOnCanvas) {
+			const object = this.canvas.getObjects().find((object: any) =>
+				(object?.effect as AnyEffect)?.id === selectedEffect.id
+			)
+
+			if (object && object !== this.canvas.getActiveObject()) {
+				this.canvas.setActiveObject(object)
+			}
+		} else {
+			this.canvas.discardActiveObject()
+		}
 	}
 
 	set_video_playing = (playing: boolean) => {
