@@ -10,9 +10,9 @@ import {ProposedTimecode, AnyEffect, EffectTimecode, State} from "../../types.js
 
 /**
 	* The Timeline class orchestrates the main actions for the video editor’s timeline.
-	* It uses other specialized classes to handle specific logic related to effects,
-	* canvas interactions, and drag actions, serving as the primary controller for 
-	* timeline management.
+	* It utilizes specialized classes to handle effect-specific logic and drag actions,
+	* and interacts with the compositor to ensure timeline changes are reflected on the canvas,
+	* serving as the primary controller for timeline management.
 */
 export class Timeline {
 	effectTrimHandler: effectTrimHandler
@@ -21,7 +21,7 @@ export class Timeline {
 	#placementProposal: EffectPlacementProposal
 	#effectManager: EffectManager
 
-	constructor(private actions: Actions, media: Media, private compositor: Compositor) {
+	constructor(private actions: Actions, private media: Media, private compositor: Compositor) {
 		this.effectTrimHandler = new effectTrimHandler(actions)
 		this.#placementProposal = new EffectPlacementProposal()
 		this.#effectManager = new EffectManager(actions, compositor, media)
@@ -72,16 +72,6 @@ export class Timeline {
 	*/
 	set_selected_effect(effect: AnyEffect | undefined, state: State) {
 		this.#effectManager.setSelectedEffect(effect, state)
-	}
-
-	/**
-		* Sets or discards the active object on the canvas based on the specified effect.
-		*
-		* @param effect - The effect to activate or discard on the canvas.
-		* @param state - The current application state.
-	*/
-	setOrDiscardActiveObjectOnCanvas(effect: AnyEffect, state: State) {
-		this.compositor.setOrDiscardActiveObjectOnCanvas(effect, state)
 	}
 
 	/**

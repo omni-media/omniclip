@@ -345,6 +345,12 @@ export class Compositor {
 		this.timebase = value
 	}
 
+	/**
+		* Sets or discards the active object on the canvas based on the specified effect.
+		*
+		* @param effect - The effect to activate or discard on the canvas.
+		* @param state - The current application state.
+	*/
 	setOrDiscardActiveObjectOnCanvas(selectedEffect: AnyEffect | null, state: State) {
 		if (!selectedEffect) {
 			// Discard any active object if no effect is selected
