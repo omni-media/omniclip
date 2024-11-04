@@ -13,12 +13,18 @@ export const styles = css`
 		top: 0;
 		z-index: 1;
 		height: 50px;
+		border: 1px solid rgb(0 0 0 / 38%);
+		border-radius: 5px;
 
 		&[data-no-file] {
 			border: 3px dotted red;
 			color: red;
 		}
-		
+
+		&[data-grabbed] {
+			cursor: grabbing;
+		}
+
 		&[data-selected] {
 			z-index: 5;
 			mix-blend-mode: overlay;
@@ -33,7 +39,6 @@ export const styles = css`
 				align-items: center;
 				justify-content: center;
 				gap: 3px;
-				z-index: 1;
 				position: absolute;
 				width: 18px;
 				height: 100%;
@@ -70,16 +75,16 @@ export const styles = css`
 		align-items: center;
 		background: #201f1f;
 		border-radius: 5px;
-		cursor: pointer;
+		border: 1px solid rgb(0 0 0 / 38%);
+		cursor: grab;
 		position: absolute;
 		top: 0;
 		height: 50px;
 		overflow: hidden;
-		
 
 		&[data-grabbed] {
-			filter: brightness(0.5);
 			z-index: 2;
+			opacity: 0.5;
 		}
 
 		&[data-selected] {

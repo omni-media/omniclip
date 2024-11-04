@@ -1,10 +1,9 @@
-import {Op, html, watch} from "@benev/slate"
+import {Op, html} from "@benev/slate"
 import {repeat} from "lit/directives/repeat.js"
 
 import {styles} from "./styles.js"
 import {Track} from "./views/track/view.js"
 import {Toolbar} from "./views/toolbar/view.js"
-import {Indicator} from "../../context/types.js"
 import {Playhead} from "./views/playhead/view.js"
 import {TimeRuler} from "./views/time-ruler/view.js"
 import {shadow_component} from "../../context/context.js"
@@ -42,12 +41,18 @@ export const OmniTimeline = shadow_component(use => {
 
 	const effect_drag_over = (event: PointerEvent) => {
 		const timeline = use.shadow.querySelector(".timeline-relative")
-		const indicator = (event.target as HTMLElement).part.value as Indicator
 		const bounds = timeline?.getBoundingClientRect()
+		const path = event.composedPath()
+		const indicator = path.find(e => (e as HTMLElement).className === "indicator-area") as HTMLElement | undefined
 		if(bounds) {
 			const x = event.clientX - bounds.left
 			const y = event.clientY - bounds.top
-			effectDrag.move({coordinates: [x >= 0 ? x : 0, y >= 0 ? y : 0], indicator})
+			effectDrag.move({
+				coordinates: [x >= 0 ? x : 0, y >= 0 ? y : 0],
+				indicator: indicator
+					? {type: "addTrack", index: Number(indicator.getAttribute("data-index"))}
+					: null
+			})
 		}
 	}
 
@@ -60,7 +65,7 @@ export const OmniTimeline = shadow_component(use => {
 		effect_drag_over(event)
 	}
 
-	const render_tracks = () => use.context.state.tracks.map((_track, i) => Track([i], {attrs: {part: "add-track-indicator"}}))
+	const render_tracks = () => repeat(use.context.state.tracks, ((_track, i) => Track([i], {attrs: {part: "add-track-indicator"}})))
 	const render_effects = () => repeat(use.context.state.effects, (effect) => effect.id, (effect) => {
 		if(effect.kind === "audio") {
 			return AudioEffect([effect, use.element])
@@ -85,7 +90,7 @@ export const OmniTimeline = shadow_component(use => {
 			${Toolbar([use.element])}
 			${TimeRuler([use.element])}
 			<div
-				style="width: ${calculate_timeline_width(state.effects, state.zoom)}px"
+				style="width: ${calculate_timeline_width(state.effects, state.zoom)}px;"
 				class=timeline-relative>
 				${Playhead([])}
 				${render_tracks()}

@@ -1,17 +1,27 @@
 import {pub} from "@benev/slate"
 import {At, Grabbed} from "../../../../types.js"
 
+export interface EffectDrop {
+	grabbed: Grabbed
+	position: At
+}
+
+export interface EffectDrag {
+	grabbed: Grabbed
+	position: At
+}
+
 export class EffectDragHandler {
 	at: At | null = null
 	grabbed: null | Grabbed = null
 	#isGrabbed = false
-	onEffectDrag = pub<{ hovering: At; grabbed: Grabbed }>()
-	onDrop = pub<{grabbed: Grabbed, droppedAt: At}>()
+	onEffectDrag = pub<EffectDrag>()
+	onDrop = pub<EffectDrop>()
 
-	move(hovering: At) {
+	move(position: At) {
 		if (this.#isGrabbed && this.grabbed) {
-			this.onEffectDrag.publish({ hovering, grabbed: this.grabbed })
-			this.at = hovering
+			this.onEffectDrag.publish({ position, grabbed: this.grabbed })
+			this.at = position
 		}
 	}
 
@@ -21,16 +31,22 @@ export class EffectDragHandler {
 		this.at = at
 	}
 
-	drop() {
+	drop(e: PointerEvent) {
 		if(this.grabbed) {
-			this.onDrop.publish({grabbed: this.grabbed!, droppedAt: this.at!})
+			const path = e.composedPath()
+			const indicator = path.find(e => (e as HTMLElement).className === "indicator-area") as HTMLElement | undefined
+			this.onDrop.publish({grabbed: this.grabbed!, position: {...this.at!,
+				indicator: indicator
+					? {type: "addTrack", index: Number(indicator.getAttribute("data-index"))}
+					: null
+			}})
 			this.#resetState()
 		}
 	}
 
 	end() {
 		if(this.grabbed) {
-			this.onDrop.publish({grabbed: this.grabbed!, droppedAt: this.at!})
+			this.onDrop.publish({grabbed: this.grabbed!, position: this.at!})
 			this.#resetState()
 		}
 	}

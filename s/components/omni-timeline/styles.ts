@@ -5,6 +5,7 @@ export const styles = css`
 		display: flex;
 		overflow: scroll;
 		position: relative;
+		height: 100%;
 	}
 
 	.timeline {
@@ -13,7 +14,11 @@ export const styles = css`
 		user-select: none;
 
 		& .timeline-relative {
+			height: 100%;
+			min-width: 100vw;
 			position: relative;
+			overflow-y: scroll;
+			background: rgb(0, 0, 0 / 38%);
 
 			& * {
 				will-change: transform;

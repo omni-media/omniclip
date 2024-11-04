@@ -4,7 +4,8 @@ export const styles = css`
 	.time-ruler {
 		font-size: 0.5em;
 		display: flex;
-		height: 10px;
+		height: 20px;
+		background: #202020;
 		align-items: center;
 	}
 

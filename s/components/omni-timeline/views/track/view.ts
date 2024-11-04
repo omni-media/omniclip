@@ -18,7 +18,7 @@ export const Track = shadow_view(use => (index :number) => {
 	return html`
 		<div style="${if_text_on_track_styles()}" class=track></div>
 		<div class="indicators">
-			${AddTrackIndicator()}
+			${AddTrackIndicator(index)}
 		</div>
 	`
 })

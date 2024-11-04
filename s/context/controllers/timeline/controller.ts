@@ -4,9 +4,9 @@ import {Compositor} from "../compositor/controller.js"
 import {EffectManager} from "./parts/effect-manager.js"
 import {PlayheadDrag} from "./parts/drag-related/playhead-drag.js"
 import {effectTrimHandler} from "./parts/drag-related/effect-trim.js"
-import {EffectDragHandler} from "./parts/drag-related/effect-drag.js"
 import {EffectPlacementProposal} from "./parts/effect-placement-proposal.js"
 import {ProposedTimecode, AnyEffect, EffectTimecode, State} from "../../types.js"
+import {EffectDrag, EffectDragHandler, EffectDrop} from "./parts/drag-related/effect-drag.js"
 
 /**
 	* The Timeline class orchestrates the main actions for the video editor’s timeline.
@@ -36,8 +36,8 @@ export class Timeline {
 		* @param state - The current application state.
 		* @returns A ProposedTimecode object containing the suggested placement and any adjustments.
 	*/
-	calculate_proposed_timecode(effectTimecode: EffectTimecode, grabbed_effect_id: string, state: State): ProposedTimecode {
-		return this.#placementProposal.calculateProposedTimecode(effectTimecode, grabbed_effect_id, state)
+	calculate_proposed_timecode(effectTimecode: EffectTimecode, drag: EffectDrag, state: State): ProposedTimecode {
+		return this.#placementProposal.calculateProposedTimecode(effectTimecode, drag, state)
 	}
 
 	/**
@@ -47,8 +47,8 @@ export class Timeline {
 		* @param effect - The effect to update with a new timecode.
 		* @param proposedTimecode - The calculated timecode proposal for placement.
 	*/
-	set_proposed_timecode(effect: AnyEffect, proposedTimecode: ProposedTimecode) {
-		this.#effectManager.setProposedTimecode(effect, proposedTimecode)
+	set_proposed_timecode(dragProps: EffectDrop, proposedTimecode: ProposedTimecode, state: State) {
+		this.#effectManager.setProposedTimecode(dragProps, proposedTimecode, state)
 	}
 
 	/**

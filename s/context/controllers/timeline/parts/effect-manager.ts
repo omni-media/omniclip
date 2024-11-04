@@ -2,27 +2,122 @@ import {generate_id} from "@benev/slate"
 
 import {Actions} from "../../../actions.js"
 import {Media} from "../../media/controller.js"
+import {EffectDrop} from "./drag-related/effect-drag.js"
 import {Compositor} from "../../compositor/controller.js"
-import {AnyEffect, ProposedTimecode, State} from "../../../types.js"
+import {AnyEffect, At, ProposedTimecode, State} from "../../../types.js"
 import {get_effects_at_timestamp} from "../../video-export/utils/get_effects_at_timestamp.js"
 
 // EffectManager: Manages effect state updates
 export class EffectManager {
 	constructor(private actions: Actions, private compositor: Compositor, private media: Media) {}
 
-	setProposedTimecode(effect: AnyEffect, proposedTimecode: ProposedTimecode) {
-		this.actions.set_effect_start_position(effect, proposedTimecode.proposed_place.start_at_position)
-		this.actions.set_effect_track(effect, proposedTimecode.proposed_place.track)
+	setProposedTimecode({grabbed, position}: EffectDrop, proposedTimecode: ProposedTimecode, state: State) {
+		this.actions.set_effect_start_position(grabbed.effect, proposedTimecode.proposed_place.start_at_position)
+		this.actions.set_effect_track(grabbed.effect, proposedTimecode.proposed_place.track)
 
-		if (proposedTimecode.duration && effect.duration !== proposedTimecode.duration) {
-			const end = effect.start + proposedTimecode.duration
-			this.actions.set_effect_end(effect, end)
+		if (proposedTimecode.duration && grabbed.effect.duration !== proposedTimecode.duration) {
+			const end = grabbed.effect.start + proposedTimecode.duration
+			this.actions.set_effect_end(grabbed.effect, end)
 		}
 
 		if (proposedTimecode.effects_to_push) {
-			this.#pushEffectsForward(proposedTimecode.effects_to_push, effect.end - effect.start)
+			this.#pushEffectsForward(proposedTimecode.effects_to_push, grabbed.effect.end - grabbed.effect.start)
+		}
+
+		const isCurrentTrackEmpty = this.#isTrackEmpty(state, grabbed.effect)
+		const isDroppedOnAddTrackIndicator = this.#isDroppedOnAddTrackIndicator(position)
+
+		if (isCurrentTrackEmpty) {
+			this.#adjustForEmptyTrack({ grabbed, position }, proposedTimecode, state)
+		} else if (isDroppedOnAddTrackIndicator) {
+			this.#adjustForAddTrackDrop({ grabbed, position }, state)
 		}
 	}
+	// start -- that neets to be moved to EffectPlacementProposal --
+	#isTrackEmpty(state: State, effect: AnyEffect) {
+		return !state.effects.filter(e => e.id !== effect.id).some(e => e.track === effect.track)
+	}
+
+	#isEffectDroppedOnSameTrack(effect: AnyEffect, proposedTimecode: ProposedTimecode) {
+		return proposedTimecode.proposed_place.track === effect.track
+	}
+
+	#isDroppedOnAddTrackIndicator(position: At) {
+		return position.indicator?.type === "addTrack"
+	}
+
+	#adjustForEmptyTrack(event: EffectDrop, proposedTimecode: ProposedTimecode, state: State) {
+		const targetTrackIndex = event.position.indicator?.index
+		const isDroppedOnSameTrack = this.#isEffectDroppedOnSameTrack(event.grabbed.effect, proposedTimecode)
+		const isDroppedOnAddTrackIndicator = this.#isDroppedOnAddTrackIndicator(event.position)
+
+		if (isDroppedOnSameTrack) {
+			if (event.grabbed.effect.track === targetTrackIndex) {
+				this.actions.set_effect_track(event.grabbed.effect, event.grabbed.effect.track)
+				return
+			}
+		} else if (isDroppedOnAddTrackIndicator) {
+			this.#handleAddTrackDrop(event, targetTrackIndex!, state)
+		} else {
+			this.actions.remove_track(state.tracks[event.grabbed.effect.track].id)
+			this.#reorderTracksForEmptyDrop(event, proposedTimecode, state)
+		}
+	}
+
+	#handleAddTrackDrop(event: EffectDrop, targetTrackIndex: number, state: State) {
+		const grabbedTrackIndex = event.grabbed.effect.track
+
+		if (grabbedTrackIndex === targetTrackIndex) {
+			this.actions.set_effect_track(event.grabbed.effect, grabbedTrackIndex)
+		} else if (grabbedTrackIndex > targetTrackIndex) {
+			this.actions.set_effect_track(event.grabbed.effect, targetTrackIndex + 1)
+			state.effects.filter(e => e.id !== event.grabbed.effect.id).forEach(e => {
+				if (e.track > targetTrackIndex && e.track <= grabbedTrackIndex) {
+					this.actions.set_effect_track(e, e.track + 1)
+				}
+			})
+		} else {
+			this.actions.set_effect_track(event.grabbed.effect, targetTrackIndex)
+			state.effects.filter(e => e.id !== event.grabbed.effect.id).forEach(e => {
+				if (e.track <= targetTrackIndex && e.track > grabbedTrackIndex) {
+					this.actions.set_effect_track(e, e.track - 1)
+				}
+			})
+		}
+	}
+
+	#reorderTracksForEmptyDrop({ grabbed }: EffectDrop, proposedTimecode: ProposedTimecode, state: State) {
+		if (proposedTimecode.proposed_place.track > grabbed.effect.track) {
+			this.actions.set_effect_track(grabbed.effect, proposedTimecode.proposed_place.track - 1)
+		}
+		state.effects.forEach(e => {
+			if (e.track > grabbed.effect.track) {
+				this.actions.set_effect_track(e, e.track - 1)
+			}
+		})
+	}
+
+	#adjustForAddTrackDrop(event: EffectDrop, state: State) {
+		this.actions.add_track()
+		const targetTrackIndex = event.position.indicator!.index
+
+		if (event.grabbed.effect.track > targetTrackIndex) {
+			this.actions.set_effect_track(event.grabbed.effect, targetTrackIndex + 1)
+			state.effects.filter(e => e.id !== event.grabbed.effect.id).forEach(e => {
+				if (e.track > targetTrackIndex) {
+					this.actions.set_effect_track(e, e.track + 1)
+				}
+			})
+		} else {
+			this.actions.set_effect_track(event.grabbed.effect, targetTrackIndex + 1)
+			state.effects.filter(e => e.id !== event.grabbed.effect.id).forEach(e => {
+				if (e.track > targetTrackIndex) {
+					this.actions.set_effect_track(e, e.track + 1)
+				}
+			})
+		}
+	}
+	// end
 
 	removeEffect(effect: AnyEffect) {
 		this.actions.remove_effect(effect)

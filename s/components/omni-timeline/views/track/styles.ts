@@ -2,10 +2,8 @@ import {css} from "@benev/slate"
 
 export const styles = css`
 	.track {
-		background: rgb(0 0 0 / 38%);
 		display: flex;
 		height: 50px;
-		outline: 1px solid #181818;
 	}
 
 	.indicators {
@@ -17,7 +15,11 @@ export const styles = css`
 			width: 100%;
 			height: 14px;
 			top: -7px;
-			z-index: 3;
+			z-index: 10;
+
+			&[data-indicate] {
+				cursor: grabbing;
+			}
 		}
 
 		& .indicator {

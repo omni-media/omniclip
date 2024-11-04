@@ -1,3 +1,4 @@
+import {EffectDrag} from "./drag-related/effect-drag.js"
 import {EffectPlacementUtilities} from "./effect-placement-utilities.js"
 import {AnyEffect, EffectTimecode, ProposedTimecode, State} from "../../../types.js"
 
@@ -5,8 +6,8 @@ import {AnyEffect, EffectTimecode, ProposedTimecode, State} from "../../../types
 export class EffectPlacementProposal {
 	#placementUtilities = new EffectPlacementUtilities()
 
-	calculateProposedTimecode(effectTimecode: EffectTimecode, grabbedEffectId: string, state: State): ProposedTimecode {
-		const effectsToConsider = this.#excludeGrabbedEffect(grabbedEffectId, state.effects)
+	calculateProposedTimecode(effectTimecode: EffectTimecode, {grabbed, position}: EffectDrag, state: State): ProposedTimecode {
+		const effectsToConsider = this.#excludeGrabbedEffect(grabbed.effect.id, state.effects)
 		const trackEffects = effectsToConsider.filter(effect => effect.track === effectTimecode.track)
 
 		const effectBefore = this.#placementUtilities.getEffectsBefore(trackEffects, effectTimecode.timeline_start)[0]

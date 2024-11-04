@@ -2,7 +2,7 @@ import {CSSResultGroup, TemplateResult, html, css, GoldElement} from "@benev/sla
 
 import {styles} from "./styles.js"
 import {V2} from "../../../utils/coordinates_in_rect.js"
-import {AnyEffect, At, Indicator} from "../../../../../context/types.js"
+import {AnyEffect, At} from "../../../../../context/types.js"
 import {shadow_view} from "../../../../../context/context.js"
 import {calculate_effect_width} from "../../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../../utils/calculate_start_position.js"
@@ -75,8 +75,8 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 				const isDragged = e.grabbed.effect.id === effect.id
 				if(isDragged) {
 					const center_of_effect: V2 = [
-						e.hovering.coordinates[0] - e.grabbed.offset.x,
-						e.hovering.coordinates[1] - e.grabbed.offset.y
+						e.position.coordinates[0] - e.grabbed.offset.x,
+						e.position.coordinates[1] - e.grabbed.offset.y
 					]
 					setCords(center_of_effect)
 				}
@@ -84,18 +84,18 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 			return () => dispose()
 		},
 		start(event: PointerEvent) {
+			use.context.controllers.timeline.set_selected_effect(effect, use.context.state)
 			const timelineElement = timeline.shadowRoot?.querySelector(".timeline-relative")
 			const bounds = timelineElement?.getBoundingClientRect()
-			const indicator = (event.target as HTMLElement).part.value as Indicator
 			if(bounds && !handler.grabbed) {
 				const x = event.clientX - bounds.left
 				const y = event.clientY - bounds.top
-				const at = {coordinates: [x >= 0 ? x : 0, y >= 0 ? y : 0], indicator} satisfies At
+				const at = {coordinates: [x >= 0 ? x : 0, y >= 0 ? y : 0], indicator: null} satisfies At
 				effectDragHandler.start({effect, offset: {x: event.offsetX, y: event.offsetY}}, at)
 			}
 		},
-		drop() {
-			effectDragHandler.drop()
+		drop(e: PointerEvent) {
+			effectDragHandler.drop(e)
 		},
 		end() {
 			effectDragHandler.end()
@@ -114,7 +114,7 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 			}
 		})
 		const dropevents = (e: PointerEvent) => {
-			drag_events.drop()
+			drag_events.drop(e)
 			handler.trim_drop(e, use.context.state)
 		}
 		const endevents = (e: PointerEvent) => {
@@ -181,7 +181,6 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 				);
 			"
 			@pointerdown=${drag_events.start}
-			@click=${() => use.context.controllers.timeline.set_selected_effect(effect, use.context.state)}
 		>
 			${fileNotFound
 				? html`<span style="width: 100%; transform: translateX(${timelineScrollLeft}px)">File Not Found: ${effect.kind !== "text" ? effect.name : null}</span>`

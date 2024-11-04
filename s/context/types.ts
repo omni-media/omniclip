@@ -156,5 +156,9 @@ export type Settings = {
 	aspect_ratio: AspectRatio
 }
 
-export type Indicator = "add-track-indicator" | null
+export type Indicator = AddTrackIndicator | null
+export interface AddTrackIndicator {
+	index: number
+	type: "addTrack"
+}
 export type Status = "render" | "decode" | "demux" | "fetch"
