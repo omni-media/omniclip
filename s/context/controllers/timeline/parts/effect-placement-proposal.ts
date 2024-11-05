@@ -37,6 +37,17 @@ export class EffectPlacementProposal {
 			shrinkedSize
 		)
 
+		if(position.indicator?.type === "addTrack") {
+			return {
+				proposed_place: {
+					start_at_position: this.#placementUtilities.roundToNearestFrame(effectTimecode.timeline_start, state.timebase),
+					track: effectTimecode.track
+				},
+				duration: grabbed.effect.end - grabbed.effect.start,
+				effects_to_push: []
+			}
+		}
+
 		return {
 			proposed_place: {
 				start_at_position: this.#placementUtilities.roundToNearestFrame(proposedStartPosition, state.timebase),

@@ -6,7 +6,7 @@ export const styles = css`
 		display: flex;
 		justify-content: center;
 		width: 2px;
-		height: 100%;
+		height: 100vh;
 		background: var(--alpha);
 		z-index: 3;
 		cursor: pointer;

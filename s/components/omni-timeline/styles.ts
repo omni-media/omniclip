@@ -18,7 +18,7 @@ export const styles = css`
 			min-width: 100vw;
 			position: relative;
 			overflow-y: scroll;
-			background: rgb(0, 0, 0 / 38%);
+			background: rgb(0 0 0 / 38%);
 
 			& * {
 				will-change: transform;
