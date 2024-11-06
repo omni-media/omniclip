@@ -289,18 +289,18 @@ export class Compositor {
 		await media.are_files_ready()
 		for(const effect of effects) {
 			if(effect.kind === "image") {
-				const file = media.get(effect.file_hash)
+				const file = media.get(effect.file_hash)?.file
 				if(file) {
 					await this.managers.imageManager.add_image_effect(effect , file, true)
 				}
 			}
 			else if(effect.kind === "video") {
-				const file = media.get(effect.file_hash)
+				const file = media.get(effect.file_hash)?.file
 				if(file)
 					this.managers.videoManager.add_video_effect(effect, file, true)
 			}
 			else if(effect.kind === "audio") {
-				const file = media.get(effect.file_hash)
+				const file = media.get(effect.file_hash)?.file
 				if(file)
 					this.managers.audioManager.add_audio_effect(effect, file, true)
 			}

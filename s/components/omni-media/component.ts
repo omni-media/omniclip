@@ -19,7 +19,7 @@ export const OmniMedia = shadow_component(use => {
 	const [placeholders, setPlaceholders, getPlaceholders] = use.state<any[]>([])
 
 	use.mount(() => {
-		media_controller.get_imported_files().then(async media => {
+		media_controller.getImportedFiles().then(async media => {
 			setPlaceholders(Array.apply(null, Array(media.length)))
 			const video_files = media.filter(({kind}) => kind === "video") as VideoFile[]
 			const image_files = media.filter(({kind}) => kind === "image") as ImageFile[]

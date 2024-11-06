@@ -20,7 +20,7 @@ async function getMediaInfo() {
 
 const mediainfo = await getMediaInfo() as MediaInfo
 
-export class Media extends Map<string, File> {
+export class Media extends Map<string, AnyMedia> {
 	#database_request = window.indexedDB.open("database", 3)
 	#opened = false
 	#files_ready = false
@@ -28,6 +28,7 @@ export class Media extends Map<string, File> {
 
 	constructor(private actions: Actions) {
 		super()
+		this.#get_imported_files()
 		this.#database_request.onerror = (event) => {
 			console.error("Why didn't you allow my web app to use IndexedDB?!")
 		}
@@ -79,10 +80,17 @@ export class Media extends Map<string, File> {
 
 	async get_file(file_hash: string) {
 		await this.are_files_ready()
-		return this.get(file_hash)
+		return this.get(file_hash)?.file
 	}
 
-	async get_imported_files(): Promise<AnyMedia[]> {
+	async getImportedFiles(): Promise<AnyMedia[]> {
+		return new Promise(async (resolve) => {
+			await this.are_files_ready()
+			resolve([...this.values()])
+		})
+	}
+
+	async #get_imported_files(): Promise<AnyMedia[]> {
 		return new Promise(async (resolve, reject) => {
 			await this.#is_db_opened()
 			const transaction = this.#database_request.result.transaction(["files"])
@@ -92,8 +100,8 @@ export class Media extends Map<string, File> {
 			request.onsuccess = async () => {
 				try {
 					const files: AnyMedia[] = request.result || []
-					for(const {hash, file} of files) {
-						this.set(hash, file)
+					for(const file of files) {
+						this.set(file.hash, file)
 					}
 					this.#files_ready = true
 					resolve(files)
@@ -133,24 +141,29 @@ export class Media extends Map<string, File> {
 			const transaction = this.#database_request.result.transaction(["files"], "readwrite")
 			const files_store = transaction.objectStore("files")
 			const check_if_duplicate = files_store.count(hash)
-			this.set(hash, imported_file)
 			check_if_duplicate!.onsuccess = () => {
 				const not_duplicate = check_if_duplicate.result === 0
 				if(not_duplicate) {
 					if(imported_file.type.startsWith("image")) {
-						files_store.add({file: imported_file, hash, kind: "image"})
-						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "image"}], action: "added"})
+						const media = {file: imported_file, hash, kind: "image"} satisfies AnyMedia
+						files_store.add(media)
+						this.set(hash, media)
+						this.on_media_change.publish({files: [media], action: "added"})
 					}
 					else if(imported_file.type.startsWith("video")) {
 						const track = video_info!.media?.track[0] as VideoTrack
 						const duration = track?.Duration! * 1000
 						const frames = track.FrameCount!
-						files_store.add({file: imported_file, hash, kind: "video", frames, duration})
-						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "video", frames, duration}], action: "added"})
+						const media = {file: imported_file, hash, kind: "video", frames, duration} satisfies AnyMedia
+						files_store.add(media)
+						this.set(hash, media)
+						this.on_media_change.publish({files: [media], action: "added"})
 					}
 					else if(imported_file.type.startsWith("audio")) {
-						files_store.add({file: imported_file, hash, kind: "audio"})
-						this.on_media_change.publish({files: [{file: imported_file, hash, kind: "audio"}], action: "added"})
+						const media = {file: imported_file, hash, kind: "audio"} satisfies AnyMedia
+						files_store.add(media)
+						this.set(hash, media)
+						this.on_media_change.publish({files: [media], action: "added"})
 					}
 				}
 				this.#files_ready = true
