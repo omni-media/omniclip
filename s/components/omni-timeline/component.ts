@@ -11,6 +11,7 @@ import {TextEffect} from "./views/effects/text-effect.js"
 import {VideoEffect} from "./views/effects/video-effect.js"
 import {AudioEffect} from "./views/effects/audio-effect.js"
 import {ImageEffect} from "./views/effects/image-effect.js"
+import folderSvg from "../../icons/gravity-ui/folder.svg.js"
 import {StateHandler} from "../../views/state-handler/view.js"
 import {ProposalIndicator} from "./views/indicators/proposal-indicator.js"
 import {calculate_timeline_width} from "./utils/calculate_timeline_width.js"
@@ -81,6 +82,15 @@ export const OmniTimeline = shadow_component(use => {
 		}
 	})
 
+	const renderTimelineInfo = () => {
+		return use.context.state.effects.length === 0 ? html`
+			<div class=timeline-info>
+				<h3>Your timeline is empty</h3>
+				<p>Add some media from ${folderSvg} panel to start editing!</p>
+			</div>
+		` : null
+	}
+
 	return StateHandler(Op.all(
 		use.context.helpers.ffmpeg.is_loading.value,
 		use.context.helpers.ffmpeg.is_loading.value), () => html`
@@ -92,6 +102,7 @@ export const OmniTimeline = shadow_component(use => {
 			<div
 				style="width: ${calculate_timeline_width(state.effects, state.zoom)}px;"
 				class=timeline-relative>
+				${renderTimelineInfo()}
 				${Playhead([])}
 				${render_tracks()}
 				${render_effects()}

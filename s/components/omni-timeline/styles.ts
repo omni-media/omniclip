@@ -18,10 +18,32 @@ export const styles = css`
 			min-width: 100vw;
 			position: relative;
 			overflow-y: scroll;
-			background: rgb(0 0 0 / 38%);
+			background-image: url("/assets/noise.svg");
+			background-color: rgb(0 0 0 / 38%);
 
 			& * {
 				will-change: transform;
+			}
+
+			& .timeline-info {
+				position: fixed;
+				display: flex;
+				flex-direction: column;
+				padding: 1.5em;
+				gap: 0.2em;
+				font-family: cursive;
+
+				& h3 {
+					font-size: 18px;
+				}
+
+				& p {
+					font-size: 16px;
+					color: gray;
+					display: flex;
+					align-items: center;
+					gap: 0.3em;
+				}
 			}
 		}
 
