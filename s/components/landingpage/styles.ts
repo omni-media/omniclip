@@ -6,6 +6,8 @@ export default css`
 	margin: 0;
 }
 
+@keyframes g-3 { 50% { --g3-1-x-position: 42.69531250000001%; --g3-1-y-position: 91.5625%; --g3-2-x-position: 91.7578125%; --g3-2-y-position: 33.046875%; --g3-3-x-position: 5.742187500000001%; --g3-3-y-position: 5.546875000000001%; } }
+
 .landing-page {
 	display: flex;
 	flex-direction: column;
@@ -15,15 +17,27 @@ export default css`
 
 	& nav {
 		position: fixed;
-		width: 100vw;
+		align-self: center;
+		border-radius: 10px;
+		margin: 1em;
+		background-image: url(/assets/noise.svg);
 		z-index: 10;
 		display: flex;
+		backdrop-filter: blur(5px);
 		justify-content: space-between;
 		align-items: center;
-		background: rgba(0, 0, 0, 1);
-		border-bottom: 1px solid;
-		border-image-source: linear-gradient(90deg, rgba(168, 170, 173, 0) 0%, #A8AAAD 49.18%, rgba(168, 170, 173, 0) 100%);
-		border-image-slice: 1;
+
+		& .try {
+			display: flex;
+			align-items: center;
+			gap: 0.5em;
+			background: white;
+			color: black;
+			padding: 0.3em 1em;
+			border-radius: 5px;
+			font-weight: bold;
+			font-size: 16px;
+		}
 
 		.logo {
 			padding: 1em 2em;
@@ -47,7 +61,7 @@ export default css`
 
 		& a {
 			text-decoration: none;
-			color: inherit;
+			color: white;
 			cursor: pointer;
 		}
 		& img {
@@ -63,7 +77,7 @@ export default css`
 			display: flex;
 			align-items: center;
 			padding: 1em 2em;
-			gap: 2em;
+			gap: 3em;
 		}
 
 		& a {
@@ -77,9 +91,10 @@ export default css`
 	}
 
 	& h1 {
+		color: white;
+
 		& span {
 			background-clip: text !important;
-			-webkit-text-fill-color: transparent;
 			font-family: Nippo-Regular;
 			background: linear-gradient(180.2deg, #FFFFFF 29.5%, #848588 50.27%, #FFFFFF 72.49%);
 		}
@@ -119,13 +134,14 @@ export default css`
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	box-shadow: black 0px -5vw 10vw 5vw inset;
 	gap: 2.5em;
+	background: radial-gradient(100% 100% at var(--g3-3-x-position) var(--g3-3-y-position), #ffffff -80%, transparent), radial-gradient(100% 100% at var(--g3-1-x-position) var(--g3-1-y-position), #000000 -71%, transparent), radial-gradient(100% 100% at var(--g3-2-x-position) var(--g3-2-y-position), #431eaf -52%, transparent), #000000;
+	animation-name: g-3;
+	animation-iteration-count: infinite;
+	animation-duration: 15s;
+	transition-timing-function: ease-in-out;
 	padding: 15em 3em;
-	background: rgba(0, 0, 0, 1);
-	background-image: url(../assets/bg-hero.svg);
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
 
 	& h1 {
 		text-transform: uppercase;
@@ -157,13 +173,11 @@ export default css`
 	}
 
 	& p {
+		color: white;
 		padding: 0.5em 1em;
 		border-radius: 100px;
 		font-size: 1em;
-		border: 2px solid transparent;
-		background-clip: padding-box, border-box;
-		border-image-slice: 1;
-		background-image: linear-gradient(rgba(29, 29, 29, 1), rgba(29, 29, 29, 1)), linear-gradient(88.9deg, #FFFFFF 1.88%, #6F6F6F 51.1%, #FFFFFF 97.16%);
+		border: 1px solid white;
 	}
 
 	& .btns {
@@ -209,7 +223,7 @@ export default css`
 }
 
 .core {
-	background: rgba(15, 15, 15, 1);
+	background: black;
 	padding: 3em;
 	display: flex;
 	justify-content: center;

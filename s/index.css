@@ -139,3 +139,32 @@ construct-editor {
     width:0%;
   }
 }
+
+@property --g3-1-x-position { syntax: "<percentage>"; inherits: false; initial-value: 16.09375%; }
+
+@property --g3-1-y-position { syntax: "<percentage>"; inherits: false; initial-value: 33.12500000000001%; }
+
+@property --g3-2-x-position { syntax: "<percentage>"; inherits: false; initial-value: 48.55468750000001%; }
+
+@property --g3-2-y-position { syntax: "<percentage>"; inherits: false; initial-value: 9.648437500000002%; }
+
+@property --g3-3-x-position { syntax: "<percentage>"; inherits: false; initial-value: 78.6328125%; }
+
+@property --g3-3-y-position { syntax: "<percentage>"; inherits: false; initial-value: 79.8046875%; }
+
+
+:root {
+
+--g3-1-x-position: 16.09375%
+
+--g3-1-y-position: 33.12500000000001%
+
+--g3-2-x-position: 48.55468750000001%
+
+--g3-2-y-position: 9.648437500000002%
+
+--g3-3-x-position: 78.6328125%
+
+--g3-3-y-position: 79.8046875%
+
+}

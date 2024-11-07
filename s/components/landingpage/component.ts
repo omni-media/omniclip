@@ -4,6 +4,7 @@ import {property} from "lit/decorators.js"
 import styles from "./styles.js"
 import {removeLoadingPageIndicator} from "../../main.js"
 import discordSvg from "../../icons/remix-icon/discord.svg.js"
+import arrowRightSvg from "../../icons/gravity-ui/arrow-right.svg.js"
 
 export class LandingPage extends LitElement {
 	static styles = styles
@@ -61,11 +62,23 @@ export class LandingPage extends LitElement {
 					<a @click=${() => this.scrollIntoElementView("welcome")} href="#welcome">Home</a>
 					<a @click=${() => this.scrollIntoElementView("core")} href="#core">Principles</a>
 					<a @click=${() => this.scrollIntoElementView("capabilities")} href="#capabilities">Capabilities</a>
+					<a
+						class="try"
+						href="#/editor"
+					>
+						Try it out ${arrowRightSvg}
+					</a>
 				</div>
 				<div class="nav">
 					<a @click=${() => this.scrollIntoElementView("welcome")} href="#welcome">Home</a>
 					<a @click=${() => this.scrollIntoElementView("core")} href="#core">Core Principles</a>
 					<a @click=${() => this.scrollIntoElementView("capabilities")} href="#capabilities">Capabilities</a>
+					<a
+						class="try"
+						href="#/editor"
+					>
+						Try it out ${arrowRightSvg}
+					</a>
 				</div>
 			</nav>
 			<section id="welcome" class="welcome">
@@ -93,7 +106,7 @@ export class LandingPage extends LitElement {
 						class="try"
 						href="#/editor"
 					>
-						Try it out
+						Start for free
 					</a>
 					<a
 						href="https://discord.gg/Nr8t9s5wSM"
