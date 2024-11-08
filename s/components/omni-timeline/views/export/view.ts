@@ -44,33 +44,40 @@ export const Export = shadow_view(use => () => {
 							${compositor.canvas_element}
 						`
 						: null}
-					<div class="flex-col">
-						<div class="progress">
-							<span class="status">
+					<div class=progress>
+						<div class=stats>
+							<span class=percentage>
 								Progress ${state.export_status === "complete" || state.export_status === "flushing"
 									? "100"
 									: state.export_progress.toFixed(2)}
 								%
 							</span>
-							<span>Status: ${state.export_status}</span>
-							<span>FPS: ${state.fps}</span>
-							<span class=logs-txt>logs:</span>
-							<div class=logs>
-								<div class="box-logs">
-									${logs.map(log => html`<span>${log}<span>`)}
-								</div>
+							<span class=status>Status: ${state.export_status}</span>
+						</div>
+						<div class=progress-bar>
+							<div
+								class="bar"
+								style="
+									width: ${state.export_status === "complete" || state.export_status === "flushing"
+										? "100"
+										: state.export_progress.toFixed(2)
+								}%"
+							>
 							</div>
 						</div>
-						<button
-							@click=${() => video_export.save_file()}
-							class="sparkle-button save-button"
-							.disabled=${state.export_status !== "complete"}
-						>
-							<span  class="spark"></span>
-							<span class="backdrop"></span>
-							${saveSvg}
-							<span class=text>save</span>
-						</button>
+						<div class=buttons>
+							<button class=cancel>Cancel Export</button>
+							<button
+								@click=${() => video_export.save_file()}
+								class="sparkle-button save-button"
+								.disabled=${state.export_status !== "complete"}
+							>
+								<span  class="spark"></span>
+								<span class="backdrop"></span>
+								${saveSvg}
+								<span class=text>save</span>
+							</button>
+						</div>
 					</div>
 				</div>
 			</dialog>

@@ -96,8 +96,7 @@ export const styles = css`
 	dialog {
 		width: 100%;
 		height: 100%;
-		background: none;
-		backdrop-filter: blur(5px);
+		background: radial-gradient(100% 100% at var(--g3-3-x-position) var(--g3-3-y-position), #ffffff -80%, transparent), radial-gradient(100% 100% at var(--g3-1-x-position) var(--g3-1-y-position), #000000 -71%, transparent), radial-gradient(100% 100% at var(--g3-2-x-position) var(--g3-2-y-position), #431eaf -52%, transparent), #000000;
 		border: none;
 		margin: auto;
 
@@ -106,78 +105,67 @@ export const styles = css`
 			flex-wrap: wrap;
 			width: 100%;
 			height: 100%;
+			gap: 1em;
+			flex-direction: column;
 			justify-content: center;
 			align-items: center;
+
+			& .progress {
+				display: flex;
+				flex-direction: column;
+				gap: 0.2em;
+				margin-top: 1em;
+				color: white;
+
+				& .stats {
+					display: flex;
+					justify-content: space-between;
+				}
+
+				& .buttons {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					margin-top: 1em;
+
+					& .cancel {
+						color: white;
+						background: linear-gradient(47deg, rgba(36, 0, 7, 1) 0%, rgba(201, 38, 38, 1) 100%);
+						width: 150px;
+						height: 35px;
+						cursor: pointer;
+					}
+				}
+
+				& .progress-bar {
+					width: 500px;
+					height: 10px;
+					border: 1px solid white;
+					border-radius: 10px;
+
+					& .bar {
+						border-radius: 10px;
+						filter: blur(2px);
+						height: 8px;
+						background: white;
+					}
+				}
+			}
 
 			canvas {
 				width: 500px;
 				height: 300px;
-				background: #18181894;
+				background: black;
+				box-shadow: black 0px 0px 30px 10px;
 			}
 
-			& .flex-col {
-				display: flex;
-				flex-direction: column;
-				height: 300px;
-				width: 350px;
-				justify-content: space-between;
-				background: #18181894;
-				padding: 1em;
-				font-size: 0.8em;
-
-				& .progress {
-					display: flex;
-					flex-direction: column;
-					align-items: center;
-					gap: 0.3em;
-					height: 100%;
-
-					& .logs {
-						display: flex;
-						align-self: start;
-						justify-content: left;
-						flex-direction: column;
-						overflow: hidden;
-						height: 100%;
-						width: 100%;
-						text-align: left;
-						position: relative;
-
-						& .box-logs {
-							word-break: break-all;
-							position: absolute;
-							bottom: 0;
-						}
-
-						& span {
-							display: block;
-							color: green;
-							font-size: 8px;
-							text-align: left;
-						}
-					}
-
-					& .logs-txt {
-						align-self: start;
-						font-size: 10px;
-					}
-
-					& .status {}
-				}
-
-				& span {
-					color: white;
-					font-size: 1.2em;
-				}
-			}
-			
 			& .save-button {
-				margin-top: 1em;
 				position: relative;
 				display: flex;
-				align-self: center;
+				align-self: end;
 				justify-content: center;
 				width: 150px;
+				height: 35px;
 				
 				&:disabled {
 					opacity: 0.5;
@@ -191,13 +179,13 @@ export const styles = css`
 
 				& svg {
 					width: 15px;
-					translate: -25% 20%;
-					color: gray;
+					translate: -25% 35%;
+					color: white;
 				}
 				
 				.text {
 					translate: 0;
-					color: #a2a1a1;
+					color: white;
 					font-size: 1.4em;
 				}
 
@@ -258,6 +246,17 @@ export const styles = css`
 	@keyframes rotate {
 		to {
 			transform: rotate(90deg);
+		}
+	}
+
+	@keyframes g-3 {
+		50% {
+			--g3-1-x-position: 42.69531250000001%;
+			--g3-1-y-position: 91.5625%;
+			--g3-2-x-position: 91.7578125%;
+			--g3-2-y-position: 33.046875%;
+			--g3-3-x-position: 5.742187500000001%;
+			--g3-3-y-position: 5.546875000000001%;
 		}
 	}
 `

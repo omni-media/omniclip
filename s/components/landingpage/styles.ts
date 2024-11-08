@@ -20,7 +20,6 @@ export default css`
 		align-self: center;
 		border-radius: 10px;
 		margin: 1em;
-		background-image: url(/assets/noise.svg);
 		z-index: 10;
 		display: flex;
 		backdrop-filter: blur(5px);
