@@ -134,6 +134,10 @@ export const styles = css`
 						width: 150px;
 						height: 35px;
 						cursor: pointer;
+
+						&[data-complete] {
+							background: linear-gradient(47deg, rgb(0, 36, 4) 0%, rgb(6, 147, 10) 100%);
+						}
 					}
 				}
 

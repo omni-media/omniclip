@@ -19,6 +19,7 @@ export class VideoExport {
 	#FPSCounter: FPSCounter
 	#Decoder: Decoder
 	#Encoder: Encoder
+	#exporting = false
 
 	constructor(private actions: Actions, private compositor: Compositor, media: Media) {
 		this.#FPSCounter = new FPSCounter(this.actions.set_fps, 100)
@@ -31,17 +32,34 @@ export class VideoExport {
 		await this.#FileSystemHelper.writeFile(handle, this.#Encoder.file!)
 	}
 
+	resetExporter(state: State) {
+		this.#exporting = false
+		this.#timestamp = 0
+		this.#timestamp_end = 0
+		this.#Decoder.reset()
+		this.#Encoder.reset()
+		this.actions.set_is_exporting(false)
+		this.actions.set_export_status("composing")
+		this.compositor.reset()
+		state.effects.forEach(effect => {
+			if(effect.kind === "video") {
+				this.compositor.managers.videoManager.reset(effect)
+			}
+		})
+	}
+
 	export_start(state: State, bitrate: number) {
+		this.#exporting = true
 		this.#Encoder.configure([state.settings.width, state.settings.height], bitrate, state.timebase)
 		const sorted_effects = this.#sort_effects_by_track(state.effects)
 		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position + (effect.end - effect.start)))
 		this.#export_process(sorted_effects, state.timebase)
 		this.actions.set_is_exporting(true)
-		this.compositor.currently_played_effects.clear()
-		this.compositor.canvas.clear()
+		this.compositor.reset()
 	}
 
 	async #export_process(effects: AnyEffect[], timebase: number) {
+		if(!this.#exporting) {return}
 		await this.#Decoder.get_and_draw_decoded_frame(effects, this.#timestamp)
 		this.compositor.compose_effects(effects, this.#timestamp, true)
 		this.actions.set_export_status("composing")

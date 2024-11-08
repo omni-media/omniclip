@@ -84,6 +84,11 @@ export class Compositor {
 		}
 		requestAnimationFrame(this.#on_playing)
 	}
+
+	reset() {
+		this.currently_played_effects.clear()
+		this.canvas.clear()
+	}
 	
 	#calculate_elapsed_time() {
 		const now = performance.now() - this.#pause_time

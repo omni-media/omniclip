@@ -18,8 +18,17 @@ interface DecodedFrame {
 export class Decoder {
 	decoded_frames: Map<string, DecodedFrame> = new Map()
 	decoded_effects = new Map<string, string>()
+	#workers: Worker[] = []
 
 	constructor(private actions: Actions, private media: Media, private compositor: Compositor, private encoder: Encoder) {}
+
+	reset() {
+		this.decoded_frames.forEach(decoded => decoded.frame.close())
+		this.decoded_frames.clear()
+		this.decoded_effects.clear()
+		this.#workers.forEach(worker => worker.terminate())
+		this.#workers = []
+	}
 
 	async get_and_draw_decoded_frame(effects: AnyEffect[], timestamp: number) {
 		const effects_at_timestamp = get_effects_at_timestamp(effects, timestamp)
@@ -56,6 +65,7 @@ export class Decoder {
 	async #extract_frames_from_video(effect: VideoEffect, timestamp: number) {
 		this.actions.set_export_status("demuxing")
 		const worker = new Worker(new URL("./decode_worker.js", import.meta.url), {type: "module"})
+		this.#workers.push(worker)
 		worker.addEventListener("message", (msg) => {
 			if(msg.data.action === "new-frame") {
 				const id = generate_id()

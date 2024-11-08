@@ -13,6 +13,12 @@ export class Encoder {
 		this.#ffmpeg = new FFmpegHelper(actions)
 	}
 
+	reset() {
+		this.encode_worker.terminate()
+		this.encode_worker = new Worker(new URL("./encode_worker.js", import.meta.url), {type: "module"})
+		this.file = null
+	}
+
 	export_process_end(effects: AnyEffect[], timebase: number) {
 		this.actions.set_export_status("flushing")
 		this.encode_worker.postMessage({action: "get-binary"})

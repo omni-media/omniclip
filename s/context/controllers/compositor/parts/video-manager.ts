@@ -9,6 +9,7 @@ import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new
 
 export class VideoManager extends Map<string, FabricImage> {
 	#effect_canvas = new Map<string, HTMLCanvasElement>()
+	#videoElements = new Map<string, HTMLVideoElement>()
 
 	constructor(private compositor: Compositor, private actions: Actions) {
 		super()
@@ -51,6 +52,7 @@ export class VideoManager extends Map<string, FabricImage> {
 		element.load()
 		element.width = effect.rect.width
 		element.height = effect.rect.height
+		this.#videoElements.set(effect.id, element)
 		const video = new FabricImage(element, {
 			top: effect.rect.position_on_canvas.y,
 			left: effect.rect.position_on_canvas.x,
@@ -82,6 +84,15 @@ export class VideoManager extends Map<string, FabricImage> {
 		if(video) {
 			this.compositor.canvas.remove(video)
 			this.compositor.canvas.renderAll()
+		}
+	}
+
+	//reset element to state before export started
+	reset(effect: VideoEffect) {
+		const video = this.get(effect.id)
+		if(video) {
+			const element = this.#videoElements.get(effect.id)!
+			video.setElement(element)
 		}
 	}
 

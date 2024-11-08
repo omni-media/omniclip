@@ -28,8 +28,8 @@ export const Export = shadow_view(use => () => {
 		return () => dispose()
 	})
 
+	const dialog = use.defer(() => use.shadow.querySelector("dialog"))
 	if(use.context.state.is_exporting) {
-		const dialog = use.shadow.querySelector("dialog")
 		dialog?.showModal()
 	}
 
@@ -41,7 +41,7 @@ export const Export = shadow_view(use => () => {
 				<div class="box">
 					${state.is_exporting
 						? html`
-							${compositor.canvas_element}
+							${compositor.canvas.getElement()}
 						`
 						: null}
 					<div class=progress>
@@ -66,7 +66,16 @@ export const Export = shadow_view(use => () => {
 							</div>
 						</div>
 						<div class=buttons>
-							<button class=cancel>Cancel Export</button>
+							<button
+								@click=${() => {
+									dialog?.close()
+									video_export.resetExporter(use.context.state)
+								}}
+								class="cancel"
+								?data-complete=${state.export_status === "complete"}
+							>
+								${state.export_status === "complete" ? "Continue editing" : "Cancel Export"}
+							</button>
 							<button
 								@click=${() => video_export.save_file()}
 								class="sparkle-button save-button"

@@ -87,8 +87,12 @@ export const MediaPlayer = shadow_view(use => () => {
 					${use.context.state.selected_effect?.kind === "text" && compositor.canvas.getActiveObject()
 					? TextUpdater([use.context.state.selected_effect])
 					: null}
-					${compositor.canvas.getSelectionElement()}
-					${compositor.canvas.getElement()}
+					${!state.is_exporting
+						? html`
+							${compositor.canvas.getSelectionElement()}
+							${compositor.canvas.getElement()}
+						`
+						: null}
 				</div>
 			</figure>
 			<div id="video-controls" class="controls">
