@@ -7,6 +7,7 @@ export const styles = css`
 		align-items: start;
 		width: 100%;
 		height: 100%;
+		overflow-y: scroll;
 	}
 
 	.settings {
@@ -14,6 +15,72 @@ export const styles = css`
 		gap: 1em;
 		flex-direction: column;
 		padding: 1em;
+
+		& .timebases {
+			display: flex;
+			gap: 0.5em;
+			flex-wrap: wrap;
+
+			& .timebase {
+				border: 1px solid gray;
+				border-radius: 5px;
+				padding: 0.1em 0.5em;
+				cursor: pointer;
+
+				&[data-selected] {
+					border-color: white;
+					color: white;
+				}
+			}
+		}
+
+		& .resolutions {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 1em;
+
+			& p {
+				border: 1px solid gray;
+				padding: 0.2em 1em;
+				border-radius: 5px;
+
+				&[data-selected] {
+					color: white;
+					border-color: white;
+				}
+			}
+		}
+
+		& .aspect-ratios {
+			display: flex;
+			gap: 1em;
+			flex-wrap: wrap;
+
+			& .cnt {
+				display: flex;
+				align-self: end;
+				max-width: 100px;
+				width: 100%;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				text-align: center;
+				gap: 0.3em;
+				color: gray;
+				cursor: pointer;
+
+				&[data-selected] {
+					color: white;
+				}
+
+				& .shape {
+					height: 50px;
+					border-radius: 5px;
+					border: 1px solid;
+					margin-bottom: 0.5em;
+				}
+			}
+		}
 
 		& select {
 			cursor: pointer;
@@ -31,14 +98,5 @@ export const styles = css`
 	p {
 		cursor: pointer;
 		transition: all 0.3s ease;
-	}
-
-	p:hover {
-		scale: 1.1;
-		cursor: pointer;
-	}
-
-	p[data-selected] {
-		font-weight: bold;
 	}
 `

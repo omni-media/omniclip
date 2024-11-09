@@ -83,7 +83,7 @@ export const MediaPlayer = shadow_view(use => () => {
 				</span>
 			</div>
 			<figure>
-				<div class="canvas-container">
+				<div class="canvas-container" style="aspect-ratio: ${state.settings.width}/${state.settings.height};">
 					${use.context.state.selected_effect?.kind === "text" && compositor.canvas.getActiveObject()
 					? TextUpdater([use.context.state.selected_effect])
 					: null}

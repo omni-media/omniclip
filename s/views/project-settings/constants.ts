@@ -1,22 +1,5 @@
-import {Settings} from "../../context/types.js"
+import {AspectRatio, Standard} from "../../context/types.js"
 
-export const export_props: Settings[] = [{
-	width: 854,
-	height: 480,
-	aspect_ratio: "16/9"
-},
-{
-	width: 1280,
-	height:  720,
-	aspect_ratio: "16/9"
-},
-{
-	width: 1920,
-	height: 1080,
-	aspect_ratio: "16/9"
-}, {
-	width: 3840,
-	height: 2160,
-	aspect_ratio: "16/9"
-}]
-
+export const standards: Standard[] = ["4k", "2k", "1080p", "720p", "480p"]
+export const aspectRatios: AspectRatio[] = ["1/1", "4/3", "3/2", "16/9", "9/16", "21/9"]
+export const timebases = [10, 24, 25, 30, 50, 60, 90, 120]

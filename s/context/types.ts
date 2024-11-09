@@ -148,7 +148,8 @@ export interface ProposedTimecode {
 	effects_to_push: AnyEffect[] | null
 }
 
-export type AspectRatio = "16/9" | "16/10" | "4/3"
+export type AspectRatio = "16/9" | "1/1" | "4/3" | "9/16" | "3/2" | "21/9"
+export type Standard = "4k" | "2k" | "1080p" | "720p" | "480p"
 
 export type Settings = {
 	width: number
