@@ -1,8 +1,19 @@
 import {css} from "@benev/slate"
 
 export const styles = css`
+	:host {
+		display: flex;
+		height: 100%;
+		flex-direction: column;
+		overflow-y: scroll;
+	}
+
 	form {
-		margin: 1em;
+		background: #111;
+		position: fixed;
+		padding: 1em;
+		width: 100%;
+		z-index: 5;
 	}
 
 	.placeholder {
@@ -35,11 +46,9 @@ export const styles = css`
 	.media {
 		display: flex;
 		padding: 1em;
-		max-height: 90%;
 		flex-wrap: wrap;
 		gap: 1em;
-		overflow-y: scroll;
-		overflow-x: hidden;
+		margin-top: 40px;
 
 		& .box {
 			align-self: start;
