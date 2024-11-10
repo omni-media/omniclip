@@ -5,6 +5,7 @@ import {shadow_view} from "../../../../context/context.js"
 import saveSvg from "../../../../icons/gravity-ui/save.svg.js"
 import exportSvg from "../../../../icons/gravity-ui/export.svg.js"
 import {StateHandler} from "../../../../views/state-handler/view.js"
+import circleInfoSvg from "../../../../icons/gravity-ui/circle-info.svg.js"
 
 export const Export = shadow_view(use => () => {
 	use.styles(styles)
@@ -14,8 +15,6 @@ export const Export = shadow_view(use => () => {
 	const video_export = use.context.controllers.video_export
 	const state = use.context.state
 	const [logs, setLogs, getLogs] = use.state<string[]>([])
-
-	const [bitrate, setBitrate] = use.state(9000)
 
 	use.mount(() => {
 		const dispose = watch.track(() => use.context.state.log, (log) => {
@@ -31,6 +30,34 @@ export const Export = shadow_view(use => () => {
 	const dialog = use.defer(() => use.shadow.querySelector("dialog"))
 	if(use.context.state.is_exporting) {
 		dialog?.showModal()
+	}
+
+	const renderAspectRatio = () => {
+		const aspectRatio = state.settings.aspectRatio
+		return html`
+			<div class=aspect-ratios>
+				<h4>Aspect Ratio</h4>
+				<div class=cnt>
+					<div class="shape" style="aspect-ratio: ${aspectRatio}"></div>
+					<div class=info>
+						${aspectRatio === "21/9"
+							? "Ultra-Wide"
+							: aspectRatio === "9/16"
+							?  "Vertical"
+							: aspectRatio === "16/9"
+							? "Wide"
+							: aspectRatio === "1/1"
+							? "Square"
+							: aspectRatio === "4/3"
+							? "Standard"
+							: aspectRatio === "3/2"
+							? "Balanced"
+							: null}
+						</div>
+					<div class=aspect-ratio>${aspectRatio}</div>
+				</div>
+			</div>
+		`
 	}
 
 	return StateHandler(Op.all(
@@ -90,17 +117,27 @@ export const Export = shadow_view(use => () => {
 					</div>
 				</div>
 			</dialog>
-			<h2>Export Settings</h2>
-			<h4>Bitrate (kbps)</h4>
-			<div class="setting-container flex">
-				<input @input=${(e: InputEvent) => setBitrate(+(e.currentTarget as HTMLInputElement).value)} class="bitrate" value="${bitrate}" min="1" type="number">
-				${bitrate <= 0 ? html`<span class="error">bitrate must be higher than 0</span>` : null}
-			</div>
 			<div class=export>
-				<span class=info>${`${state.settings.width}x${state.settings.height}`}@${state.timebase}fps</span>
-				<button ?disabled=${bitrate <= 0} class="sparkle-button" @click=${() => video_export.export_start(use.context.state, bitrate)}>
-					<span class="text">${exportSvg}<span>Export</span></span>
-				</button>
+				<h2>Export</h2>
+				<p>${circleInfoSvg} Your video will export with the following settings:</p>
+				<div class=selected-settings>
+					${renderAspectRatio()}
+					<div>
+						<h4>Resolution</h4>
+						<span>${state.settings.width}x${state.settings.height} (${state.settings.standard})</span>
+					</div>
+					<div>
+						<h4>Timebase</h4>
+						<span>${state.timebase} fps</span>
+					</div>
+					<div>
+						<h4>Bitrate</h4>
+						<span>${state.settings.bitrate} kbps</span>
+					</div>
+					<button ?disabled=${state.settings.bitrate <= 0} class="sparkle-button" @click=${() => video_export.export_start(use.context.state, state.settings.bitrate)}>
+						<span class="text">${exportSvg}<span>Export</span></span>
+					</button>
+				</div>
 			</div>
 		</div>
 	`)

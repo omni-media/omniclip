@@ -26,6 +26,8 @@ export const non_historical_state: NonHistoricalState = {
 	settings: {
 		width: 1920,
 		height: 1080,
-		aspect_ratio: "16/9"
-	}
+		aspectRatio: "16/9",
+		bitrate: 9000,
+		standard: "1080p"
+	},
 }

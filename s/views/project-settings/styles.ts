@@ -16,6 +16,14 @@ export const styles = css`
 		flex-direction: column;
 		padding: 1em;
 
+		& .bitrate {
+			background: transparent;
+			border: 1px solid gray;
+			border-radius: 5px;
+			padding: 0.2em;
+			color: gray;
+		}
+
 		& .timebases {
 			display: flex;
 			gap: 0.5em;
@@ -26,6 +34,7 @@ export const styles = css`
 				border-radius: 5px;
 				padding: 0.1em 0.5em;
 				cursor: pointer;
+				font-size: 0.9em;
 
 				&[data-selected] {
 					border-color: white;
@@ -37,12 +46,13 @@ export const styles = css`
 		& .resolutions {
 			display: flex;
 			flex-wrap: wrap;
-			gap: 1em;
+			gap: 0.5em;
 
 			& p {
 				border: 1px solid gray;
 				padding: 0.2em 1em;
 				border-radius: 5px;
+				font-size: 0.9em;
 
 				&[data-selected] {
 					color: white;
@@ -68,6 +78,14 @@ export const styles = css`
 				gap: 0.3em;
 				color: gray;
 				cursor: pointer;
+
+				& .aspect-ratio {
+					font-size: 0.9em;
+				}
+
+				& .info {
+					font-size: 0.8em;
+				}
 
 				&[data-selected] {
 					color: white;

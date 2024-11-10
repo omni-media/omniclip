@@ -154,7 +154,9 @@ export type Standard = "4k" | "2k" | "1080p" | "720p" | "480p"
 export type Settings = {
 	width: number
 	height: number
-	aspect_ratio: AspectRatio
+	bitrate: number
+	aspectRatio: AspectRatio
+	standard: Standard
 }
 
 export type Indicator = AddTrackIndicator | null

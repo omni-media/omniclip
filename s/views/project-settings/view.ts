@@ -11,9 +11,8 @@ export const ProjectSettings = shadow_view(use => () => {
 	use.watch(() => use.context.state)
 
 	const actions = use.context.actions
+	const state = use.context.state
 	const compositor = use.context.controllers.compositor
-	const [selectedAsptectRatio, setSelectedAspectRatio] = use.state<AspectRatio>("16/9")
-	const [selectedStandard, setStandard] = use.state<Standard>("1080p")
 
 	const set_project_resolution = (width: number, height: number) => {
 		actions.set_project_resolution(width, height)
@@ -24,30 +23,52 @@ export const ProjectSettings = shadow_view(use => () => {
 		actions.set_timebase(timebase)
 		compositor.set_timebase(timebase)
 	}
-	
-	const calculateResolution = (aspectRatio: AspectRatio, standard: Standard) => {
-		const [aspectWidth, aspectHeight] = aspectRatio.split('/').map(Number)
-		let width = 1920
-		let height = 1080
 
-		if (standard === "4k") {
-			width = 4096
-			height = Math.round(width * (aspectHeight / aspectWidth))
-		} else if (standard === "480p") {
-			height = 480
-			width = Math.round(height * (aspectWidth / aspectHeight))
-		} else if (standard === "1080p") {
-			height = 1080
-			width = Math.round(height * (aspectWidth / aspectHeight))
-		} else if (standard === "720p") {
-			height = 720
-			width = Math.round(height * (aspectWidth / aspectHeight))
-		} else if (standard === "2k") {
-			width = 2048
-			height = Math.round(width * (aspectHeight / aspectWidth))
+	const calculateResolution = (aspectRatio: AspectRatio, standard: Standard) => {
+		const consumerResolutions = {
+			"4k": {
+				"16/9": { width: 3840, height: 2160 },
+				"21/9": { width: 5040, height: 2160 },
+				"4/3": { width: 2880, height: 2160 },
+				"3/2": { width: 3240, height: 2160 },
+				"1/1": { width: 2160, height: 2160 },
+				"9/16": { width: 1210, height: 2160 },
+			},
+			"2k": {
+				"16/9": { width: 2560, height: 1440 },
+				"21/9": { width: 3360, height: 1440 },
+				"4/3": { width: 1920, height: 1440 },
+				"3/2": { width: 2160, height: 1440 },
+				"1/1": { width: 1440, height: 1440 },
+				"9/16": { width: 810, height: 1440 },
+			},
+			"1080p": {
+				"16/9": { width: 1920, height: 1080 },
+				"21/9": { width: 2560, height: 1080 },
+				"4/3": { width: 1440, height: 1080 },
+				"3/2": { width: 1620, height: 1080 },
+				"1/1": { width: 1080, height: 1080 },
+				"9/16": { width: 610, height: 1080 }, //
+			},
+			"720p": {
+				"16/9": { width: 1280, height: 720 },
+				"21/9": { width: 1680, height: 720 },
+				"4/3": { width: 960, height: 720 },
+				"3/2": { width: 1080, height: 720 },
+				"1/1": { width: 720, height: 720 },
+				"9/16": { width: 410, height: 720 }, //
+			},
+			"480p": {
+				"16/9": { width: 854, height: 480 },
+				"21/9": { width: 1120, height: 480 },
+				"4/3": { width: 640, height: 480 },
+				"3/2": { width: 720, height: 480 },
+				"1/1": { width: 480, height: 480 },
+				"9/16": { width: 270, height: 480 },
+			},
 		}
 
-		return {width, height}
+		return consumerResolutions[standard][aspectRatio]
 	}
 
 	const render_resolution_settings = () => {
@@ -59,11 +80,11 @@ export const ProjectSettings = shadow_view(use => () => {
 						return html`
 							<p
 								@click=${() => {
-									const {width, height} = calculateResolution(selectedAsptectRatio, standard)
+									actions.set_standard(standard)
+									const {width, height} = calculateResolution(state.settings.aspectRatio, standard)
 									set_project_resolution(width, height)
-									setStandard(standard)
 								}}
-								?data-selected=${standard === selectedStandard}
+								?data-selected=${standard === state.settings.standard}
 							>
 								${standard}
 							</p>`
@@ -101,11 +122,11 @@ export const ProjectSettings = shadow_view(use => () => {
 						return html`
 							<div
 								@click=${() => {
-									setSelectedAspectRatio(aspectRatio)
-									const {width, height} = calculateResolution(aspectRatio, selectedStandard)
+									actions.set_aspect_ratio(aspectRatio)
+									const {width, height} = calculateResolution(aspectRatio, state.settings.standard)
 									set_project_resolution(width, height)
 								}}
-								?data-selected=${aspectRatio === selectedAsptectRatio}
+								?data-selected=${aspectRatio === state.settings.aspectRatio}
 								class=cnt
 							>
 								<div class="shape" style="aspect-ratio: ${aspectRatio}"></div>
@@ -133,6 +154,24 @@ export const ProjectSettings = shadow_view(use => () => {
 		`
 	}
 
+	const renderBitrateSetting = () => {
+		return html`
+			<div>
+				<h4>Bitrate (kbps)</h4>
+				<div class="setting-container flex">
+					<input
+						@input=${(e: InputEvent) => actions.set_bitrate(+(e.currentTarget as HTMLInputElement).value)}
+						class="bitrate"
+						.value="${state.settings.bitrate}"
+						min="1"
+						type="number"
+					>
+					${state.settings.bitrate <= 0 ? html`<span class="error">bitrate must be higher than 0</span>` : null}
+				</div>
+			</div>
+		`
+	}
+
 	return StateHandler(Op.all(
 		use.context.is_webcodecs_supported.value,
 		use.context.helpers.ffmpeg.is_loading.value), () => html`
@@ -141,6 +180,7 @@ export const ProjectSettings = shadow_view(use => () => {
 				${renderAspectRatios()}
 				${render_resolution_settings()}
 				${renderTimebaseSettings()}
+				${renderBitrateSetting()}
 			</div>
 		`)
 })

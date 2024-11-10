@@ -2,6 +2,8 @@ import {css} from "@benev/slate"
 
 export const styles = css`
 	:host {
+		display: flex;
+		overflow-y: scroll;
 		width: 100%;
 		height: 100%;
 	}
@@ -12,9 +14,11 @@ export const styles = css`
 		height: 300px !important;
 	}
 
-	h2 {
-		margin: 1em;
-		align-self: start;
+	.selected-settings {
+		display: flex;
+		flex-direction: column;
+		gap: 1em;
+		padding: 1em 0 1em 1em;
 	}
 
 	.bitrate {
@@ -31,17 +35,42 @@ export const styles = css`
 		}
 	}
 
-	.flex {
+
+	.aspect-ratios {
 		display: flex;
-		justify-content: center;
-		align-items: center;
+		gap: 0.3em;
 		flex-direction: column;
-		width: 100%;
-		letter-spacing: 0.5px;
-		gap: 0.2em;
+
+		& .cnt {
+			display: flex;
+			max-width: 100px;
+			width: 100%;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+			gap: 0.3em;
+			color: gray;
+
+			& .aspect-ratio {
+				font-size: 0.9em;
+			}
+
+			& .info {
+				font-size: 0.8em;
+			}
+
+			& .shape {
+				height: 50px;
+				border-radius: 5px;
+				border: 1px solid;
+				margin-bottom: 0.5em;
+			}
+		}
 	}
 
 	.sparkle-button {
+		align-self: start;
 		--active: 0;
 		background: #1d1c1c;
 		cursor: pointer;
@@ -69,12 +98,21 @@ export const styles = css`
 
 	.export {
 		display: flex;
-		align-items: center;
-		gap: 1em;
-		position: absolute;
-		bottom: 0;
-		right: 0;
+		flex-direction: column;
+		align-self: start;
 		margin: 1em;
+
+		& span {
+			font-size: 0.8em;
+		}
+
+		& p {
+			display: flex;
+			align-items: center;
+			gap: 0.3em;
+			margin: 0.5em 0em 1em 0;
+			font-size: 15px;
+		}
 
 		& .info {
 			font-size: 0.8em;
@@ -91,6 +129,11 @@ export const styles = css`
 		display: flex;
 		align-items: center;
 		translate: 0;
+		gap: 0.2em;
+
+		& span {
+			font-size: 1em;
+		}
 	}
 
 	dialog {

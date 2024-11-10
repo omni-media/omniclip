@@ -3,9 +3,18 @@ import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 
 import {Helpers} from "./helpers.js"
 import {actionize_historical, actionize_non_historical} from "./../utils/actionize.js"
-import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, EffectRect, VideoEffect} from "./types.js"
+import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, EffectRect, VideoEffect, Standard, AspectRatio} from "./types.js"
 
 export const non_historical_actions = actionize_non_historical({
+	set_standard: state => (standard: Standard) => {
+		state.settings.standard = standard
+	},
+	set_aspect_ratio: state => (aspectRatio: AspectRatio) => {
+		state.settings.aspectRatio = aspectRatio
+	},
+	set_bitrate: state => (value: number) => {
+		state.settings.bitrate = value
+	},
 	zoom_in: state => () => {
 		state.zoom += 0.1
 	},
