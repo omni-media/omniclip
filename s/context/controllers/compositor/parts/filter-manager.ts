@@ -11,6 +11,13 @@ export type Filter = {
 	type: FilterType
 }
 
+export const effectFilters: FilterType[] = []
+for(const filter in filters) {
+	const fname = filter as FilterType
+	if(!IgnoredFilters.includes(fname))
+		effectFilters.push(fname)
+}
+
 export class FiltersManager {
 	#filters: Filter[] = []
 	onChange = pub()
@@ -81,5 +88,19 @@ export class FiltersManager {
 			object.removeTexture(object.cacheKey + "_filtered")
 			object.applyFilters()
 		}
+	}
+
+	async createFilterPreviews(onCreatedPreview: ({canvas, type}: {canvas: HTMLCanvasElement, type: FilterType}) => void) {
+		const webp = await fetch("/assets/filter-preview.webp")
+		effectFilters.forEach(async name => {
+			const filter = new filters[name]() as filters.BaseFilter
+			const image = await FabricImage.fromURL(webp.url)
+			image.filters.push(filter)
+			image.applyFilters()
+			const canvas = image.toCanvasElement()
+			canvas.style.width = "100%"
+			canvas.style.height = "100%"
+			onCreatedPreview({canvas, type: name})
+		})
 	}
 }

@@ -42,6 +42,7 @@
     "@benev/slate": "^0.1.0-x.14",
     "@ffmpeg/ffmpeg": "^0.12.9",
     "@ffmpeg/util": "^0.12.1",
+    "@floating-ui/dom": "^1.6.12",
     "coi-serviceworker": "^0.1.7",
     "es-module-shims": "^1.8.2",
     "fabric": "^6.0.0-beta20",
