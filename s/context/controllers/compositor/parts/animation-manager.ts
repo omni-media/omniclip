@@ -8,19 +8,20 @@ import {calculateProjectDuration} from "../../../../utils/calculate-project-dura
 
 interface AnimationBase<T = AnimationIn | AnimationOut> {
 	targetEffect: VideoEffect | ImageEffect
-	type: T
+	name: T
+	type: "in" | "out"
 	duration: number
 }
 export const animationNone = "none" as const
-export const animationIn = ["slideIn", "fadeIn", "spinIn", "bounceIn", "wipeIn", "blurIn", "zoomIn"] as const
-export const animationOut = ["slideOut", "fadeOut", "spinOut", "bounceOut", "wipeOut", "blurOut", "zoomOut"] as const
+export const animationIn = ["slide-in", "fade-in", "spin-in", "bounce-in", "wipe-in", "blur-in", "zoom-in"] as const
+export const animationOut = ["slide-out", "fade-out", "spin-out", "bounce-out", "wipe-out", "blur-out", "zoom-out"] as const
 export type AnimationIn = AnimationBase<(typeof animationIn)[number]>
 export type AnimationOut = AnimationBase<(typeof animationOut)[number]>
 export type AnimationNone = AnimationBase<(typeof animationNone)[number]>
 export type Animation = AnimationIn | AnimationOut
 type UpdatedProps = {
 	duration: number
-	kind: "In" | "Out"
+	kind: "in" | "out"
 }
 
 export class AnimationManager {
@@ -37,7 +38,7 @@ export class AnimationManager {
 	selectedAnimationForEffect(effect: AnyEffect | null, animation: Animation) {
 		if (!effect) return
 		const haveAnimation = this.#animations.find(
-			(anim) => anim.targetEffect.id === effect.id && animation.type === anim.type
+			(anim) => anim.targetEffect.id === effect.id && animation.name === anim.name
 		)
 		return !!haveAnimation
 	}
@@ -45,7 +46,7 @@ export class AnimationManager {
 	isAnyAnimationInSelected(effect: AnyEffect | null) {
 		if (!effect) return false
 		const haveAnimation = this.#animations.find(
-			(animation) => animation.targetEffect.id === effect.id && animation.type.includes("In")
+			(animation) => animation.targetEffect.id === effect.id && animation.type === "in"
 		)
 		return !!haveAnimation
 	}
@@ -53,7 +54,7 @@ export class AnimationManager {
 	isAnyAnimationOutSelected(effect: AnyEffect | null) {
 		if (!effect) return false
 		const haveAnimation = this.#animations.find(
-			(animation) => animation.targetEffect.id === effect.id && animation.type.includes("Out")
+			(animation) => animation.targetEffect.id === effect.id && animation.type === "out"
 		)
 		return !!haveAnimation
 	}
@@ -86,7 +87,7 @@ export class AnimationManager {
 			this.deselectAnimation(
 				animation.targetEffect,
 				state,
-				animation.type.includes("In") ? "In" : "Out",
+				animation.type,
 			)
 			this.selectAnimation(animation.targetEffect, updatedProps ? this.#refreshAnimation(updatedProps, animation) : animation, state)
 		})
@@ -123,16 +124,15 @@ export class AnimationManager {
 		animation: AnimationIn | AnimationOut,
 		state: State
 	) {
-		const type = animation.type.includes("In") ? "In" : "Out"
-		const alreadySelected = this.#animations.find(a => a.targetEffect.id === effect.id && a.type === animation.type)
+		const alreadySelected = this.#animations.find(a => a.targetEffect.id === effect.id && a.name === animation.name)
 		if(alreadySelected) {
 			return
 		}
 
-		const isDifferentAnimationSelected = this.#animations.find(a => a.targetEffect.id === effect.id && a.type.includes(type))
+		const isDifferentAnimationSelected = this.#animations.find(a => a.targetEffect.id === effect.id && a.type === animation.type)
 		if(isDifferentAnimationSelected) {
 			// deselect current animation
-			this.deselectAnimation(effect, state, type)
+			this.deselectAnimation(effect, state, animation.type)
 			// continue with selecting different animation
 		}
 
@@ -145,8 +145,8 @@ export class AnimationManager {
 
 		await this.compositor.seek(state.timecode, true)
 
-		switch (animation.type) {
-			case "slideIn": {
+		switch (animation.name) {
+			case "slide-in": {
 				const targetPosition = {left: effect.rect.position_on_canvas.x}
 				const startPosition = {left: effect.rect.position_on_canvas.x - effect.rect.width}
 
@@ -164,7 +164,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "slideOut": {
+			case "slide-out": {
 				const targetPosition = {left: effect.rect.position_on_canvas.x + effect.rect.width}
 				const startPosition = {left: effect.rect.position_on_canvas.x}
 
@@ -183,7 +183,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "fadeIn": {
+			case "fade-in": {
 				gsap.set(object, { opacity: 0 })
 				this.timeline.add(
 					gsap.to(object, {
@@ -198,7 +198,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "fadeOut": {
+			case "fade-out": {
 				gsap.set(object, { opacity: 1 })
 				this.timeline.add(
 					gsap.to(object, {
@@ -213,7 +213,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "spinIn": {
+			case "spin-in": {
 				object.set({ originX: "center", originY: "center" })
 				gsap.set(object, { angle: -180 })
 				this.timeline.add(
@@ -230,7 +230,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "spinOut": {
+			case "spin-out": {
 				object.set({ originX: "center", originY: "center" })
 				gsap.set(object, { angle: 0 })
 				this.timeline.add(
@@ -247,7 +247,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "bounceIn": {
+			case "bounce-in": {
 				const startPosition = { left: -effect.rect.width }
 				const targetPosition = { left: effect.rect.position_on_canvas.x }
 				gsap.set(object, { left: startPosition.left })
@@ -265,7 +265,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "bounceOut": {
+			case "bounce-out": {
 				const startPosition = { left: effect.rect.position_on_canvas.x }
 				const targetPosition = { left: this.compositor.canvas.width + effect.rect.width }
 				gsap.set(object, { left: startPosition.left })
@@ -283,7 +283,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "wipeIn": {
+			case "wipe-in": {
 				const fullWidth = object.width
 				const fullHeight = object.height
 				const clipRect = new Rect({
@@ -310,7 +310,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "wipeOut": {
+			case "wipe-out": {
 				const fullWidth = object.width
 				const fullHeight = object.height
 				const clipRect = new Rect({
@@ -337,7 +337,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "blurIn": {
+			case "blur-in": {
 				const blurFilter = new filters.Blur({ blur: 1 })
 				blurFilter.for = "animation"
 				//@ts-ignore
@@ -359,7 +359,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "blurOut": {
+			case "blur-out": {
 				const blurFilter = new filters.Blur({ blur: 0 })
 				blurFilter.for = "animation"
 				//@ts-ignore
@@ -381,7 +381,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "zoomIn": {
+			case "zoom-in": {
 				const originalLeft = object.left
 				const originalTop = object.top
 				const originalWidth = object.getScaledWidth()
@@ -414,7 +414,7 @@ export class AnimationManager {
 				break
 			}
 
-			case "zoomOut": {
+			case "zoom-out": {
 				const originalLeft = object.left
 				const originalTop = object.top
 				const originalWidth = object.getScaledWidth()
@@ -479,11 +479,11 @@ export class AnimationManager {
 		fabric.opacity = 1
 	}
 
-	deselectAnimation(effect: ImageEffect | VideoEffect, state: State, type: "In" | "Out") {
+	deselectAnimation(effect: ImageEffect | VideoEffect, state: State, type: "in" | "out") {
 		const object = this.#getObject(effect)
 		this.#resetObjectProperties(object!, effect)
 		gsap.killTweensOf(object!)
-		this.#animations = this.#animations.filter((animation) => !(animation.targetEffect.id === effect.id && animation.type.includes(type)))
+		this.#animations = this.#animations.filter((animation) => !(animation.targetEffect.id === effect.id && animation.type === type))
 		object!.filters = object!.filters.filter(f => f.for !== "animation")
 		object!.applyFilters()
 		this.refreshAnimations(state)

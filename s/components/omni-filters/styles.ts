@@ -8,6 +8,14 @@ export const styles = css`
 	overflow: scroll;
 }
 
+h2 {
+	display: flex;
+
+	& svg {
+		width: 20px;
+	}
+}
+
 .box {
 	display: flex;
 	align-items: flex-start;
@@ -73,7 +81,7 @@ export const styles = css`
 		}
 
 		&[data-selected] {
-			border: 2px solid gray;
+			border: 2px solid white;
 		}
 	}
 

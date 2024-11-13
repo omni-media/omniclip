@@ -76,8 +76,8 @@ export const Tooltip = shadow_view(use => (icon: SVGTemplateResult, content: Tem
 
 	return html`
 		<button
-			@pointerenter=${hideTooltip}
-			@pointerleave=${showTooltip}
+			@pointerenter=${showTooltip}
+			@pointerleave=${hideTooltip}
 			id="button"
 		>
 			${icon}

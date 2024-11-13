@@ -7,6 +7,7 @@ import {shadow_component} from "../../context/context.js"
 import {StateHandler} from "../../views/state-handler/view.js"
 import {ImageEffect, VideoEffect} from "../../context/types.js"
 import circleInfoSvg from "../../icons/gravity-ui/circle-info.svg.js"
+import overlapSvg from "../../icons/material-design-icons/overlap.svg.js"
 import {FilterType} from "../../context/controllers/compositor/parts/filter-manager.js"
 
 export const OmniFilters = shadow_component(use => {
@@ -99,8 +100,7 @@ export const OmniFilters = shadow_component(use => {
 		use.context.is_webcodecs_supported.value,
 		use.context.helpers.ffmpeg.is_loading.value), () =>  html`
 		<div class=box>
-			<h2>Filters</h2>
-			<p>Here you can select filters for your video or image</p>
+			<h2>${overlapSvg} Filters</h2>
 			${renderEffectSelectionDropdown()}
 			<div class="filters" ?disabled=${!selectedImageOrVideoEffect}>
 				${renderFilters()}
