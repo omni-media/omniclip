@@ -64,8 +64,8 @@ export class LandingPage extends LitElement {
 				}} class="menu-icon" src="/assets/hamburger.svg">
 				<div class="menu" ?data-opened=${this.menuOpened}>
 					<a @click=${() => this.scrollIntoElementView("welcome")} href="#welcome">Home</a>
-					<a @click=${() => this.scrollIntoElementView("core")} href="#core">Principles</a>
 					<a @click=${() => this.scrollIntoElementView("capabilities")} href="#capabilities">Capabilities</a>
+					<a @click=${() => this.scrollIntoElementView("soon")} href="#soon">Soon</a>
 					<a
 						class="try"
 						href="#/editor"
@@ -75,8 +75,8 @@ export class LandingPage extends LitElement {
 				</div>
 				<div class="nav">
 					<a @click=${() => this.scrollIntoElementView("welcome")} href="#welcome">Home</a>
-					<a @click=${() => this.scrollIntoElementView("core")} href="#core">Core Principles</a>
 					<a @click=${() => this.scrollIntoElementView("capabilities")} href="#capabilities">Capabilities</a>
+					<a @click=${() => this.scrollIntoElementView("soon")} href="#soon">Soon</a>
 					<a
 						class="try"
 						href="#/editor"
@@ -121,8 +121,8 @@ export class LandingPage extends LitElement {
 					</a>
 				</div>
 			</section>
-			<section id="abilities" class="abilities">
-				<h2>So, what's omniclip capable of ?</h2>
+			<section id="capabilities" class="abilities">
+				<h2>Capabilities</h2>
 				<div class=items>
 					<h4>All the basic stuff, you can add audio/image/text/video and trim or split it, but theres more!</h4>
 					<div class=flex>
@@ -272,7 +272,7 @@ export class LandingPage extends LitElement {
 					</div>
 				</div>
 			</section>
-			<section class="soon">
+			<section class="soon" id="soon">
 				<h2>Coming soon</h2>
 				<div class="items">
 					<div class=flex>

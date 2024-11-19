@@ -50,10 +50,11 @@ export default css`
 			display: flex;
 			flex-direction: column;
 			position: absolute;
-			right: 0;
+			right: 20px;
 			top: 50px;
 			gap: 0.5em;
-			background: #00000061;
+			border-radius: 20px;
+			background: radial-gradient(100% 100% at var(--g3-3-x-position) var(--g3-3-y-position), #ffffff -80%, transparent), radial-gradient(100% 100% at var(--g3-1-x-position) var(--g3-1-y-position), #000000 -71%, transparent), radial-gradient(100% 100% at var(--g3-2-x-position) var(--g3-2-y-position), #431eaf -52%, transparent), #000000;
 			padding: 1em;
 			font-family: Poppins-Regular;
 		}
@@ -236,7 +237,7 @@ export default css`
 	padding: 3em;
 	display: flex;
 	justify-content: center;
-	gap: 3em;
+	gap: 2em;
 	flex-wrap: wrap;
 	position: relative;
 	flex-direction: column;
@@ -266,7 +267,8 @@ export default css`
 		justify-content: start;
 		color: white;
 		text-align: center;
-		font-size: 2.5em;
+		font-size: 2em;
+		margin: 2em 0;
 		line-height: 45px;
 		flex-direction: column;
 		text-transform: uppercase;
@@ -277,7 +279,6 @@ export default css`
 		flex-direction: column;
 		gap: 1em;
 		border-radius: 20px;
-		padding: 2em;
 		flex-wrap: wrap;
 		justify-content: center;
 		text-align: center;
@@ -366,7 +367,8 @@ export default css`
 		background: radial-gradient(100% 100% at var(--g3-3-x-position) var(--g3-3-y-position), #ffffff -80%, transparent), radial-gradient(100% 100% at var(--g3-1-x-position) var(--g3-1-y-position), #000000 -71%, transparent), radial-gradient(100% 100% at var(--g3-2-x-position) var(--g3-2-y-position), #431eaf -52%, transparent), #000000;
 
 		& video {
-			width: 350px;
+			max-width: 350px;
+			width: 100%;
 			border-radius: 20px;
 		}
 
@@ -386,6 +388,7 @@ export default css`
 			align-items: self-start;
 			font-family: Poppins-ExtraLight;
 			margin-top: 2em;
+			text-align: left;
 
 			& li:last-child {
 				font-weight: bold;
@@ -504,7 +507,7 @@ export default css`
 		}
 
 		& .free, .open {
-			min-width: 350px;
+			min-width: 300px;
 
 			& h3 {
 				padding: 1em;
@@ -591,7 +594,7 @@ export default css`
 		text-transform: uppercase;
 		font-size: 2em;
 		z-index: 5;
-		margin: 4em 0 1em 0;
+		margin: 4em 0 2em 0;
 		color: white;
 	}
 
@@ -608,7 +611,21 @@ export default css`
 				display: flex;
 				flex-wrap: wrap;
 				justify-content: center;
+				align-items: start;
 				gap: 1em;
+				width: 100%;
+
+				& .concept:first-child {
+					max-width: 500px;
+				}
+
+				& .concept:last-child {
+					max-width: 350px;
+				}
+
+				& .concept {
+					flex: 1 1 auto;
+				}
 
 				& img {
 					border-radius: 20px;
@@ -629,7 +646,7 @@ export default css`
 			}
 
 			& img {
-				max-height: 350px;
+				height: auto;
 				width: 100%;
 			}
 		}
@@ -637,6 +654,7 @@ export default css`
 		& .flex {
 			display: flex;
 			gap: 1em;
+			flex-wrap: wrap;
 		}
 
 		& .item {
@@ -718,13 +736,12 @@ export default css`
 }
 
 @media only screen and (max-width: 768px) {
+	.abilities {
+		padding: 1em;
+	}
 	.soon {
-		& .items {
-			font-size: 0.8em;
-		}
 		& h2 {
-			font-size: 1.3em;
-			margin: 1.8em;
+			margin: 3em 0 1em 0;
 		}
 
 		& .ellipse-1 {
@@ -743,7 +760,7 @@ export default css`
 	.landing-page {
 		nav {
 			& .logo {
-				width: 100px;
+				width: 120px;
 			}
 		}
 	}
@@ -782,6 +799,14 @@ export default css`
 }
 
 @media only screen and (max-width: 640px) {
+	.abilities {
+		& h2 {
+			margin: 1em 0;
+		}
+		& .export  {
+			gap: 3em;
+		}
+	}
 	.welcome {
 		padding: 7em 3em;
 	}
@@ -792,12 +817,50 @@ export default css`
 }
 
 @media only screen and (max-width: 480px) {
+	.differences {
+		& .items .gh .flex {
+			margin-top: 120px;
+		}
+	}
+
+	.abilities {
+		& .export {
+			padding: 1.3em;
+
+			& h3 {
+				font-size: 1.2em;
+			}
+		}
+
+		& .items .item {
+			width: 80px;
+			height: 60px;
+		}
+
+		& .items .more .item-more video {
+			width: 280px;
+		}
+
+		& .export  {
+			gap: 2em;
+		}
+	}
+
 	.landing-page {
 		& footer {
 			padding: 2em;
 		}
 	}
+
 	.welcome {
+		& h1 {
+			font-size: 1em;
+		}
+
+		& h2 {
+			font-size: 0.7em;
+		}
+
 		padding: 5em 1em;
 
 		& .try, .discord {

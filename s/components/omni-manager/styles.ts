@@ -4,7 +4,7 @@ export const styles = css`
 	:host {
 		display: flex;
 		justify-content: center;
-		height: 100%;
+		height: 100vh;
 		width: 100vw;
 		background: rgba(0, 0, 0, 1);
 	}

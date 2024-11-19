@@ -32,7 +32,7 @@ export const ProjectSettings = shadow_view(use => () => {
 				"4/3": { width: 2880, height: 2160 },
 				"3/2": { width: 3240, height: 2160 },
 				"1/1": { width: 2160, height: 2160 },
-				"9/16": { width: 1210, height: 2160 },
+				"9/16": { width: 2160, height: 3840 },
 			},
 			"2k": {
 				"16/9": { width: 2560, height: 1440 },
@@ -40,7 +40,7 @@ export const ProjectSettings = shadow_view(use => () => {
 				"4/3": { width: 1920, height: 1440 },
 				"3/2": { width: 2160, height: 1440 },
 				"1/1": { width: 1440, height: 1440 },
-				"9/16": { width: 810, height: 1440 },
+				"9/16": { width: 1440, height: 2560 },
 			},
 			"1080p": {
 				"16/9": { width: 1920, height: 1080 },
@@ -48,7 +48,7 @@ export const ProjectSettings = shadow_view(use => () => {
 				"4/3": { width: 1440, height: 1080 },
 				"3/2": { width: 1620, height: 1080 },
 				"1/1": { width: 1080, height: 1080 },
-				"9/16": { width: 610, height: 1080 }, //
+				"9/16": { width: 1080, height: 1920 }, //
 			},
 			"720p": {
 				"16/9": { width: 1280, height: 720 },
@@ -56,7 +56,7 @@ export const ProjectSettings = shadow_view(use => () => {
 				"4/3": { width: 960, height: 720 },
 				"3/2": { width: 1080, height: 720 },
 				"1/1": { width: 720, height: 720 },
-				"9/16": { width: 410, height: 720 }, //
+				"9/16": { width: 720, height: 1280 }, //
 			},
 			"480p": {
 				"16/9": { width: 854, height: 480 },
@@ -64,7 +64,7 @@ export const ProjectSettings = shadow_view(use => () => {
 				"4/3": { width: 640, height: 480 },
 				"3/2": { width: 720, height: 480 },
 				"1/1": { width: 480, height: 480 },
-				"9/16": { width: 270, height: 480 },
+				"9/16": { width: 480, height: 854 },
 			},
 		}
 
