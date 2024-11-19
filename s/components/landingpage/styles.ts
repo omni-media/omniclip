@@ -103,9 +103,7 @@ export default css`
 		font-family: Nippo-Regular;
 		font-size: 3em;
 		text-align: center;
-		background-clip: text !important;
-		-webkit-text-fill-color: transparent;
-		background: linear-gradient(180.2deg, #FFFFFF 29.5%, #848588 50.27%, #FFFFFF 72.49%);
+
 		& span {
 			font-weight: lighter;
 			background-clip: text !important;
@@ -117,10 +115,22 @@ export default css`
 	footer {
 		display: flex;
 		justify-content: space-between;
-		padding: 3em;
+		padding: 6em;
 		background: rgba(255, 255, 255, 0.06);
 		font-size: 0.9em;
 		font-family: Poppins-Regular;
+
+		--dotSize: 0.25rem;
+		--bgSize: 1.35rem;
+		--bgPosition: calc(var(--bgSize) / 2);
+
+		background-image: radial-gradient(
+				circle at center,
+				black var(--dotSize),
+				transparent 0
+			), radial-gradient(circle at center, black var(--dotSize), transparent 0);
+		background-size: var(--bgSize) var(--bgSize);
+		background-position: 0 0, var(--bgPosition) var(--bgPosition);
 
 		& div {
 			display: flex;
@@ -133,7 +143,7 @@ export default css`
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	box-shadow: black 0px -5vw 10vw 5vw inset;
+	box-shadow: black 0px -5vw 15vw 5vw inset, black 0 -5vw 5vw 0 inset;
 	gap: 2.5em;
 	background: radial-gradient(100% 100% at var(--g3-3-x-position) var(--g3-3-y-position), #ffffff -80%, transparent), radial-gradient(100% 100% at var(--g3-1-x-position) var(--g3-1-y-position), #000000 -71%, transparent), radial-gradient(100% 100% at var(--g3-2-x-position) var(--g3-2-y-position), #431eaf -52%, transparent), #000000;
 	animation-name: g-3;
@@ -221,14 +231,16 @@ export default css`
 	} 
 }
 
-.core {
+.abilities {
 	background: black;
 	padding: 3em;
 	display: flex;
 	justify-content: center;
-	gap: 10em;
+	gap: 3em;
 	flex-wrap: wrap;
 	position: relative;
+	flex-direction: column;
+	align-items: center;
 
 	& .ellipse-1 {
 		background-image: url(/assets/ellipse-1.svg);
@@ -252,8 +264,9 @@ export default css`
 	& h2 {
 		display: flex;
 		justify-content: start;
-		text-align: left;
-		font-size: 2em;
+		color: white;
+		text-align: center;
+		font-size: 2.5em;
 		line-height: 45px;
 		flex-direction: column;
 		text-transform: uppercase;
@@ -261,29 +274,69 @@ export default css`
 
 	& .items {
 		display: flex;
-		gap: 1em;
 		flex-direction: column;
+		gap: 1em;
+		border-radius: 20px;
+		padding: 2em;
 		flex-wrap: wrap;
-		align-items: start;
 		justify-content: center;
+		text-align: center;
 
-		& .item:nth-child(2) {
-			margin-left: 3em;
+		& .flex {
+			display: flex;
+			justify-content: center;
+			gap: 0.5em;
+			flex-wrap: wrap;
+		}
+
+		& h4 {
+			font-family: Poppins-ExtraLight;
+			font-size: 0.8em;
+		}
+
+		& .more {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			gap: 3em;
+			margin-top: 1em;
+
+			& .flex {
+				display: flex;
+				flex-direction: column;
+				gap: 1em;
+			}
+
+			& .item-more {
+
+				& p {
+					font-family: Poppins-ExtraLight;
+					font-size: 0.8em;
+				}
+
+				& video, img {
+					width: 300px;
+					padding: 0.5em;
+					border-radius: 20px;
+				}
+			}
 		}
 
 		& .item {
 			display: flex;
-			align-items: start;
-			height: 350px;
-			gap: 1em;
-			flex: 1;
-			padding: 1.5em;
-			border-radius: 4px;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			width: 100px;
+			height: 80px;
+			gap: 0.5em;
+			padding: 1em 1.5em;
+			border-radius: 20px;
 			background: linear-gradient(307.26deg, #FFFFFF -21.65%, rgba(255, 255, 255, 0.14) -21.64%, rgba(255, 255, 255, 0.02) 99.38%);
-			border-bottom: 1px solid;
-			border-top: 1px solid;
-			border-image-source: linear-gradient(90deg, rgba(168, 170, 173, 0) 0%, #A8AAAD 49.18%, rgba(168, 170, 173, 0) 100%);
-			border-image-slice: 1;
+
+			& img {
+				width: 30px;
+			}
 
 			& h3 {
 				color: rgba(255, 255, 255, 1);
@@ -292,7 +345,6 @@ export default css`
 			}
 
 			& p {
-				width: 395px;
 				color: rgba(255, 255, 255, 1);
 				text-align: left;
 				font-size: 0.95em;
@@ -300,68 +352,210 @@ export default css`
 			}
 		}
 	}
+
+	& .export {
+		display: flex;
+		margin: 5em 0 5em 0;
+		align-items: center;
+		justify-content: center;
+		flex-wrap: wrap;
+		gap: 5em;
+		padding: 2em;
+		border-radius: 20px;
+		color: white;
+		background: radial-gradient(100% 100% at var(--g3-3-x-position) var(--g3-3-y-position), #ffffff -80%, transparent), radial-gradient(100% 100% at var(--g3-1-x-position) var(--g3-1-y-position), #000000 -71%, transparent), radial-gradient(100% 100% at var(--g3-2-x-position) var(--g3-2-y-position), #431eaf -52%, transparent), #000000;
+
+		& video {
+			width: 350px;
+			border-radius: 20px;
+		}
+
+		& .emoji {
+			font-family: "Noto Color Emoji";
+		}
+
+		& h3 {
+			text-align: left;
+			font-size: 1.5em;
+		}
+
+		& ul {
+			display: flex;
+			flex-direction: column;
+			gap: 2em;
+			align-items: self-start;
+			font-family: Poppins-ExtraLight;
+			margin-top: 2em;
+
+			& li:last-child {
+				font-weight: bold;
+			}
+
+			& .try {
+				background: white;
+				padding: 0.3em 1em;
+				border-radius: 5px;
+				font-size: 12px;
+				text-decoration: none;
+				color: black;
+				margin-left: 0.5em;
+			}
+		}
+	}
 }
 
-.capabilities {
+.differences {
 	display: flex;
 	flex-direction: column;
+	justify-content: center;
 	align-items: center;
-	background: rgba(0, 0, 0, 1);
-	padding: 0 3em 6em 3em;
-	max-width: 1350px;
-	align-self: center;
-	z-index: 5;
 
 	& h2 {
-		text-transform: uppercase;
-		font-size: 2em;
-		margin: 3em;
+		color: white;
+		margin: 2em 0 2em 0;
 	}
 
 	& .items {
 		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
+		flex-direction: column;
 		gap: 1em;
+		padding: 0 1em;
 
-		& .item {
-			align-self: stretch;
-			padding: 1em;
+		& .gh {
+			position: absolute;
 			display: flex;
-			align-items: start;
-			flex: 30%;
-			min-width: 250px;
-			gap: 1em;
 			flex-direction: column;
-			border: 1px solid transparent;
-			border-radius: 4px;
-			background: linear-gradient(307.26deg, rgba(255, 255, 255, 0.5) -21.65%, rgba(255, 255, 255, 0.07) -21.64%, rgba(255, 255, 255, 0.01) 99.38%);
+			height: 100%;
+			width: 100%;
+			align-items: center;
+			justify-content: center;
 
-			& h3 {
-				font-size: 1.5em;
+			& .flex {
+				display: flex;
+				flex-direction: column;
+				gap: 0.2em;
+				align-items: center;
+				backdrop-filter: blur(3px);
+				transition: all 0.5s ease;
+				padding: 1em;
+				border-radius: 20px;
+				border: 1px solid white;
+				margin-top: 80px;
+
+				&:hover {
+					scale: 1.1;
+				}
 			}
 
-			& .img-box {
+			& a {
+				color: white;
+				text-decoration: none;
+				font-weight: bold;
+				font-size: 1.2em;
+			}
+
+			& .stars {
+				width: 120px;
+				height: 30px;
+			}
+		}
+
+		& .free {
+
+			& .emoji-1 {
+				position: absolute;
+				font-size: 150px;
+				top: 30%;
+				left: 10%;
+			}
+
+			& .emoji-2 {
+				position: absolute;
+				font-size: 150px;
+				bottom: 0;
+				right: 10%;
+			}
+
+			& .view {
 				width: 100%;
-				aspect-ratio: 16/9;
+				height: 100%;
+				min-height: 300px;
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				border-bottom: 1px solid;
-				border-top: 1px solid;
-				border-image-slice: 1;
-				border-image-source: linear-gradient(270deg, rgba(160, 162, 165, 0) 0%, #A0A2A5 50.12%, rgba(160, 162, 165, 0) 97.31%);
-				background: rgba(255, 255, 255, 0.06);
+				z-index: 2;
+				backdrop-filter: blur(50px);
 			}
 
-			& img {
-				width: 150px;
-				aspect-ratio: 4/3;
+			& .try {
+				background: radial-gradient(100% 100% at var(--g3-3-x-position) var(--g3-3-y-position), #FF9800 -80%, transparent), radial-gradient(100% 100% at var(--g3-1-x-position) var(--g3-1-y-position), #000000 -71%, transparent), radial-gradient(100% 100% at var(--g3-2-x-position) var(--g3-2-y-position), #FFC107 -52%, transparent), #CDDC39;
+				color: white;
+				font-weight: bold;
+				padding: 0.5em 2em;
+				border-radius: 5px;
+				font-size: 1.5em;
+				text-decoration: none;
+				transition: all 0.5s ease;
+
+				&:hover {
+					scale: 1.1;
+				}
+			}
+		}
+
+		& .free, .open {
+			min-width: 350px;
+
+			& h3 {
+				padding: 1em;
 			}
 
 			& p {
-				text-align: left;
-				line-height: 1.3rem;
+				padding-bottom: 1em; }
+		}
+
+		& .flex {
+			display: flex;
+			gap: 2em;
+			flex-wrap: wrap;
+
+			& .more {
+				min-width: 250px;
+				gap: 0.5em;
+				padding: 1em;
+				justify-content: space-between;
+				background: linear-gradient(307.26deg, #FFFFFF -21.65%, rgba(255, 255, 255, 0.14) -21.64%, rgba(255, 255, 255, 0.02) 99.38%);
+
+				& svg {
+					width: 100px;
+					height: 100px;
+				}
+
+			}
+		}
+
+		& .item {
+			position: relative;
+			display: flex;
+			flex-direction: column;
+			border-radius: 20px;
+			align-items: center;
+			background: linear-gradient(307.26deg, #FFFFFF -21.65%, rgba(255, 255, 255, 0.14) -21.64%, rgba(255, 255, 255, 0.02) 99.38%);
+			flex: 1;
+
+			& img {
+				flex: 1;
+				max-height: 400px;
+				width: 100%;
+				border-bottom-left-radius: 20px;
+				border-bottom-right-radius: 20px;
+			}
+
+			& p {
+				max-width: 300px;
+				font-size: 0.8em;
+				font-family: Poppins-ExtraLight;
+				text-align: center;
 			}
 		}
 	}
@@ -373,6 +567,7 @@ export default css`
 	align-items: center;
 	background: rgba(0, 0, 0, 1);
 	position: relative;
+	margin-bottom: 5em;
 
 	& .ellipse-1 {
 		background-image: url(/assets/ellipse.svg);
@@ -396,55 +591,89 @@ export default css`
 		text-transform: uppercase;
 		font-size: 2em;
 		z-index: 5;
-		margin: 2.5em 0;
+		margin: 4em 0 1em 0;
+		color: white;
 	}
 
 	& .items {
 		display: flex;
+		flex-direction: column;
 		flex-wrap: wrap;
 		align-items: center;
 		gap: 1em;
-		padding: 3em 1em;
+
+		& .api {
+
+			& .concepts {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 1em;
+
+				& img {
+					border-radius: 20px;
+				}
+				
+				& span {
+					display: flex;
+					position: absolute;
+					align-items: center;
+					background: white;
+					padding: 0.2em 1em;
+					color: black;
+					margin: 0.5em;
+					font-family: "Nippo-Regular";
+					gap: 0.2em;
+					border-radius: 20px;
+				}
+			}
+
+			& img {
+				max-height: 350px;
+				width: 100%;
+			}
+		}
+
+		& .flex {
+			display: flex;
+			gap: 1em;
+		}
 
 		& .item {
 			align-self: stretch;
 			min-width: 250px;
 			padding: 1em;
 			display: flex;
-			align-items: start;
+			align-items: center;
 			flex: 1;
-			gap: 1em;
 			flex-direction: column;
-			border: 1px solid;
-			border-image-slice: 1;
-			border-image-source: linear-gradient(210.49deg, rgba(160, 162, 165, 0) 0%, rgba(160, 162, 165, 0.6) 43.5%, rgba(160, 162, 165, 0) 100%);
-			background: linear-gradient(307.26deg, rgba(255, 255, 255, 0.5) -21.65%, rgba(255, 255, 255, 0.07) -21.64%, rgba(255, 255, 255, 0.01) 99.38%);
+			border-radius: 20px;
 
 			& h3 {
 				font-size: 1.5em;
 			}
 
+			& .p-api {
+				max-width: 500px;
+				font-size: 0.8em;
+				margin-bottom: 1em;
+			}
+
 			& .img-box {
-				width: 100%;
-				height: 100%;
 				aspect-ratio: 16/9;
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				border-bottom: 1px solid;
-				border-top: 1px solid;
-				border-image-slice: 1;
-				border-image-source: linear-gradient(270deg, rgba(160, 162, 165, 0) 0%, #A0A2A5 50.12%, rgba(160, 162, 165, 0) 97.31%);
-				background: rgba(255, 255, 255, 0.06);
-			}
 
-			& img {
-				width: 150px;
-				aspect-ratio: 4/3;
+				& img {
+					height: 100px;
+					margin-bottom: 0.5em;
+				}
 			}
 
 			& p {
-				text-align: left;
+				font-family: "Poppins-ExtraLight";
+				text-align: center;
 				line-height: 1.3rem;
 			}
 		}
@@ -486,51 +715,9 @@ export default css`
 			font-size: 1.9rem;
 		}
 	}
-	.core {
-		& .items {
-			& .item:nth-child(2) {
-				margin-left: 0;
-			}
-			& .item {
-				margin: 0;
-			}
-		}
-	}
 }
 
 @media only screen and (max-width: 768px) {
-	.core {
-		& .ellipse-1 {
-			display: none;
-		}
-		& .ellipse-2 {
-			width: 250px;
-			height: 250px;
-			top: -30px;
-			right: -125px;
-			bottom: -100px;
-		}
-		& h2 {
-			font-size: 1.5em;
-			line-height: 35px;
-		}
-
-		& .items {
-			font-size: 0.9em;
-		}
-	}
-	.capabilities {
-		padding: 0 3em 3em 3em;
-
-		& .items {
-			font-size: 0.8em;
-		}
-		& h2 {
-			font-size: 1.5em;
-			margin: 1.5em;
-		}
-	}
-
 	.soon {
 		& .items {
 			font-size: 0.8em;
@@ -595,9 +782,6 @@ export default css`
 }
 
 @media only screen and (max-width: 640px) {
-	.core {
-		justify-content: start;
-	}
 	.welcome {
 		padding: 7em 3em;
 	}
@@ -620,14 +804,6 @@ export default css`
 			font-size: 0.7rem;
 			padding: 0;
 		}
-	}
-
-	.core {
-		padding: 3em 1em;
-	}
-
-	.capabilities {
-		padding: 0 1em 1em 1em;
 	}
 }
 `

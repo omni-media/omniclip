@@ -3,8 +3,12 @@ import {property} from "lit/decorators.js"
 
 import styles from "./styles.js"
 import {removeLoadingPageIndicator} from "../../main.js"
+import lockSvg from "../../icons/gravity-ui/lock.svg.js"
+import shieldSvg from "../../icons/gravity-ui/shield.svg.js"
 import discordSvg from "../../icons/remix-icon/discord.svg.js"
+import computerSvg from "../../icons/remix-icon/computer.svg.js"
 import arrowRightSvg from "../../icons/gravity-ui/arrow-right.svg.js"
+import circleInfoSvg from "../../icons/gravity-ui/circle-info.svg.js"
 
 export class LandingPage extends LitElement {
 	static styles = styles
@@ -117,128 +121,192 @@ export class LandingPage extends LitElement {
 					</a>
 				</div>
 			</section>
-			<section id="core" class="core">
-				<div class="ellipse-1"></div>
-				<div class="ellipse-2"></div>
-				<h2>
-					<span>Core principles behind</span>
-					<span>this video editor<span>
-				</h2>
-				<div class="items">
-					<div class="item">
-						<img src="/assets/performance.svg" />
-						<div>
-							<h3>Performance</h3>
-							<p>
-								By leveraging cutting-edge technologies (webcodecs), this
-								video editor delivers unparalleled speed and efficiency.
-								Experience the fastest exporting capabilities available on
-								the web.
-							</p>
+			<section id="abilities" class="abilities">
+				<h2>So, what's omniclip capable of ?</h2>
+				<div class=items>
+					<h4>All the basic stuff, you can add audio/image/text/video and trim or split it, but theres more!</h4>
+					<div class=flex>
+						<div class=item>
+							<img src="/assets/trim.svg" />
+							<p>Trim</p>
+						</div>
+						<div class=item>
+							<img src="/assets/split.svg" />
+							<p>Split</p>
+						</div>
+						<div class=item>
+							<img src="/assets/text.svg" />
+							<p>Text</p>
+						</div>
+						<div class=item>
+							<img src="/assets/images.svg" />
+							<p>Images</p>
+						</div>
+						<div class=item>
+							<img src="/assets/audio.svg" />
+							<p>Audio</p>
 						</div>
 					</div>
-					<div class="item">
-						<img src="/assets/secure.svg" />
-						<div>
-							<h3>Security</h3>
-							<p>
-								This video editor operates entirely client-side, meaning
-								all your editing processes and data storage occur locally
-								on your device. There is no need for login or
-								registration, ensuring your personal information remains
-								private.
-							</p>
+					<div class=more>
+						<div class=flex>
+							<div class="item-more">
+								<h3>Animations</h3>
+								<p>7 animations to play with<br>
+								but theres more to come!</p>
+								<video autoplay loop muted width="250">
+									<source src="/assets/animation.mp4" type="video/mp4" />
+								</video>
+							</div>
+							<div class="item-more">
+								<h3>Filters</h3>
+								<p>As much as 18 filters!<br> you can mix and match them too.</p>
+								<video autoplay loop muted width="250">
+									<source src="/assets/filters.mp4" type="video/mp4" />
+								</video>
+							</div>
+						</div>
+						<div class=flex>
+							<div class="item-more">
+								<h3>Resizable Panels</h3>
+								<p>Adjustable panels<br>customize workspace the way you want<br>
+								</p>
+								<video autoplay loop muted width="250">
+									<source src="/assets/resizable.mp4" type="video/mp4" />
+								</video>
+							</div>
+							<div class="item-more">
+								<h3>Local Fonts</h3>
+								<p>Auto-loading fonts from<br> your device for seamless typography.<br>
+								</p>
+								<video autoplay loop muted width="250">
+									<source src="/assets/localfonts.mp4" type="video/mp4" />
+								</video>
+							</div>
 						</div>
 					</div>
-					<div class="item">
-						<img src="/assets/ease.svg" />
+					<div class=export>
 						<div>
-							<h3>Ease of use</h3>
-							<p>
-								Designed with the user in mind, this video editor features
-								an intuitive and user-friendly interface. Its simple
-								layout and straightforward tools make it accessible for
-								beginners.
-							</p>
+							<h3>Export your video up to 4k!</h3>
+							<ul>
+								<li>No credit card required! <span class=emoji>&#129327;</span></li>
+								<li>Unparalleled speed <span class=emoji>&#9889;</span></li>
+								<li>Choose desired bitrate & aspect ratio <span class=emoji>&#9881;</span></li>
+								<li>
+									Try it out!
+									<a
+										class="try"
+										href="#/editor"
+									>
+										Open editor
+									</a>
+								</li>
+							</ul>
 						</div>
+						<video autoplay loop muted width="250">
+							<source src="/assets/export4k.mp4" type="video/mp4" />
+						</video>
 					</div>
 				</div>
 			</section>
-			<section id="capabilities" class="capabilities">
-				<h2>Capabilities</h2>
-				<div class="items">
-					<div class="item">
-						<div class="img-box"><img src="/assets/trim.svg" /></div>
-						<h3>Trim</h3>
-						<p>
-							Easily remove unwanted sections from your
-							video clips with the trimming tool
-						</p>
+			<section class="differences">
+				<div class=items>
+					<div class=flex>
+						<div class="item open">
+							<h3>Open source</h3>
+							<div class=gh>
+								<a href="https://github.com/omni-media/omniclip" class="flex">
+									<span class="btn btn-github">View on GitHub</span>
+									<img class="stars" src="https://img.shields.io/github/stars/omni-media/omniclip" alt="GitHub Stars">
+								</a>
+							</div>
+							<p>
+								Yep, it’s open source! See how it’s built, tweak it,
+								or pitch in, all with the freedom of an MIT license.
+							</p>
+							<img src="/assets/opens.png" />
+						</div>
+						<div class="item free">
+							<h3>Free</h3>
+							<p>
+								Totally free, no strings attached.
+								Use it, create with it, and enjoy no hidden costs or sneaky subscriptions.
+							</p>
+							<span class=emoji-1>
+								&#127775;
+							</span>
+							<span class=emoji-2>
+								&#127775;
+							</span>
+							<div class="view">
+								<a
+									class="try"
+									href="#/editor"
+								>
+									Open editor
+								</a>
+							</div>
+						</div>
 					</div>
-					<div class="item">
-						<div class="img-box"><img src="/assets/audio.svg" /></div>
-						<h3>Audio</h3>
-						<p>
-							Enhance your videos by adding custom
-							audio tracks
-						</p>
-					</div>
-					<div class="item">
-						<div class="img-box"><img src="/assets/images.svg" /></div>
-						<h3>Images</h3>
-						<p>
-							Add all kinds of images to your timeline
-							with ease
-						</p>
-					</div>
-					<div class="item">
-						<div class="img-box"><img src="/assets/text.svg" /></div>
-						<h3>Text</h3>
-						<p>
-							Add text anywhere on your video clips or
-							images
-						</p>
-					</div>
-					<div class="item">
-						<div class="img-box"><img src="/assets/high-res.svg" /></div>
-						<h3>High Resolution</h3>
-						<p>
-							Export project with support for resolutions up
-							to 4K
-						</p>
-					</div>
-					<div class="item">
-						<div class="img-box"><img src="/assets/split.svg" /></div>
-						<h3>Split</h3>
-						<p>
-							Divide your video clips into multiple
-							segments with ease using the split tool.
-						</p>
+					<div class=flex>
+						<div class="item more">
+							<h3>Privacy</h3>
+							<p>
+								Your data stays yours, everything happens locally on your device,
+								so nothing gets sent to a server.
+							</p>
+							${lockSvg}
+						</div>
+						<div class="item more">
+							<h3>Security</h3>
+							<p>No uploads, no risks. Everything runs safely within your browser.</p>
+							${shieldSvg}
+						</div>
+						<div class="item more">
+							<h3>Client side</h3>
+							<p>
+								Powered by WebCodecs for native-speed rendering and export,
+								all processing happens right on your device.
+							</p>
+							${computerSvg}
+						</div>
 					</div>
 				</div>
 			</section>
 			<section class="soon">
-				<div class="ellipse-1"></div>
-				<div class="ellipse-2"></div>
-				<div class="ellipse-3"></div>
 				<h2>Coming soon</h2>
 				<div class="items">
-					<div class="item">
-						<div class="img-box">
-							<img src="/assets/transition.svg" />
+					<div class=flex>
+						<div class="item">
+							<div class="img-box">
+								<img src="/assets/transition.svg" />
+							</div>
+							<h3>Transitions</h3>
+							<p>transitions between clips</p>
 						</div>
-						<h3>Transitions</h3>
-						<p>
-							Applying transitions between video clips for smooth visual
-							effects
-						</p>
+						<div class="item">
+							<div class="img-box"><img src="/assets/effect.svg" /></div>
+							<h3>Collaboration</h3>
+							<p>Work together in real-time</p>
+						</div>
 					</div>
 					<div class="item">
-						<div class="img-box"><img src="/assets/effect.svg" /></div>
-						<h3>Effects</h3>
-						<p>
-							Filters, color adjustments, or some other special effects
+						<h3 class=h3-api>Omni tools</h3>
+						<p class=p-api>
+							Whether you want to harness the raw power of video processing or script entire timelines without a UI,
+							Omniclip is set to become your go-to toolkit for building, creating, and innovating anything video-related on the web.
 						</p>
+						<div class="flex api">
+							<div class=concepts>
+								<div class=concept>
+									<span>${circleInfoSvg} concept</span>
+									<img src="/assets/codesample2.png" />
+								</div>
+								<div class=concept>
+									<span>${circleInfoSvg} concept</span>
+									<img src="/assets/codesample1.png" />
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</section>
