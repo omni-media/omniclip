@@ -90,11 +90,7 @@ export class EffectManager {
 		if (proposedTimecode.proposed_place.track > grabbed.effect.track) {
 			this.actions.set_effect_track(grabbed.effect, proposedTimecode.proposed_place.track - 1)
 		}
-		state.effects.forEach(e => {
-			if (e.track > grabbed.effect.track) {
-				this.actions.set_effect_track(e, e.track - 1)
-			}
-		})
+		this.#lowerTracksAboveLevel(grabbed.effect.track, state.effects)
 	}
 
 	#adjustForAddTrackDrop(event: EffectDrop, state: State) {
@@ -119,8 +115,24 @@ export class EffectManager {
 	}
 	// end
 
-	removeEffect(effect: AnyEffect) {
+	#lowerTracksAboveLevel(trackLevel: number, effects: AnyEffect[]) {
+		effects.forEach(effect => {
+			if (effect.track > trackLevel) {
+				this.actions.set_effect_track(effect, effect.track - 1)
+			}
+		})
+	}
+
+	#isLastTrack(state: State) {
+		return state.tracks.length === 1
+	}
+
+	removeEffect(state: State, effect: AnyEffect) {
 		this.actions.remove_effect(effect)
+		if(!this.#isLastTrack(state) && this.#isTrackEmpty(state, effect)) {
+			this.actions.remove_track(state.tracks[effect.track].id)
+			this.#lowerTracksAboveLevel(effect.track, state.effects)
+		}
 	}
 
 	#pushEffectsForward(effectsToPush: AnyEffect[], pushBy: number) {
