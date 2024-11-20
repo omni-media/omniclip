@@ -82,6 +82,7 @@ export class OmniContext extends Context {
 
 	clear_project() {
 		this.actions.remove_all_effects()
+		this.actions.remove_tracks()
 		this.controllers.compositor.canvas.clear()
 		this.controllers.compositor.init_guidelines()
 	}

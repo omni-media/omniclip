@@ -139,6 +139,10 @@ export const historical_actions = actionize_historical({
 		const new_arr = state.tracks.filter(track => track.id !== id)
 		state.tracks = new_arr
 	},
+	remove_tracks: state => () => {
+		state.tracks = []
+		state.tracks.push({id: generate_id()})
+	},
 	set_rotation: state => ({id}: TextEffect | ImageEffect | VideoEffect, rotation: number) => {
 		const effect = state.effects.find(effect => effect.id === id) as TextEffect | VideoEffect | ImageEffect
 		effect.rect.rotation = rotation
