@@ -25,7 +25,7 @@ export const styles = css`
 
 		& .new-project {
 			& svg {
-				color: green;
+				color: gray;
 			}
 
 			&:hover {
@@ -46,12 +46,7 @@ export const styles = css`
 			justify-content: center;
 			width: 200px;
 			height: 200px;
-			background: rgba(0, 0, 0, 1);
-			border-bottom: 1px solid;
-			border-top: 1px solid;
-			border-image-source: linear-gradient(90deg, rgba(168, 170, 173, 0) 0%, #A8AAAD 49.18%, rgba(168, 170, 173, 0) 100%);
-			border-image-slice: 1;
-			background: linear-gradient(307.26deg, #FFFFFF -21.65%, rgba(255, 255, 255, 0.14) -21.64%, rgba(255, 255, 255, 0.02) 99.38%);
+			background: #0e0e0e;
 			
 			& .project-name {
 				position: absolute;
@@ -70,6 +65,7 @@ export const styles = css`
 				right: 0;
 				padding: 1em;
 				z-index: 2;
+				color: gray;
 
 				& .icon {
 					display: flex;
