@@ -13,7 +13,7 @@ export const styles = css`
 		top: 0;
 		z-index: 1;
 		height: 50px;
-		border: 1px solid rgb(0 0 0 / 38%);
+		border: 1px solid #111;
 		border-radius: 5px;
 
 		&[data-no-file] {
@@ -75,7 +75,7 @@ export const styles = css`
 		align-items: center;
 		background: #201f1f;
 		border-radius: 5px;
-		border: 1px solid rgb(0 0 0 / 38%);
+		border: 1px solid #111;
 		cursor: grab;
 		position: absolute;
 		top: 0;
@@ -103,7 +103,7 @@ export const styles = css`
 		}
 
 		&:hover {
-			outline: 1px solid gray;
+			border: 1px solid white;
 		}
 	}
 `
