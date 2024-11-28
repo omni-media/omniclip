@@ -614,6 +614,8 @@ export default css`
 				align-items: start;
 				gap: 1em;
 				width: 100%;
+				background: rgb(30, 30, 30);
+				border-radius: 20px;
 
 				& .concept:first-child {
 					max-width: 500px;
@@ -666,6 +668,7 @@ export default css`
 			flex: 1;
 			flex-direction: column;
 			border-radius: 20px;
+			background: linear-gradient(307.26deg, #FFFFFF -21.65%, rgba(255, 255, 255, 0.14) -21.64%, rgba(255, 255, 255, 0.02) 99.38%);
 
 			& h3 {
 				font-size: 1.5em;

@@ -251,8 +251,7 @@ export class LandingPage extends LitElement {
 						<div class="item more">
 							<h3>Privacy</h3>
 							<p>
-								Your data stays yours, everything happens locally on your device,
-								so nothing gets sent to a server.
+								Your data stays yours, everything happens locally on your device.
 							</p>
 							${lockSvg}
 						</div>
@@ -264,8 +263,7 @@ export class LandingPage extends LitElement {
 						<div class="item more">
 							<h3>Client side</h3>
 							<p>
-								Powered by WebCodecs for native-speed rendering and export,
-								all processing happens right on your device.
+								Powered by WebCodecs for native-speed rendering and export.
 							</p>
 							${computerSvg}
 						</div>
