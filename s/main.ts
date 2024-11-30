@@ -7,14 +7,17 @@ import {omnislate, OmniContext} from "./context/context.js"
 import {TextPanel} from "./components/omni-text/panel.js"
 import {AnimPanel} from "./components/omni-anim/panel.js"
 import {MediaPanel} from "./components/omni-media/panel.js"
+import {AudioPanel} from './components/omni-audio/panel.js'
 import {OmniText} from "./components/omni-text/component.js"
 import {OmniAnim} from "./components/omni-anim/component.js"
+import {OmniAudio} from './components/omni-audio/component.js'
 import {OmniMedia} from "./components/omni-media/component.js"
 import {FiltersPanel} from './components/omni-filters/panel.js'
 import {TimelinePanel} from "./components/omni-timeline/panel.js"
 import {LandingPage} from './components/landingpage/component.js'
 import {OmniFilters} from './components/omni-filters/component.js'
 import {OmniManager} from './components/omni-manager/component.js'
+import {ProjectImportPanel} from "./views/project-import/panel.js"
 import {OmniTimeline} from "./components/omni-timeline/component.js"
 import {ProjectSettingsPanel} from "./views/project-settings/panel.js"
 import {TransitionsPanel} from "./components/omni-transitions/panel.js"
@@ -40,9 +43,11 @@ export function setupContext(projectId: string) {
 			TextPanel,
 			ExportPanel,
 			ProjectSettingsPanel,
+			ProjectImportPanel,
 			AnimPanel,
 			FiltersPanel,
-			TransitionsPanel
+			TransitionsPanel,
+        	AudioPanel
 		},
 		layouts: {
 			empty: single_panel_layout("TimelinePanel"),
@@ -69,7 +74,7 @@ const router = new HashRouter({
 	},
   '/editor/*': (projectId) => {
 		if(!registered) {
-			register_to_dom({OmniTimeline, OmniText, OmniMedia, OmniAnim, ConstructEditor, OmniFilters, OmniTransitions})
+			register_to_dom({OmniTimeline, OmniText, OmniMedia, OmniAnim, ConstructEditor, OmniFilters, OmniAudio, OmniTransitions})
 			registered = true
 		}
 		setupContext(projectId)

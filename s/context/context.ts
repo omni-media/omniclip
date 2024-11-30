@@ -4,6 +4,7 @@ import {slate, Context, PanelSpec} from "@benev/construct/x/mini.js"
 import {store} from "./controllers/store/store.js"
 import {removeLoadingPageIndicator} from "../main.js"
 import {Media} from "./controllers/media/controller.js"
+import {Import} from "./controllers/import/controller.js"
 import {Timeline} from "./controllers/timeline/controller.js"
 import {Compositor} from "./controllers/compositor/controller.js"
 import {historical_state, non_historical_state} from "./state.js"
@@ -107,6 +108,7 @@ export class OmniContext extends Context {
 		compositor: Compositor
 		media: Media
 		video_export: VideoExport
+                import: Import
 	}
 
 	#check_if_webcodecs_supported() {
@@ -137,6 +139,7 @@ export class OmniContext extends Context {
 			media,
 			timeline: new Timeline(this.actions, media, compositor),
 			video_export: new VideoExport(this.actions, compositor, media),
+                        import: new Import(this.actions, media),
 		}
 		this.#listen_for_state_changes()
 		this.#recreate_project_from_localstorage_state(this.state, this.controllers.media)

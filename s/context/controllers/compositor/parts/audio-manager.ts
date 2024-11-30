@@ -1,3 +1,4 @@
+import {pub} from "@benev/slate"
 import {generate_id} from "@benev/slate"
 
 import {Compositor} from "../controller.js"
@@ -7,7 +8,6 @@ import {Audio} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
 export class AudioManager extends Map<string, HTMLAudioElement> {
-
 	constructor(private compositor: Compositor, private actions: Actions) {super()}
 
 	create_and_add_audio_effect(audio: Audio, state: State) {
@@ -24,6 +24,7 @@ export class AudioManager extends Map<string, HTMLAudioElement> {
 			start: 0,
 			end: adjusted_duration_to_timebase,
 			track: 2,
+                        volume: audio.element.volume
 		}
 		const {position, track} = find_place_for_new_effect(state.effects, state.tracks)
 		effect.start_at_position = position!
@@ -37,6 +38,7 @@ export class AudioManager extends Map<string, HTMLAudioElement> {
 		source.type = "audio/mp3"
 		source.src = URL.createObjectURL(file)
 		audio.append(source)
+                audio.volume = effect.volume
 		this.set(effect.id, audio)
 		if(recreate) {return}
 		this.actions.add_audio_effect(effect)
@@ -73,4 +75,10 @@ export class AudioManager extends Map<string, HTMLAudioElement> {
 		if(element)
 			await element.play()
 	}
+        
+        set_volume(effect: AudioEffect, volume: number){
+            let e = this.get(effect.id)!
+            e.volume = volume
+            this.actions.set_effect_volume(effect, volume)
+        }
 }

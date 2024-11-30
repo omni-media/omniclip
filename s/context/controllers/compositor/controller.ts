@@ -167,7 +167,14 @@ export class Compositor {
 		for(const effect of this.currently_played_effects.values()) {
 			if(effect.kind === "audio") {
 				const audio = this.managers.audioManager.get(effect.id)
-				if(!redraw && audio?.paused && this.#is_playing.value) {await audio.play()}
+                                let effectAudio = effect as AudioEffect
+                                if(audio){
+                                    audio.volume = effectAudio.volume
+                                }
+				if(!redraw && audio?.paused && this.#is_playing.value) {
+                                    await audio.play()
+                                    audio.volume = effect.volume
+                                }
 				if(redraw && timecode && audio) {
 					const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
 					audio.currentTime = current_time
