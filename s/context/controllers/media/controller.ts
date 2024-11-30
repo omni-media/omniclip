@@ -127,51 +127,57 @@ export class Media extends Map<string, AnyMedia> {
 	}
 
 	async import_file(input: HTMLInputElement) {
-		this.#files_ready = false
-		this.on_media_change.publish({files: [], action: "placeholder"})
 		const imported_file = input.files?.[0]
-		const video_info = imported_file?.type.startsWith('video')
-			? await mediainfo.analyzeData(
-					imported_file.size,
-					makeReadChunk(imported_file)
-				)
-			: null
 		if(imported_file) {
-			const hash = await quick_hash(imported_file)
-			const transaction = this.#database_request.result.transaction(["files"], "readwrite")
-			const files_store = transaction.objectStore("files")
-			const check_if_duplicate = files_store.count(hash)
-			check_if_duplicate!.onsuccess = () => {
-				const not_duplicate = check_if_duplicate.result === 0
-				if(not_duplicate) {
-					if(imported_file.type.startsWith("image")) {
-						const media = {file: imported_file, hash, kind: "image"} satisfies AnyMedia
-						files_store.add(media)
-						this.set(hash, media)
-						this.on_media_change.publish({files: [media], action: "added"})
-					}
-					else if(imported_file.type.startsWith("video")) {
-						const track = video_info!.media?.track[0] as VideoTrack
-						const duration = track?.Duration! * 1000
-						const frames = track.FrameCount!
-						const media = {file: imported_file, hash, kind: "video", frames, duration} satisfies AnyMedia
-						files_store.add(media)
-						this.set(hash, media)
-						this.on_media_change.publish({files: [media], action: "added"})
-					}
-					else if(imported_file.type.startsWith("audio")) {
-						const media = {file: imported_file, hash, kind: "audio"} satisfies AnyMedia
-						files_store.add(media)
-						this.set(hash, media)
-						this.on_media_change.publish({files: [media], action: "added"})
-					}
-				}
-				this.#files_ready = true
-			}
-			check_if_duplicate!.onerror = (error) => console.log("error")
+                    await this.import_from_file(imported_file);
 		}
 	}
-
+        
+        async import_from_file(file: File) {
+            this.#files_ready = false
+            this.on_media_change.publish({files: [], action: "placeholder"})
+            const video_info = file?.type.startsWith('video')
+                    ? await mediainfo.analyzeData(
+                                    file.size,
+                                    makeReadChunk(file)
+                            )
+                    : null
+            if(file) {
+                    const hash = await quick_hash(file)
+                    const transaction = this.#database_request.result.transaction(["files"], "readwrite")
+                    const files_store = transaction.objectStore("files")
+                    const check_if_duplicate = files_store.count(hash)
+                    check_if_duplicate!.onsuccess = () => {
+                            const not_duplicate = check_if_duplicate.result === 0
+                            if(not_duplicate) {
+                                    if(file.type.startsWith("image")) {
+                                            const media = {file: file, hash, kind: "image"} satisfies AnyMedia
+                                            files_store.add(media)
+                                            this.set(hash, media)
+                                            this.on_media_change.publish({files: [media], action: "added"})
+                                    }
+                                    else if(file.type.startsWith("video")) {
+                                            const track = video_info!.media?.track[0] as VideoTrack
+                                            const duration = track?.Duration! * 1000
+                                            const frames = track.FrameCount!
+                                            const media = {file: file, hash, kind: "video", frames, duration} satisfies AnyMedia
+                                            files_store.add(media)
+                                            this.set(hash, media)
+                                            this.on_media_change.publish({files: [media], action: "added"})
+                                    }
+                                    else if(file.type.startsWith("audio")) {
+                                            const media = {file: file, hash, kind: "audio"} satisfies AnyMedia
+                                            files_store.add(media)
+                                            this.set(hash, media)
+                                            this.on_media_change.publish({files: [media], action: "added"})
+                                    }
+                            }
+                            this.#files_ready = true
+                    }
+                    check_if_duplicate!.onerror = (error) => console.log("error")
+            }
+        }
+        
 	create_video_thumbnail(video: HTMLVideoElement): Promise<string> {
 		const canvas = document.createElement("canvas")
 		canvas.width = 150

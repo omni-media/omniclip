@@ -54,6 +54,7 @@ export interface VideoEffect extends Effect {
 	rect: EffectRect
 	file_hash: string
 	name: string
+        volume: number
 }
 
 export interface AudioEffect extends Effect {
@@ -61,6 +62,7 @@ export interface AudioEffect extends Effect {
 	raw_duration: number
 	file_hash: string
 	name: string
+        volume: number
 }
 
 export interface ImageEffect extends Effect {
@@ -165,3 +167,84 @@ export interface AddTrackIndicator {
 	type: "addTrack"
 }
 export type Status = "render" | "decode" | "demux" | "fetch"
+
+export type ProjectFile = {
+    resolution: { 
+        width: number
+        height: number
+    }
+    tracks: TrackProjectFile[]
+}
+
+export type TrackProjectFile = {
+    effects: EffectProjectFile[]
+}
+
+export type EffectProjectFile = {
+    kind: string
+    start: number
+    duration: number
+    file_name: string
+}
+
+export interface AudioProjectFile extends EffectProjectFile {
+    volume: number
+    start_at_position: number
+    end: number
+}
+
+export interface VideoProjectFile extends EffectProjectFile {
+    scaleX: number
+    scaleY: number
+    width: number
+    height: number
+    start_at_position: number
+    end: number
+    x: number
+    y: number
+    rotation: number
+    volume: number
+    animations: AnimationProjectFile[]
+}
+
+export interface ImageProjectFile extends EffectProjectFile {
+    scaleX: number
+    scaleY: number
+    width: number
+    height: number
+    x: number
+    y: number
+    rotation: number
+    animations: AnimationProjectFile[]
+    filters: FilterProjectFile[]
+}
+
+export interface TextProjectFile extends EffectProjectFile {
+    start_at_position: number
+    duration: number 
+    start: number
+    end: number
+    size: number
+    content: string
+    style: string
+    font: string
+    color: string
+    align: string
+    scaleX: number
+    scaleY: number
+    width: number
+    height: number
+    x: number
+    y: number
+    rotation: number
+}
+
+export interface AnimationProjectFile {
+    kind: string
+    duration: number
+}
+
+export interface FilterProjectFile {
+    type: string
+    value: number
+}

@@ -30,6 +30,7 @@ export class VideoManager extends Map<string, FabricImage> {
 			end: adjusted_duration_to_timebase,
 			track: 0,
 			thumbnail: video.thumbnail,
+                        volume: video.element.volume,
 			rect: {
 				position_on_canvas: {x: 0, y: 0},
 				width: video.element.videoWidth,
@@ -52,6 +53,7 @@ export class VideoManager extends Map<string, FabricImage> {
 		element.load()
 		element.width = effect.rect.width
 		element.height = effect.rect.height
+                element.volume = effect.volume
 		this.#videoElements.set(effect.id, element)
 		const video = new FabricImage(element, {
 			top: effect.rect.position_on_canvas.y,
@@ -146,4 +148,11 @@ export class VideoManager extends Map<string, FabricImage> {
 			await element.play()
 		}
 	}
+        
+        set_volume(effect: VideoEffect, volume: number){
+            let e = this.get(effect.id)
+            let element = this.#videoElements.get(effect.id) as HTMLMediaElement
+            element.volume = volume
+            this.actions.set_effect_volume(effect, volume)
+        }
 }

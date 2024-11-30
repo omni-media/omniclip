@@ -117,7 +117,7 @@ export const OmniMedia = shadow_component(use => {
 		use.context.helpers.ffmpeg.is_loading.value), () => html`
 		<form>
 			<label class="import-btn" for="import">${importFileSvg} Import Multimedia</label>
-			<input type="file" accept="image/*, video/*, .mp3" id="import" class="hide" @change=${(e: Event) => media_controller.import_file(e.target as HTMLInputElement)}>
+			<input type="file" accept="image/*, video/*, .mp3, .wav" id="import" class="hide" @change=${(e: Event) => media_controller.import_file(e.target as HTMLInputElement)}>
 		</form>
 		<div class="media">
 			${placeholders.map(_ => html`<div class="box placeholder">${loadingSvg}</div>`)}
