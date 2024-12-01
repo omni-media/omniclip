@@ -19,7 +19,7 @@ export type AnimationIn = AnimationBase<(typeof animationIn)[number]>
 export type AnimationOut = AnimationBase<(typeof animationOut)[number]>
 export type AnimationNone = AnimationBase<(typeof animationNone)[number]>
 export type Animation = AnimationIn | AnimationOut
-type UpdatedProps = {
+export type UpdatedProps = {
 	duration: number
 	kind: "in" | "out"
 }
@@ -33,7 +33,33 @@ export class AnimationManager {
 	#animations: Animation[] = []
 	onChange = pub()
 
-	constructor(private compositor: Compositor) {}
+	constructor(private compositor: Compositor, private kind?: string) {}
+
+	clearAnimations(state: State) {
+		this.#animations = []
+		this.#animations.forEach(a => this.deselectAnimation(state, a.targetEffect, a.type))
+		this.timeline.clear()
+	}
+
+	get animations() {
+		return this.#animations
+	}
+
+	set animations(animations: Animation[]) {
+		this.animations = animations
+	}
+
+	protected getAnimations(effect: AnyEffect) {
+		return this.#animations.filter(a => a.targetEffect.id === effect.id)
+	}
+
+	protected getAnimation(effect: AnyEffect, kind: "in" | "out") {
+		return this.#animations.find(a => a.targetEffect.id === effect.id && a.type === kind)
+	}
+
+	protected getAnyAnimation(effect: AnyEffect) {
+		return this.#animations.find(a => a.targetEffect.id === effect.id)
+	}
 
 	selectedAnimationForEffect(effect: AnyEffect | null, animation: Animation) {
 		if (!effect) return
@@ -73,7 +99,7 @@ export class AnimationManager {
 		}
 	}
 
-	refreshAnimations(state: State, updatedProps?: UpdatedProps) {
+	refresh(state: State, updatedProps?: UpdatedProps) {
 		this.timeline.clear()
 		const updated = this.#animations.map((animation) => {
 			const effect = state.effects.find((effect) => effect.id === animation.targetEffect.id) as ImageEffect | VideoEffect | undefined
@@ -85,8 +111,8 @@ export class AnimationManager {
 		this.#animations = updated
 		this.#animations.forEach((animation) => {
 			this.deselectAnimation(
-				animation.targetEffect,
 				state,
+				animation.targetEffect,
 				animation.type,
 			)
 			this.selectAnimation(animation.targetEffect, updatedProps ? this.#refreshAnimation(updatedProps, animation) : animation, state)
@@ -121,7 +147,7 @@ export class AnimationManager {
 
 	async selectAnimation(
 		effect: ImageEffect | VideoEffect,
-		animation: AnimationIn | AnimationOut,
+		animation: Animation,
 		state: State
 	) {
 		const alreadySelected = this.#animations.find(a => a.targetEffect.id === effect.id && a.name === animation.name)
@@ -132,7 +158,7 @@ export class AnimationManager {
 		const isDifferentAnimationSelected = this.#animations.find(a => a.targetEffect.id === effect.id && a.type === animation.type)
 		if(isDifferentAnimationSelected) {
 			// deselect current animation
-			this.deselectAnimation(effect, state, animation.type)
+			this.deselectAnimation(state, effect, animation.type)
 			// continue with selecting different animation
 		}
 
@@ -144,6 +170,7 @@ export class AnimationManager {
 		this.#animations.push(animation)
 
 		await this.compositor.seek(state.timecode, true)
+		const {incoming, outgoing} = this.compositor.managers.transitionManager.getTransitionDuration(effect)
 
 		switch (animation.name) {
 			case "slide-in": {
@@ -192,7 +219,7 @@ export class AnimationManager {
 						ease: "linear",
 						onUpdate: () => this.compositor.canvas.renderAll()
 					}),
-					effect.start_at_position / 1000
+					(effect.start_at_position - incoming) / 1000
 				)
 
 				break
@@ -207,7 +234,7 @@ export class AnimationManager {
 						ease: "linear",
 						onUpdate: () => this.compositor.canvas.renderAll()
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
+					(effect.start_at_position + (effect.end + outgoing - effect.start) - animation.duration * 1000) / 1000
 				)
 
 				break
@@ -479,14 +506,30 @@ export class AnimationManager {
 		fabric.opacity = 1
 	}
 
-	deselectAnimation(effect: ImageEffect | VideoEffect, state: State, type: "in" | "out") {
+	removeAnimations(effect: AnyEffect, state: State) {
+		const animations = this.getAnimations(effect)
+		animations.map(a => this.deselectAnimation(state, a.targetEffect, a.type))
+	}
+
+	deselectAnimation(state: State, effect: ImageEffect | VideoEffect, type: "in" | "out", force?: boolean) {
 		const object = this.#getObject(effect)
 		this.#resetObjectProperties(object!, effect)
 		gsap.killTweensOf(object!)
 		this.#animations = this.#animations.filter((animation) => !(animation.targetEffect.id === effect.id && animation.type === type))
 		object!.filters = object!.filters.filter(f => f.for !== "animation")
 		object!.applyFilters()
-		this.refreshAnimations(state)
 		this.onChange.publish(true)
+		this.compositor.canvas.renderAll()
+		this.refresh(state)
+
+		// hack to force removal of animation, since for some reason its not removed from
+		// deleted effect or effect which no longer have transition
+		if(force) {
+			setTimeout(() => {
+				this.#resetObjectProperties(object!, effect)
+				gsap.killTweensOf(object!)
+				this.compositor.canvas.renderAll()
+			}, 100)
+		}
 	}
 }

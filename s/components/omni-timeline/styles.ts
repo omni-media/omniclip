@@ -18,8 +18,7 @@ export const styles = css`
 			min-width: 100vw;
 			position: relative;
 			overflow-y: scroll;
-			background-image: url("/assets/noise.svg");
-			background-color: rgb(0 0 0 / 38%);
+			background-color: #111;
 
 			& * {
 				will-change: transform;
@@ -44,6 +43,69 @@ export const styles = css`
 					align-items: center;
 					gap: 0.3em;
 				}
+			}
+		}
+
+		& .transition-duration {
+			position: absolute;
+			z-index: 5;
+			background: #0080005e;
+			border-radius: 5px;
+			border: 1px solid green;
+			transition: 0.5s ease all;
+
+			&:first-of-type {
+				left: 10px;
+				margin-left: -1px;
+			}
+
+			&:last-child {
+				right: 10px;
+				margin-right: -1px;
+			}
+		}
+
+		& .transition-indicator {
+			text-align: center;
+			display: flex;
+			background: #5b8900;
+			border: 2px solid #111;
+			border-radius: 5px;
+			color: white;
+			align-items: center;
+			justify-content: center;
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			top: 15px;
+			left: -10px;
+			z-index: 2;
+			opacity: 0;
+			cursor: pointer;
+
+			&[data-transition] {
+				opacity: 1;
+				z-index: 5;
+			}
+
+			&[data-selected] {
+
+				& svg {
+					z-index: 6;
+					background: #329032;
+				}
+			}
+
+			& svg {
+				width: 100%;
+				height: 100%;
+				color: white;
+				background: #2d2d2d;
+			}
+
+			&:hover {
+				opacity: 1;
+				z-index: 6;
 			}
 		}
 

@@ -32,7 +32,8 @@ export class OmniContext extends Context {
 			this.#updateAnimationTimeline(state)
 		})
 		watch.track(() => this.#core.state.effects, () => {
-			this.controllers.compositor.managers.animationManager.refreshAnimations(this.state)
+			this.controllers.compositor.managers.animationManager.refresh(this.state)
+			this.controllers.compositor.managers.transitionManager.refresh(this.state)
 		})
 	}
 
@@ -50,6 +51,7 @@ export class OmniContext extends Context {
 	#updateAnimationTimeline(state: HistoricalState) {
 		const timelineDuration = Math.max(...state.effects.map(effect => effect.start_at_position + (effect.end - effect.start)))
 		this.controllers.compositor.managers.animationManager.updateTimelineDuration(timelineDuration)
+		this.controllers.compositor.managers.transitionManager.updateTimelineDuration(timelineDuration)
 	}
 
 	#state_from_storage(projectId: string): HistoricalState {
@@ -80,11 +82,10 @@ export class OmniContext extends Context {
 		this.controllers.compositor.update_canvas_objects(state)
 	}
 
-	clear_project() {
+	clear_project(state: State) {
 		this.actions.remove_all_effects()
 		this.actions.remove_tracks()
-		this.controllers.compositor.canvas.clear()
-		this.controllers.compositor.init_guidelines()
+		this.controllers.compositor.clear(state)
 	}
 
 	get history() {

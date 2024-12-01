@@ -48,6 +48,7 @@ export const ProposalIndicator = light_view(use => () => {
 				use.context.state
 			)
 			controller.set_proposed_timecode(props, proposed_timecode, use.context.state)
+			use.context.controllers.compositor.managers.transitionManager.removeTransitionFromNoLongerTouchingEffects(use.context.state)
 		})
 
 		const disposeDrag = effectDragHandler.onEffectDrag(props => {

@@ -72,7 +72,7 @@ export const OmniAnim = shadow_component(use => {
 				<div
 					?data-selected=${type === "in" ? !manager.isAnyAnimationInSelected(selectedImageOrVideoEffect) : !manager.isAnyAnimationOutSelected(selectedImageOrVideoEffect)}
 					?disabled=${!selectedImageOrVideoEffect}
-					@click=${() => manager.deselectAnimation(selectedImageOrVideoEffect!, use.context.state, type)}
+					@click=${() => manager.deselectAnimation(use.context.state, selectedImageOrVideoEffect!, type)}
 					class="animation"
 				>
 					<span class="text">
@@ -111,7 +111,7 @@ export const OmniAnim = shadow_component(use => {
 						? setAnimationInDuration(+(e.target as HTMLInputElement).value)
 						: setAnimationOutDuration(+(e.target as HTMLInputElement).value)
 					}
-					@change=${() => manager.refreshAnimations(use.context.state, {duration: animationDuration, kind})}
+					@change=${() => manager.refresh(use.context.state, {duration: animationDuration, kind})}
 					type="range"
 					min="0.5"
 					max="10"

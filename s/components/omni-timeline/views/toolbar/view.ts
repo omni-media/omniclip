@@ -36,7 +36,7 @@ export const Toolbar = shadow_view(use => (timeline: GoldElement) => {
 					<button class="remove" ?disabled=${!use.context.state.selected_effect} @click=${() => controller.remove_selected_effect(use.context.state)}>
 						${binSvg}
 					</button>
-					<button @click=${() => use.context.clear_project()} class="clean">${cleanSvg}</button>
+					<button @click=${() => use.context.clear_project(use.context.state)} class="clean">${cleanSvg}</button>
 				</div>
 				<div>${convert_ms_to_hmsms(use.context.state.timecode)}</div>
 				<div class="zoom">

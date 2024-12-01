@@ -13,6 +13,7 @@ import {AudioEffect} from "./views/effects/audio-effect.js"
 import {ImageEffect} from "./views/effects/image-effect.js"
 import folderSvg from "../../icons/gravity-ui/folder.svg.js"
 import {StateHandler} from "../../views/state-handler/view.js"
+import {TransitionIndicator} from "./views/indicators/add-transition.js"
 import {ProposalIndicator} from "./views/indicators/proposal-indicator.js"
 import {calculate_timeline_width} from "./utils/calculate_timeline_width.js"
 
@@ -107,6 +108,7 @@ export const OmniTimeline = shadow_component(use => {
 				${render_tracks()}
 				${render_effects()}
 				${ProposalIndicator()}
+				${TransitionIndicator()}
 			</div>
 		</div>
  `)

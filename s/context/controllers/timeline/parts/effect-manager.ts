@@ -128,11 +128,46 @@ export class EffectManager {
 	}
 
 	removeEffect(state: State, effect: AnyEffect) {
-		this.actions.remove_effect(effect)
 		if(!this.#isLastTrack(state) && this.#isTrackEmpty(state, effect)) {
 			this.actions.remove_track(state.tracks[effect.track].id)
 			this.#lowerTracksAboveLevel(effect.track, state.effects)
 		}
+
+		this.compositor.managers.animationManager.removeAnimations(effect, state)
+		
+		// removal of transitions related stuff
+		this.compositor.managers.transitionManager.removeAllTransitions(effect, state)
+		const effectAfter = this.#getEffectAfter(effect, state)
+		const effectBefore = this.#getEffectBefore(effect, state)
+
+		if(effectAfter) {
+			// removing transition chained to effect after the removed effect
+			this.compositor.managers.transitionManager.removeTransition(effectAfter, "incoming", state)
+		}
+
+		if(effectBefore) {
+			// removing transition chained to effect before the removed effect
+			this.compositor.managers.transitionManager.removeTransition(effectBefore, "outgoing", state)
+		}
+
+		const selected = this.compositor.managers.transitionManager.selected
+		if(selected) {
+			if(selected.incoming.id === effect.id || selected.outgoing.id === effect.id) {
+				this.compositor.managers.transitionManager.selected = null
+			}
+		}
+
+		this.actions.remove_effect(effect)
+	}
+
+	#getEffectAfter(effect: AnyEffect, state: State) {
+		return [...state.effects].sort((a, b) => a.start_at_position - b.start_at_position)
+		.find(e => e.start_at_position > effect.start_at_position)
+	}
+
+	#getEffectBefore(effect: AnyEffect, state: State) {
+		return [...state.effects].sort((a, b) => a.start_at_position - b.start_at_position)
+		.find(e => e.start_at_position < effect.start_at_position)
 	}
 
 	#pushEffectsForward(effectsToPush: AnyEffect[], pushBy: number) {
@@ -143,7 +178,7 @@ export class EffectManager {
 
 	splitEffectAtTimestamp(state: State) {
 		const normalizedTimecode = this.#normalizeToTimebase(state)
-		const selectedEffect = state.selected_effect
+		const selectedEffect = state.effects.find(e => e.id === state.selected_effect?.id)
 		
 		// If an effect is selected, attempt to split it
 		if (selectedEffect) {

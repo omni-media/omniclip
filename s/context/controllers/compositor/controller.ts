@@ -12,6 +12,7 @@ import {AlignGuidelines} from "./lib/aligning_guidelines.js"
 import {AnyEffect, AudioEffect, State} from "../../types.js"
 import {AnimationManager} from "./parts/animation-manager.js"
 import {compare_arrays} from "../../../utils/compare_arrays.js"
+import {TransitionManager} from "./parts/transition-manager.js"
 import {sort_effects_by_track} from "../video-export/utils/sort_effects_by_track.js"
 import {get_effect_at_timestamp} from "../video-export/utils/get_effect_at_timestamp.js"
 
@@ -22,6 +23,7 @@ export interface Managers {
 	audioManager: AudioManager
 	animationManager: AnimationManager
 	filtersManager: FiltersManager
+	transitionManager: TransitionManager
 }
 
 export class Compositor {
@@ -52,7 +54,8 @@ export class Compositor {
 		imageManager: new ImageManager(this, actions),
 		audioManager: new AudioManager(this, actions),
 		animationManager: new AnimationManager(this),
-		filtersManager: new FiltersManager(this)
+		filtersManager: new FiltersManager(this),
+		transitionManager: new TransitionManager(actions, this)
 	}
 
 		this.#on_playing()
@@ -60,10 +63,12 @@ export class Compositor {
 			() => this.#is_playing.value,
 			(is_playing) => {
 				if(is_playing) {
+					this.managers.transitionManager.play(this.timecode)
 					this.managers.animationManager.play(this.timecode)
 					this.managers.videoManager.play_videos()
 					this.managers.audioManager.play_audios()
 				} else {
+					this.managers.transitionManager.pause()
 					this.managers.animationManager.pause()
 					this.managers.videoManager.pause_videos()
 					this.managers.audioManager.pause_audios()
@@ -89,6 +94,13 @@ export class Compositor {
 		this.currently_played_effects.clear()
 		this.canvas.clear()
 	}
+
+	clear(state: State) {
+		this.canvas.clear()
+		this.init_guidelines()
+		this.managers.animationManager.clearAnimations(state)
+		this.managers.transitionManager.clearTransitions(state)
+	}
 	
 	#calculate_elapsed_time() {
 		const now = performance.now() - this.#pause_time
@@ -109,7 +121,10 @@ export class Compositor {
 	}
 
 	get_effects_relative_to_timecode(effects: AnyEffect[], timecode: number) {
-		return effects.filter(effect => effect.start_at_position <= timecode && timecode <= effect.start_at_position + (effect.end - effect.start))
+		return effects.filter(effect => {
+			const {incoming, outgoing} = this.managers.transitionManager.getTransitionDuration(effect)
+			return effect.start_at_position - incoming <= timecode && timecode <= effect.start_at_position + (effect.end - effect.start) + outgoing
+		})
 	}
 
 	#update_currently_played_effects(effects: AnyEffect[], timecode: number, exporting?: boolean) {
@@ -148,6 +163,7 @@ export class Compositor {
 
 	async seek(timecode: number, redraw?: boolean) {
 		this.managers.animationManager.seek(timecode)
+		this.managers.transitionManager.seek(timecode)
 		for(const effect of this.currently_played_effects.values()) {
 			if(effect.kind === "audio") {
 				const audio = this.managers.audioManager.get(effect.id)
