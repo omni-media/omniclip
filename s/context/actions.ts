@@ -170,7 +170,11 @@ export const historical_actions = actionize_historical({
 	},
 	remove_all_effects: state => () => {
 		state.effects = []
-	}
+	},
+        set_effect_volume: state => ({id}: AudioEffect | VideoEffect, volume: number) => {
+            const effect = state.effects.find(effect => effect.id === id) as AudioEffect | VideoEffect
+            effect.volume = volume;
+        }
 })
 
 export type Actions = HistoricalActions & NonHistoricalActions
