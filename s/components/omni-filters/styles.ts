@@ -8,12 +8,45 @@ export const styles = css`
 	overflow: scroll;
 }
 
+h2 {
+	display: flex;
+
+	& svg {
+		width: 20px;
+	}
+}
+
 .box {
 	display: flex;
 	align-items: flex-start;
 	flex-direction: column;
-	gap: 0.5em;
 	padding: 1em;
+
+	& .dropdown {
+		display: flex;
+		flex-direction: column;
+
+		& .flex {
+			display: flex;
+			align-items: center;
+			margin: 1em 0;
+		}
+	}
+
+	& label {
+		font-size: 0.9em;
+	}
+
+	& select {
+		background: #111;
+		border-radius: 5px;
+		color: gray;
+		padding: 0.3em;
+
+		& option {
+			background: #111;
+		}
+	}
 }
 
 .filters {
@@ -29,17 +62,26 @@ export const styles = css`
 
 	& .filter {
 		display: flex;
-		border-radius: 5px;
+		flex-direction: column;
 		width: 200px;
-		height: 200px;
 		background: black;
+		border-radius: 10px;
 		justify-content: center;
 		align-items: center;
 		cursor: pointer;
 		border: 1px solid #373535;
 
+		& p {
+			padding: 0.2em;
+		}
+
+		& canvas {
+			border-top-right-radius: 10px;
+			border-top-left-radius: 10px;
+		}
+
 		&[data-selected] {
-			border: 2px solid gray;
+			border: 2px solid white;
 		}
 	}
 

@@ -1,5 +1,7 @@
 @import url(../assets/fonts/Nippo/Fonts/WEB/css/nippo.css);
 @import url(../assets/fonts/Poppins/Fonts/WEB/css/poppins.css);
+@import url(../assets/fonts/NotoEmoji/Fonts/WEB/css/noto.css);
+@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Emoji:wght@300..700&display=swap');
 
 * {
 	padding: 0;

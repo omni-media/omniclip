@@ -59,7 +59,7 @@ export class Timeline {
 	*/
 	remove_selected_effect(state: State) {
 		if (state.selected_effect) {
-			this.#effectManager.removeEffect(state.selected_effect)
+			this.#effectManager.removeEffect(state, state.selected_effect)
 		}
 	}
 

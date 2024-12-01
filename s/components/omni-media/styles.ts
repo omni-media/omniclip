@@ -12,7 +12,6 @@ export const styles = css`
 		background: #111;
 		position: fixed;
 		padding: 1em;
-		width: 100%;
 		z-index: 5;
 	}
 

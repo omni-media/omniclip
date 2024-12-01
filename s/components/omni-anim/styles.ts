@@ -8,12 +8,38 @@ export const styles = css`
 		overflow: auto;
 	}
 
+	h2 {
+		display: flex;
+		gap: 0.2em;
+
+		& svg {
+			width: 20px;
+		}
+	}
+
 	.animations {
 		display: flex;
 		gap: 0.5em;
 		padding: 1em;
 		flex-direction: column;
 		align-items: flex-start;
+
+		& .flex {
+			display: flex;
+			align-items: center;
+			margin: 0.5em 0;
+		}
+
+		& select {
+			background: #111;
+			border-radius: 5px;
+			color: gray;
+			padding: 0.3em;
+
+			& option {
+				background: #111;
+			}
+		}
 
 		& .duration-slider {
 			display: flex;
@@ -39,13 +65,13 @@ export const styles = css`
 			gap: 0.5em;
 
 			& button {
-				padding: 1em 2em;
+				padding: 0.5em 1.5em;
 				border-radius: 10px;
-				background: #363636;
+				background: #212121;
 				cursor: pointer;
 
 				&[data-selected] {
-					border: 2px solid gray;
+					border: 1px solid gray;
 				}
 			}
 		}
@@ -56,17 +82,16 @@ export const styles = css`
 			justify-content: center;
 			width: 150px;
 			height: 150px;
-			background: black;
 			cursor: pointer;
 			font-size: 1.5em;
-			border-radius: 5px;
+			border-radius: 10px;
 			margin: 1em;
-			padding: 3em 2em;
 			position: relative;
-			border: 1px solid #373535;
+			border: 1px solid;
 
 			&[data-selected] {
-				border: 2px solid gray;
+				color: white;
+				border: 1px solid white;
 			}
 			
 			&:hover {
