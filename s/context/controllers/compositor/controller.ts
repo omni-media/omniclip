@@ -95,11 +95,11 @@ export class Compositor {
 		this.canvas.clear()
 	}
 
-	clear(state: State) {
+	clear() {
 		this.canvas.clear()
 		this.init_guidelines()
-		this.managers.animationManager.clearAnimations(state)
-		this.managers.transitionManager.clearTransitions(state)
+		this.managers.animationManager.clearAnimations()
+		this.managers.transitionManager.clearTransitions()
 	}
 	
 	#calculate_elapsed_time() {

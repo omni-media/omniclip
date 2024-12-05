@@ -1,6 +1,6 @@
 import {Actions} from "../../../actions.js"
 import {Compositor} from "../controller.js"
-import {AnimationManager, UpdatedProps} from "./animation-manager.js"
+import {AnimationManager} from "./animation-manager.js"
 import {AnyEffect, ImageEffect, State, VideoEffect} from "../../../types.js"
 
 export const transition = ["fade"] as const
@@ -19,15 +19,19 @@ interface Transition {
 	outgoing: TransitionAbleEffect
 }
 
+interface PropsToUpdate {
+	duration: number
+}
+
 export class TransitionManager extends AnimationManager {
 	selected: null | SelectedPair = null
 
 	constructor(private actions: Actions, compositor: Compositor) {
-		super(compositor, "TRANSITIONS")
+		super(compositor)
 	}
 
-	clearTransitions(state: State) {
-		this.clearAnimations(state)
+	clearTransitions() {
+		this.clearAnimations()
 		this.selected = null
 	}
 
@@ -45,6 +49,7 @@ export class TransitionManager extends AnimationManager {
 		}
 		if(!this.isAnyAnimationInSelected(transition.incoming)) {
 			this.actions.set_effect_start_position(transition.incoming, transition.incoming.start_at_position - transition.duration / 2)
+			this.actions.set_effect_start(transition.incoming, transition.incoming.start + transition.duration / 2)
 		}
 		if(!this.isAnyAnimationOutSelected(transition.outgoing)) {
 			this.actions.set_effect_end(transition.outgoing, transition.outgoing.end - transition.duration / 2)
@@ -79,31 +84,32 @@ export class TransitionManager extends AnimationManager {
 		}
 	}
 
-	updateTransition(state: State, propsToUpdate?: UpdatedProps) {
+	async updateTransition(state: State, propsToUpdate?: PropsToUpdate) {
 		if(this.selected && propsToUpdate) {
 			const {incoming, outgoing} = this.selected
 			const newDuration = propsToUpdate.duration * 1000
+			await this.refresh(state, propsToUpdate)
 			this.actions.set_effect_start_position(incoming, incoming.start_at_position - newDuration / 2)
+			this.actions.set_effect_start(incoming, incoming.start + newDuration / 2)
 			this.actions.set_effect_end(outgoing, outgoing.end - newDuration / 2)
-			this.refresh(state, propsToUpdate)
 		}
 	}
 
-	removeSelectedTransistion(state: State) {
+	removeSelectedTransition() {
 		const {outgoing, incoming} = this.selected!
-		this.deselectAnimation(state, incoming, "in", true)
-		this.deselectAnimation(state, outgoing, "out", true)
+		this.deselectAnimation(incoming, "in")
+		this.deselectAnimation(outgoing, "out")
 	}
 
-	removeAllTransitions(effect: AnyEffect, state: State) {
+	removeAllTransitions(effect: AnyEffect) {
 		const animations = this.getAnimations(effect)
-		animations.forEach(a => this.deselectAnimation(state, a.targetEffect, a.type, true))
+		animations.forEach(a => this.deselectAnimation(a.targetEffect, a.type))
 	}
 
-	removeTransition(effect: AnyEffect, kind: "incoming" | "outgoing", state: State) {
+	removeTransition(effect: AnyEffect, kind: "incoming" | "outgoing") {
 		const animation = this.getAnimation(effect, kind === "incoming" ? "in" : "out")
 		if(animation) {
-			this.deselectAnimation(state, animation.targetEffect, kind === "incoming" ? "in" : "out", true)
+			this.deselectAnimation(animation.targetEffect, kind === "incoming" ? "in" : "out")
 		}
 	}
 
@@ -120,15 +126,11 @@ export class TransitionManager extends AnimationManager {
 			stillTouchingIds.add(incoming.id)
 		})
 
-		this.animations.forEach((transition, key) => {
+		this.animations.map(async transition => {
 			if (!stillTouchingIds.has(transition.targetEffect.id)) {
-				this.animations.forEach(animation => {
-					this.deselectAnimation(state, transition.targetEffect, animation.type, true)
-				})
+				await this.deselectAnimation(transition.targetEffect, transition.type)
 			}
 		})
-		
-		this.refresh(state)
 	}
 
 	getTransitions() {

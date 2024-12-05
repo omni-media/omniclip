@@ -53,7 +53,7 @@ export const OmniTransitions = shadow_component(use => {
 			<div
 				?data-selected=${!manager.selected}
 				?disabled=${!selectedImageOrVideoEffect}
-				@click=${() => manager.removeSelectedTransistion(use.context.state)}
+				@click=${() => manager.removeSelectedTransition()}
 				class="transition"
 			>
 				<span class="text">
@@ -71,10 +71,7 @@ export const OmniTransitions = shadow_component(use => {
 				<label for="duration">Duration:</label>
 				<input
 					@input=${(e: InputEvent) => setAnimationDuration(+(e.target as HTMLInputElement).value)}
-					@change=${() => {
-						manager.updateTransition(use.context.state, {duration: animationDuration, kind: "in"})
-						manager.updateTransition(use.context.state, {duration: animationDuration, kind: "out"})
-					}}
+					@change=${() => manager.updateTransition(use.context.state, {duration: animationDuration})}
 					type="range"
 					min="0.5"
 					max=${max}

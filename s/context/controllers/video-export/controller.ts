@@ -66,6 +66,7 @@ export class VideoExport {
 		this.#Encoder.encode_composed_frame(this.compositor.canvas_element, this.#timestamp)
 		this.#timestamp += 1000/this.compositor.timebase
 		this.compositor.managers.animationManager.seek(this.#timestamp)
+		this.compositor.managers.transitionManager.seek(this.#timestamp)
 		this.on_timestamp_change.publish(this.#timestamp)
 		const progress = this.#timestamp / this.#timestamp_end * 100 // for progress bar
 		this.actions.set_export_progress(progress)

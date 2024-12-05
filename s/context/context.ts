@@ -19,6 +19,8 @@ export interface MiniContextOptions {
 	layouts: StockLayouts
 }
 
+let queue = Promise.resolve()
+
 export class OmniContext extends Context {
 	#non_historical_state =  watch.stateTree<NonHistoricalState>(non_historical_state)
 
@@ -31,9 +33,11 @@ export class OmniContext extends Context {
 			this.#save_to_storage(state)
 			this.#updateAnimationTimeline(state)
 		})
-		watch.track(() => this.#core.state.effects, () => {
-			this.controllers.compositor.managers.animationManager.refresh(this.state)
-			this.controllers.compositor.managers.transitionManager.refresh(this.state)
+		watch.track(() => this.#core.state.effects, async () => {
+			queue = queue.then(async () => {
+				await this.controllers.compositor.managers.transitionManager.refresh(this.state)
+				await this.controllers.compositor.managers.animationManager.refresh(this.state)
+			})
 		})
 	}
 
@@ -82,10 +86,10 @@ export class OmniContext extends Context {
 		this.controllers.compositor.update_canvas_objects(state)
 	}
 
-	clear_project(state: State) {
+	clear_project() {
 		this.actions.remove_all_effects()
 		this.actions.remove_tracks()
-		this.controllers.compositor.clear(state)
+		this.controllers.compositor.clear()
 	}
 
 	get history() {

@@ -133,21 +133,21 @@ export class EffectManager {
 			this.#lowerTracksAboveLevel(effect.track, state.effects)
 		}
 
-		this.compositor.managers.animationManager.removeAnimations(effect, state)
+		this.compositor.managers.animationManager.removeAnimations(effect)
 		
 		// removal of transitions related stuff
-		this.compositor.managers.transitionManager.removeAllTransitions(effect, state)
+		this.compositor.managers.transitionManager.removeAllTransitions(effect)
 		const effectAfter = this.#getEffectAfter(effect, state)
 		const effectBefore = this.#getEffectBefore(effect, state)
 
 		if(effectAfter) {
 			// removing transition chained to effect after the removed effect
-			this.compositor.managers.transitionManager.removeTransition(effectAfter, "incoming", state)
+			this.compositor.managers.transitionManager.removeTransition(effectAfter, "incoming")
 		}
 
 		if(effectBefore) {
 			// removing transition chained to effect before the removed effect
-			this.compositor.managers.transitionManager.removeTransition(effectBefore, "outgoing", state)
+			this.compositor.managers.transitionManager.removeTransition(effectBefore, "outgoing")
 		}
 
 		const selected = this.compositor.managers.transitionManager.selected

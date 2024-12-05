@@ -72,7 +72,7 @@ export const OmniAnim = shadow_component(use => {
 				<div
 					?data-selected=${type === "in" ? !manager.isAnyAnimationInSelected(selectedImageOrVideoEffect) : !manager.isAnyAnimationOutSelected(selectedImageOrVideoEffect)}
 					?disabled=${!selectedImageOrVideoEffect}
-					@click=${() => manager.deselectAnimation(use.context.state, selectedImageOrVideoEffect!, type)}
+					@click=${() => manager.removeAnimation(use.context.state, selectedImageOrVideoEffect!, type)}
 					class="animation"
 				>
 					<span class="text">

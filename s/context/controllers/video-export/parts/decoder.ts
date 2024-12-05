@@ -6,7 +6,7 @@ import {Media} from "../../media/controller.js"
 import {demuxer} from "../../../../tools/demuxer.js"
 import {Compositor} from "../../compositor/controller"
 import {AnyEffect, VideoEffect} from "../../../types.js"
-import {get_effects_at_timestamp} from "../utils/get_effects_at_timestamp.js"
+import {sort_effects_by_track} from "../utils/sort_effects_by_track.js"
 
 interface DecodedFrame {
 	frame: VideoFrame
@@ -31,8 +31,8 @@ export class Decoder {
 	}
 
 	async get_and_draw_decoded_frame(effects: AnyEffect[], timestamp: number) {
-		const effects_at_timestamp = get_effects_at_timestamp(effects, timestamp)
-		for(const effect of effects_at_timestamp) {
+		const effects_at_timestamp = this.compositor.get_effects_relative_to_timecode(effects, timestamp)
+		for(const effect of sort_effects_by_track(effects_at_timestamp)) {
 			if(effect.kind === "video") {
 				const {frame, frame_id} = await this.#get_frame_from_video(effect, timestamp)
 				this.compositor.managers.videoManager.draw_decoded_frame(effect, frame)
@@ -83,13 +83,25 @@ export class Decoder {
 				}
 			}
 		})
+
+		const {incoming, outgoing} = this.compositor.managers.transitionManager.getTransitionDuration(effect)
 		const file = await this.media.get_file(effect.file_hash)
-		worker.postMessage({action: "demux", effect: {...effect}, starting_timestamp: timestamp, frames: effect.frames, timebase: this.compositor.timebase})
+		worker.postMessage({
+			action: "demux",
+			effect: {
+				...effect,
+				start: effect.start - incoming,
+				end: effect.end + outgoing
+			},
+			starting_timestamp: timestamp,
+			frames: effect.frames,
+			timebase: this.compositor.timebase
+		})
 		demuxer(
 			file!,
 			this.encoder.encode_worker,
-			effect.start,
-			effect.end === effect.duration ? effect.raw_duration : effect.end,
+			effect.start - incoming,
+			effect.end === effect.duration ? effect.raw_duration : effect.end + outgoing,
 			(config) => worker.postMessage({action: "configure", config}),
 			(chunk) => worker.postMessage({action: "chunk", chunk}),
 		)

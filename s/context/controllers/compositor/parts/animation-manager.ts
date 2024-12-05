@@ -21,7 +21,7 @@ export type AnimationNone = AnimationBase<(typeof animationNone)[number]>
 export type Animation = AnimationIn | AnimationOut
 export type UpdatedProps = {
 	duration: number
-	kind: "in" | "out"
+	kind?: "in" | "out"
 }
 
 export class AnimationManager {
@@ -35,9 +35,9 @@ export class AnimationManager {
 
 	constructor(private compositor: Compositor, private kind?: string) {}
 
-	clearAnimations(state: State) {
+	clearAnimations() {
 		this.#animations = []
-		this.#animations.forEach(a => this.deselectAnimation(state, a.targetEffect, a.type))
+		this.#animations.forEach(a => this.deselectAnimation(a.targetEffect, a.type))
 		this.timeline.clear()
 	}
 
@@ -99,7 +99,7 @@ export class AnimationManager {
 		}
 	}
 
-	refresh(state: State, updatedProps?: UpdatedProps) {
+	async refresh(state: State, updatedProps?: UpdatedProps) {
 		this.timeline.clear()
 		const updated = this.#animations.map((animation) => {
 			const effect = state.effects.find((effect) => effect.id === animation.targetEffect.id) as ImageEffect | VideoEffect | undefined
@@ -109,17 +109,26 @@ export class AnimationManager {
 			}
 		})
 		this.#animations = updated
-		this.#animations.forEach((animation) => {
-			this.deselectAnimation(
-				state,
+		await Promise.all(this.#animations.map(async (animation) => {
+			await this.deselectAnimation(
 				animation.targetEffect,
 				animation.type,
 			)
-			this.selectAnimation(animation.targetEffect, updatedProps ? this.#refreshAnimation(updatedProps, animation) : animation, state)
-		})
+			await this.selectAnimation(
+				animation.targetEffect,
+				updatedProps
+					? this.#refreshAnimation(updatedProps, animation)
+					: animation,
+				state
+			)
+		}))
 	}
 
 	#refreshAnimation({kind, duration}: UpdatedProps, animation: Animation): Animation {
+		if(!kind) {
+			// updating both if no kind
+			return {...animation, duration}
+		}
 		if(animation.type.includes(kind)) {
 			return {...animation, duration}
 		} else return animation
@@ -158,7 +167,7 @@ export class AnimationManager {
 		const isDifferentAnimationSelected = this.#animations.find(a => a.targetEffect.id === effect.id && a.type === animation.type)
 		if(isDifferentAnimationSelected) {
 			// deselect current animation
-			this.deselectAnimation(state, effect, animation.type)
+			await this.deselectAnimation(effect, animation.type)
 			// continue with selecting different animation
 		}
 
@@ -177,13 +186,14 @@ export class AnimationManager {
 				const targetPosition = {left: effect.rect.position_on_canvas.x}
 				const startPosition = {left: effect.rect.position_on_canvas.x - effect.rect.width}
 
-				gsap.set(object, { left: startPosition.left })
 				this.timeline.add(
-					gsap.to(object, {
+					gsap.fromTo(object, {
 						animationName: animation.type,
-						duration: animation.duration,
-						left: targetPosition.left,
+						left: startPosition.left,
 						ease: "linear",
+					}, {
+						left: targetPosition.left,
+						duration: animation.duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					effect.start_at_position / 1000
@@ -195,13 +205,14 @@ export class AnimationManager {
 				const targetPosition = {left: effect.rect.position_on_canvas.x + effect.rect.width}
 				const startPosition = {left: effect.rect.position_on_canvas.x}
 
-				gsap.set(object, { left: startPosition.left })
 				this.timeline.add(
-					gsap.to(object, {
+					gsap.fromTo(object, {
 						animationName: animation.type,
-						duration: animation.duration,
-						left: targetPosition.left,
+						left: startPosition.left,
 						ease: "linear",
+					}, {
+						left: targetPosition.left,
+						duration: animation.duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
@@ -211,12 +222,13 @@ export class AnimationManager {
 			}
 
 			case "fade-in": {
-				gsap.set(object, { opacity: 0 })
 				this.timeline.add(
-					gsap.to(object, {
-						duration: animation.duration,
-						opacity: 1,
+					gsap.fromTo(object, {
+						opacity: 0,
 						ease: "linear",
+					}, {
+						opacity: 1,
+						duration: animation.duration,
 						onUpdate: () => this.compositor.canvas.renderAll()
 					}),
 					(effect.start_at_position - incoming) / 1000
@@ -226,12 +238,13 @@ export class AnimationManager {
 			}
 
 			case "fade-out": {
-				gsap.set(object, { opacity: 1 })
 				this.timeline.add(
-					gsap.to(object, {
-						duration: animation.duration,
-						opacity: 0,
+					gsap.fromTo(object, {
+						opacity: 1,
 						ease: "linear",
+					}, {
+						opacity: 0,
+						duration: animation.duration,
 						onUpdate: () => this.compositor.canvas.renderAll()
 					}),
 					(effect.start_at_position + (effect.end + outgoing - effect.start) - animation.duration * 1000) / 1000
@@ -242,13 +255,14 @@ export class AnimationManager {
 
 			case "spin-in": {
 				object.set({ originX: "center", originY: "center" })
-				gsap.set(object, { angle: -180 })
 				this.timeline.add(
-					gsap.to(object, {
+					gsap.fromTo(object, {
 						animationName: animation.type,
-						duration: animation.duration,
-						angle: 0,
+						angle: -180,
 						ease: "linear",
+					}, {
+						angle: 0,
+						duration: animation.duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					effect.start_at_position / 1000
@@ -259,13 +273,14 @@ export class AnimationManager {
 
 			case "spin-out": {
 				object.set({ originX: "center", originY: "center" })
-				gsap.set(object, { angle: 0 })
 				this.timeline.add(
-					gsap.to(object, {
+					gsap.fromTo(object, {
 						animationName: animation.type,
-						duration: animation.duration,
-						angle: 180,
+						angle: 0,
 						ease: "linear",
+					}, {
+						angle: 180,
+						duration: animation.duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
@@ -277,13 +292,14 @@ export class AnimationManager {
 			case "bounce-in": {
 				const startPosition = { left: -effect.rect.width }
 				const targetPosition = { left: effect.rect.position_on_canvas.x }
-				gsap.set(object, { left: startPosition.left })
 				this.timeline.add(
-					gsap.to(object, {
+					gsap.fromTo(object, {
 						animationName: animation.type,
-						duration: animation.duration,
-						left: targetPosition.left,
+						left: startPosition.left,
 						ease: "bounce.out",
+					}, {
+						left: targetPosition.left,
+						duration: animation.duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					effect.start_at_position / 1000
@@ -295,13 +311,14 @@ export class AnimationManager {
 			case "bounce-out": {
 				const startPosition = { left: effect.rect.position_on_canvas.x }
 				const targetPosition = { left: this.compositor.canvas.width + effect.rect.width }
-				gsap.set(object, { left: startPosition.left })
 				this.timeline.add(
-					gsap.to(object, {
+					gsap.fromTo(object, {
 						animationName: animation.type,
-						duration: animation.duration,
-						left: targetPosition.left,
+						left: startPosition.left,
 						ease: "bounce.in",
+					}, {
+						left: targetPosition.left,
+						duration: animation.duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
@@ -424,15 +441,16 @@ export class AnimationManager {
 					object.top = originalTop + originalHeight / 2
 				}
 
-				gsap.set(object, { scaleX: 0.5, scaleY: 0.5 })
-
 				this.timeline.add(
-					gsap.to(object, {
+					gsap.fromTo(object, {
 						animationName: animation.type,
-						duration: animation.duration,
+						scaleX: 0.5,
+						scaleY: 0.5,
+						ease: "linear",
+					}, {
 						scaleX: 1,
 						scaleY: 1,
-						ease: "linear",
+						duration: animation.duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					effect.start_at_position / 1000
@@ -457,15 +475,16 @@ export class AnimationManager {
 					object.top = originalTop + originalHeight / 2
 				}
 
-				gsap.set(object, { scaleX: 1, scaleY: 1 })
-
 				this.timeline.add(
-					gsap.to(object, {
+					gsap.fromTo(object, {
 						animationName: animation.type,
-						duration: animation.duration,
+						scaleX: 1,
+						scaleY: 1,
+						ease: "linear",
+					}, {
 						scaleX: 0.5,
 						scaleY: 0.5,
-						ease: "linear",
+						duration: animation.duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
@@ -506,30 +525,27 @@ export class AnimationManager {
 		fabric.opacity = 1
 	}
 
-	removeAnimations(effect: AnyEffect, state: State) {
+	removeAnimations(effect: AnyEffect) {
 		const animations = this.getAnimations(effect)
-		animations.map(a => this.deselectAnimation(state, a.targetEffect, a.type))
+		animations.map(a => this.deselectAnimation(a.targetEffect, a.type))
 	}
 
-	deselectAnimation(state: State, effect: ImageEffect | VideoEffect, type: "in" | "out", force?: boolean) {
-		const object = this.#getObject(effect)
-		this.#resetObjectProperties(object!, effect)
-		gsap.killTweensOf(object!)
-		this.#animations = this.#animations.filter((animation) => !(animation.targetEffect.id === effect.id && animation.type === type))
-		object!.filters = object!.filters.filter(f => f.for !== "animation")
-		object!.applyFilters()
-		this.onChange.publish(true)
-		this.compositor.canvas.renderAll()
+	removeAnimation(state: State, effect: ImageEffect | VideoEffect, type: "in" | "out") {
+		this.deselectAnimation(effect, type)
 		this.refresh(state)
+	}
 
-		// hack to force removal of animation, since for some reason its not removed from
-		// deleted effect or effect which no longer have transition
-		if(force) {
-			setTimeout(() => {
-				this.#resetObjectProperties(object!, effect)
-				gsap.killTweensOf(object!)
-				this.compositor.canvas.renderAll()
-			}, 100)
-		}
+	protected deselectAnimation(effect: ImageEffect | VideoEffect, type: "in" | "out") {
+		return new Promise((resolve) => gsap.ticker.add(() => {
+			const object = this.#getObject(effect)
+			this.#resetObjectProperties(object!, effect)
+			gsap.killTweensOf(object!)
+			this.#animations = this.#animations.filter((animation) => !(animation.targetEffect.id === effect.id && animation.type === type))
+			object!.filters = object!.filters.filter(f => f.for !== "animation")
+			object!.applyFilters()
+			this.onChange.publish(true)
+			this.compositor.canvas.renderAll()
+			resolve(true)
+		}, true))
 	}
 }
