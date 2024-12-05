@@ -42,11 +42,8 @@
     "@benev/slate": "^0.1.0-x.14",
     "@ffmpeg/ffmpeg": "^0.12.9",
     "@ffmpeg/util": "^0.12.1",
-<<<<<<< HEAD
     "@floating-ui/dom": "^1.6.12",
-=======
     "@zip.js/zip.js": "^2.7.53",
->>>>>>> 30ff426 (Added 'Import Panel' to import the project from a .zip file containing project.json Added 'Audio Panel' to modify the volume of video and audio files)
     "coi-serviceworker": "^0.1.7",
     "es-module-shims": "^1.8.2",
     "fabric": "^6.0.0-beta20",
