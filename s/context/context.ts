@@ -131,7 +131,7 @@ export class OmniContext extends Context {
 		})
 		this.#check_if_webcodecs_supported()
 		const compositor = new Compositor(this.actions)
-		const media = new Media(this.actions) 
+		const media = new Media()
 		this.controllers = {
 			compositor,
 			media,

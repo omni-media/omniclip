@@ -4,7 +4,6 @@ import type { ReadChunkFunc, VideoTrack, MediaInfo } from 'mediainfo.js'
 //@ts-ignore
 import {mediaInfoFactory} from 'mediainfo.js/dist/esm-bundle/index.min.js'
 
-import {Actions} from "../../actions.js"
 import {Video, VideoFile, AnyMedia, ImageFile, Image, AudioFile, Audio} from "../../../components/omni-media/types.js"
 
 function makeReadChunk(file: File): ReadChunkFunc {
@@ -26,7 +25,7 @@ export class Media extends Map<string, AnyMedia> {
 	#files_ready = false
 	on_media_change = pub<{files: AnyMedia[], action: "removed" | "added" | "placeholder"}>()
 
-	constructor(private actions: Actions) {
+	constructor() {
 		super()
 		this.#get_imported_files()
 		this.#database_request.onerror = (event) => {
@@ -126,10 +125,10 @@ export class Media extends Map<string, AnyMedia> {
 		}
 	}
 
-	async import_file(input: HTMLInputElement) {
+	async import_file(input: HTMLInputElement | File) {
 		this.#files_ready = false
 		this.on_media_change.publish({files: [], action: "placeholder"})
-		const imported_file = input.files?.[0]
+		const imported_file = input instanceof File ? input : input.files?.[0]
 		const video_info = imported_file?.type.startsWith('video')
 			? await mediainfo.analyzeData(
 					imported_file.size,

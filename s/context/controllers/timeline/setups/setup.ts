@@ -17,7 +17,7 @@ export function setup() {
 	const watch = new WatchTower(signals)
 	const timelineTree = watch.stateTree<State>(state)
 	const actions_timeline = ZipAction.actualize(timelineTree, actions)
-	const media = new Media(actions_timeline)
+	const media = new Media()
 	return {
 		timelineTree,
 		timelineController: new Timeline(actions_timeline, media, new Compositor(actions_timeline))

@@ -22,8 +22,37 @@ export const styles = css`
 		flex-wrap: wrap;
 		gap: 1em;
 		justify-content: center;
+		flex-direction: column;
+
+		& h1 {
+			margin: 0;
+			text-align: center;
+		}
+
+		& .flex {
+			display: flex;
+			gap: 1em;
+			align-items: center;
+			justify-content: center;
+			flex-wrap: wrap;
+
+			&:first-child {
+				padding: 4em 1em; 
+			}
+
+			&:nth-of-type(2) {
+				padding: 0 1em 1em 1em;
+			}
+		}
+
 
 		& .new-project {
+			flex-direction: column;
+
+			& span {
+				font-size: 14px;
+			}
+
 			& svg {
 				color: gray;
 			}
@@ -35,7 +64,38 @@ export const styles = css`
 			}
 		}
 
-		& .project, .new-project {
+		& .import-project {
+			flex-direction: column;
+
+			& span {
+				font-size: 14px;
+			}
+
+			& label {
+				display: flex;
+			}
+
+			&:hover {
+				
+				& svg {
+					opacity: 1;
+				}
+			}
+
+			& input {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				cursor: pointer;
+				color: transparent;
+			}
+
+			& input[type=file]::file-selector-button {
+				display: none;
+			}
+		}
+
+		& .project, .new-project, .import-project {
 			height: 200px;
 			width: 200px;
 			position: relative;
@@ -44,12 +104,37 @@ export const styles = css`
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			width: 200px;
-			height: 200px;
 			background: #0e0e0e;
+			text-decoration: none;
+			flex-direction: column;
+			transition: 0.5s all ease;
+			gap: 0.3em;
+
+			& .items {
+				display: flex;
+				align-items: center;
+				justify-content: space-evenly;
+				width: 100%;
+				padding: 0.5em;
+
+				& .export {
+					background: none;
+					border: none;
+					color: gray;
+					cursor: pointer;
+
+					& svg {
+						width: 20px;
+						height: 20px;
+
+						&:hover {
+							opacity: 1;
+						}
+					}
+				}
+			}
 			
 			& .project-name {
-				position: absolute;
 				bottom: 0;
 				right: 0;
 				padding: 0.5em;
@@ -58,12 +143,10 @@ export const styles = css`
 			}
 
 			& .remove {
-				position: absolute;
 				background: none;
 				border: none;
 				top: 0;
 				right: 0;
-				padding: 1em;
 				z-index: 2;
 				color: gray;
 
@@ -98,10 +181,8 @@ export const styles = css`
 
 			& .duration {
 				cursor: default;
-				position: absolute;
 				top: 0;
 				left: 0;
-				padding: 0.7em;
 				z-index: 2;
 			}
 
@@ -109,6 +190,7 @@ export const styles = css`
 				width: 50px;
 				height: 50px;
 				opacity: 0.3;
+				transition: 0.3s ease all;
 			}
 		}
 	}

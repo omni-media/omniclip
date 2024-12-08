@@ -170,3 +170,27 @@ construct-editor {
 --g3-3-y-position: 79.8046875%
 
 }
+
+.toast {
+	position: fixed;
+	bottom: 10px;
+	left: 10px;
+	padding: 10px 20px;
+	border-radius: 5px;
+	color: white;
+	background-color: rgba(0, 0, 0, 0.8);
+	z-index: 1000;
+	animation: fade-in-out 5s ease-in-out;
+	font-family: Poppins-Regular;
+}
+
+.toast.error { background-color: #e74c3c; }
+.toast.warning { background-color: #f39c12; }
+.toast.info { background-color: #2ecc71; }
+
+@keyframes fade-in-out {
+	0% { opacity: 0; }
+	10% { opacity: 1; }
+	90% { opacity: 1; }
+	100% { opacity: 0; }
+}
