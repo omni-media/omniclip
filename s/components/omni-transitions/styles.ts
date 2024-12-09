@@ -11,6 +11,7 @@ export const styles = css`
 	h2 {
 		display: flex;
 		gap: 0.2em;
+		align-items: center;
 
 		& svg {
 			width: 20px;
@@ -23,6 +24,46 @@ export const styles = css`
 		padding: 1em;
 		flex-direction: column;
 		align-items: flex-start;
+
+		& .tutorial {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-direction: column;
+			position: relative;
+
+			& h4 {
+				width: 100%;
+				text-align: left;
+				padding: 0.5em 0;
+				display: flex;
+				gap: 0.5em;
+			}
+
+			& video {
+				max-width: 500px;
+				width: 100%;
+				border-radius: 15px;
+			}
+
+			& button {
+				width: 100%;
+				height: 100%;
+				position: absolute;
+				cursor: pointer;
+				opacity: 0;
+				transition: opacity 0.2s ease;
+
+				& svg {
+					width: 30px;
+					height: 30px;
+				}
+
+				&:hover {
+					opacity: 1;
+				}
+			}
+		}
 
 		& .flex {
 			display: flex;

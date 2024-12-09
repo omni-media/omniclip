@@ -99,6 +99,7 @@ export class TransitionManager extends AnimationManager {
 		const {outgoing, incoming} = this.selected!
 		this.deselectAnimation(incoming, "in")
 		this.deselectAnimation(outgoing, "out")
+		this.selected = null
 	}
 
 	removeAllTransitions(effect: AnyEffect) {
@@ -106,10 +107,12 @@ export class TransitionManager extends AnimationManager {
 		animations.forEach(a => this.deselectAnimation(a.targetEffect, a.type))
 	}
 
-	removeTransition(effect: AnyEffect, kind: "incoming" | "outgoing") {
+	async removeTransition(effect: AnyEffect, kind: "incoming" | "outgoing") {
 		const animation = this.getAnimation(effect, kind === "incoming" ? "in" : "out")
 		if(animation) {
-			this.deselectAnimation(animation.targetEffect, kind === "incoming" ? "in" : "out")
+			if(animation.targetEffect.id === this.selected?.incoming.id ||
+				animation.targetEffect.id === this.selected?.outgoing.id) {this.selected = null}
+			await this.deselectAnimation(animation.targetEffect, kind === "incoming" ? "in" : "out")
 		}
 	}
 
@@ -128,7 +131,7 @@ export class TransitionManager extends AnimationManager {
 
 		this.animations.map(async transition => {
 			if (!stillTouchingIds.has(transition.targetEffect.id)) {
-				await this.deselectAnimation(transition.targetEffect, transition.type)
+				await this.removeTransition(transition.targetEffect, transition.type === "in" ? "incoming" : "outgoing")
 			}
 		})
 	}

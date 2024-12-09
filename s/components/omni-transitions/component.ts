@@ -5,6 +5,9 @@ import transitionSvg from "../../icons/transition.svg.js"
 import {shadow_component} from "../../context/context.js"
 import {StateHandler} from "../../views/state-handler/view.js"
 import {ImageEffect, VideoEffect} from "../../context/types.js"
+import circleInfoSvg from "../../icons/gravity-ui/circle-info.svg.js"
+import circlePlaySvg from "../../icons/gravity-ui/circle-play.svg.js"
+import circlePauseSvg from "../../icons/gravity-ui/circle-pause.svg.js"
 import {normalizeTransitionDuration} from "./utils/normalize-transition-duration.js"
 import {calculateMaxTransitionDuration} from "./utils/calculate-max-transition-duration.js"
 import {SelectedPair, transition} from "../../context/controllers/compositor/parts/transition-manager.js"
@@ -14,6 +17,7 @@ export const OmniTransitions = shadow_component(use => {
 	use.watch(() => use.context.state)
 	const [animationDuration, setAnimationDuration] = use.state(0.52)
 	const manager = use.context.controllers.compositor.managers.transitionManager
+	const [isTutorialPlaying, setTutorialPlaying] = use.state(false)
 
 	use.mount(() => {
 		const dispose = manager.onChange(() => use.rerender())
@@ -84,6 +88,31 @@ export const OmniTransitions = shadow_component(use => {
 			</div>
 		`
 	}
+	
+	const tutorialVideo = use.once(() => {
+		const video = document.createElement("video")
+		video.src = "/assets/transition-tutorial.mp4"
+		video.loop = true
+		return video
+	})
+
+	const renderTutorialVideo = () => {
+		return html`
+			<div class=tutorial>
+				<h4>${circleInfoSvg} How to add transition</h4>
+				${tutorialVideo}
+				<button @click=${() => {
+					if(tutorialVideo.paused) {
+						setTutorialPlaying(true)
+						tutorialVideo.play()
+					} else {
+						setTutorialPlaying(false)
+						tutorialVideo.pause()
+					}
+				}}>${isTutorialPlaying ? circlePauseSvg : circlePlaySvg}</button>
+			</div>
+		`
+	}
 
 	return StateHandler(Op.all(
 		use.context.helpers.ffmpeg.is_loading.value,
@@ -98,7 +127,7 @@ export const OmniTransitions = shadow_component(use => {
 						${renderTransitions()}
 					</div>
 				`
-				: null}
+				: renderTutorialVideo()}
 		</div>
 	`)
 })
