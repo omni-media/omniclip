@@ -5,8 +5,9 @@ export const styles = css`
 		font-size: 0.5em;
 		display: flex;
 		height: 20px;
-		background: #202020;
+		background: rgb(26, 26, 26);
 		align-items: center;
+		border-bottom: 2px solid #111;
 	}
 
 	.indicator {

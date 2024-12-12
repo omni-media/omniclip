@@ -4,6 +4,8 @@ export const styles = css`
 	.track {
 		display: flex;
 		height: 50px;
+		background: rgb(26, 26, 26);
+		outline: 1px #111 solid;
 	}
 
 	.indicators {
