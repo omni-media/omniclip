@@ -23,17 +23,24 @@ export const styles = css`
 		align-items: center;
 		justify-content: space-between;
 
+		& button {
+			cursor: pointer;
+		}
+
 		& .clean {
-			margin-left: 2em;
+			display: flex;
 			color: #f13131;
 		}
 
 		& .flex {
 			display: flex;
-
-			& .split {margin: 0 1em;}
+			align-items: center;
+			gap: 1em;
 
 			& .split, .remove {
+				display: flex;
+				align-items: center;
+
 				& svg {
 					width: 17px;
 				}
@@ -45,16 +52,13 @@ export const styles = css`
 		display: flex;
 		fill: #555454;
 
-		& svg {
-			cursor: default;
+		& button {
+			display: flex;
+			align-items: center;
 		}
 
 		& button[data-past], button[data-future] {
 			fill: #989898;
-
-			& svg {
-				cursor: pointer;
-			}
 		}
 
 	}
@@ -72,14 +76,10 @@ export const styles = css`
 	svg {
 		width: 20px;
 		height: 20px;
-		cursor: pointer;
 	}
 
 	button[disabled] {
 		opacity: 0.5;
-
-		& svg {
-			cursor: default;
-		}
+		cursor: default;
 	}
 `

@@ -3,6 +3,7 @@ import {Op, html, css} from "@benev/slate"
 import {styles} from "./styles.js"
 import {Tooltip} from "../../views/tooltip/view.js"
 import {shadow_component} from "../../context/context.js"
+import {tooltipStyles} from "../../views/tooltip/styles.js"
 import {StateHandler} from "../../views/state-handler/view.js"
 import {ImageEffect, VideoEffect} from "../../context/types.js"
 import circleInfoSvg from "../../icons/gravity-ui/circle-info.svg.js"
@@ -10,7 +11,13 @@ import animationSvg from "../../icons/material-design-icons/animation.svg.js"
 import {animationIn, animationNone, animationOut} from "../../context/controllers/compositor/parts/animation-manager.js"
 
 export const OmniAnim = shadow_component(use => {
-	use.styles(styles)
+	use.styles([styles, tooltipStyles, css`
+		#icon-container {
+			position: relative;
+			top: -25px;
+		}
+	`])
+
 	use.watch(() => use.context.state)
 	const controllers = use.context.controllers
 	const [kind, setKind] = use.state<"in" | "out">("in")
@@ -126,15 +133,10 @@ export const OmniAnim = shadow_component(use => {
 	}
 
 	const renderDropdownInfo = () => {
-		return Tooltip([
+		return Tooltip(
 			circleInfoSvg,
-			html`<p>Select video or image either from dropdown menu here, timeline or scene</p>`,
-			css`
-				:host {
-					position: relative;
-					top: -25px;
-				}`
-		])
+			html`<p>Select video or image either from dropdown menu here, timeline or scene</p>`
+		)
 	}
 
 	return StateHandler(Op.all(

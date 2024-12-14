@@ -4,6 +4,7 @@ import {Op, html, css} from "@benev/slate"
 import {styles} from "./styles.js"
 import {Tooltip} from "../../views/tooltip/view.js"
 import {shadow_component} from "../../context/context.js"
+import {tooltipStyles} from "../../views/tooltip/styles.js"
 import {StateHandler} from "../../views/state-handler/view.js"
 import {ImageEffect, VideoEffect} from "../../context/types.js"
 import circleInfoSvg from "../../icons/gravity-ui/circle-info.svg.js"
@@ -12,7 +13,13 @@ import {FilterType} from "../../context/controllers/compositor/parts/filter-mana
 
 export const OmniFilters = shadow_component(use => {
 	use.watch(() => use.context.state)
-	use.styles(styles)
+	use.styles([styles, tooltipStyles, css`
+		#icon-container {
+			position: relative;
+			top: -25px;
+		}
+	`])
+
 	const controllers = use.context.controllers
 	const filtersManager = controllers.compositor.managers.filtersManager
 	const [filterPreviews, setFilterPreviews, getFilterPreviews] = use.state<{type: FilterType, canvas: HTMLCanvasElement}[]>([])
@@ -52,15 +59,10 @@ export const OmniFilters = shadow_component(use => {
 	}
 
 	const renderDropdownInfo = () => {
-		return Tooltip([
+		return Tooltip(
 			circleInfoSvg,
-			html`<p>Select video or image either from dropdown menu here, timeline or scene</p>`,
-			css`
-				:host {
-					position: relative;
-					top: -25px;
-				}`
-		])
+			html`<p>Select video or image either from dropdown menu here, timeline or scene</p>`
+		)
 	}
 
 	const renderFilters = () => {

@@ -1,20 +1,22 @@
 import {css} from "@benev/slate"
 
-export const styles = css`
+export const tooltipStyles = css`
 	#tooltip {
-		display: none;
+		display: flex;
 		position: fixed;
 		width: max-content;
 		top: 0;
 		left: 0;
-		background: #EEEEEE;
+		background: #0a0a0a;
 		color: gray;
 		z-index: 105;
 		pointer-events: none;
 		max-width: 200px;
 		border-radius: 5px;
-		padding: 0.5em;
+		padding: 0.2em 0.3em;
 		font-size: 12px;
+		opacity: 0;
+		transition: opacity 0.3s ease-in-out;
 	}
 
 	#floating {
@@ -28,10 +30,14 @@ export const styles = css`
 		position: absolute;
 	}
 
-	#button {
+	#icon-container {
 		display: flex;
 		position: relative;
 		z-index: 100;
+
+		& > :first-child {
+			display: flex;
+		}
 
 		& svg {
 			pointer-events: none;

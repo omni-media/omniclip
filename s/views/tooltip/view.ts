@@ -1,8 +1,6 @@
-import {CSSResult, SVGTemplateResult, TemplateResult, html, css} from "@benev/slate"
+import {SVGTemplateResult, TemplateResult, html} from "@benev/slate"
 
-import {styles} from "./styles.js"
-import {shadow_view} from "../../context/context.js"
-
+import {light_view} from "../../context/context.js"
 import type {
 	computePosition as ComputePosition,
 	autoUpdate as AutoUpdate,
@@ -14,14 +12,13 @@ import {
 	autoUpdate as untypedAutoUpdate,
 	hide as untypedHide,
 	autoPlacement as untypedAutoPlacement,
-	arrow
 	//@ts-ignore
 } from "@floating-ui/dom/dist/floating-ui.dom.browser.mjs"
 
 type Stuff = {
-	button: HTMLButtonElement
+	iconContainer: HTMLElement
 	tooltip: HTMLElement
-	cleanup: () => void
+	cleanup: (() => void)[]
 }
 
 const autoPlacement = untypedAutoPlacement as typeof AutoPlacement
@@ -29,62 +26,63 @@ const computePosition = untypedComputePosition as typeof ComputePosition
 const autoUpdate = untypedAutoUpdate as typeof AutoUpdate
 const hide = untypedHide as typeof Hide
 
-export const Tooltip = shadow_view(use => (icon: SVGTemplateResult, content: TemplateResult, hostStyles?: CSSResult) => {
-	use.styles([styles, hostStyles ?? css``])
+export const Tooltip = light_view(use => (icon: SVGTemplateResult | TemplateResult, content: TemplateResult, iconContainerStyles?: string) => {
 	const elements = use.signal<Stuff | null>(null)
 
 	use.defer(() => {
 		if (elements.value)
 				return undefined
-		const button = use.shadow.querySelector('#button') as HTMLButtonElement
-		const tooltip = use.shadow.querySelector('#tooltip') as HTMLElement
-
-		elements.value = {
-			button,
-			tooltip,
-			cleanup: autoUpdate(button, tooltip, () => {
-				computePosition(button, tooltip, {
-						middleware: [hide()],
-						strategy: "fixed",
-						placement: 'top',
-				}).then(({x, y}) => {
-					Object.assign(tooltip.style, {
-						left: `${x}px`,
-						top: `${y}px`,
-					})
-				})
+		const iconContainer = use.element.querySelector('#icon-container')?.firstElementChild as HTMLButtonElement
+		const tooltip = use.element.querySelector('#tooltip') as HTMLElement
+		const compute = () => computePosition(iconContainer, tooltip, {
+				middleware: [hide()],
+				strategy: "fixed",
+				placement: 'top',
+		}).then(({x, y}) => {
+			Object.assign(tooltip.style, {
+				left: `${x}px`,
+				top: `${y}px`,
 			})
+		})
+		const interval = setInterval(() => compute(), 100)
+		elements.value = {
+			iconContainer,
+			tooltip,
+			cleanup: [
+				autoUpdate(iconContainer, tooltip, () => compute()),
+				() =>  clearInterval(interval)
+			]
 		}
 	})
 
 	use.mount(() => () => {
 		if (elements.value)
-			elements.value.cleanup()
+			elements.value.cleanup.forEach(cleanup => cleanup())
 	})
 
 	const showTooltip = () => {
 		if(elements.value) {
-			elements.value.tooltip.style.display = "flex"
+			elements.value.tooltip.style.opacity = "1"
 		}
 	}
 
 	const hideTooltip = () => {
 		if(elements.value) {
-			elements.value.tooltip.style.display = "none"
+			elements.value.tooltip.style.opacity = "0"
 		}
 	}
 
 	return html`
-		<button
+		<div
 			@pointerenter=${showTooltip}
 			@pointerleave=${hideTooltip}
-			id="button"
+			id="icon-container"
+			css=${iconContainerStyles}
 		>
 			${icon}
-		</button>
+		</div>
 		<div id="tooltip">
 			${content}
-			<i></i>
 		</div>
 	`
 })
