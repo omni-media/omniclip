@@ -84,4 +84,16 @@ export class Timeline {
 	split(state: State) {
 		this.#effectManager.splitEffectAtTimestamp(state)
 	}
+
+	copy(state: State) {
+		this.#effectManager.copySelectedEffect(state)
+	}
+
+	paste(state: State) {
+		this.#effectManager.pasteSelectedEffect(state)
+	}
+
+	cut(state: State) {
+		this.#effectManager.cutSelectedEffect(state)
+	}
 }

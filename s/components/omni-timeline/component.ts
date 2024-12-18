@@ -26,6 +26,8 @@ export const OmniTimeline = shadow_component(use => {
 	const playheadDrag = use.context.controllers.timeline.playheadDragHandler
 
 	use.mount(() => {
+		const layout = document.querySelector("construct-editor")?.shadowRoot?.querySelector(".layout") as HTMLElement
+		if(layout) {layout.style.borderRadius = "10px"}
 		window.addEventListener("pointermove", augmented_dragover)
 		return () => removeEventListener("pointermove", augmented_dragover)
 	})

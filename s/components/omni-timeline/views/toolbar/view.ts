@@ -37,7 +37,7 @@ export const Toolbar = shadow_view(use => (timeline: GoldElement) => {
 									?disabled=${use.context.history.past.length === 0}
 									?data-past=${use.context.history.past.length !== 0}
 									@click=${() => {
-										use.context.undo(use.context.state)
+										use.context.undo()
 										use.rerender()
 									}}
 								>
@@ -52,7 +52,7 @@ export const Toolbar = shadow_view(use => (timeline: GoldElement) => {
 									?disabled=${use.context.history.future.length === 0}
 									?data-future=${use.context.history.future.length !== 0}
 									@click=${() => {
-										use.context.redo(use.context.state)
+										use.context.redo()
 										use.rerender()
 									}}
 								>

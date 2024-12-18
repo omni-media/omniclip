@@ -9,6 +9,8 @@ import {get_effects_at_timestamp} from "../../video-export/utils/get_effects_at_
 
 // EffectManager: Manages effect state updates
 export class EffectManager {
+	#copiedEffect: AnyEffect | null = null
+
 	constructor(private actions: Actions, private compositor: Compositor, private media: Media) {}
 
 	setProposedTimecode({grabbed, position}: EffectDrop, proposedTimecode: ProposedTimecode, state: State) {
@@ -137,8 +139,8 @@ export class EffectManager {
 		
 		// removal of transitions related stuff
 		this.compositor.managers.transitionManager.removeAllTransitions(effect)
-		const effectAfter = this.#getEffectAfter(effect, state)
-		const effectBefore = this.#getEffectBefore(effect, state)
+		const effectAfter = this.#getEffectAfter(effect, effect.track, state)
+		const effectBefore = this.#getEffectBefore(effect, effect.track, state)
 
 		if(effectAfter) {
 			// removing transition chained to effect after the removed effect
@@ -160,13 +162,13 @@ export class EffectManager {
 		this.actions.remove_effect(effect)
 	}
 
-	#getEffectAfter(effect: AnyEffect, state: State) {
-		return [...state.effects].sort((a, b) => a.start_at_position - b.start_at_position)
+	#getEffectAfter(effect: AnyEffect, track: number, state: State) {
+		return [...state.effects].filter(e => e.track === track).sort((a, b) => a.start_at_position - b.start_at_position)
 		.find(e => e.start_at_position > effect.start_at_position)
 	}
 
-	#getEffectBefore(effect: AnyEffect, state: State) {
-		return [...state.effects].sort((a, b) => a.start_at_position - b.start_at_position)
+	#getEffectBefore(effect: AnyEffect, track: number, state: State) {
+		return [...state.effects].filter(e => e.track === track).sort((a, b) => a.start_at_position - b.start_at_position)
 		.find(e => e.start_at_position < effect.start_at_position)
 	}
 
@@ -254,5 +256,66 @@ export class EffectManager {
 	#normalizeToTimebase(state: State): number {
 		const frameDuration = 1000 / state.timebase
 		return Math.round(state.timecode / frameDuration) * frameDuration
+	}
+
+	copySelectedEffect(state: State) {
+		this.#copiedEffect = state.selected_effect
+	}
+
+	isEffectOverlapping(effect: AnyEffect, effects: AnyEffect[], track: number): boolean {
+		const effectStart = effect.start_at_position
+		const effectEnd = effect.start_at_position + (effect.end - effect.start)
+
+		// Filter effects on the specified track and exclude the effect being checked
+		const filteredEffects = effects.filter(
+			otherEffect =>
+				otherEffect.track === track && // Same track
+				otherEffect !== effect // Exclude the effect being checked
+		)
+
+		for (const otherEffect of filteredEffects) {
+			const otherEffectStart = otherEffect.start_at_position
+			const otherEffectEnd = otherEffect.start_at_position + (otherEffect.end - otherEffect.start)
+
+			// Check if the two effects overlap
+			if (effectStart < otherEffectEnd && effectEnd > otherEffectStart) {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	pasteSelectedEffect(state: State) {
+		const effect = state.effects.find(e => e.id === this.#copiedEffect?.id) ?? this.#copiedEffect
+		if(effect) {
+			const modified = {
+				...effect,
+				id: generate_id(),
+				start_at_position: this.#normalizeToTimebase(state)
+			} satisfies AnyEffect
+			for(let track = effect.track; track >= 0; track--) {
+				const isOverlapping = this.isEffectOverlapping(modified, state.effects, track)
+				if(isOverlapping && track === 0) {
+					this.actions.add_track()
+					state.effects.forEach(e => this.actions.set_effect_track(e, e.track + 1))
+					modified.track = 0
+					this.#addSplitEffect(modified)
+					break
+				}
+				if(!isOverlapping) {
+					modified.track = track
+					this.#addSplitEffect(modified)
+					break
+				}
+			}
+		}
+	}
+
+	cutSelectedEffect(state: State) {
+		if(state.selected_effect) {
+			this.actions.remove_effect(state.selected_effect)
+		}
+		this.#copiedEffect = state.selected_effect
 	}
 }

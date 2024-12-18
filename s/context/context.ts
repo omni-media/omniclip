@@ -5,6 +5,7 @@ import {store} from "./controllers/store/store.js"
 import {removeLoadingPageIndicator} from "../main.js"
 import {Media} from "./controllers/media/controller.js"
 import {Timeline} from "./controllers/timeline/controller.js"
+import {Shortcuts} from "./controllers/shortcuts/controller.js"
 import {Compositor} from "./controllers/compositor/controller.js"
 import {historical_state, non_historical_state} from "./state.js"
 import {VideoExport} from "./controllers/video-export/controller.js"
@@ -76,14 +77,14 @@ export class OmniContext extends Context {
 		}
 	}
 
-	undo(state: State) {
+	undo() {
 		this.#core.history.undo()
-		this.controllers.compositor.update_canvas_objects(state)
+		this.controllers.compositor.update_canvas_objects(this.state)
 	}
 
-	redo(state: State) {
+	redo() {
 		this.#core.history.redo()
-		this.controllers.compositor.update_canvas_objects(state)
+		this.controllers.compositor.update_canvas_objects(this.state)
 	}
 
 	clear_project() {
@@ -107,6 +108,7 @@ export class OmniContext extends Context {
 		compositor: Compositor
 		media: Media
 		video_export: VideoExport
+		shortcuts: Shortcuts
 	}
 
 	#check_if_webcodecs_supported() {
@@ -137,6 +139,7 @@ export class OmniContext extends Context {
 			media,
 			timeline: new Timeline(this.actions, media, compositor),
 			video_export: new VideoExport(this.actions, compositor, media),
+			shortcuts: new Shortcuts(this, this.actions)
 		}
 		this.#listen_for_state_changes()
 		this.#recreate_project_from_localstorage_state(this.state, this.controllers.media)
