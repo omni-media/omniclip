@@ -9,6 +9,96 @@
 	box-sizing: border-box;
 }
 
+
+/*Video editor surface styles*/
+.editor {
+	padding: 0.5em;
+	height: 100vh;
+}
+
+.editor-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 0.3em 0.3em 0.3em;
+	flex-wrap: wrap;
+	gap: 0.5em;
+
+	& .logo {
+		width: 70px;
+	}
+
+	& .flex {
+		display: flex;
+		align-items: center;
+		gap: 1em;
+	}
+}
+
+.project-name {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	& .box {
+		display: flex;
+		align-items: center;
+		border: 1px solid;
+		padding: 0.2em;
+		border-radius: 5px;
+
+		& .icons {
+			display: flex;
+			cursor: pointer;
+
+			& .check {
+				display: flex;
+				color: green;
+			}
+		}
+
+		& input {
+			background: none;
+			border: none;
+			color: gray;
+
+			&:not(:disabled) {
+				color: white;
+			}
+		}
+
+	}
+}
+
+.export {
+	display: flex;
+	align-items: center;
+	gap: 1em;
+}
+
+.export-button {
+	color: white;
+	background: #1d1c1c;
+	cursor: pointer;
+	border-radius: 5px;
+	padding: 0 0.3em;
+	border: 1px solid white;
+
+	& .text {
+		display: flex;
+		gap: 0.3em;
+		font-family: Poppins-Regular;
+
+		& svg {
+			position: relative;
+			top: 1px;
+			width: 14px;
+		}
+	}
+}
+/*Video editor surface styles end*/
+
+/*Global styles*/
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #333; border-radius: 1em; }
@@ -19,7 +109,7 @@ html, body {
 	min-height: 100%;
 
 	color: gray;
-	background: #1b1b22;
+	background: black;
 }
 
 body {
@@ -27,8 +117,9 @@ body {
 }
 
 construct-editor {
-	width: 100vw;
-	height: 100vh;
+	width: 100%;
+	height: calc(100% - 25px);
+	border-radius: 10px;
 
 	--alpha: yellow;
 	--bravo: lime;

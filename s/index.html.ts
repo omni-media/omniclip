@@ -5,7 +5,7 @@ export default template(async basic => {
 	return easypage({
 		path,
 		css: "index.css",
-		title: "omni-clip",
+		title: "omniclip",
 		head: html`
 			<script src="coi-serviceworker.js"></script>
 			<meta charset="UTF-8">

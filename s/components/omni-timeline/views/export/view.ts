@@ -1,4 +1,4 @@
-import {Op, html, watch} from "@benev/slate"
+import {Op, html, watch, css} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/context.js"
@@ -11,9 +11,8 @@ export const Export = shadow_view(use => () => {
 	use.styles(styles)
 	use.watch(() => use.context.state)
 
-	const compositor = use.context.controllers.compositor
-	const video_export = use.context.controllers.video_export
 	const state = use.context.state
+	const video_export = use.context.controllers.video_export
 	const [logs, setLogs, getLogs] = use.state<string[]>([])
 
 	use.mount(() => {
@@ -26,11 +25,6 @@ export const Export = shadow_view(use => () => {
 		})
 		return () => dispose()
 	})
-
-	const dialog = use.defer(() => use.shadow.querySelector("dialog"))
-	if(use.context.state.is_exporting) {
-		dialog?.showModal()
-	}
 
 	const renderAspectRatio = () => {
 		const aspectRatio = state.settings.aspectRatio
@@ -64,59 +58,6 @@ export const Export = shadow_view(use => () => {
 		use.context.helpers.ffmpeg.is_loading.value,
 		use.context.is_webcodecs_supported.value), () => html`
 		<div class="flex">
-			<dialog @cancel=${(e: Event) => e.preventDefault()}>
-				<div class="box">
-					${state.is_exporting
-						? html`
-							${compositor.canvas.getElement()}
-						`
-						: null}
-					<div class=progress>
-						<div class=stats>
-							<span class=percentage>
-								Progress ${state.export_status === "complete" || state.export_status === "flushing"
-									? "100"
-									: state.export_progress.toFixed(2)}
-								%
-							</span>
-							<span class=status>Status: ${state.export_status}</span>
-						</div>
-						<div class=progress-bar>
-							<div
-								class="bar"
-								style="
-									width: ${state.export_status === "complete" || state.export_status === "flushing"
-										? "100"
-										: state.export_progress.toFixed(2)
-								}%"
-							>
-							</div>
-						</div>
-						<div class=buttons>
-							<button
-								@click=${() => {
-									dialog?.close()
-									video_export.resetExporter(use.context.state)
-								}}
-								class="cancel"
-								?data-complete=${state.export_status === "complete"}
-							>
-								${state.export_status === "complete" ? "Continue editing" : "Cancel Export"}
-							</button>
-							<button
-								@click=${() => video_export.save_file()}
-								class="sparkle-button save-button"
-								.disabled=${state.export_status !== "complete"}
-							>
-								<span  class="spark"></span>
-								<span class="backdrop"></span>
-								${saveSvg}
-								<span class=text>save</span>
-							</button>
-						</div>
-					</div>
-				</div>
-			</dialog>
 			<div class=export>
 				<h2>Export</h2>
 				<p>${circleInfoSvg} Your video will export with the following settings:</p>
@@ -141,4 +82,82 @@ export const Export = shadow_view(use => () => {
 			</div>
 		</div>
 	`)
+})
+
+export const ExportInProgressModal = shadow_view(use => () => {
+	use.styles([styles, css`
+		:host {
+			display: block;
+			width: auto;
+			height: auto;
+			overflow: auto;
+			font-family: sans-serif;
+		}`
+	])
+	use.watch(() => use.context.state)
+
+	const state = use.context.state
+	const compositor = use.context.controllers.compositor
+	const video_export = use.context.controllers.video_export
+
+	const dialog = use.defer(() => use.shadow.querySelector("dialog"))
+	if(use.context.state.is_exporting) {
+		dialog?.showModal()
+	}
+
+	return html`
+		<dialog @cancel=${(e: Event) => e.preventDefault()}>
+			<div class="box">
+				${state.is_exporting
+					? html`
+						${compositor.canvas.getElement()}
+					`
+					: null}
+				<div class=progress>
+					<div class=stats>
+						<span class=percentage>
+							Progress ${state.export_status === "complete" || state.export_status === "flushing"
+								? "100"
+								: state.export_progress.toFixed(2)}
+							%
+						</span>
+						<span class=status>Status: ${state.export_status}</span>
+					</div>
+					<div class=progress-bar>
+						<div
+							class="bar"
+							style="
+								width: ${state.export_status === "complete" || state.export_status === "flushing"
+									? "100"
+									: state.export_progress.toFixed(2)
+							}%"
+						>
+						</div>
+					</div>
+					<div class=buttons>
+						<button
+							@click=${() => {
+								dialog?.close()
+								video_export.resetExporter(use.context.state)
+							}}
+							class="cancel"
+							?data-complete=${state.export_status === "complete"}
+						>
+							${state.export_status === "complete" ? "Continue editing" : "Cancel Export"}
+						</button>
+						<button
+							@click=${() => video_export.save_file()}
+							class="sparkle-button save-button"
+							.disabled=${state.export_status !== "complete"}
+						>
+							<span  class="spark"></span>
+							<span class="backdrop"></span>
+							${saveSvg}
+							<span class=text>save</span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</dialog>
+	`
 })
