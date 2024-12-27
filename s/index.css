@@ -46,6 +46,7 @@
 		border: 1px solid;
 		padding: 0.2em;
 		border-radius: 5px;
+		height: 21px;
 
 		& .icons {
 			display: flex;
@@ -77,6 +78,9 @@
 }
 
 .export-button {
+	display: flex;
+	height: 21px;
+	align-items: center;
 	color: white;
 	background: #1d1c1c;
 	cursor: pointer;
@@ -264,8 +268,8 @@ construct-editor {
 
 .toast {
 	position: fixed;
-	bottom: 10px;
-	left: 10px;
+	bottom: 20px;
+	left: 20px;
 	padding: 10px 20px;
 	border-radius: 5px;
 	color: white;
