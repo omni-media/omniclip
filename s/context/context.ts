@@ -11,6 +11,7 @@ import {historical_state, non_historical_state} from "./state.js"
 import {VideoExport} from "./controllers/video-export/controller.js"
 import {HistoricalState, NonHistoricalState, State} from "./types.js"
 import {historical_actions, non_historical_actions} from "./actions.js"
+import {Collaboration} from "./controllers/collaboration/controller.js"
 import {FFmpegHelper} from "./controllers/video-export/helpers/FFmpegHelper/helper.js"
 import {StockLayouts} from "@benev/construct/x/context/controllers/layout/parts/utils/stock_layouts.js"
 
@@ -23,8 +24,7 @@ export interface MiniContextOptions {
 let queue = Promise.resolve()
 
 export class OmniContext extends Context {
-	#non_historical_state =  watch.stateTree<NonHistoricalState>(non_historical_state)
-
+	#non_historical_state = watch.stateTree<NonHistoricalState>(non_historical_state)
 	#non_historical_actions = ZipAction.actualize(this.#non_historical_state, non_historical_actions)
 
 	#store = store(localStorage)
@@ -109,6 +109,7 @@ export class OmniContext extends Context {
 		media: Media
 		video_export: VideoExport
 		shortcuts: Shortcuts
+		collaboration: Collaboration
 	}
 
 	#check_if_webcodecs_supported() {
@@ -139,7 +140,8 @@ export class OmniContext extends Context {
 			media,
 			timeline: new Timeline(this.actions, media, compositor),
 			video_export: new VideoExport(this.actions, compositor, media),
-			shortcuts: new Shortcuts(this, this.actions)
+			shortcuts: new Shortcuts(this, this.actions),
+			collaboration: new Collaboration(this.actions)
 		}
 		this.#listen_for_state_changes()
 		this.#recreate_project_from_localstorage_state(this.state, this.controllers.media)

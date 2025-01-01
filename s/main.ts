@@ -17,6 +17,7 @@ import {TimelinePanel} from "./components/omni-timeline/panel.js"
 import {LandingPage} from './components/landingpage/component.js'
 import {OmniFilters} from './components/omni-filters/component.js'
 import {OmniManager} from './components/omni-manager/component.js'
+import {CollaborationManager} from './views/collaboration/view.js'
 import {OmniTimeline} from "./components/omni-timeline/component.js"
 import pencilSquareSvg from './icons/gravity-ui/pencil-square.svg.js'
 import {ProjectSettingsPanel} from "./views/project-settings/panel.js"
@@ -93,6 +94,7 @@ const VideoEditor = light_view((use) => () => {
 					</div>
 				</div>
 				<div class="export">
+					${CollaborationManager([])}
 					${ShortcutsManager([])}
 					<button
 						?disabled=${omnislate.context.state.settings.bitrate <= 0}

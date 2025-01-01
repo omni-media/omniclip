@@ -25,6 +25,8 @@
 	gap: 0.5em;
 
 	& .logo {
+		position: relative;
+		top: 1px;
 		width: 70px;
 	}
 
@@ -39,6 +41,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	background: transparent;
+	border-radius: 5px;
 
 	& .box {
 		display: flex;
@@ -46,7 +50,7 @@
 		border: 1px solid;
 		padding: 0.2em;
 		border-radius: 5px;
-		height: 21px;
+		height: 20px;
 
 		& .icons {
 			display: flex;
@@ -62,6 +66,7 @@
 			background: none;
 			border: none;
 			color: gray;
+			font-family: Nippo-Regular;
 
 			&:not(:disabled) {
 				color: white;

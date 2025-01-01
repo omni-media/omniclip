@@ -3,6 +3,7 @@ import {FabricImage} from "fabric/dist/index.mjs"
 
 import {Compositor} from "../controller.js"
 import {Actions} from "../../../actions.js"
+import {omnislate} from "../../../context.js"
 import {VideoEffect, State} from "../../../types.js"
 import {Video} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
@@ -16,6 +17,7 @@ export class VideoManager extends Map<string, FabricImage> {
 	}
 
 	create_and_add_video_effect(video: Video, state: State) {
+		omnislate.context.controllers.collaboration.syncMedia(video)
 		const adjusted_duration_to_timebase = Math.floor(video.duration / (1000/state.timebase)) * (1000/state.timebase) - 200
 		const effect: VideoEffect = {
 			frames: video.frames,

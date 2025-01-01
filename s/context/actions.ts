@@ -2,10 +2,19 @@ import {ZipAction} from "@benev/slate/x/watch/zip/action.js"
 import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 
 import {Helpers} from "./helpers.js"
+import {omnislate} from "./context.js"
+import {withBroadcast} from "../utils/with-broadcast.js"
 import {actionize_historical, actionize_non_historical} from "./../utils/actionize.js"
-import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, EffectRect, VideoEffect, Standard, AspectRatio} from "./types.js"
+import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, EffectRect, VideoEffect, Standard, AspectRatio, State, HistoricalActionsWithBroadcast, NonHistoricalActionsWithBroadcast} from "./types.js"
 
-export const non_historical_actions = actionize_non_historical({
+export const non_historical = actionize_non_historical({
+	set_incoming_non_historical_state_webrtc: state => (historical: State) => {
+		for(const k in state) {
+			const key = k as keyof typeof state
+			//@ts-ignore
+			state[key] = historical[key]
+		}
+	},
 	set_standard: state => (standard: Standard) => {
 		state.settings.standard = standard
 	},
@@ -63,7 +72,17 @@ export const non_historical_actions = actionize_non_historical({
 	}
 })
 
-export const historical_actions = actionize_historical({
+export const historical = actionize_historical({
+	set_incoming_historical_state_webrtc: state => (historical: State) => {
+		for(const k in state) {
+			const key = k as keyof typeof state
+			//@ts-ignore
+			state[key] = historical[key]
+		}
+	},
+	set_effects: state => (effects: AnyEffect[]) => {
+		state.effects = effects
+	},
 	set_project_name: state => (value: string) => {
 		state.projectName = value
 	},
@@ -172,6 +191,26 @@ export const historical_actions = actionize_historical({
 		state.effects = []
 	}
 })
+
+
+// Function to broadcast actions
+const broadcastAction = <T>(actionType: keyof Actions, payload: T) => {
+	omnislate.context.controllers.collaboration.broadcastAction(actionType, payload)
+}
+// Wrapped actions
+export const historical_actions: HistoricalActionsWithBroadcast = Object.entries(
+	historical
+).reduce((acc, [key, action]) => {
+	acc[key as keyof HistoricalActions] = withBroadcast(action, broadcastAction)
+	return acc
+}, {} as any)
+
+export const non_historical_actions: NonHistoricalActionsWithBroadcast = Object.entries(
+	non_historical
+).reduce((acc, [key, action]) => {
+	acc[key as keyof NonHistoricalActions] = withBroadcast(action, broadcastAction)
+	return acc
+}, {} as any)
 
 export type Actions = HistoricalActions & NonHistoricalActions
 type HistoricalActions = ZipAction.Callable<typeof historical_actions>

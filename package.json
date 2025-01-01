@@ -53,6 +53,7 @@
     "mediainfo.js": "^0.3.2",
     "mp4box": "^0.5.2",
     "posthog-js": "^1.141.3",
+    "sparrow-rtc": "^0.2.3",
     "wavesurfer.js": "^7.7.5",
     "web-demuxer": "^1.0.1"
   }

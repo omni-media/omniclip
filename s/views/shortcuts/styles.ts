@@ -1,6 +1,15 @@
 import {css} from "@benev/slate"
 
 export const styles = css`
+:host {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-left: 1px solid gray;
+	border-right: 1px solid gray;
+	width: 50px;
+}
+
 /* General styles for modals */
 .modal {
 	position: absolute;
@@ -24,10 +33,13 @@ export const styles = css`
 }
 
 .open {
+	display: flex;
 	cursor: pointer;
 	padding: 0 0.2em;
 	border: 1px solid gray;
 	border-radius: 5px;
+	height: 21px;
+	align-items: center;
 }
 
 .modal {

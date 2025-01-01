@@ -1,6 +1,7 @@
 import {html} from "lit"
 import {styles} from "./styles.js"
 import {shadow_view} from "../../context/context.js"
+import keyboardSvg from "../../icons/gravity-ui/keyboard.svg.js"
 import {ActionType} from "../../context/controllers/shortcuts/controller.js"
 
 export const ShortcutsManager = shadow_view((use) => () => {
@@ -60,7 +61,7 @@ export const ShortcutsManager = shadow_view((use) => () => {
 	const cancelConflict = () => setConflict(null)
 
 	return html`
-		<span class=open @click=${() => setIsModalOpened(true)}>Shortcuts</span>
+		<span class=open @click=${() => setIsModalOpened(true)}>${keyboardSvg}</span>
 		<div id="shortcut-modal" ?data-hidden=${!isModalOpened} class="modal">
 			<div class="modal-content">
 				<h2>Customize Shortcuts</h2>
