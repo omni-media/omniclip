@@ -192,23 +192,22 @@ export const historical = actionize_historical({
 	}
 })
 
-
-// Function to broadcast actions
-const broadcastAction = <T>(actionType: keyof Actions, payload: T) => {
-	omnislate.context.controllers.collaboration.broadcastAction(actionType, payload)
-}
 // Wrapped actions
 export const historical_actions: HistoricalActionsWithBroadcast = Object.entries(
 	historical
 ).reduce((acc, [key, action]) => {
-	acc[key as keyof HistoricalActions] = withBroadcast(action, broadcastAction)
+	acc[key as keyof HistoricalActions] = withBroadcast(action, (a, p) => {
+		omnislate.context.controllers.collaboration.broadcastAction(a, p)
+	})
 	return acc
 }, {} as any)
 
 export const non_historical_actions: NonHistoricalActionsWithBroadcast = Object.entries(
 	non_historical
 ).reduce((acc, [key, action]) => {
-	acc[key as keyof NonHistoricalActions] = withBroadcast(action, broadcastAction)
+	acc[key as keyof NonHistoricalActions] = withBroadcast(action, (a, p) => {
+		omnislate.context.controllers.collaboration.broadcastAction(a, p)
+	})
 	return acc
 }, {} as any)
 
