@@ -80,6 +80,9 @@ export const historical = actionize_historical({
 			state[key] = historical[key]
 		}
 	},
+	set_project_id: state => (id: string) => {
+		state.projectId = id
+	},
 	set_effects: state => (effects: AnyEffect[]) => {
 		state.effects = effects
 	},
