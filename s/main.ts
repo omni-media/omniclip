@@ -1,5 +1,5 @@
 import posthog from 'posthog-js'
-import {register_to_dom, html} from "@benev/slate"
+import {register_to_dom, html, Nexus} from "@benev/slate"
 import {ConstructEditor, single_panel_layout} from "@benev/construct/x/mini.js"
 
 import {HashRouter} from './tools/hash-router.js'
@@ -8,6 +8,7 @@ import exportSvg from './icons/gravity-ui/export.svg.js'
 import {ShortcutsManager} from './views/shortcuts/view.js'
 import {TextPanel} from "./components/omni-text/panel.js"
 import {AnimPanel} from "./components/omni-anim/panel.js"
+import {omnislate, OmniContext} from "./context/context.js"
 import {MediaPanel} from "./components/omni-media/panel.js"
 import {OmniText} from "./components/omni-text/component.js"
 import {OmniAnim} from "./components/omni-anim/component.js"
@@ -22,7 +23,6 @@ import {OmniTimeline} from "./components/omni-timeline/component.js"
 import pencilSquareSvg from './icons/gravity-ui/pencil-square.svg.js'
 import {ProjectSettingsPanel} from "./views/project-settings/panel.js"
 import {TransitionsPanel} from "./components/omni-transitions/panel.js"
-import {omnislate, OmniContext, light_view} from "./context/context.js"
 import {OmniTransitions} from "./components/omni-transitions/component.js"
 import {ExportPanel} from "./components/omni-timeline/views/export/panel.js"
 import {ExportInProgressModal} from './components/omni-timeline/views/export/view.js'
@@ -55,6 +55,7 @@ export function setupContext(projectId: string) {
 			default: single_panel_layout("TimelinePanel"),
 		},
 	})
+	return omnislate
 }
 
 register_to_dom({OmniManager, LandingPage})
@@ -66,7 +67,7 @@ export function removeLoadingPageIndicator() {
 		document.body.removeChild(loadingPageIndicatorElement!)
 }
 
-const VideoEditor = light_view((use) => () => {
+const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((use) => () => {
 	const [renameDisabled, setRenameDisabled] = use.state(true)
 	const toggleProjectRename = (e: PointerEvent) => {
 		e.preventDefault()
@@ -122,8 +123,8 @@ const router = new HashRouter({
 			register_to_dom({OmniTimeline, OmniText, OmniMedia, OmniAnim, ConstructEditor, OmniFilters, OmniTransitions})
 			registered = true
 		}
-		setupContext(projectId)
-		return html`${VideoEditor()}`
+		const omnislate = setupContext(projectId)
+		return html`${VideoEditor(omnislate)()}`
 	},
 })
 
