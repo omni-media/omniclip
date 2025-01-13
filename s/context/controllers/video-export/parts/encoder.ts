@@ -51,7 +51,7 @@ export class Encoder {
 	}
 
 	configure([width, height]: number[], bitrate: number, timebase: number) {
-		this.encode_worker.postMessage({action: "configure", width, height, bitrate, timebase})
+		this.encode_worker.postMessage({action: "configure", width, height, bitrate, timebase, bitrateMode: "constant"})
 	}
 
 }

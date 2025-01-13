@@ -2,7 +2,7 @@ import {generate_id} from "@benev/slate"
 
 import {Compositor} from "../controller.js"
 import {Actions} from "../../../actions.js"
-import {omnislate} from "../../../context.js"
+import {collaboration} from "../../../context.js"
 import {AudioEffect, State} from "../../../types.js"
 import {Audio} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
@@ -12,7 +12,7 @@ export class AudioManager extends Map<string, HTMLAudioElement> {
 	constructor(private compositor: Compositor, private actions: Actions) {super()}
 
 	create_and_add_audio_effect(audio: Audio, state: State) {
-		omnislate.context.controllers.collaboration.syncMedia(audio)
+		collaboration.broadcastMedia(audio)
 		const duration = audio.element.duration * 1000
 		const adjusted_duration_to_timebase = Math.floor(duration / (1000/state.timebase)) * (1000/state.timebase)
 		const effect: AudioEffect = {

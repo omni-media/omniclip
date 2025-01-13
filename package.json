@@ -52,6 +52,7 @@
     "lit": "^2.6.1",
     "mediainfo.js": "^0.3.2",
     "mp4box": "^0.5.2",
+    "opfs-tools": "^0.7.0",
     "posthog-js": "^1.141.3",
     "sparrow-rtc": "^0.2.3",
     "wavesurfer.js": "^7.7.5",

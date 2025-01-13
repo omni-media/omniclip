@@ -101,7 +101,7 @@ export const Toolbar = shadow_view(use => (timeline: GoldElement) => {
 						html`
 							<button
 								?disabled=${zoom >= 2}
-								@click=${actions.zoom_in}
+								@click=${() => actions.zoom_in(true)}
 								class="zoom-in"
 							>
 								${zoomInSvg}
@@ -112,7 +112,7 @@ export const Toolbar = shadow_view(use => (timeline: GoldElement) => {
 						html`
 							<button
 								?disabled=${zoom <= -13}
-								@click=${actions.zoom_out}
+								@click=${() => actions.zoom_out(true)}
 								class="zoom-out"
 							>
 								${zoomOutSvg}

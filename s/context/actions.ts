@@ -2,7 +2,7 @@ import {ZipAction} from "@benev/slate/x/watch/zip/action.js"
 import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 
 import {Helpers} from "./helpers.js"
-import {omnislate} from "./context.js"
+import {collaboration} from "./context.js"
 import {withBroadcast} from "../utils/with-broadcast.js"
 import {actionize_historical, actionize_non_historical} from "./../utils/actionize.js"
 import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, EffectRect, VideoEffect, Standard, AspectRatio, State, HistoricalActionsWithBroadcast, NonHistoricalActionsWithBroadcast} from "./types.js"
@@ -200,7 +200,7 @@ export const historical_actions: HistoricalActionsWithBroadcast = Object.entries
 	historical
 ).reduce((acc, [key, action]) => {
 	acc[key as keyof HistoricalActions] = withBroadcast(action, (a, p) => {
-		omnislate.context.controllers.collaboration.broadcastAction(a, p)
+		collaboration.broadcastAction(a, p)
 	})
 	return acc
 }, {} as any)
@@ -209,7 +209,7 @@ export const non_historical_actions: NonHistoricalActionsWithBroadcast = Object.
 	non_historical
 ).reduce((acc, [key, action]) => {
 	acc[key as keyof NonHistoricalActions] = withBroadcast(action, (a, p) => {
-		omnislate.context.controllers.collaboration.broadcastAction(a, p)
+		collaboration.broadcastAction(a, p)
 	})
 	return acc
 }, {} as any)

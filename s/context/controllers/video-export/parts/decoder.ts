@@ -88,22 +88,21 @@ export class Decoder {
 		const file = await this.media.get_file(effect.file_hash)
 		worker.postMessage({
 			action: "demux",
-			effect: {
-				...effect,
+			props: {
 				start: effect.start - incoming,
-				end: effect.end + outgoing
+				end: effect.end === effect.duration ? effect.raw_duration : effect.end + outgoing,
+				id: effect.id
 			},
 			starting_timestamp: timestamp,
-			frames: effect.frames,
 			timebase: this.compositor.timebase
 		})
 		demuxer(
 			file!,
 			this.encoder.encode_worker,
-			effect.start - incoming,
-			effect.end === effect.duration ? effect.raw_duration : effect.end + outgoing,
 			(config) => worker.postMessage({action: "configure", config}),
 			(chunk) => worker.postMessage({action: "chunk", chunk}),
+			effect.start - incoming,
+			effect.end === effect.duration ? effect.raw_duration : effect.end + outgoing,
 		)
 		this.decoded_effects.set(effect.id, effect.id)
 	}

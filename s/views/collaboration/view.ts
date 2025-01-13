@@ -20,9 +20,9 @@ export const CollaborationManager = shadow_view((use) => () => {
 	const [inviteID, setInviteID] = use.state("")
 	const [isModalOpened, setIsModalOpened] = use.state(false)
 	const [hostInviteID, setHostInviteID] = use.state("")
-	const [isHost, setIsHost] = use.state(false)
-	const [isClient, setIsClient, getIsClient] = use.state(false)
-	const [numberOfCollaborators, setNumberOfCollaborators] = use.state(0)
+	const [isHost, setIsHost] = use.state(!!collaboration.host)
+	const [isClient, setIsClient, getIsClient] = use.state(!!collaboration.client)
+	const [numberOfCollaborators, setNumberOfCollaborators] = use.state(collaboration.numberOfConnectedUsers)
 	const [allow, setAllow] = use.state(true)
 
 	use.mount(() => {
@@ -37,7 +37,12 @@ export const CollaborationManager = shadow_view((use) => () => {
 				window.location.hash = "#/editor"
 			}
 		})
-		return () => {dispose(); dispose1(); locker()}
+		return () => {
+			dispose(); dispose1(); locker();
+			if(isClient || isHost) {
+				collaboration.disconnect()
+			}
+		}
 	})
 
 	const createRoom = async () => {
@@ -56,10 +61,9 @@ export const CollaborationManager = shadow_view((use) => () => {
 	const joinRoom = async () => {
 		setJoiningOrCreatingInProgress(true)
 		try {
-			const client = await collaboration.joinRoom(inviteID)
+			await collaboration.joinRoom(inviteID)
 			setJoiningOrCreatingInProgress(false)
-			setIsClient(true)
-			window.location.href = `#/editor/${use.context.state.projectId}`
+			window.location.hash = `#/editor/${use.context.state.projectId}` // component will reset
 		} catch(e) {
 			setSessionError(e)
 			setJoiningOrCreatingInProgress(false)

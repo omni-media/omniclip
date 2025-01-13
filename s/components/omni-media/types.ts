@@ -10,6 +10,7 @@ export type AnyMedia = AudioFile | VideoFile | ImageFile
 export interface VideoFile extends MediaFile {
 	kind: "video"
 	frames: number
+	fps: number
 	duration: number
 }
 

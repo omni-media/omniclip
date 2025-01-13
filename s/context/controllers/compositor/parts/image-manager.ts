@@ -3,7 +3,7 @@ import {FabricImage} from "fabric/dist/index.mjs"
 
 import {Compositor} from "../controller.js"
 import {Actions} from "../../../actions.js"
-import {omnislate} from "../../../context.js"
+import {collaboration} from "../../../context.js"
 import {ImageEffect, State} from "../../../types.js"
 import {Image} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
@@ -13,7 +13,7 @@ export class ImageManager extends Map<string, FabricImage> {
 	constructor(private compositor: Compositor, private actions: Actions) {super()}
 
 	async create_and_add_image_effect(image: Image, state: State) {
-		omnislate.context.controllers.collaboration.syncMedia(image)
+		collaboration.broadcastMedia(image)
 		const effect: ImageEffect = {
 			id: generate_id(),
 			kind: "image",

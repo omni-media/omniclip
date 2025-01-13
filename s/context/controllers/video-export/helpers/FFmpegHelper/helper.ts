@@ -12,10 +12,12 @@ export class FFmpegHelper {
 	ffmpeg = new FFmpeg()
 	ffprobe = new FFprobeWorker()
 	is_loading = signals.op<any>()
+	isLoading: Promise<any>
 
 	constructor(actions: Actions) {
-		this.is_loading.load(async() => await this.#load_ffmpeg())
-		this.ffmpeg.on("log", (log) => actions.set_log(log.message))
+		this.isLoading = this.is_loading.load(async() => {
+			await this.#load_ffmpeg()
+		})
 	}
 
 	async #load_ffmpeg() {

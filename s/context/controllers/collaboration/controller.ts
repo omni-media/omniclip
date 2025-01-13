@@ -3,7 +3,9 @@ import Sparrow, {Connection, SparrowHost, SparrowJoin} from "sparrow-rtc"
 
 import {Actions} from "../../actions.js"
 import {omnislate} from "../../context.js"
+import {Compressor} from "./parts/compressor.js"
 import {FileHandler} from "./parts/file-handler.js"
+import {OPFSManager} from "./parts/opfs-manager.js"
 import {showToast} from "../../../utils/show-toast.js"
 import {MessageHandler} from "./parts/message-handler.js"
 import {AnyMedia} from "../../../components/omni-media/types.js"
@@ -18,13 +20,18 @@ export class Collaboration {
 	#messageHandler: MessageHandler
 
 	onNumberOfClientsChange = pub<number>()
+	numberOfConnectedUsers = 0
+
 	onDisconnect = pub()
 	onLock = pub<boolean>()
 
-	constructor(private actions: Actions) {
-		// Initialize file and message handlers
+	compressor = new Compressor(this)
+	opfs: OPFSManager
+
+	constructor() {
 		this.#fileHandler = new FileHandler(this)
-		this.#messageHandler = new MessageHandler(this.actions, this, this.#fileHandler)
+		this.opfs = new OPFSManager(this.#fileHandler)
+		this.#messageHandler = new MessageHandler(this, this.#fileHandler)
 	}
 
 	async createRoom() {
@@ -37,6 +44,7 @@ export class Collaboration {
 				const id = generate_id()
 				this.connectedClients.set(id, connection)
 				this.onNumberOfClientsChange.publish(this.connectedClients.size)
+				this.numberOfConnectedUsers = this.connectedClients.size
 
 				connection.cable.reliable.send(
 					JSON.stringify({initState: omnislate.context.state, type: "init"})
@@ -50,6 +58,7 @@ export class Collaboration {
 				return () => {
 					this.connectedClients.delete(id)
 					this.onNumberOfClientsChange.publish(this.connectedClients.size)
+					this.numberOfConnectedUsers = this.connectedClients.size
 					this.connectedClients.forEach(c => c.cable.reliable.send(JSON.stringify({type: "clients-change", number: this.connectedClients.size})))
 					showToast("One of your collaborators has left the session.", "info")
 				}
@@ -59,6 +68,8 @@ export class Collaboration {
 				showToast("Project session ended. Collaborators are no longer connected.", "info")
 			}
 		})
+		// start compressing all videos on timeline
+		this.compressor.compressAllVideos(omnislate.context.state)
 		this.host = host
 		return host
 	}
@@ -67,6 +78,7 @@ export class Collaboration {
 		const client = await Sparrow.join({
 			invite: inviteId,
 			disconnected: () => {
+				this.numberOfConnectedUsers = 0
 				this.onDisconnect.publish(true)
 				showToast("You’ve been disconnected from host's project.", "info")
 			},
@@ -91,8 +103,8 @@ export class Collaboration {
 		this.#messageHandler.broadcastAction(actionType, payload)
 	}
 
-	syncMedia(media: AnyMedia) {
-		this.#fileHandler.syncMedia(media)
+	broadcastMedia(media: AnyMedia) {
+		this.#fileHandler.broadcastMedia(media)
 	}
 
 	disconnect() {
@@ -103,6 +115,8 @@ export class Collaboration {
 			this.connectedClients.forEach(c => c.disconnect())
 			this.host.close()
 		}
+		this.client = null
+		this.host = null
 	}
 
 	cleanup() {

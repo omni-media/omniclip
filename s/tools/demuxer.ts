@@ -2,11 +2,11 @@ import {WebDemuxer} from "web-demuxer/dist/web-demuxer.js"
 
 export async function demuxer(
 	file: File,
-	worker: Worker,
-	start: number,
-	end: number,
+	encoderWorker: Worker,
 	onConfig: (config: VideoDecoderConfig) => void,
-	onChunk: (chunk: EncodedVideoChunk) => void
+	onChunk: (chunk: EncodedVideoChunk) => void,
+	start?: number,
+	end?: number
 ) {
 	let queue = 0
 	const webdemuxer = new WebDemuxer({
@@ -22,14 +22,16 @@ export async function demuxer(
 		* starts demuxing from keyframe that is too far ahead from effect.start
 		* causing rendering to be stuck because of too few frames,
 		* also ending demuxing one second later just in case too
-		* */
-	const oneSecondOffset = 1000 
-	const reader = webdemuxer.readAVPacket((start - oneSecondOffset) / 1000, (end + oneSecondOffset) / 1000).getReader()
-	worker.addEventListener("message", (msg) => {
+	*/
+	const oneSecondOffset = 1000
+	const reader = webdemuxer.readAVPacket(start ? (start - oneSecondOffset) / 1000 : undefined, end ? (end + oneSecondOffset) / 1000 : undefined).getReader()
+
+	encoderWorker.addEventListener("message", (msg) => {
 		if(msg.data.action === "dequeue") {
 			queue = msg.data.size
 		}
 	})
+
 	reader.read().then(async function processAVPacket({ done, value }): Promise<any> {
 		if (done) {return}
 		const delay = calculateDynamicDelay(queue)
@@ -40,7 +42,7 @@ export async function demuxer(
 	})
 }
 
- function calculateDynamicDelay(queueSize: number) {
+	function calculateDynamicDelay(queueSize: number) {
 		const queueLimit = 500
 		const maxDelay = 100 // Maximum delay in milliseconds
 		const minDelay = 0   // Minimum delay in milliseconds

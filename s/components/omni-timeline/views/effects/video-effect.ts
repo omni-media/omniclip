@@ -6,6 +6,7 @@ import {VideoEffect as XVideoEffect} from "../../../../context/types.js"
 import {Filmstrip} from "../../../../context/controllers/timeline/parts/filmstrip.js"
 
 export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: GoldElement) => {
+	use.watch(() => use.context.state)
 	const media = use.context.controllers.media
 	const compositor = use.context.controllers.compositor
 	const [visibleFilmstripFrames, setVisibleFilmstripFrames, getVisibleFilmstripFrames] = use.state<{url: string, left: number}[]>([])

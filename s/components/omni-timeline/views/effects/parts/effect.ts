@@ -12,7 +12,7 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 	use.styles([style ?? css``, styles])
 	use.watch(() => use.context.state)
 
-	const effect = use.context.state.effects.find(effect => effect.id === any_effect.id)!
+	const effect = use.context.state.effects.find(effect => effect.id === any_effect.id) ?? any_effect
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
 	const zoom = use.context.state.zoom
 	const controller = use.context.controllers.timeline

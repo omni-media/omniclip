@@ -21,6 +21,8 @@ export interface MiniContextOptions {
 	layouts: StockLayouts
 }
 
+// init here to preserve collaboration state for client joining the room (joining refreshes context)
+export const collaboration = new Collaboration()
 let queue = Promise.resolve()
 
 export class OmniContext extends Context {
@@ -141,7 +143,7 @@ export class OmniContext extends Context {
 			timeline: new Timeline(this.actions, media, compositor),
 			video_export: new VideoExport(this.actions, compositor, media),
 			shortcuts: new Shortcuts(this, this.actions),
-			collaboration: new Collaboration(this.actions)
+			collaboration
 		}
 		this.#listen_for_state_changes()
 		this.#recreate_project_from_localstorage_state(this.state, this.controllers.media)

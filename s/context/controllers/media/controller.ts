@@ -1,23 +1,22 @@
 import {pub} from "@benev/slate"
 import {quick_hash} from "@benev/construct"
-import type { ReadChunkFunc, VideoTrack, MediaInfo } from 'mediainfo.js'
+import type {ReadChunkFunc, MediaInfo} from 'mediainfo.js'
 //@ts-ignore
 import {mediaInfoFactory} from 'mediainfo.js/dist/esm-bundle/index.min.js'
 
 import {Video, VideoFile, AnyMedia, ImageFile, Image, AudioFile, Audio} from "../../../components/omni-media/types.js"
 
-function makeReadChunk(file: File): ReadChunkFunc {
+export function makeReadChunk(file: File): ReadChunkFunc {
 	return async (chunkSize: number, offset: number) =>
 		new Uint8Array(await file.slice(offset, offset + chunkSize).arrayBuffer())
 }
 
-async function getMediaInfo() {
+// its best to create new instance of mediainfo every time its used
+export async function getMediaInfo() {
 	return await new mediaInfoFactory({
 		locateFile: () => `${window.location.origin}/assets/MediaInfoModule.wasm` // Path to the wasm file
 	})
 }
-
-const mediainfo = await getMediaInfo() as MediaInfo
 
 export class Media extends Map<string, AnyMedia> {
 	#database_request = window.indexedDB.open("database", 3)
@@ -125,15 +124,49 @@ export class Media extends Map<string, AnyMedia> {
 		}
 	}
 
+	async getVideoFileMetadata(file: File) {
+		const info = await getMediaInfo() as MediaInfo
+		const metadata = await info.analyzeData(
+			file.size,
+			makeReadChunk(file)
+		)
+		const videoTrack = metadata.media?.track.find(track => track["@type"] === "Video")
+		if(videoTrack?.["@type"] === "Video") {
+			const duration = videoTrack.Source_Duration ? videoTrack.Source_Duration * 1000 : videoTrack.Duration! * 1000
+			const frames = Math.round(videoTrack.FrameRate! * (videoTrack.Source_Duration ?? videoTrack.Duration!))
+			const fps = videoTrack.FrameRate!
+			return {fps, duration, frames}
+		} else {
+			throw Error("File is not a video")
+		}
+	}
+
+	// syncing files for collaboration (no permament storing to db)
+	async syncFile(file: File, hash: string) {
+		if(file.type.startsWith("image")) {
+			const media = {file, hash, kind: "image"} satisfies AnyMedia
+			this.set(hash, media)
+			this.on_media_change.publish({files: [media], action: "added"})
+		}
+		else if(file.type.startsWith("video")) {
+			const {frames, duration, fps} = await this.getVideoFileMetadata(file)
+			const media = {file, hash, kind: "video", frames, duration, fps} satisfies AnyMedia
+			this.set(hash, media)
+			this.on_media_change.publish({files: [media], action: "added"})
+		}
+		else if(file.type.startsWith("audio")) {
+			const media = {file, hash, kind: "audio"} satisfies AnyMedia
+			this.set(hash, media)
+			this.on_media_change.publish({files: [media], action: "added"})
+		}
+	}
+
 	async import_file(input: HTMLInputElement | File) {
 		this.#files_ready = false
 		this.on_media_change.publish({files: [], action: "placeholder"})
 		const imported_file = input instanceof File ? input : input.files?.[0]
-		const video_info = imported_file?.type.startsWith('video')
-			? await mediainfo.analyzeData(
-					imported_file.size,
-					makeReadChunk(imported_file)
-				)
+		const metadata = imported_file?.type.startsWith('video')
+			? await this.getVideoFileMetadata(imported_file)
 			: null
 		if(imported_file) {
 			const hash = await quick_hash(imported_file)
@@ -150,10 +183,8 @@ export class Media extends Map<string, AnyMedia> {
 						this.on_media_change.publish({files: [media], action: "added"})
 					}
 					else if(imported_file.type.startsWith("video")) {
-						const track = video_info!.media?.track[0] as VideoTrack
-						const duration = track?.Duration! * 1000
-						const frames = track.FrameCount!
-						const media = {file: imported_file, hash, kind: "video", frames, duration} satisfies AnyMedia
+						const {frames, duration, fps} = metadata!
+						const media = {file: imported_file, hash, kind: "video", frames, duration, fps} satisfies AnyMedia
 						files_store.add(media)
 						this.set(hash, media)
 						this.on_media_change.publish({files: [media], action: "added"})
@@ -211,12 +242,12 @@ export class Media extends Map<string, AnyMedia> {
 
 	async create_video_elements(files: VideoFile[]) {
 		const videos: Video[] = []
-		for(const {file, hash, frames, duration} of files) {
+		for(const {file, hash, frames, duration, fps} of files) {
 			const video = document.createElement('video')
 			video.src = URL.createObjectURL(file)
 			video.load()
 			const url = await this.create_video_thumbnail(video)
-			videos.push({element: video, file, hash, kind: "video", thumbnail: url, frames, duration})
+			videos.push({element: video, file, hash, kind: "video", thumbnail: url, frames, duration, fps})
 		}
 		return videos
 	}

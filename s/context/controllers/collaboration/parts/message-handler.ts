@@ -6,7 +6,7 @@ import {omnislate} from "../../../context.js"
 import {FileHandler} from "./file-handler.js"
 import {Collaboration} from "../controller.js"
 import {showToast} from "../../../../utils/show-toast.js"
-import {AnyMedia} from "../../../../components/omni-media/types.js"
+import {AnyMedia, VideoFile} from "../../../../components/omni-media/types.js"
 
 type ReceivedAction<T extends keyof Actions> = {
 	actionType: T
@@ -29,7 +29,7 @@ type ReceivedMessage = ReceivedFileChunk | ReceivedAction<keyof Actions> | Missi
 	| {type: "init", initState: State} | {type: "newMedia"} | {type: "clients-change", number: number}
 
 export class MessageHandler {
-	constructor(private actions: Actions, private collaboration: Collaboration, private fileHandler: FileHandler) {}
+	constructor(private collaboration: Collaboration, private fileHandler: FileHandler) {}
 
 	handleMessage(connection: Connection, event: MessageEvent<any>) {
 		// Delegate file-related messages to onFileChunk
@@ -38,13 +38,17 @@ export class MessageHandler {
 			64,
 			async (hash, file) => {
 				console.log(`File received: ${hash}`, file)
+				const mediaController = omnislate.context.controllers.media
 				// Broadcast to other clients (if host)
 				if (this.collaboration.host) {
-					omnislate.context.controllers.media.import_file(file)
-					this.fileHandler.syncMedia({file, hash}, connection)
+					await mediaController.syncFile(file, hash)
+					const media = mediaController.get(hash) as VideoFile
+					this.fileHandler.broadcastMedia(media, connection)
 				} else {
 					// Otherwise, just import the file locally for the client
-					omnislate.context.controllers.media.import_file(file)
+					if(this.collaboration.client) {
+						mediaController.syncFile(file, hash)
+					}
 				}
 			},
 			(hash, received, total) => {
@@ -58,18 +62,19 @@ export class MessageHandler {
 			switch (parsed.type) {
 				case "action":
 					//@ts-ignore
-					this.actions[parsed.actionType](...parsed.payload, true)
+					omnislate.context.actions[parsed.actionType](...parsed.payload, true)
 					if(this.collaboration.host) {
-						this.broadcastAction(parsed.actionType, parsed.payload)
+						this.broadcastAction(parsed.actionType, parsed.payload, connection)
 					}
 					break
 				case "init":
 					this.#handleInitMessage(parsed, connection)
 					break
 				case "missing":
-					this.#handleMissingFiles(parsed.missing, connection)
+					this.fileHandler.handleMissingFiles(parsed.missing, connection)
 					break
 				case "clients-change":
+					this.collaboration.numberOfConnectedUsers = parsed.number
 					this.collaboration.onNumberOfClientsChange.publish(parsed.number)
 					break
 				default:
@@ -80,8 +85,8 @@ export class MessageHandler {
 
 	async #handleInitMessage(parsed: { type: "init"; initState: State }, connection: Connection) {
 		// Apply the received state
-		this.actions.set_incoming_historical_state_webrtc(parsed.initState)
-		this.actions.set_incoming_non_historical_state_webrtc(parsed.initState)
+		omnislate.context.actions.set_incoming_historical_state_webrtc(parsed.initState)
+		omnislate.context.actions.set_incoming_non_historical_state_webrtc(parsed.initState)
 
 		showToast(`You're now collaborating on "${parsed.initState.projectName}"`, "info")
 		// Identify missing files
@@ -89,15 +94,6 @@ export class MessageHandler {
 
 		// Request missing files from the host
 		connection.cable.reliable.send(JSON.stringify({ type: "missing", missing }))
-	}
-
-	#handleMissingFiles(missing: string[], connection: Connection) {
-		missing.forEach(async hash => {
-			const media = omnislate.context.controllers.media.get(hash)
-			if (media) {
-				this.fileHandler.sendFile(media.file, media.hash, connection.cable.reliable)
-			}
-		})
 	}
 
 	broadcastAction(actionType: keyof Actions, payload: any, connection?: Connection) {
