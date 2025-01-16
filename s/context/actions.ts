@@ -42,7 +42,7 @@ export const non_historical = actionize_non_historical({
 	toggle_is_playing: state => () => {
 		state.is_playing = !state.is_playing
 	},
-	set_is_exporting: state => (is_exporting) => {
+	set_is_exporting: state => (is_exporting: boolean) => {
 		state.is_exporting = is_exporting
 	},
 	set_export_progress: state => (progress: number) => {
