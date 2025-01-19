@@ -604,6 +604,7 @@ export default css`
 		flex-wrap: wrap;
 		align-items: center;
 		gap: 1em;
+		padding: 0 1em;
 
 		& .api {
 
