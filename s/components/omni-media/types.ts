@@ -12,6 +12,7 @@ export interface VideoFile extends MediaFile {
 	frames: number
 	fps: number
 	duration: number
+	proxy: boolean
 }
 
 export interface AudioFile extends MediaFile {
