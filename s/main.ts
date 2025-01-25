@@ -25,8 +25,8 @@ import {ProjectSettingsPanel} from "./views/project-settings/panel.js"
 import {TransitionsPanel} from "./components/omni-transitions/panel.js"
 import {OmniTransitions} from "./components/omni-transitions/component.js"
 import {ExportPanel} from "./components/omni-timeline/views/export/panel.js"
-import {ExportInProgressModal} from './components/omni-timeline/views/export/view.js'
 import {MediaPlayerPanel} from "./components/omni-timeline/views/media-player/panel.js"
+import {ExportConfirmModal, ExportInProgressModal} from './components/omni-timeline/views/export/view.js'
 
 posthog.init('phc_CMbHMWGVJSqM1RqGyGxWCyqgaSGbGFKl964fIN3NDwU',
 	{
@@ -68,6 +68,7 @@ export function removeLoadingPageIndicator() {
 }
 
 const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((use) => () => {
+	use.watch(() => use.context.state)
 	const [renameDisabled, setRenameDisabled] = use.state(true)
 	const toggleProjectRename = (e: PointerEvent) => {
 		e.preventDefault()
@@ -79,8 +80,11 @@ const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((us
 		use.context.actions.set_project_name(projectName.value)
 	}
 
+	const [showConfirmExportModal, setShowConfirmExportModal] = use.state(false)
+
 	return html`
 		<div class=editor>
+			${ExportConfirmModal([showConfirmExportModal, setShowConfirmExportModal])}
 			${ExportInProgressModal([])}
 			<div class=editor-header>
 				<div class=flex>
@@ -100,7 +104,7 @@ const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((us
 					<button
 						?disabled=${omnislate.context.state.settings.bitrate <= 0}
 						class="export-button"
-						@click=${() => omnislate.context.controllers.video_export.export_start(omnislate.context.state, omnislate.context.state.settings.bitrate)}
+						@click=${() => setShowConfirmExportModal(true)}
 					>
 						<span class="text">${exportSvg}<span>Export</span></span>
 					</button>

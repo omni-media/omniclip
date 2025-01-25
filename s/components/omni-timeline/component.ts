@@ -85,8 +85,10 @@ export const OmniTimeline = shadow_component(use => {
 		}
 	})
 
+	const noEffects = use.context.state.effects.length === 0
+
 	const renderTimelineInfo = () => {
-		return use.context.state.effects.length === 0 ? html`
+		return noEffects ? html`
 			<div class=timeline-info>
 				<h3>Your timeline is empty</h3>
 				<p>Add some media from ${folderSvg} panel to start editing!</p>
@@ -107,7 +109,7 @@ export const OmniTimeline = shadow_component(use => {
 				class=timeline-relative>
 				${renderTimelineInfo()}
 				${Playhead([])}
-				${render_tracks()}
+				${!noEffects ? render_tracks() : null}
 				${render_effects()}
 				${ProposalIndicator()}
 				${TransitionIndicator()}

@@ -64,6 +64,7 @@ export const CollaborationManager = shadow_view((use) => () => {
 			await collaboration.joinRoom(inviteID)
 			setJoiningOrCreatingInProgress(false)
 			window.location.hash = `#/editor/${use.context.state.projectId}` // component will reset
+			setIsClient(true)
 		} catch(e) {
 			setSessionError(e)
 			setJoiningOrCreatingInProgress(false)
