@@ -1,4 +1,4 @@
-import {generate_id, pub} from "@benev/slate"
+import {pub} from "@benev/slate"
 import Sparrow, {Connection, SparrowHost, SparrowJoin} from "sparrow-rtc"
 
 import {Actions} from "../../actions.js"
@@ -22,6 +22,7 @@ export class Collaboration {
 	onNumberOfClientsChange = pub<number>()
 	numberOfConnectedUsers = 0
 
+	onFileProgress = pub<{hash: string, progress: number}>()
 	onDisconnect = pub()
 	onLock = pub<boolean>()
 
@@ -41,8 +42,7 @@ export class Collaboration {
 				console.log(`peer connected: ${connection.id}`)
 				showToast("A collaborator joined your session", "info")
 
-				const id = generate_id()
-				this.connectedClients.set(id, connection)
+				this.connectedClients.set(connection.id, connection)
 				this.onNumberOfClientsChange.publish(this.connectedClients.size)
 				this.numberOfConnectedUsers = this.connectedClients.size
 
@@ -56,7 +56,7 @@ export class Collaboration {
 				)
 
 				return () => {
-					this.connectedClients.delete(id)
+					this.connectedClients.delete(connection.id)
 					this.onNumberOfClientsChange.publish(this.connectedClients.size)
 					this.numberOfConnectedUsers = this.connectedClients.size
 					this.connectedClients.forEach(c => c.cable.reliable.send(JSON.stringify({type: "clients-change", number: this.connectedClients.size})))
@@ -140,4 +140,15 @@ export class Collaboration {
 		}
 	}
 
+	requestOriginalVideoFile(requestedFileHash: string) {
+		this.#fileHandler.requestOriginalVideoFile(requestedFileHash)
+	}
+
+	get filesInProgress() {
+		return this.#fileHandler.filesInProgress
+	}
+
+	get filesMetada() {
+		return this.#fileHandler.filesMetadata
+	}
 }

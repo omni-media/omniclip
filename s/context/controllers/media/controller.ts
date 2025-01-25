@@ -142,7 +142,9 @@ export class Media extends Map<string, AnyMedia> {
 	}
 
 	// syncing files for collaboration (no permament storing to db)
-	async syncFile(file: File, hash: string) {
+	async syncFile(file: File, hash: string, proxy?: boolean) {
+		const alreadyAdded = this.get(hash)
+		if(alreadyAdded && proxy) {return}
 		if(file.type.startsWith("image")) {
 			const media = {file, hash, kind: "image"} satisfies AnyMedia
 			this.set(hash, media)
@@ -150,7 +152,7 @@ export class Media extends Map<string, AnyMedia> {
 		}
 		else if(file.type.startsWith("video")) {
 			const {frames, duration, fps} = await this.getVideoFileMetadata(file)
-			const media = {file, hash, kind: "video", frames, duration, fps} satisfies AnyMedia
+			const media = {file, hash, kind: "video", frames, duration, fps, proxy: proxy ?? false} satisfies AnyMedia
 			this.set(hash, media)
 			this.on_media_change.publish({files: [media], action: "added"})
 		}
@@ -184,7 +186,7 @@ export class Media extends Map<string, AnyMedia> {
 					}
 					else if(imported_file.type.startsWith("video")) {
 						const {frames, duration, fps} = metadata!
-						const media = {file: imported_file, hash, kind: "video", frames, duration, fps} satisfies AnyMedia
+						const media = {file: imported_file, hash, kind: "video", frames, duration, fps, proxy: false} satisfies AnyMedia
 						files_store.add(media)
 						this.set(hash, media)
 						this.on_media_change.publish({files: [media], action: "added"})
@@ -242,12 +244,12 @@ export class Media extends Map<string, AnyMedia> {
 
 	async create_video_elements(files: VideoFile[]) {
 		const videos: Video[] = []
-		for(const {file, hash, frames, duration, fps} of files) {
+		for(const {file, hash, frames, duration, fps, proxy} of files) {
 			const video = document.createElement('video')
 			video.src = URL.createObjectURL(file)
 			video.load()
 			const url = await this.create_video_thumbnail(video)
-			videos.push({element: video, file, hash, kind: "video", thumbnail: url, frames, duration, fps})
+			videos.push({element: video, file, hash, kind: "video", thumbnail: url, frames, duration, fps, proxy})
 		}
 		return videos
 	}

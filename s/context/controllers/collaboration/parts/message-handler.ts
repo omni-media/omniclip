@@ -25,8 +25,13 @@ type MissingFile = {
 	missing: string[] // hashes of missing files
 }
 
+type GetOriginalFile = {
+	type: "get-original-file"
+	hash: string
+}
+
 type ReceivedMessage = ReceivedFileChunk | ReceivedAction<keyof Actions> | MissingFile
-	| {type: "init", initState: State} | {type: "newMedia"} | {type: "clients-change", number: number}
+	| {type: "init", initState: State} | {type: "newMedia"} | {type: "clients-change", number: number} | GetOriginalFile
 
 export class MessageHandler {
 	constructor(private collaboration: Collaboration, private fileHandler: FileHandler) {}
@@ -34,20 +39,22 @@ export class MessageHandler {
 	handleMessage(connection: Connection, event: MessageEvent<any>) {
 		// Delegate file-related messages to onFileChunk
 		this.fileHandler.onFileChunk(
+			connection,
 			event,
 			64,
-			async (hash, file) => {
+			async (hash, file, proxy) => {
 				console.log(`File received: ${hash}`, file)
 				const mediaController = omnislate.context.controllers.media
 				// Broadcast to other clients (if host)
 				if (this.collaboration.host) {
-					await mediaController.syncFile(file, hash)
+					await mediaController.syncFile(file, hash, proxy)
 					const media = mediaController.get(hash) as VideoFile
-					this.fileHandler.broadcastMedia(media, connection)
+					if(proxy)
+						this.fileHandler.broadcastMedia(media, connection, true)
 				} else {
 					// Otherwise, just import the file locally for the client
 					if(this.collaboration.client) {
-						mediaController.syncFile(file, hash)
+						mediaController.syncFile(file, hash, proxy)
 					}
 				}
 			},
@@ -62,7 +69,7 @@ export class MessageHandler {
 			switch (parsed.type) {
 				case "action":
 					//@ts-ignore
-					omnislate.context.actions[parsed.actionType](...parsed.payload, true)
+					omnislate.context.actions[parsed.actionType](...parsed.payload, {omit: true})
 					if(this.collaboration.host) {
 						this.broadcastAction(parsed.actionType, parsed.payload, connection)
 					}
@@ -77,6 +84,10 @@ export class MessageHandler {
 					this.collaboration.numberOfConnectedUsers = parsed.number
 					this.collaboration.onNumberOfClientsChange.publish(parsed.number)
 					break
+				case "get-original-file":
+					const media = omnislate.context.controllers.media.get(parsed.hash)
+					if(media)
+						this.fileHandler.sendFile(media.file, media.hash, connection.cable.reliable, media.file.size)
 				default:
 					console.warn("Unknown message type", parsed.type)
 			}

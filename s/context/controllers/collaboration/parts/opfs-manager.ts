@@ -49,7 +49,7 @@ export class OPFSManager {
 		metadataFileName: string,
 		chunkIndex: number
 	): Promise<Uint8Array> {
-		const metadata = await this.readMetadata(metadataFileName)
+		const metadata = await this.#readMetadata(metadataFileName)
 		const {offset, length} = metadata[chunkIndex]
 		const fileHandle = file(`/${fileName}`)
 		const reader = await fileHandle.createReader()
@@ -58,14 +58,14 @@ export class OPFSManager {
 		return new Uint8Array(arrayBuffer)
 	}
 
-	async readMetadata(metadataFileName: string): Promise<ChunkMetadata[]> {
+	async #readMetadata(metadataFileName: string): Promise<ChunkMetadata[]> {
 		const metadataFile = file(`/${metadataFileName}`)
 		const metadataText = await metadataFile.text()
 		return JSON.parse(metadataText)
 	}
 
 	sendFile(originalFile: File, fileHash: string, frames: number, peer: Connection) {
-		this.fileHandler.sendFileMetadata(peer.cable.reliable, fileHash, originalFile)
+		this.fileHandler.sendFileMetadata(peer.cable.reliable, fileHash, originalFile, true, frames)
 
 		this.#worker.postMessage({
 			filePath: `/compressed/${fileHash}`,
@@ -83,7 +83,7 @@ export class OPFSManager {
 			}
 			if(e.data.action === "finished") {
 				if(e.data.hash === fileHash) {
-					peer.cable.reliable.send(JSON.stringify({done: true, hash: fileHash, filename: originalFile.name, fileType: originalFile.type}))
+					peer.cable.reliable.send(JSON.stringify({done: true, hash: fileHash, filename: originalFile.name, fileType: originalFile.type, proxy: true}))
 					this.fileHandler.markFileAsSynced(fileHash)
 				}
 			}

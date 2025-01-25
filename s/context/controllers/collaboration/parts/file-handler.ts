@@ -7,15 +7,24 @@ import {Collaboration} from "../controller.js"
 import {AnyMedia} from "../../../../components/omni-media/types.js"
 import {BinaryAccumulator} from "../../video-export/tools/BinaryAccumulator/tool.js"
 
-interface FileMetadata {
+export interface FileMetadata {
 	hash: string
-	fileName: string
-	fileType: string
-	fileSize: number
+	name: string
+	type: string
+	size: number
+	total?: number
+	proxy: boolean
 }
 
 export class FileHandler {
-	#fileSizes: {[hash: string]: number} = {}
+	#fileProgress: {[hash: string]: {
+		received: number
+		total: number
+		proxy: boolean
+	}} = {}
+	#fileMetadata: {[hash: string]: FileMetadata} = {}
+
+	receivedFiles: {hash: string, proxy: boolean, receivedFrom: Connection}[] = []
 
 	#syncedHashes: Set<string> = new Set() // Files that are already synced
 	#pendingSync: Set<string> = new Set() // Files currently being sent
@@ -34,13 +43,21 @@ export class FileHandler {
 		this.compressor = new Compressor(collaboration)
 	}
 
+	get filesInProgress() {
+		return Object.entries(this.#fileProgress)
+	}
+
+	get filesMetadata() {
+		return Object.entries(this.#fileMetadata)
+	}
+
 	sendChunk(compressedChunk: Uint8Array, hash: string, dataChannel: RTCDataChannel) {
 		this.#sendChunkWithHash(dataChannel, compressedChunk, hash)
 	}
 
-	sendFile(file: File, hash: string, dataChannel: RTCDataChannel) {
-		this.sendFileMetadata(dataChannel, hash, file)
-		const chunkSize = 16 * 1024 // 16 KB
+	sendFile(file: File, hash: string, dataChannel: RTCDataChannel, total: number) {
+		this.sendFileMetadata(dataChannel, hash, file, false, total)
+		const chunkSize = 8 * 1024 // 16 KB
 		let offset = 0
 
 		const readNextChunk = () => {
@@ -54,7 +71,7 @@ export class FileHandler {
 					readNextChunk()
 				} else {
 					dataChannel.send(
-						JSON.stringify({ done: true, hash, filename: file.name, fileType: file.type })
+						JSON.stringify({ done: true, hash, filename: file.name, fileType: file.type, proxy: false })
 					)
 					this.markFileAsSynced(hash)
 				}
@@ -65,37 +82,35 @@ export class FileHandler {
 		readNextChunk()
 	}
 
+	requestOriginalVideoFile(requestedFileHash: string) {
+		for(const {receivedFrom, hash} of this.receivedFiles) {
+			if(requestedFileHash === hash) {
+				const alive = this.collaboration.connectedClients.get(receivedFrom.id)
+				if(alive) {
+					alive.cable.reliable.send(JSON.stringify({type: "get-original-file", hash}))
+				}
+			}
+		}
+	}
+
 	async onFileChunk(
+		connection: Connection,
 		event: MessageEvent<any>,
 		hashLength: number,
-		onComplete: (hash: string, file: File) => void,
+		onComplete: (hash: string, file: File, proxy?: boolean) => void,
 		onProgress?: (hash: string, receivedBytes: number, totalBytes: number) => void
 	) {
 		if (typeof event.data === "string") {
 			const message = JSON.parse(event.data)
-			if (message.done) {
-				const hash = message.hash
-				if (this.binary_accumulators[hash]) {
-					if(message.fileType.startsWith("video")) {
-						const ffmpeg = omnislate.context.helpers.ffmpeg
-						await ffmpeg.isLoading
-						await ffmpeg.write_composed_data(this.binary_accumulators[hash].binary, `${hash}compressed`)
-						await ffmpeg.ffmpeg.exec([
-							"-i", `${hash}compressed`,
-							"-map", "0:v:0","-c:v" ,"copy", "-y", `${hash}.mp4`
-						])
-						const muxed_file = await ffmpeg.get_muxed_file(`${hash}.mp4`)
-						const file = new File([muxed_file], message.filename, {type: message.fileType})
-						onComplete(hash, file)
-					} else {
-						const file = new File([this.binary_accumulators[hash].binary], message.filename, {type: message.fileType})
-						onComplete(hash, file)
-					}
-					delete this.binary_accumulators[hash]
-					delete this.#fileSizes[hash]
+				
+			if (message.hash && message.total) {
+				const props = message as FileMetadata
+				this.#fileMetadata[message.hash] = props
+				this.#fileProgress[message.hash] = {
+					total: message.total,
+					received: 0,
+					proxy: message.proxy
 				}
-			} else if (message.hash && message.size) {
-				this.#fileSizes[message.hash] = message.size // Save the total size
 			}
 		} else {
 			const {hash, chunk} = this.#receiveChunkWithHash(event, hashLength)
@@ -105,11 +120,49 @@ export class FileHandler {
 			}
 
 			this.binary_accumulators[hash].add_chunk(chunk)
+
 			// Update progress
-			if (onProgress && this.#fileSizes[hash]) {
-				//@ts-ignore
-				// const receivedBytes = this.files[hash].reduce((sum, part) => sum + part.byteLength, 0)
-				// onProgress(hash, receivedBytes, this.#fileSizes[hash])
+			if (onProgress && this.#fileProgress[hash]) {
+				const {proxy, type, name} = this.#fileMetadata[hash]
+				if(proxy) {
+					const total = this.#fileProgress[hash].total
+					this.#fileProgress[hash].received += 1
+					const received = this.#fileProgress[hash].received
+					onProgress(hash, received, total)
+					this.collaboration.onFileProgress.publish({progress: (received / total) * 100, hash})
+					if(received >= total) {
+						delete this.#fileProgress[hash]
+						if(type.startsWith("video")) {
+							const ffmpeg = omnislate.context.helpers.ffmpeg
+							await ffmpeg.isLoading
+							await ffmpeg.write_composed_data(this.binary_accumulators[hash].binary, `${hash}compressed`)
+							await ffmpeg.ffmpeg.exec([
+								"-i", `${hash}compressed`,
+								"-map", "0:v:0","-c:v" ,"copy", "-y", `${hash}.mp4`
+							])
+							const muxed_file = await ffmpeg.get_muxed_file(`${hash}.mp4`)
+							const file = new File([muxed_file], name, {type})
+							this.receivedFiles.push({hash, proxy, receivedFrom: connection})
+							onComplete(hash, file, proxy)
+							delete this.binary_accumulators[hash]
+							delete this.#fileMetadata[hash]
+						}
+					}
+				} else {
+					const total = this.#fileProgress[hash].total
+					this.#fileProgress[hash].received = this.binary_accumulators[hash].size
+					const received = this.#fileProgress[hash].received
+					onProgress(hash, this.binary_accumulators[hash].size, total)
+					this.collaboration.onFileProgress.publish({progress: (this.binary_accumulators[hash].size / total) * 100, hash})
+					if(received >= total) {
+						const file = new File([this.binary_accumulators[hash].binary], name, {type})
+						this.receivedFiles.push({hash, proxy, receivedFrom: connection})
+						onComplete(hash, file, proxy)
+						delete this.binary_accumulators[hash]
+						delete this.#fileMetadata[hash]
+						delete this.#fileProgress[hash]
+					}
+				}
 			}
 		}
 	}
@@ -135,8 +188,8 @@ export class FileHandler {
 		return { hash, chunk }
 	}
 
-	sendFileMetadata(dataChannel: RTCDataChannel, hash: string, file: File) {
-		const metadata = {hash, size: file.size, filename: file.name, mimeType: file.type}
+	sendFileMetadata(dataChannel: RTCDataChannel, hash: string, file: File, proxy: boolean, total?: number) {
+		const metadata: FileMetadata = {hash, size: file.size, name: file.name, type: file.type, total, proxy}
 		dataChannel.send(JSON.stringify(metadata))
 	}
 
@@ -183,14 +236,14 @@ export class FileHandler {
 				if(media.kind === "video") {
 					this.collaboration.opfs.sendFile(media.file, hash, media.frames, connection)
 				} else {
-					this.sendFile(media.file, media.hash, connection.cable.reliable)
+					this.sendFile(media.file, media.hash, connection.cable.reliable, media.file.size)
 				}
 				this.#markFileAsPendingSync(media.hash)
 			}
 		})
 	}
 
-	broadcastMedia(media: AnyMedia, connection?: Connection) {
+	broadcastMedia(media: AnyMedia, connection?: Connection, proxy?: boolean) {
 		if(!this.collaboration.host && !this.collaboration.client)
 			return
 
@@ -201,11 +254,12 @@ export class FileHandler {
 
 		this.#markFileAsPendingSync(media.hash)
 		
-		this.compressor.compressVideo(media.file, {
-			onChunk: (chunk) => {
-				this.collaboration.opfs.writeChunk(media.hash, chunk)
-			}
-		})
+		if(media.kind === "video" && !proxy)
+			this.compressor.compressVideo(media.file, {
+				onChunk: (chunk) => {
+					this.collaboration.opfs.writeChunk(media.hash, chunk)
+				}
+			})
 
 		if (this.collaboration.host) {
 			this.collaboration.connectedClients.forEach(client => {
@@ -213,7 +267,7 @@ export class FileHandler {
 					if(media.kind === "video") {
 						this.collaboration.opfs.sendFile(media.file, media.hash, media.frames, client)
 					} else {
-						this.sendFile(media.file, media.hash, client.cable.reliable)
+						this.sendFile(media.file, media.hash, client.cable.reliable, media.file.size)
 					}
 				}
 			})
@@ -221,7 +275,7 @@ export class FileHandler {
 			if(media.kind === "video") {
 				this.collaboration.opfs.sendFile(media.file, media.hash, media.frames, this.collaboration.client.connection)
 			} else {
-				this.sendFile(media.file, media.hash, this.collaboration.client.connection.cable.reliable)
+				this.sendFile(media.file, media.hash, this.collaboration.client.connection.cable.reliable, media.file.size)
 			}
 		}
 	}
