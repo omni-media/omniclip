@@ -1,4 +1,5 @@
 import {historical, non_historical} from "./actions.js"
+import {BroadcastOptions} from "../utils/with-broadcast.js"
 
 // export interface OmniStateHistorical {
 // 	timeline: HistoricalState
@@ -169,8 +170,8 @@ export interface AddTrackIndicator {
 export type Status = "render" | "decode" | "demux" | "fetch"
 
 // Utility type to adjust action types for broadcasting
-type WithBroadcast<T> = T extends (...args: infer P) => (...omitBroadcast: infer I) => infer R
-	? (...args: P) => (...omitBroadcast: [...I, boolean?]) => R
+type WithBroadcast<T> = T extends (...args: infer P) => (...innerArgs: infer I) => infer R
+	? (...args: P) => (...innerArgs: [...I, BroadcastOptions?]) => R
 	: never
 
 // Apply WithBroadcast to all actions

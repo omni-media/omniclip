@@ -38,7 +38,7 @@ export class VideoExport {
 		this.#timestamp_end = 0
 		this.#Decoder.reset()
 		this.#Encoder.reset()
-		this.actions.set_is_exporting(false)
+		this.actions.set_is_exporting(false, {omit: true})
 		this.actions.set_export_status("composing")
 		this.compositor.reset()
 		state.effects.forEach(effect => {
@@ -54,7 +54,7 @@ export class VideoExport {
 		const sorted_effects = this.#sort_effects_by_track(state.effects)
 		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position + (effect.end - effect.start)))
 		this.#export_process(sorted_effects, state.timebase)
-		this.actions.set_is_exporting(true)
+		this.actions.set_is_exporting(true, {omit: true})
 		this.compositor.reset()
 	}
 
@@ -69,7 +69,7 @@ export class VideoExport {
 		this.compositor.managers.transitionManager.seek(this.#timestamp)
 		this.on_timestamp_change.publish(this.#timestamp)
 		const progress = this.#timestamp / this.#timestamp_end * 100 // for progress bar
-		this.actions.set_export_progress(progress)
+		this.actions.set_export_progress(progress, {omit: true})
 
 		if(Math.ceil(this.#timestamp) >= this.#timestamp_end) {
 			this.#Encoder.export_process_end(effects, timebase)

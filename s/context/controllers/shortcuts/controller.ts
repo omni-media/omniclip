@@ -180,7 +180,7 @@ export class Shortcuts {
 			case "Previous frame":
 				return (state) => {
 					this.controllers.compositor.set_video_playing(false)
-					this.actions.set_timecode(state.timecode - 1000 / state.timebase, true)
+					this.actions.set_timecode(state.timecode - 1000 / state.timebase, {omit: true})
 					this.controllers.compositor.seek(state.timecode - 1000 / state.timebase, true).then(() =>
 						this.controllers.compositor.compose_effects(state.effects, state.timecode)
 					)
@@ -188,7 +188,7 @@ export class Shortcuts {
 			case "Next frame":
 				return (state) => {
 					this.controllers.compositor.set_video_playing(false)
-					this.actions.set_timecode(state.timecode + 1000 / state.timebase, true)
+					this.actions.set_timecode(state.timecode + 1000 / state.timebase, {omit: true})
 					this.controllers.compositor.seek(state.timecode + 1000 / state.timebase, true).then(() =>
 						this.controllers.compositor.compose_effects(state.effects, state.timecode)
 					)

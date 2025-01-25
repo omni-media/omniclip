@@ -18,7 +18,7 @@ export const Playhead = shadow_view(use => () => {
 	const translate_to_timecode = (x: number) => {
 		const zoom = use.context.state.zoom
 		const milliseconds = x * Math.pow(2, -zoom)
-		use.context.actions.set_timecode(milliseconds, true)
+		use.context.actions.set_timecode(milliseconds, {omit: true})
 	}
 
 	const events = {
