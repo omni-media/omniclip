@@ -307,3 +307,139 @@ export const styles = css`
 		}
 	}
 `
+
+export const confirmModalStyles = css`
+	dialog {
+		align-self: center;
+		justify-self: center;
+		font-family: Poppins-Regular;
+		padding: 0.5em;
+		background: #111;
+		max-width: 350px;
+		color: gray;
+		border: 1px solid gray;
+		border-radius: 5px;
+
+		&::backdrop {
+			backdrop-filter: blur(5px);
+		}
+	}
+
+	h4 {
+		margin: 0;
+	}
+
+	p {
+		margin: 0.5em 0;
+		font-size: 0.8em;
+	}
+
+	.flex {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.proxies {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2em;
+		color: black;
+		margin-top: 0.2em;
+		padding-left: 0.3em;
+		font-family: Nippo-Regular;
+		font-size: 0.8em;
+		max-width: 300px;
+
+		& .proxy {
+			display: flex;
+			border: 1px solid gray;
+			padding: 0.2em;
+			border-radius: 5px;
+			background: ghostwhite;
+
+			& img {
+				border-radius: 5px;
+				width: 80px;
+				aspect-ratio: 16/9;
+			}
+
+			& span {
+				padding: 0.2em;
+				align-self: center;
+				font-size: 0.8em;
+				overflow: auto;
+			}
+		}
+	}
+
+	.close-modal {
+		cursor: pointer;
+	}
+
+	.options {
+		margin: 0 1em;
+		font-size: 0.9em;
+
+		& .option {
+			display: flex;
+			align-items: center;
+			gap: 0.3em;
+
+			& .export-button {
+				margin-top: 0;
+				scale: 0.9;
+			}
+		}
+	}
+
+	.request {
+		border: 1px solid gray;
+		padding: 0 0.5em;
+		background: yellow;
+		cursor: pointer;
+		width: 100px;
+	}
+
+	.export-button {
+		display: flex;
+		height: 21px;
+		align-items: center;
+		color: white;
+		background: #1d1c1c;
+		cursor: pointer;
+		border-radius: 5px;
+		padding: 0 0.3em;
+		border: 1px solid white;
+		margin-top: 0.5em;
+		justify-self: end;
+
+		& .text {
+			display: flex;
+			gap: 0.3em;
+			font-family: Poppins-Regular;
+
+			& svg {
+				position: relative;
+				top: 1px;
+				width: 14px;
+			}
+		}
+	}
+
+	.in-progress {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2em;
+	}
+
+	.file-progress {
+		display: flex;
+		flex-direction: column;
+		background: ghostwhite;
+		padding: 0.2em;
+		border-radius: 5px;
+		color: black;
+		font-size: 0.8em;
+		font-family: Nippo-Regular;
+	}
+`

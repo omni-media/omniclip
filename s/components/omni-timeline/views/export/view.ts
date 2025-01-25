@@ -1,10 +1,12 @@
 import {Op, html, watch, css} from "@benev/slate"
 
-import {styles} from "./styles.js"
-import {shadow_view} from "../../../../context/context.js"
+import {confirmModalStyles, styles} from "./styles.js"
+import {VideoEffect} from "../../../../context/types.js"
 import saveSvg from "../../../../icons/gravity-ui/save.svg.js"
+import xMarkSvg from "../../../../icons/gravity-ui/x-mark.svg.js"
 import exportSvg from "../../../../icons/gravity-ui/export.svg.js"
 import {StateHandler} from "../../../../views/state-handler/view.js"
+import {collaboration, shadow_view} from "../../../../context/context.js"
 import circleInfoSvg from "../../../../icons/gravity-ui/circle-info.svg.js"
 
 export const Export = shadow_view(use => () => {
@@ -157,6 +159,137 @@ export const ExportInProgressModal = shadow_view(use => () => {
 						</button>
 					</div>
 				</div>
+			</div>
+		</dialog>
+	`
+})
+
+export const ExportConfirmModal = shadow_view(use => (showModal: boolean, setShowModal: (v: boolean) => void) => {
+	use.watch(() => use.context.state)
+	use.styles([confirmModalStyles])
+	const mediaController = use.context.controllers.media
+	const [_, setFilesProgess, getFileProgress] = use.state<Map<string, number>>(new Map())
+
+	// get proxy videos on timeline
+	const getProxies = () => {
+		const files = [...mediaController.values()]
+		return files.filter(file => file.kind === "video" && file.proxy && use.context.state.effects.some(e => e.kind === "video" && e.file_hash === file.hash))
+	}
+
+	use.mount(() => {
+		const dispose = mediaController.on_media_change(() => use.rerender())
+		const dispose1 = collaboration.onFileProgress(({hash, progress}) => {
+			setFilesProgess(new Map(getFileProgress()).set(hash, progress))
+		})
+		return () => {dispose(); dispose1()}
+	})
+
+	const dialog = use.defer(() => use.shadow.querySelector("dialog"))
+	if(showModal) {
+		dialog?.showModal()
+	} else {
+		dialog?.close()
+	}
+
+	const getProxyPreview = (hash: string) => {
+		return (use.context.state.effects.find(e => e.kind === "video" && e.file_hash === hash) as VideoEffect).thumbnail
+	}
+
+	const getFileMetadata = (hash: string) => {
+		return collaboration.filesMetada.find(([fileHash]) => hash === fileHash)?.[1]
+	}
+
+	const renderProxyFilesInProgressModal = () => {
+		return html`
+			<div>
+				<div class=flex>
+					<h4>Export Unavailable</h4>
+					<button @click=${() => setShowModal(false)} class="close-modal">${xMarkSvg}</button>
+				</div>
+				<p>We're still transferring the following files to you.<br>
+					Please wait until all transfers are complete before exporting the project.
+				</p>
+				<div class=in-progress>
+				<h5>Pending files:</h5>
+					${getProxyFilesInProgress.map(([hash, file]) => html`
+						<div class=file-progress>
+							<span>${getFileMetadata(hash)?.name}</span>
+							<span>Progress: ${((file.received/file.total) * 100).toFixed()}%</span>
+						</div>
+					`)}
+				</div>
+			</div>
+		`
+	}
+
+	const renderProjectReadyModal = () => {
+		return html`
+			<div class=flex>
+				<h4>Your project is ready</h4>
+				<button @click=${() => setShowModal(false)} class="close-modal">${xMarkSvg}</button>
+			</div>
+			<p>All files have been transferred without proxies.<br>
+				You can now export your project in the highest quality.
+			</p>
+			<button
+				class="export-button"
+				@click=${() => use.context.controllers.video_export.export_start(use.context.state, use.context.state.settings.bitrate)}
+			>
+				Export
+			</button>
+		`
+	}
+
+	const renderRequestOriginalFilesModal = () => {
+		return html`
+			<div class=flex>
+				<h4>Proxy Videos Detected</h4>
+				<button @click=${() => setShowModal(false)} class="close-modal">${xMarkSvg}</button>
+			</div>
+			<p>To ensure faster transfers within collaborative environment, some of your videos are proxies (same resolution, lower bitrate):</p>
+			<h4>Export options:</h4>
+			<ol class=options>
+				<li>
+					<div class=option>
+						<span>Export with proxies</span>
+						<button
+							class="export-button"
+							@click=${() => {
+								setShowModal(false)
+								use.context.controllers.video_export.export_start(use.context.state, use.context.state.settings.bitrate)
+							}}
+						>
+							Export
+						</button>
+					</div>
+				</li>
+				<li>Request original videos:</li>
+			</ol>
+			<div class=proxies>
+				${getProxies().map(proxy => html`
+					<div class=proxy>
+						<img src=${getProxyPreview(proxy.hash)}>
+						<span>${proxy?.file.name}</span>
+						<button class="request" @click=${() => collaboration.requestOriginalVideoFile(proxy!.hash)}>
+							${getFileProgress().get(proxy.hash) === 100 ? "Request" : `${getFileProgress().get(proxy.hash)?.toFixed()}%`}
+						</button>
+					</div>
+				`)}
+			</div>
+		`
+	}
+
+	const getProxyFilesInProgress = collaboration.filesInProgress.filter(([_, file]) => file.proxy === true)
+
+	return html`
+		<dialog>
+			<div>
+			${getProxyFilesInProgress.length !== 0
+				? renderProxyFilesInProgressModal()
+				: getProxies().length !== 0
+					? renderRequestOriginalFilesModal()
+					: renderProjectReadyModal()
+			}
 			</div>
 		</dialog>
 	`
