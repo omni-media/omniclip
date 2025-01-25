@@ -82,6 +82,12 @@ export const styles = css`
 		height: 50px;
 		overflow: hidden;
 
+		& .not-found {
+			background: repeating-linear-gradient(45deg, #5D5D5D, #5D5D5D 10px, #858585 10px, #858585 20px);
+			position: absolute;
+			height: 100%;
+		}
+
 		&[data-grabbed] {
 			z-index: 2;
 			opacity: 0.5;
@@ -100,6 +106,38 @@ export const styles = css`
 			height: 100%;
 			border-radius: 5px;
 			box-shadow: inset 0px 0px 6px 2px black;
+		}
+
+		& .no-file {
+			margin: 0.2em;
+			color: white;
+			text-shadow: 0px 0px 5px black;
+		}
+
+		& .proxy {
+			position: absolute;
+			z-index: 10;
+			top: 0;
+
+			& svg {
+				color: linear-gradient(180deg, #ffd275 0%, #f3b737 100%);
+			}
+		}
+
+		& .progress {
+			position: absolute;
+			background: linear-gradient(180deg, #ffd275 0%, #f3b737 100%);
+			width: 100%;
+			bottom: 0;
+		}
+
+		& .progress-float {
+			position: relative;
+			z-index: 10;
+			text-shadow: 0px 0px 5px black;
+			color: white;
+			font-family: Nippo-Regular;
+			margin: 0.2em;
 		}
 
 		&:hover {

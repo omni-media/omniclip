@@ -3,9 +3,10 @@ import {CSSResultGroup, TemplateResult, html, css, GoldElement} from "@benev/sla
 import {styles} from "./styles.js"
 import {V2} from "../../../utils/coordinates_in_rect.js"
 import {AnyEffect, At} from "../../../../../context/types.js"
-import {shadow_view} from "../../../../../context/context.js"
+import {collaboration, shadow_view} from "../../../../../context/context.js"
 import {calculate_effect_width} from "../../../utils/calculate_effect_width.js"
 import {calculate_start_position} from "../../../utils/calculate_start_position.js"
+import lowQualitySvg from "../../../../../icons/material-design-icons/low-quality.svg.js"
 import {calculate_effect_track_placement} from "../../../utils/calculate_effect_track_placement.js"
 
 export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: AnyEffect, content: TemplateResult, style?: CSSResultGroup, inline_css?: string) => {
@@ -26,6 +27,10 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 		startAtPosition: null,
 		end: null
 	})
+
+	// collaboration
+	const [fileProgress, setFileProgress] = use.state(0)
+	const [isFileProxy, setIsProxy] = use.state(false)
 
 	use.mount(() => handler.onDrop(({effectId}) => {
 		if(effectId === effect.id) {
@@ -49,17 +54,28 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 	}))
 
 	use.mount(() => {
+		const dispose1 = collaboration.onFileProgress(({hash, progress}) => {
+			if(any_effect.kind !== "text") {
+				if(hash === any_effect.file_hash) {
+					setFileProgress(progress)
+				}
+			}
+		})
 		const dispose = media_controller.on_media_change(({files, action}) => {
 			if(action === "added") {
-				for(const {hash} of files) {
-					if(any_effect.kind !== "text" && hash === any_effect.file_hash)
+				for(const media of files) {
+					if(any_effect.kind !== "text" && media.hash === any_effect.file_hash) {
 						setFileNotFound(false)
+						if(media.kind === "video") {
+							setIsProxy(media.proxy)
+						}
+					}
 				}
 			}
 		})
 		const set_scroll = () => setTimelineScrollLeft(timeline.scrollLeft)
 		timeline.addEventListener("scroll", set_scroll)
-		return () => {removeEventListener("scroll", set_scroll); dispose()}
+		return () => {removeEventListener("scroll", set_scroll); dispose(); dispose1()}
 	})
 
 	use.once(async () => {
@@ -165,6 +181,8 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 		`
 	}
 
+	const effectLeft = timelineScrollLeft - (x ?? calculate_start_position(effect.start_at_position, zoom))
+
 	return html`
 		${renderPreview()}
 		<span
@@ -183,8 +201,31 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 			@pointerdown=${drag_events.start}
 		>
 			${fileNotFound
-				? html`<span style="width: 100%; transform: translateX(${timelineScrollLeft}px)">File Not Found: ${effect.kind !== "text" ? effect.name : null}</span>`
-				: null
+				? html`
+					<span
+						class="not-found"
+						style="
+							width: 100%;
+							transform: translateX(${effectLeft < 0 ? 0 : effectLeft}px);
+						"
+					>
+						${fileProgress
+							? html`
+									<div class="progress-float">Progress: ${fileProgress.toFixed(0)}%</div>
+									<div style="height: ${fileProgress.toFixed(0)}%;" class="progress"></div>
+								`
+							: html`<span class=no-file>File Not Found: ${effect.kind !== "text" ? effect.name : null}</span>`
+						}
+					</span>`
+				: isFileProxy
+					? html`
+						<span
+							class="proxy"
+							style="transform: translateX(${effectLeft < 0 ? 0 : effectLeft}px);"
+						>
+							${lowQualitySvg}
+						</span>`
+					: null
 			}
 			<span class="content" style="transform: translateX(${-effect.start * Math.pow(2, use.context.state.zoom)}px)">${content}</span>
 		</span>
