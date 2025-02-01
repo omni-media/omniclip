@@ -4,8 +4,10 @@ import {generate_id} from "@benev/slate/x/tools/generate_id.js"
 import {Helpers} from "./helpers.js"
 import {collaboration} from "./context.js"
 import {withBroadcast} from "../utils/with-broadcast.js"
+import {Filter, FilterType} from "./controllers/compositor/parts/filter-manager.js"
 import {actionize_historical, actionize_non_historical} from "./../utils/actionize.js"
 import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, EffectRect, VideoEffect, Standard, AspectRatio, State, HistoricalActionsWithBroadcast, NonHistoricalActionsWithBroadcast} from "./types.js"
+import {Animation, AnimationFor} from "./controllers/compositor/parts/animation-manager.js"
 
 export const non_historical = actionize_non_historical({
 	set_incoming_non_historical_state_webrtc: state => (historical: State) => {
@@ -73,6 +75,29 @@ export const non_historical = actionize_non_historical({
 })
 
 export const historical = actionize_historical({
+	clear_animations: state => () => {
+		state.animations = []
+	},
+	set_animation_duration: state => (duration: number, {id}: VideoEffect | ImageEffect) => {
+		const effect = state.animations.find(a => a.targetEffect.id === id)
+		if(effect)
+			effect.duration = duration
+	},
+	set_animations: state => (animations: Animation[]) => {
+		state.animations = animations
+	},
+	add_animation: state => (animation: Animation, animationFor: AnimationFor) => {
+		state.animations.push(animation)
+	},
+	remove_animation: state => (effect: VideoEffect | ImageEffect, type: "in" | "out", animationFor: AnimationFor) => {
+		state.animations = state.animations.filter((animation) => !(animation.targetEffect.id === effect.id && animation.type === type))
+	},
+	remove_filter: state => (effect: ImageEffect | VideoEffect, type: FilterType) => {
+		state.filters.filter(filter => !(filter.targetEffectId === effect.id && filter.type === type))
+	},
+	add_filter: state => (filter: Filter) => {
+		state.filters.push(filter)
+	},
 	set_incoming_historical_state_webrtc: state => (historical: State) => {
 		for(const k in state) {
 			const key = k as keyof typeof state
