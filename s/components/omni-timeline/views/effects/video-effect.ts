@@ -35,8 +35,15 @@ export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: G
 				for(const {hash} of files) {
 					const is_effect_already_composed = compositor.managers.videoManager.get(effect.id)
 					if(hash === effect.file_hash && !is_effect_already_composed) {
+						const filter = use.context.state.filters.find(f => f.targetEffectId === effect.id)
 						await filmstrip.on_file_found()
-						compositor.recreate([effect], media)
+						compositor.recreate({
+							...use.context.state,
+							effects: [effect],
+							filters: filter
+								? [filter]
+								: []
+						}, media)
 						recalculate_filmstrip_frames(true)
 					}
 				}

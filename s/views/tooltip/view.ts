@@ -5,7 +5,8 @@ import type {
 	computePosition as ComputePosition,
 	autoUpdate as AutoUpdate,
 	hide as Hide,
-	autoPlacement as AutoPlacement
+	autoPlacement as AutoPlacement,
+	Placement
 } from "@floating-ui/dom"
 import {
 	computePosition as untypedComputePosition,
@@ -26,7 +27,7 @@ const computePosition = untypedComputePosition as typeof ComputePosition
 const autoUpdate = untypedAutoUpdate as typeof AutoUpdate
 const hide = untypedHide as typeof Hide
 
-export const Tooltip = light_view(use => (icon: SVGTemplateResult | TemplateResult, content: TemplateResult, iconContainerStyles?: string) => {
+export const Tooltip = light_view(use => (icon: SVGTemplateResult | TemplateResult, content: TemplateResult, iconContainerStyles?: string, placement?: Placement) => {
 	const elements = use.signal<Stuff | null>(null)
 
 	use.defer(() => {
@@ -37,7 +38,7 @@ export const Tooltip = light_view(use => (icon: SVGTemplateResult | TemplateResu
 		const compute = () => computePosition(iconContainer, tooltip, {
 				middleware: [hide()],
 				strategy: "fixed",
-				placement: 'top',
+				placement: placement ?? 'top',
 		}).then(({x, y}) => {
 			Object.assign(tooltip.style, {
 				left: `${x}px`,
@@ -77,7 +78,7 @@ export const Tooltip = light_view(use => (icon: SVGTemplateResult | TemplateResu
 			@pointerenter=${showTooltip}
 			@pointerleave=${hideTooltip}
 			id="icon-container"
-			css=${iconContainerStyles}
+			styles=${iconContainerStyles}
 		>
 			${icon}
 		</div>

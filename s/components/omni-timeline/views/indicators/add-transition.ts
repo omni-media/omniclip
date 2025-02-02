@@ -8,6 +8,7 @@ import {TransitionAbleEffect} from "../../../../context/controllers/compositor/p
 import {normalizeTransitionDuration} from "../../../omni-transitions/utils/normalize-transition-duration.js"
 
 export const TransitionIndicator = light_view(use => () => {
+	use.watch(() => use.context.state)
 	const state = use.context.state
 	const transitionManager = use.context.controllers.compositor.managers.transitionManager
 	const touchingPairs = transitionManager.findTouchingClips(state.effects)
@@ -38,12 +39,18 @@ export const TransitionIndicator = light_view(use => () => {
 			const selected = transitionManager.selected
 			const isTransition = transitionManager.getTransition(incoming) && transitionManager.getTransition(outgoing)
 			const isSelected = outgoing.id === selected?.outgoing.id && incoming.id === selected?.incoming.id
+			const transitionDuration = transitionManager.getTransitionDuration(incoming).incoming * 2
 
 			return html`
 				<div
 					@click=${() => transitionManager
-						.selectTransition({incoming, outgoing, duration: normalizeTransitionDuration(520, 1000 / state.timebase), animation: "fade"})
-						.apply(use.context.state)}
+						.selectTransition({
+							incoming,
+							outgoing,
+							duration: normalizeTransitionDuration(transitionDuration <= 0 ? 520 : transitionDuration, 1000 / state.timebase),
+							animation: "fade"
+						}).apply(use.context.state)
+					}
 					?data-transition=${isTransition}
 					?data-selected=${isSelected}
 					class="transition-indicator"

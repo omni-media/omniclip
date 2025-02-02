@@ -2,6 +2,7 @@ import {pub} from "@benev/slate"
 import {FabricImage, filters} from "fabric"
 
 import {Compositor} from "../controller.js"
+import {Actions} from "../../../actions.js"
 import {AnyEffect, ImageEffect, VideoEffect} from "../../../types.js"
 
 export const IgnoredFilters = ["BaseFilter", "Resize", "RemoveColor", "Gamma", "Convolute", "ColorMatrix", "BlendImage", "BlendColor", "Composed"]
@@ -22,7 +23,7 @@ export class FiltersManager {
 	#filters: Filter[] = []
 	onChange = pub()
 
-	constructor(private compositor: Compositor) {}
+	constructor(private compositor: Compositor, private actions: Actions) {}
 
 	selectedFilterForEffect(effect: AnyEffect | null, filterType: FilterType) {
 		if(!effect) return
@@ -45,25 +46,28 @@ export class FiltersManager {
 	addFilterToEffect(
 		effect: ImageEffect | VideoEffect,
 		type: FilterType,
+		recreate?: boolean
 	) {
 		const filter = new filters[type]() as filters.BaseFilter
 		filter.for = "filter"
-		const object = this.#getObject(effect)!
+		const object = this.#getObject(effect)
+		if(!object) {return}
 		const alreadyHasThisFilter = object.filters.find(filter => filter.type === type && filter.for === "filter")
 		if(alreadyHasThisFilter) {
-			this.removeFilterFromEffect(effect, type)
+			this.removeFilterFromEffect(effect, type, recreate)
 		} else {
-			//@ts-ignore
 			object.filters.push(filter)
 			object.applyFilters()
 			this.#filters.push({targetEffectId: effect.id, type})
+			if(!recreate) {this.actions.add_filter({targetEffectId: effect.id, type})}
 			this.compositor.canvas.renderAll()
 		}
 		this.onChange.publish(true)
 	}
 
-	removeFilterFromEffect(effect: ImageEffect | VideoEffect, type: FilterType) {
+	removeFilterFromEffect(effect: ImageEffect | VideoEffect, type: FilterType, recreate?: boolean) {
 		const object = this.#getObject(effect)!
+		if(!recreate) {this.actions.remove_filter(effect, type)}
 		this.#filters = this.#filters.filter(filter => !(filter.targetEffectId === effect.id && filter.type === type))
 		object.filters = object.filters.filter(filter => !(filter.type === type && filter.for === "filter"))
 		object.applyFilters()
@@ -82,8 +86,8 @@ export class FiltersManager {
 	}
 
 	onseek(effect: VideoEffect | ImageEffect) {
-		const object = this.#getObject(effect)! as FabricImage
-		if(object.filters.length > 0) {
+		const object = this.#getObject(effect) as FabricImage
+		if(object && object.filters?.length > 0) {
 			object.removeTexture(object.cacheKey)
 			object.removeTexture(object.cacheKey + "_filtered")
 			object.applyFilters()

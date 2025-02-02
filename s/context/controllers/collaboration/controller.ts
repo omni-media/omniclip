@@ -25,9 +25,13 @@ export class Collaboration {
 	onFileProgress = pub<{hash: string, progress: number}>()
 	onDisconnect = pub()
 	onLock = pub<boolean>()
+	onChange = pub()
 
 	compressor = new Compressor(this)
 	opfs: OPFSManager
+
+	isJoining = false
+	initiatingProject = false
 
 	constructor() {
 		this.#fileHandler = new FileHandler(this)
@@ -54,6 +58,7 @@ export class Collaboration {
 					this.#messageHandler,
 					connection
 				)
+				this.onChange.publish(true)
 
 				return () => {
 					this.connectedClients.delete(connection.id)
@@ -61,26 +66,32 @@ export class Collaboration {
 					this.numberOfConnectedUsers = this.connectedClients.size
 					this.connectedClients.forEach(c => c.cable.reliable.send(JSON.stringify({type: "clients-change", number: this.connectedClients.size})))
 					showToast("One of your collaborators has left the session.", "info")
+					this.onChange.publish(true)
 				}
 			},
 			closed: () => {
 				this.onDisconnect.publish(true)
 				showToast("Project session ended. Collaborators are no longer connected.", "info")
+				this.onChange.publish(true)
 			}
 		})
 		// start compressing all videos on timeline
 		this.compressor.compressAllVideos(omnislate.context.state)
 		this.host = host
+		this.onChange.publish(true)
 		return host
 	}
 
 	async joinRoom(inviteId: string) {
+		this.isJoining = true
+		this.initiatingProject = true
 		const client = await Sparrow.join({
 			invite: inviteId,
 			disconnected: () => {
 				this.numberOfConnectedUsers = 0
 				this.onDisconnect.publish(true)
 				showToast("You’ve been disconnected from host's project.", "info")
+				this.onChange.publish(true)
 			},
 			welcome: prospect => connection => {
 				connection.cable.reliable.onmessage =
@@ -88,6 +99,7 @@ export class Collaboration {
 					this.#messageHandler,
 					connection
 				)
+				this.onChange.publish(true)
 				return () => {}
 			},
 		})
@@ -96,6 +108,8 @@ export class Collaboration {
 			this.#messageHandler,
 			client.connection
 		)
+		this.isJoining = false
+		this.onChange.publish(true)
 		return client
 	}
 
@@ -108,12 +122,16 @@ export class Collaboration {
 	}
 
 	disconnect() {
-		if(this.client) {
-			this.client.connection.disconnect()
-			this.client.close()
-		} else if(this.host) {
-			this.connectedClients.forEach(c => c.disconnect())
-			this.host.close()
+		try {
+			if(this.client) {
+				this.client.connection.disconnect()
+				this.client.close()
+			} else if(this.host) {
+				this.connectedClients.forEach(c => c.disconnect())
+				this.host.close()
+			}
+		} catch(e) {
+			console.log(e)
 		}
 		this.client = null
 		this.host = null

@@ -3,6 +3,8 @@ import {pub} from "@benev/slate"
 import {FabricObject, Rect, filters} from "fabric"
 
 import {Compositor} from "../controller.js"
+import {Actions} from "../../../actions.js"
+import {omnislate} from "../../../context.js"
 import {AnyEffect, ImageEffect, State, VideoEffect} from "../../../types.js"
 import {calculateProjectDuration} from "../../../../utils/calculate-project-duration.js"
 
@@ -11,6 +13,7 @@ interface AnimationBase<T = AnimationIn | AnimationOut> {
 	name: T
 	type: "in" | "out"
 	duration: number
+	for: AnimationFor
 }
 export const animationNone = "none" as const
 export const animationIn = ["slide-in", "fade-in", "spin-in", "bounce-in", "wipe-in", "blur-in", "zoom-in"] as const
@@ -23,7 +26,7 @@ export type UpdatedProps = {
 	duration: number
 	kind?: "in" | "out"
 }
-
+export type AnimationFor = "Animation" | "Transition"
 export class AnimationManager {
 	timeline = gsap.timeline({
 		duration: 10, // GSAP uses seconds instead of milliseconds
@@ -33,10 +36,11 @@ export class AnimationManager {
 	#animations: Animation[] = []
 	onChange = pub()
 
-	constructor(private compositor: Compositor, private kind?: string) {}
+	constructor(private compositor: Compositor, protected actions: Actions, protected animationFor: AnimationFor) {}
 
 	clearAnimations() {
 		this.#animations = []
+		this.actions.clear_animations()
 		this.#animations.forEach(a => this.deselectAnimation(a.targetEffect, a.type))
 		this.timeline.clear()
 	}
@@ -50,15 +54,15 @@ export class AnimationManager {
 	}
 
 	protected getAnimations(effect: AnyEffect) {
-		return this.#animations.filter(a => a.targetEffect.id === effect.id)
+		return omnislate.context.state.animations.filter(a => a.targetEffect.id === effect.id)
 	}
 
 	protected getAnimation(effect: AnyEffect, kind: "in" | "out") {
-		return this.#animations.find(a => a.targetEffect.id === effect.id && a.type === kind)
+		return omnislate.context.state.animations.find(a => a.targetEffect.id === effect.id && a.type === kind)
 	}
 
 	protected getAnyAnimation(effect: AnyEffect) {
-		return this.#animations.find(a => a.targetEffect.id === effect.id)
+		return omnislate.context.state.animations.find(a => a.targetEffect.id === effect.id)
 	}
 
 	selectedAnimationForEffect(effect: AnyEffect | null, animation: Animation) {
@@ -99,7 +103,7 @@ export class AnimationManager {
 		}
 	}
 
-	async refresh(state: State, updatedProps?: UpdatedProps) {
+	async refresh(state: State, updatedProps?: UpdatedProps, omitBroadcast?: boolean) {
 		this.timeline.clear()
 		const updated = this.#animations.map((animation) => {
 			const effect = state.effects.find((effect) => effect.id === animation.targetEffect.id) as ImageEffect | VideoEffect | undefined
@@ -112,16 +116,43 @@ export class AnimationManager {
 		await Promise.all(this.#animations.map(async (animation) => {
 			await this.deselectAnimation(
 				animation.targetEffect,
-				animation.type,
+				animation.type, omitBroadcast !== undefined ? omitBroadcast : true
 			)
 			await this.selectAnimation(
 				animation.targetEffect,
 				updatedProps
 					? this.#refreshAnimation(updatedProps, animation)
 					: animation,
-				state
+				state, omitBroadcast !== undefined ? omitBroadcast : true
 			)
 		}))
+	}
+
+	async refreshOne(state: State, {id}: VideoEffect | ImageEffect, updatedProps: UpdatedProps, kind: "in" | "out", omitBroadcast?: boolean) {
+		this.timeline.clear()
+		const animation = this.#animations.find(a => a.targetEffect.id === id && a.type === kind)
+		const effect = state.effects.find((effect) => effect.id === animation?.targetEffect.id) as ImageEffect | VideoEffect | undefined
+		const updated = this.#animations.map(animation => {
+			if(animation.targetEffect.id === effect?.id) {
+				return {
+					...animation,
+					targetEffect: effect ?? animation.targetEffect
+				}
+			} else return animation
+		})
+		this.#animations = updated
+		if(!animation) {return}
+		await this.deselectAnimation(
+			animation.targetEffect,
+			animation.type, omitBroadcast !== undefined ? omitBroadcast : true
+		)
+		await this.selectAnimation(
+			animation.targetEffect,
+			updatedProps
+				? this.#refreshAnimation(updatedProps, animation)
+				: animation,
+			state, omitBroadcast !== undefined ? omitBroadcast : true
+		)
 	}
 
 	#refreshAnimation({kind, duration}: UpdatedProps, animation: Animation): Animation {
@@ -154,10 +185,16 @@ export class AnimationManager {
 		this.compositor.canvas.renderAll()
 	}
 
+	getAnimationDuration(effect: AnyEffect, kind: "in" | "out") {
+		const animation = this.getAnimation(effect, kind)
+		return animation?.duration
+	}
+
 	async selectAnimation(
 		effect: ImageEffect | VideoEffect,
 		animation: Animation,
-		state: State
+		state: State,
+		recreate?: boolean
 	) {
 		const alreadySelected = this.#animations.find(a => a.targetEffect.id === effect.id && a.name === animation.name)
 		if(alreadySelected) {
@@ -176,10 +213,13 @@ export class AnimationManager {
 		}
 
 		const object = this.#getObject(effect)!
+		if(!recreate) {this.actions.add_animation(animation, this.animationFor)}
 		this.#animations.push(animation)
 
 		await this.compositor.seek(state.timecode, true)
-		const {incoming, outgoing} = this.compositor.managers.transitionManager.getTransitionDuration(effect)
+		const incoming = animation.for === "Animation" ? 0 : this.compositor.managers.transitionManager.getTransitionDuration(effect).incoming
+		const outgoing = animation.for === "Animation" ? 0 : this.compositor.managers.transitionManager.getTransitionDuration(effect).outgoing
+		const duration = animation.duration / 1000
 
 		switch (animation.name) {
 			case "slide-in": {
@@ -193,7 +233,7 @@ export class AnimationManager {
 						ease: "linear",
 					}, {
 						left: targetPosition.left,
-						duration: animation.duration,
+						duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					effect.start_at_position / 1000
@@ -212,10 +252,10 @@ export class AnimationManager {
 						ease: "linear",
 					}, {
 						left: targetPosition.left,
-						duration: animation.duration,
+						duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration) / 1000
 				)
 
 				break
@@ -228,7 +268,7 @@ export class AnimationManager {
 						ease: "linear",
 					}, {
 						opacity: 1,
-						duration: animation.duration,
+						duration,
 						onUpdate: () => this.compositor.canvas.renderAll()
 					}),
 					(effect.start_at_position - incoming) / 1000
@@ -244,10 +284,10 @@ export class AnimationManager {
 						ease: "linear",
 					}, {
 						opacity: 0,
-						duration: animation.duration,
+						duration,
 						onUpdate: () => this.compositor.canvas.renderAll()
 					}),
-					(effect.start_at_position + (effect.end + outgoing - effect.start) - animation.duration * 1000) / 1000
+					(effect.start_at_position + (effect.end + outgoing - effect.start) - animation.duration) / 1000
 				)
 
 				break
@@ -262,7 +302,7 @@ export class AnimationManager {
 						ease: "linear",
 					}, {
 						angle: 0,
-						duration: animation.duration,
+						duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					effect.start_at_position / 1000
@@ -280,10 +320,10 @@ export class AnimationManager {
 						ease: "linear",
 					}, {
 						angle: 180,
-						duration: animation.duration,
+						duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration) / 1000
 				)
 
 				break
@@ -299,7 +339,7 @@ export class AnimationManager {
 						ease: "bounce.out",
 					}, {
 						left: targetPosition.left,
-						duration: animation.duration,
+						duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					effect.start_at_position / 1000
@@ -318,10 +358,10 @@ export class AnimationManager {
 						ease: "bounce.in",
 					}, {
 						left: targetPosition.left,
-						duration: animation.duration,
+						duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration) / 1000
 				)
 
 				break
@@ -340,7 +380,7 @@ export class AnimationManager {
 				object.set({ clipPath: clipRect })
 				this.timeline.add(
 					gsap.to(clipRect, {
-						duration: animation.duration,
+						duration,
 						width: fullWidth,
 						ease: "linear",
 						onUpdate: () => {
@@ -367,7 +407,7 @@ export class AnimationManager {
 				object.set({ clipPath: clipRect })
 				this.timeline.add(
 					gsap.to(clipRect, {
-						duration: animation.duration,
+						duration,
 						width: 0,
 						ease: "linear",
 						onUpdate: () => {
@@ -375,7 +415,7 @@ export class AnimationManager {
 							this.compositor.canvas.renderAll()
 						}
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration) / 1000
 				)
 
 				break
@@ -389,7 +429,7 @@ export class AnimationManager {
 				object.applyFilters()
 				this.timeline.add(
 					gsap.to(blurFilter, {
-						duration: animation.duration,
+						duration,
 						blur: 0,
 						ease: "linear",
 						onUpdate: () => {
@@ -411,7 +451,7 @@ export class AnimationManager {
 				object.applyFilters()
 				this.timeline.add(
 					gsap.to(blurFilter, {
-						duration: animation.duration,
+						duration,
 						blur: 1,
 						ease: "linear",
 						onUpdate: () => {
@@ -419,7 +459,7 @@ export class AnimationManager {
 							this.compositor.canvas.renderAll()
 						}
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration) / 1000
 				)
 
 				break
@@ -450,7 +490,7 @@ export class AnimationManager {
 					}, {
 						scaleX: 1,
 						scaleY: 1,
-						duration: animation.duration,
+						duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
 					effect.start_at_position / 1000
@@ -484,10 +524,10 @@ export class AnimationManager {
 					}, {
 						scaleX: 0.5,
 						scaleY: 0.5,
-						duration: animation.duration,
+						duration,
 						onUpdate: () => this.#onAnimationUpdate(object, animation)
 					}),
-					(effect.start_at_position + (effect.end - effect.start) - animation.duration * 1000) / 1000
+					(effect.start_at_position + (effect.end - effect.start) - animation.duration) / 1000
 				)
 
 				break
@@ -530,21 +570,24 @@ export class AnimationManager {
 		animations.map(a => this.deselectAnimation(a.targetEffect, a.type))
 	}
 
-	removeAnimation(state: State, effect: ImageEffect | VideoEffect, type: "in" | "out") {
-		this.deselectAnimation(effect, type)
+	removeAnimation(state: State, effect: ImageEffect | VideoEffect, type: "in" | "out", refresh?: boolean) {
+		this.deselectAnimation(effect, type, refresh)
 		this.refresh(state)
 	}
 
-	protected deselectAnimation(effect: ImageEffect | VideoEffect, type: "in" | "out") {
+	protected deselectAnimation(effect: ImageEffect | VideoEffect, type: "in" | "out", refresh?: boolean) {
 		return new Promise((resolve) => gsap.ticker.add(() => {
 			const object = this.#getObject(effect)
-			this.#resetObjectProperties(object!, effect)
-			gsap.killTweensOf(object!)
-			this.#animations = this.#animations.filter((animation) => !(animation.targetEffect.id === effect.id && animation.type === type))
-			object!.filters = object!.filters.filter(f => f.for !== "animation")
-			object!.applyFilters()
+			if(object) {
+				this.#resetObjectProperties(object, effect)
+				gsap.killTweensOf(object!)
+				this.#animations = this.#animations.filter((animation) => !(animation.targetEffect.id === effect.id && animation.type === type))
+				if(!refresh) {this.actions.remove_animation(effect, type, this.animationFor)}
+				object!.filters = object!.filters.filter(f => f.for !== "animation")
+				object!.applyFilters()
+				this.compositor.canvas.renderAll()
+			}
 			this.onChange.publish(true)
-			this.compositor.canvas.renderAll()
 			resolve(true)
 		}, true))
 	}

@@ -22,7 +22,7 @@ export const ImageEffect = shadow_view(use => (effect: XImageEffect, timeline: G
 				for(const {hash, file} of files) {
 					const is_effect_already_composed = compositor.managers.imageManager.get(effect.id)
 					if(hash === effect.file_hash && !is_effect_already_composed) {
-						compositor.recreate([effect], media)
+						compositor.recreate({...use.context.state, effects: [effect]}, media)
 						setImageURL(URL.createObjectURL(file))
 					}
 				}

@@ -8,7 +8,7 @@ import {StateHandler} from "../../views/state-handler/view.js"
 import {ImageEffect, VideoEffect} from "../../context/types.js"
 import circleInfoSvg from "../../icons/gravity-ui/circle-info.svg.js"
 import animationSvg from "../../icons/material-design-icons/animation.svg.js"
-import {animationIn, animationNone, animationOut} from "../../context/controllers/compositor/parts/animation-manager.js"
+import {AnimationFor, animationIn, animationNone, animationOut} from "../../context/controllers/compositor/parts/animation-manager.js"
 
 export const OmniAnim = shadow_component(use => {
 	use.styles([styles, tooltipStyles, css`
@@ -21,8 +21,6 @@ export const OmniAnim = shadow_component(use => {
 	use.watch(() => use.context.state)
 	const controllers = use.context.controllers
 	const [kind, setKind] = use.state<"in" | "out">("in")
-	const [animationInDuration, setAnimationInDuration] = use.state(0.5)
-	const [animationOutDuration, setAnimationOutDuration] = use.state(0.5)
 	const manager = use.context.controllers.compositor.managers.animationManager
 
 	const selectedImageOrVideoEffect = use.context.state.selected_effect?.kind === "video" || use.context.state.selected_effect?.kind === "image"
@@ -34,14 +32,19 @@ export const OmniAnim = shadow_component(use => {
 		return () => dispose()
 	})
 
-	const animationDuration = kind === "in" ? animationInDuration : animationOutDuration
-
 	const imageAndVideoEffects = () => use.context.state.effects.filter(effect => effect.kind === "image" || effect.kind === "video") as VideoEffect[] | ImageEffect[]
+	const duration = selectedImageOrVideoEffect ? manager.getAnimationDuration(selectedImageOrVideoEffect, kind)! : 520
 
 	const renderAnimationsIn = () => {
 		return animationIn.map(animation => {
 			const [name, type] = animation.split("-")
-			const anim = {type: "in" as "in" | "out", name: animation, targetEffect: selectedImageOrVideoEffect!, duration: animationDuration}
+			const anim = {
+				type: "in" as "in" | "out",
+				name: animation,
+				targetEffect: selectedImageOrVideoEffect!,
+				duration,
+				for: "Animation" as AnimationFor
+			}
 			return html`
 				<div
 					?data-selected=${manager.selectedAnimationForEffect(selectedImageOrVideoEffect, anim)}
@@ -59,7 +62,13 @@ export const OmniAnim = shadow_component(use => {
 	const renderAnimationsOut = () => {
 		return animationOut.map(animation => {
 			const [name, type] = animation.split("-")
-			const anim = {type: "out" as "in" | "out", name: animation, targetEffect: selectedImageOrVideoEffect!, duration: animationDuration}
+			const anim = {
+				type: "out" as "in" | "out",
+				name: animation,
+				targetEffect: selectedImageOrVideoEffect!,
+				duration,
+				for: "Animation" as AnimationFor
+			}
 			return html`
 				<div
 					?data-selected=${manager.selectedAnimationForEffect(selectedImageOrVideoEffect, anim)}
@@ -77,7 +86,10 @@ export const OmniAnim = shadow_component(use => {
 	const renderAnimationNone = (type: "in" | "out") => {
 			return html`
 				<div
-					?data-selected=${type === "in" ? !manager.isAnyAnimationInSelected(selectedImageOrVideoEffect) : !manager.isAnyAnimationOutSelected(selectedImageOrVideoEffect)}
+					?data-selected=${type === "in"
+						? !manager.isAnyAnimationInSelected(selectedImageOrVideoEffect)
+						: !manager.isAnyAnimationOutSelected(selectedImageOrVideoEffect)
+					}
 					?disabled=${!selectedImageOrVideoEffect}
 					@click=${() => manager.removeAnimation(use.context.state, selectedImageOrVideoEffect!, type)}
 					class="animation"
@@ -110,24 +122,21 @@ export const OmniAnim = shadow_component(use => {
 	}
 
 	const renderDurationSlider = () => {
+		const frameDuration = 1000 / use.context.state.timebase
 		return html`
 			<div class=duration-slider>
 				<label for="duration">Duration:</label>
 				<input
-					@input=${(e: InputEvent) => kind === "in"
-						? setAnimationInDuration(+(e.target as HTMLInputElement).value)
-						: setAnimationOutDuration(+(e.target as HTMLInputElement).value)
-					}
-					@change=${() => manager.refresh(use.context.state, {duration: animationDuration, kind})}
+					@change=${(e: InputEvent) => manager.refresh(use.context.state, {duration: +(e.target as HTMLInputElement).value, kind},  false)}
 					type="range"
-					min="0.5"
-					max="10"
-					step="0.1"
-					value=${animationDuration}
+					min="520"
+					max="10000"
+					step=${frameDuration}
+					.value=${duration}
 					name="duration"
 					id="duration"
 				>
-				<span>${animationDuration}s</span>
+				<span>${(duration ?? 500) / 1000}s</span>
 			</div>
 		`
 	}

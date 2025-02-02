@@ -2,13 +2,13 @@ import posthog from 'posthog-js'
 import {register_to_dom, html, Nexus} from "@benev/slate"
 import {ConstructEditor, single_panel_layout} from "@benev/construct/x/mini.js"
 
+import {Tooltip} from './views/tooltip/view.js'
 import {HashRouter} from './tools/hash-router.js'
 import checkSvg from './icons/gravity-ui/check.svg.js'
 import exportSvg from './icons/gravity-ui/export.svg.js'
 import {ShortcutsManager} from './views/shortcuts/view.js'
 import {TextPanel} from "./components/omni-text/panel.js"
 import {AnimPanel} from "./components/omni-anim/panel.js"
-import {omnislate, OmniContext} from "./context/context.js"
 import {MediaPanel} from "./components/omni-media/panel.js"
 import {OmniText} from "./components/omni-text/component.js"
 import {OmniAnim} from "./components/omni-anim/component.js"
@@ -23,6 +23,7 @@ import {OmniTimeline} from "./components/omni-timeline/component.js"
 import pencilSquareSvg from './icons/gravity-ui/pencil-square.svg.js'
 import {ProjectSettingsPanel} from "./views/project-settings/panel.js"
 import {TransitionsPanel} from "./components/omni-transitions/panel.js"
+import {omnislate, OmniContext, collaboration} from "./context/context.js"
 import {OmniTransitions} from "./components/omni-transitions/component.js"
 import {ExportPanel} from "./components/omni-timeline/views/export/panel.js"
 import {MediaPlayerPanel} from "./components/omni-timeline/views/media-player/panel.js"
@@ -69,6 +70,7 @@ export function removeLoadingPageIndicator() {
 
 const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((use) => () => {
 	use.watch(() => use.context.state)
+	const collaboration = use.context.controllers.collaboration
 	const [renameDisabled, setRenameDisabled] = use.state(true)
 	const toggleProjectRename = (e: PointerEvent) => {
 		e.preventDefault()
@@ -80,7 +82,13 @@ const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((us
 		use.context.actions.set_project_name(projectName.value)
 	}
 
+	use.mount(() => {
+		const dispose = collaboration.onChange(() => use.rerender())
+		return () => dispose()
+	})
+
 	const [showConfirmExportModal, setShowConfirmExportModal] = use.state(false)
+	const isClient = collaboration.client
 
 	return html`
 		<div class=editor>
@@ -101,13 +109,19 @@ const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((us
 				<div class="export">
 					${CollaborationManager([])}
 					${ShortcutsManager([])}
-					<button
-						?disabled=${omnislate.context.state.settings.bitrate <= 0}
-						class="export-button"
-						@click=${() => setShowConfirmExportModal(true)}
-					>
-						<span class="text">${exportSvg}<span>Export</span></span>
-					</button>
+					${Tooltip(
+						html`
+						<button
+							?disabled=${use.context.state.settings.bitrate <= 0 || isClient}
+							class="export-button"
+							@click=${() => setShowConfirmExportModal(true)}
+						>
+							<span class="text">${exportSvg}<span>Export</span></span>
+						</button>`,
+						html`${isClient ?  "Only host can export" : null}`,
+						"",
+						"bottom-end"
+					)}
 				</div>
 			</div>
 			<construct-editor></construct-editor>
@@ -120,9 +134,13 @@ const router = new HashRouter({
 		return html`<landing-page></landing-page>`
 	},
 	'/editor': () => {
+		collaboration.disconnect()
 		return html`<omni-manager></omni-manager>`
 	},
 	'/editor/*': (projectId) => {
+		if(!collaboration.initiatingProject) {
+			collaboration.disconnect()
+		}
 		if(!registered) {
 			register_to_dom({OmniTimeline, OmniText, OmniMedia, OmniAnim, ConstructEditor, OmniFilters, OmniTransitions})
 			registered = true

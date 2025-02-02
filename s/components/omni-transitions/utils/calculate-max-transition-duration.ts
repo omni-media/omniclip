@@ -8,8 +8,8 @@ export function calculateMaxTransitionDuration(transition: SelectedPair, state: 
 	const outgoingEffectDuration = outgoing.end - outgoing.start
 
 	if(incomingEffectDuration < outgoingEffectDuration) {
-		return incomingEffectDuration / 1000 / 1.2
+		return incomingEffectDuration / 1.2
 	} else {
-		return outgoingEffectDuration / 1000 / 1.2
+		return outgoingEffectDuration / 1.2
 	}
 }

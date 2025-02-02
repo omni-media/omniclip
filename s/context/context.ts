@@ -38,19 +38,22 @@ export class OmniContext extends Context {
 		})
 		watch.track(() => this.#core.state.effects, async () => {
 			queue = queue.then(async () => {
-				await this.controllers.compositor.managers.transitionManager.refresh(this.state)
-				await this.controllers.compositor.managers.animationManager.refresh(this.state)
+				await this.controllers.compositor.managers.transitionManager.refresh(this.state, undefined, true)
+				await this.controllers.compositor.managers.animationManager.refresh(this.state, undefined, true)
 			})
 		})
 	}
 
 	#save_to_storage(state: HistoricalState) {
+		if(collaboration.client || collaboration.isJoining) {return} // do not save for client in collaboration
 		if(state.projectId) {
 			this.#store[state.projectId] = {
 				projectName: state.projectName,
 				projectId: state.projectId,
 				effects: state.effects,
-				tracks: state.tracks
+				tracks: state.tracks,
+				filters: state.filters,
+				animations: state.animations
 			}
 		}
 	}
@@ -124,7 +127,7 @@ export class OmniContext extends Context {
 	
 	//after loading state from localstorage, compositor objects must be recreated
 	#recreate_project_from_localstorage_state(state: State, media: Media) {
-		this.controllers.compositor.recreate(state.effects, media)
+		this.controllers.compositor.recreate(state, media)
 	}
 
 	constructor(options: MiniContextOptions) {

@@ -2,18 +2,17 @@ import {TemplateResult, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import loadingSvg from "../../icons/loading.svg.js"
-import {shadow_view} from "../../context/context.js"
 import exitSvg from "../../icons/gravity-ui/exit.svg.js"
 import crownSvg from "../../icons/remix-icon/crown.svg.js"
 import xMarkSvg from "../../icons/gravity-ui/x-mark.svg.js"
 import personSvg from "../../icons/gravity-ui/person.svg.js"
 import slidersSvg from "../../icons/gravity-ui/sliders.svg.js"
 import warningSvg from "../../icons/gravity-ui/warning.svg.js"
+import {collaboration, shadow_view} from "../../context/context.js"
 import collaborateSvg from "../../icons/gravity-ui/collaborate.svg.js"
 
 export const CollaborationManager = shadow_view((use) => () => {
 	use.styles(styles)
-	const collaboration = use.context.controllers.collaboration
 
 	const [joiningOrCreatingInProgress, setJoiningOrCreatingInProgress] = use.state(false)
 	const [sessionError, setSessionError] = use.state<unknown>("")
@@ -24,8 +23,10 @@ export const CollaborationManager = shadow_view((use) => () => {
 	const [isClient, setIsClient, getIsClient] = use.state(!!collaboration.client)
 	const [numberOfCollaborators, setNumberOfCollaborators] = use.state(collaboration.numberOfConnectedUsers)
 	const [allow, setAllow] = use.state(true)
+	setIsClient(!!collaboration.client)
 
 	use.mount(() => {
+		const dispose2 = collaboration.onChange(() => use.rerender())
 		const locker = collaboration.onLock((v) => setAllow(v))
 		const dispose = collaboration.onNumberOfClientsChange(number => setNumberOfCollaborators(number))
 		const dispose1 = collaboration.onDisconnect(() => {
@@ -38,7 +39,7 @@ export const CollaborationManager = shadow_view((use) => () => {
 			}
 		})
 		return () => {
-			dispose(); dispose1(); locker();
+			dispose(); dispose1(); dispose2(); locker();
 			if(isClient || isHost) {
 				collaboration.disconnect()
 			}
@@ -63,9 +64,9 @@ export const CollaborationManager = shadow_view((use) => () => {
 		try {
 			await collaboration.joinRoom(inviteID)
 			setJoiningOrCreatingInProgress(false)
-			window.location.hash = `#/editor/${use.context.state.projectId}` // component will reset
 			setIsClient(true)
 		} catch(e) {
+			collaboration.initiatingProject = false
 			setSessionError(e)
 			setJoiningOrCreatingInProgress(false)
 		}
@@ -108,7 +109,7 @@ export const CollaborationManager = shadow_view((use) => () => {
 				<button class="start" @click=${createRoom}>Start session</button>
 			</div>
 			<div>
-				<h3>Join Session<h3>
+				<h3>Join Session</h3>
 				<input class="code-input" placeholder="Enter Invite Code" @input=${(e: InputEvent) => setInviteID((e.target as HTMLInputElement).value)}>
 				<button ?disabled=${inviteID === ""} class="join" @click=${joinRoom}>Join</button>
 			</div>

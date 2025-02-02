@@ -20,7 +20,7 @@ export const AudioEffect = shadow_view(use => (effect: XAudioEffect, timeline: G
 					const is_effect_already_composed = compositor.managers.audioManager.get(effect.id)
 					if(hash === effect.file_hash && !is_effect_already_composed) {
 						wave.on_file_found(use.context.state)
-						compositor.recreate([effect], media)
+						compositor.recreate({...use.context.state, effects: [effect]}, media)
 					}
 				}
 			}

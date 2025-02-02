@@ -24,6 +24,47 @@ export const styles = css`
 		justify-content: center;
 		flex-direction: column;
 
+		& .collaboration {
+			display: flex;
+			flex-direction: column;
+			gap: 1em;
+			background: #0e0e0e;
+			padding: 1em;
+			align-self: center;
+			border-radius: 10px;
+			margin-bottom: 2em;
+
+			& .title {
+				display: flex;
+				align-items: center;
+				gap: 0.5em;
+			}
+
+			& .error, .creating {
+				display: flex;
+				gap: 0.5em;
+			}
+
+			& .join {
+				font-size: 0.9em;
+			}
+
+			& svg {
+				width: 20px;
+				height: 20px;
+			}
+
+			& h3 {
+				margin: 0;
+			}
+
+			& input {
+				background: transparent;
+				border: 1px solid gray;
+				color: gray;
+			}
+		}
+
 		& h1 {
 			margin: 0;
 			text-align: center;
@@ -37,7 +78,7 @@ export const styles = css`
 			flex-wrap: wrap;
 
 			&:first-child {
-				padding: 4em 1em; 
+				padding: 4em 1em 0;
 			}
 
 			&:nth-of-type(2) {

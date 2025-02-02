@@ -240,10 +240,10 @@ export class EffectManager {
 		if (!effect) {
 			// Clear selection if no effect is provided
 			this.compositor.canvas.discardActiveObject()
-			this.actions.set_selected_effect(null)
+			this.actions.set_selected_effect(null, {omit: true})
 		} else {
 			// Set the effect as selected in actions and update canvas
-			this.actions.set_selected_effect(effect)
+			this.actions.set_selected_effect(effect, {omit: true})
 			if (effect.kind === "text") {
 				this.compositor.managers.textManager.set_clicked_effect(effect)
 			}

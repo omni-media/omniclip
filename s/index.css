@@ -1,6 +1,7 @@
 @import url(../assets/fonts/Nippo/Fonts/WEB/css/nippo.css);
 @import url(../assets/fonts/Poppins/Fonts/WEB/css/poppins.css);
 @import url(../assets/fonts/NotoEmoji/Fonts/WEB/css/noto.css);
+@import url(./views/tooltip/styles.css);
 @import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Emoji:wght@300..700&display=swap');
 
 * {
@@ -92,6 +93,12 @@
 	border-radius: 5px;
 	padding: 0 0.3em;
 	border: 1px solid white;
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: default;
+		border-color: #1d1c1c;
+	}
 
 	& .text {
 		display: flex;

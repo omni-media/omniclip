@@ -1,12 +1,12 @@
 import {Connection} from "sparrow-rtc"
 
-import {State} from "../../../types.js"
 import {Actions} from "../../../actions.js"
 import {omnislate} from "../../../context.js"
 import {FileHandler} from "./file-handler.js"
 import {Collaboration} from "../controller.js"
 import {showToast} from "../../../../utils/show-toast.js"
-import {AnyMedia, VideoFile} from "../../../../components/omni-media/types.js"
+import {ImageEffect, State, VideoEffect} from "../../../types.js"
+import {AnyMedia} from "../../../../components/omni-media/types.js"
 
 type ReceivedAction<T extends keyof Actions> = {
 	actionType: T
@@ -33,78 +33,137 @@ type GetOriginalFile = {
 type ReceivedMessage = ReceivedFileChunk | ReceivedAction<keyof Actions> | MissingFile
 	| {type: "init", initState: State} | {type: "newMedia"} | {type: "clients-change", number: number} | GetOriginalFile
 
+// Utility to handle a single action by type
+function handleAction<T extends keyof Actions>(actionType: T, payload: ActionParams<T>, host: boolean, broadcastAction: Function, connection: Connection) {
+	// 1) Look up the specialized handler, or fall back to default
+	// somtimes action is inpure in the sense that it needs to be run through controller
+	// to create some side effect eg. create object on canvas
+	const specializedHandler = (actionHandlers as any)[actionType]
+	if (specializedHandler) {
+		specializedHandler(payload)
+	} else {
+		actionHandlers.default(actionType, payload)
+	}
+
+	// 2) If host, re-broadcast
+	if (host) {
+		broadcastAction(actionType, payload, connection)
+	}
+}
+
 export class MessageHandler {
 	constructor(private collaboration: Collaboration, private fileHandler: FileHandler) {}
 
-	handleMessage(connection: Connection, event: MessageEvent<any>) {
-		// Delegate file-related messages to onFileChunk
+	async handleMessage(connection: Connection, event: MessageEvent<any>) {
+		// 1) First, delegate file-related messages to onFileChunk
 		this.fileHandler.onFileChunk(
 			connection,
 			event,
 			64,
 			async (hash, file, proxy) => {
-				console.log(`File received: ${hash}`, file)
-				const mediaController = omnislate.context.controllers.media
-				// Broadcast to other clients (if host)
+				//console.log(`File received: ${hash}`, file);
+				const mediaController = omnislate.context.controllers.media;
+
+				// If host, broadcast to other clients
 				if (this.collaboration.host) {
 					await mediaController.syncFile(file, hash, proxy)
-					const media = mediaController.get(hash) as VideoFile
-					if(proxy)
+					const media = mediaController.get(hash)!
+					if (proxy) {
 						this.fileHandler.broadcastMedia(media, connection, true)
+					}
 				} else {
-					// Otherwise, just import the file locally for the client
-					if(this.collaboration.client) {
+					// Otherwise, just import the file locally
+					if (this.collaboration.client) {
 						mediaController.syncFile(file, hash, proxy)
 					}
 				}
 			},
 			(hash, received, total) => {
-				console.log(`Progress for file ${hash}: ${(received / total) * 100}%`)
+				//console.log(`Progress for file ${hash}: ${(received / total) * 100}%`)
 			}
 		)
 
-		// Process non-file messages
+		// 2) Process non-file messages
 		if (typeof event.data === "string") {
 			const parsed = JSON.parse(event.data) as ReceivedMessage
+
 			switch (parsed.type) {
 				case "action":
-					//@ts-ignore
-					omnislate.context.actions[parsed.actionType](...parsed.payload, {omit: true})
-					if(this.collaboration.host) {
-						this.broadcastAction(parsed.actionType, parsed.payload, connection)
-					}
+					handleAction(
+						parsed.actionType,
+						parsed.payload as any,
+						!!this.collaboration.host,
+						this.broadcastAction.bind(this),
+						connection
+					)
+					// update canvas objects in case action updated effect's position in state
+					omnislate.context.controllers.compositor.update_canvas_objects(omnislate.context.state)
 					break
+
 				case "init":
-					this.#handleInitMessage(parsed, connection)
+					await this.#handleInitMessage(parsed, connection)
 					break
+
 				case "missing":
 					this.fileHandler.handleMissingFiles(parsed.missing, connection)
 					break
+
 				case "clients-change":
 					this.collaboration.numberOfConnectedUsers = parsed.number
 					this.collaboration.onNumberOfClientsChange.publish(parsed.number)
 					break
-				case "get-original-file":
+
+				case "get-original-file": {
 					const media = omnislate.context.controllers.media.get(parsed.hash)
-					if(media)
-						this.fileHandler.sendFile(media.file, media.hash, connection.cable.reliable, media.file.size)
+					if (media) {
+						this.fileHandler.sendFile(
+							media.file,
+							media.hash,
+							connection.cable.reliable,
+							media.file.size
+						)
+					}
+					break
+				}
+
 				default:
 					console.warn("Unknown message type", parsed.type)
 			}
 		}
 	}
 
+	async #waitForContextChange(parsedProjectId: string) {
+		return new Promise(resolve => {
+			const interval = setInterval(() => {
+				try {
+					if (
+						omnislate?.context?.state?.projectId
+						=== parsedProjectId
+					) {
+						clearInterval(interval)
+						resolve(true)
+					}
+				}
+				catch (err) {
+					// ignore and keep checking
+				}
+			}, 10)
+		})
+	}
+
 	async #handleInitMessage(parsed: { type: "init"; initState: State }, connection: Connection) {
+		window.location.hash = `#/editor/${parsed.initState.projectId}` // component will reset
+		await this.#waitForContextChange(parsed.initState.projectId)
 		// Apply the received state
 		omnislate.context.actions.set_incoming_historical_state_webrtc(parsed.initState)
 		omnislate.context.actions.set_incoming_non_historical_state_webrtc(parsed.initState)
-
+		this.collaboration.initiatingProject = false
 		showToast(`You're now collaborating on "${parsed.initState.projectName}"`, "info")
 		// Identify missing files
 		const missing = await this.fileHandler.getMissingFiles(parsed.initState)
 
 		// Request missing files from the host
-		connection.cable.reliable.send(JSON.stringify({ type: "missing", missing }))
+		connection.cable.reliable.send(JSON.stringify({ type: "missing", missing: [...new Set(missing)] }))
 	}
 
 	broadcastAction(actionType: keyof Actions, payload: any, connection?: Connection) {
@@ -124,4 +183,86 @@ export class MessageHandler {
 			)
 		}
 	}
+}
+
+type ActionHandlers = {
+	[K in keyof Actions]?: (
+		payload: PopLast<Parameters<Actions[K]>>
+	) => void
+} & {
+	default: (actionType: keyof Actions, payload: any[]) => void
+}
+
+type PopLast<T extends any[]> = T extends [...infer Rest, any?] ? Rest : T
+type ActionParams<T extends keyof Actions> = PopLast<Parameters<Actions[T]>>
+
+const actionHandlers: ActionHandlers = {
+	clear_animations() {
+		omnislate.context.controllers.compositor.managers.animationManager.clearAnimations()
+	},
+
+	add_animation(payload) {
+		omnislate.context.actions.add_animation(...payload, { omit: true })
+
+		const [animation, animationFor] = payload
+		if (animationFor === 'Animation') {
+			omnislate.context.controllers.compositor.managers.animationManager
+				.selectAnimation(animation.targetEffect, animation, omnislate.context.state, true)
+		} else {
+			omnislate.context.controllers.compositor.managers.transitionManager
+				.selectAnimation(animation.targetEffect, animation, omnislate.context.state, true)
+		}
+	},
+
+	remove_animation(payload) {
+		omnislate.context.actions.remove_animation(...payload, { omit: true })
+		const [effect, type, animationFor] = payload
+		if (animationFor === 'Animation') {
+			omnislate.context.controllers.compositor.managers.animationManager
+				.removeAnimation(omnislate.context.state, effect , type, true)
+		} else {
+			omnislate.context.controllers.compositor.managers.transitionManager
+				.removeAnimation(omnislate.context.state, effect, type, true)
+		}
+	},
+
+	add_filter(payload) {
+		omnislate.context.actions.add_filter(...payload, { omit: true })
+		const [filter] = payload
+		const effect = omnislate.context.state.effects.find(e => e.id === filter.targetEffectId) as VideoEffect | ImageEffect
+		if (effect) {
+			omnislate.context.controllers.compositor.managers.filtersManager
+				.addFilterToEffect(effect, filter.type, true)
+		}
+	},
+
+	remove_filter(payload) {
+		omnislate.context.actions.remove_filter(...payload, { omit: true })
+		const [effect, type] = payload
+		if (effect) {
+			omnislate.context.controllers.compositor.managers.filtersManager
+				.removeFilterFromEffect(effect, type, true)
+		}
+
+	},
+
+	add_video_effect(payload) {
+		const [effect] = payload
+		if (!effect) return
+
+		const file = omnislate.context.controllers.media.get(effect.file_hash)
+		if (file) {
+			omnislate.context.controllers.compositor.managers.videoManager
+				.add_video_effect(effect, file.file, true)
+		}
+
+		omnislate.context.actions.add_video_effect(...payload, { omit: true })
+	},
+
+	// "default" handler for any action that doesn't require additional side effects
+	default(actionType, payload) {
+		// For purely updating state with no ephemeral controller logic:
+		// @ts-ignore
+		omnislate.context.actions[actionType](...payload, { omit: true })
+	},
 }

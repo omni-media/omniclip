@@ -2,20 +2,28 @@ import {Op, html, watch, css} from "@benev/slate"
 
 import {confirmModalStyles, styles} from "./styles.js"
 import {VideoEffect} from "../../../../context/types.js"
+import {Tooltip} from "../../../../views/tooltip/view.js"
 import saveSvg from "../../../../icons/gravity-ui/save.svg.js"
 import xMarkSvg from "../../../../icons/gravity-ui/x-mark.svg.js"
+import {tooltipStyles} from "../../../../views/tooltip/styles.js"
 import exportSvg from "../../../../icons/gravity-ui/export.svg.js"
 import {StateHandler} from "../../../../views/state-handler/view.js"
 import {collaboration, shadow_view} from "../../../../context/context.js"
 import circleInfoSvg from "../../../../icons/gravity-ui/circle-info.svg.js"
 
 export const Export = shadow_view(use => () => {
-	use.styles(styles)
+	use.styles([styles, tooltipStyles])
 	use.watch(() => use.context.state)
 
 	const state = use.context.state
 	const video_export = use.context.controllers.video_export
 	const [logs, setLogs, getLogs] = use.state<string[]>([])
+
+	use.mount(() => {
+		const dispose = collaboration.onChange(() => use.rerender())
+		return () => dispose()
+	})
+	const isClient = collaboration.client
 
 	use.mount(() => {
 		const dispose = watch.track(() => use.context.state.log, (log) => {
@@ -77,9 +85,18 @@ export const Export = shadow_view(use => () => {
 						<h4>Bitrate</h4>
 						<span>${state.settings.bitrate} kbps</span>
 					</div>
-					<button ?disabled=${state.settings.bitrate <= 0} class="sparkle-button" @click=${() => video_export.export_start(use.context.state, state.settings.bitrate)}>
-						<span class="text">${exportSvg}<span>Export</span></span>
-					</button>
+					${Tooltip(
+						html`
+							<button
+								?disabled=${state.settings.bitrate <= 0 || isClient}
+								class="sparkle-button"
+								@click=${() => video_export.export_start(use.context.state, state.settings.bitrate)}
+							>
+								<span class="text">${exportSvg}<span>Export</span></span>
+							</button>
+						`,
+						html`${isClient ?  "Only host can export" : null}`
+					)}
 				</div>
 			</div>
 		</div>

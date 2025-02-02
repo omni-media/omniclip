@@ -8,7 +8,9 @@ export const historical_state: HistoricalState = {
 	tracks: [
 		{id: generate_id()}
 	],
-	effects: []
+	effects: [],
+	filters: [],
+	animations: []
 }
 
 export const non_historical_state: NonHistoricalState = {

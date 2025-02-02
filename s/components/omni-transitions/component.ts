@@ -15,7 +15,6 @@ import {SelectedPair, transition} from "../../context/controllers/compositor/par
 export const OmniTransitions = shadow_component(use => {
 	use.styles(styles)
 	use.watch(() => use.context.state)
-	const [animationDuration, setAnimationDuration] = use.state(0.52)
 	const manager = use.context.controllers.compositor.managers.transitionManager
 	const [isTutorialPlaying, setTutorialPlaying] = use.state(false)
 
@@ -31,6 +30,9 @@ export const OmniTransitions = shadow_component(use => {
 	const renderTransitions = () => {
 		return transition.map(transition => {
 			const {incoming, outgoing} = manager.selected!
+			const selectedAnimation = use.context.state.animations.find(a => a.targetEffect.id === manager.selected?.incoming.id)
+			const duration = selectedAnimation!.duration
+
 			return html`
 				<div
 					?data-selected=${manager.isSelected(transition)}
@@ -38,7 +40,7 @@ export const OmniTransitions = shadow_component(use => {
 					@click=${() => manager.selectTransition({
 						incoming: incoming,
 						outgoing: outgoing,
-						duration: normalizeTransitionDuration(animationDuration * 1000, 1000 / use.context.state.timebase),
+						duration: normalizeTransitionDuration(duration, 1000 / use.context.state.timebase),
 						animation: "fade"})
 						.apply(use.context.state)
 					}
@@ -68,23 +70,23 @@ export const OmniTransitions = shadow_component(use => {
 
 	const renderDurationSlider = (pair: SelectedPair) => {
 		const max = calculateMaxTransitionDuration(pair, use.context.state)
-		const frameDuration = 1000 / use.context.state.timebase / 1000
+		const frameDuration = 1000 / use.context.state.timebase
+		const duration = manager.getTransitionDuration(pair.incoming).incoming * 2
 
 		return html`
 			<div class=duration-slider>
 				<label for="duration">Duration:</label>
 				<input
-					@input=${(e: InputEvent) => setAnimationDuration(+(e.target as HTMLInputElement).value)}
-					@change=${() => manager.updateTransition(use.context.state, {duration: animationDuration})}
+					@change=${(e: InputEvent) => manager.updateTransition(use.context.state, {duration: +(e.target as HTMLInputElement).value})}
 					type="range"
-					min="0.5"
+					min="500"
 					max=${max}
 					step=${frameDuration}
-					value=${animationDuration}
+					.value=${duration}
 					name="duration"
 					id="duration"
 				>
-				<span>${animationDuration}s</span>
+				<span>${duration / 1000}s</span>
 			</div>
 		`
 	}

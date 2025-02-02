@@ -23,7 +23,7 @@ export const Playhead = shadow_view(use => () => {
 
 	const events = {
 		start() {
-			actions.set_is_playing(false)
+			actions.set_is_playing(false, {omit: true})
 			playheadDrag.start()
 		},
 		drop: () => playheadDrag.drop(),

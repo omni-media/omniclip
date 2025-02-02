@@ -1,7 +1,9 @@
 import {Actions} from "../../../actions.js"
 import {Compositor} from "../controller.js"
+import {omnislate} from "../../../context.js"
 import {AnimationManager} from "./animation-manager.js"
 import {AnyEffect, ImageEffect, State, VideoEffect} from "../../../types.js"
+import {normalizeTransitionDuration} from "../../../../components/omni-transitions/utils/normalize-transition-duration.js"
 
 export const transition = ["fade"] as const
 export type TransitionAbleEffect = ImageEffect | VideoEffect
@@ -26,8 +28,8 @@ interface PropsToUpdate {
 export class TransitionManager extends AnimationManager {
 	selected: null | SelectedPair = null
 
-	constructor(private actions: Actions, compositor: Compositor) {
-		super(compositor)
+	constructor(compositor: Compositor, actions: Actions) {
+		super(compositor, actions, "Transition")
 	}
 
 	clearTransitions() {
@@ -41,8 +43,7 @@ export class TransitionManager extends AnimationManager {
 		} else false
 	}
 
-	selectTransition(transition: Transition, kind?: TransitionAnimation) {
-		this.onChange.publish(0)
+	selectTransition(transition: Transition) {
 		this.selected = {
 			incoming: transition.incoming,
 			outgoing: transition.outgoing
@@ -55,6 +56,8 @@ export class TransitionManager extends AnimationManager {
 			this.actions.set_effect_end(transition.outgoing, transition.outgoing.end - transition.duration / 2)
 		}
 
+		this.onChange.publish(0)
+
 		return {
 			apply: (state: State) => {
 				if(!this.isAnyAnimationInSelected(transition.incoming)) {
@@ -63,8 +66,9 @@ export class TransitionManager extends AnimationManager {
 						effect,
 						{targetEffect: transition.incoming,
 						type: "in",
-						duration: transition.duration / 1000,
-						name: "fade-in"},
+						duration: transition.duration,
+						name: "fade-in",
+						for: "Transition"},
 						state
 					)
 				}
@@ -74,9 +78,9 @@ export class TransitionManager extends AnimationManager {
 						effect,
 						{targetEffect: transition.outgoing,
 						type: "out",
-						duration: transition.duration / 1000,
-						name: "fade-out"
-						},
+						duration: transition.duration,
+						name: "fade-out",
+						for: "Transition"},
 						state
 					)
 				}
@@ -87,8 +91,11 @@ export class TransitionManager extends AnimationManager {
 	async updateTransition(state: State, propsToUpdate?: PropsToUpdate) {
 		if(this.selected && propsToUpdate) {
 			const {incoming, outgoing} = this.selected
-			const newDuration = propsToUpdate.duration * 1000
-			await this.refresh(state, propsToUpdate)
+			const newDuration = normalizeTransitionDuration(propsToUpdate.duration, 1000/state.timebase)
+			await this.refreshOne(state, incoming, propsToUpdate, "in", false)
+			await this.refreshOne(state, outgoing, propsToUpdate, "out", false)
+			this.actions.set_animation_duration(newDuration, incoming)
+			this.actions.set_animation_duration(newDuration, outgoing)
 			this.actions.set_effect_start_position(incoming, incoming.start_at_position - newDuration / 2)
 			this.actions.set_effect_start(incoming, incoming.start + newDuration / 2)
 			this.actions.set_effect_end(outgoing, outgoing.end - newDuration / 2)
@@ -137,9 +144,9 @@ export class TransitionManager extends AnimationManager {
 	}
 
 	getTransitions() {
-		return this.animations.map(a => ({
+		return omnislate.context.state.animations.map(a => ({
 			...a,
-			duration: a.duration / 2 * 1000
+			duration: a.duration / 2
 		}))
 	}
 
@@ -149,9 +156,9 @@ export class TransitionManager extends AnimationManager {
 		let outgoing = 0
 		if(transition) {
 			if(transition.type === "in") {
-				incoming = transition.duration / 2 * 1000
+				incoming = transition.duration / 2
 			} else {
-				outgoing = transition.duration / 2 * 1000
+				outgoing = transition.duration / 2
 			}
 		}
 		return {incoming, outgoing}

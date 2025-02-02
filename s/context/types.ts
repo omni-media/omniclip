@@ -1,5 +1,7 @@
 import {historical, non_historical} from "./actions.js"
 import {BroadcastOptions} from "../utils/with-broadcast.js"
+import {Filter} from "./controllers/compositor/parts/filter-manager.js"
+import {Animation} from "./controllers/compositor/parts/animation-manager.js"
 
 // export interface OmniStateHistorical {
 // 	timeline: HistoricalState
@@ -21,6 +23,8 @@ export interface HistoricalState {
 	projectId: string
 	effects: AnyEffect[]
 	tracks: XTrack[]
+	filters: Filter[]
+	animations: Animation[]
 }
 
 export interface NonHistoricalState {

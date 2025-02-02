@@ -53,9 +53,9 @@ export class Compositor {
 		textManager: new TextManager(this, actions),
 		imageManager: new ImageManager(this, actions),
 		audioManager: new AudioManager(this, actions),
-		animationManager: new AnimationManager(this),
-		filtersManager: new FiltersManager(this),
-		transitionManager: new TransitionManager(actions, this)
+		animationManager: new AnimationManager(this, actions, "Animation"),
+		filtersManager: new FiltersManager(this, actions),
+		transitionManager: new TransitionManager(this, actions)
 	}
 
 		this.#on_playing()
@@ -83,7 +83,7 @@ export class Compositor {
 		}
 		if(this.#is_playing.value) {
 			const elapsed_time = this.#calculate_elapsed_time()
-			this.actions.increase_timecode(elapsed_time)
+			this.actions.increase_timecode(elapsed_time, {omit: true})
 			this.on_playing.publish(0)
 			this.compose_effects([...this.currently_played_effects.values()], this.timecode)
 		}
@@ -281,7 +281,7 @@ export class Compositor {
 		this.canvas.on("mouse:down", (e) => {
 			//@ts-ignore
 			const selected_effect = e.target ? e.target.effect as AnyEffect : null
-			this.actions.set_selected_effect(selected_effect)
+			this.actions.set_selected_effect(selected_effect, {omit: true})
 			if(e.target) {this.canvas.setActiveObject(e.target)}
 			if(selected_effect?.kind === "text") {this.managers.textManager.set_clicked_effect(selected_effect)}
 		})
@@ -306,9 +306,9 @@ export class Compositor {
 		})
 	}
 
-	async recreate(effects: AnyEffect[], media: Media) {
+	async recreate(state: State, media: Media) {
 		await media.are_files_ready()
-		for(const effect of effects) {
+		for(const effect of state.effects) {
 			if(effect.kind === "image") {
 				const file = media.get(effect.file_hash)?.file
 				if(file) {
@@ -329,7 +329,21 @@ export class Compositor {
 				this.managers.textManager.add_text_effect(effect, true)
 			}
 		}
-		this.compose_effects(effects, this.timecode)
+		for(const filter of state.filters) {
+			const effect = state.effects.find(e => e.id === filter.targetEffectId)
+			if(effect && (effect.kind === "video" || effect.kind === "image")) {
+				this.managers.filtersManager.addFilterToEffect(effect, filter.type)
+			}
+		}
+		for(const animation of state.animations) {
+			const effect = state.effects.find(e => e.id === animation.targetEffect.id)
+			if(effect && (effect.kind === "video" || effect.kind === "image")) {
+				if(animation.for === "Animation") {
+					this.managers.animationManager.selectAnimation(effect, animation, state, true)
+				} else this.managers.transitionManager.selectAnimation(effect, animation, state, true)
+			}
+		}
+		this.compose_effects(state.effects, this.timecode)
 	}
 
 	update_canvas_objects(state: State) {
@@ -396,12 +410,12 @@ export class Compositor {
 
 	set_video_playing = (playing: boolean) => {
 		this.#is_playing.value = playing
-		this.actions.set_is_playing(playing)
+		this.actions.set_is_playing(playing, {omit: true})
 	}
 
 	toggle_video_playing = () => {
 		this.#is_playing.value = !this.#is_playing.value
-		this.actions.toggle_is_playing()
+		this.actions.toggle_is_playing({omit: true})
 	}
 
 }

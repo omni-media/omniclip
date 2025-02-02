@@ -85,6 +85,7 @@ export const styles = css`
 		&:disabled {
 			opacity: 0.5;
 			box-shadow: none;
+			cursor: default;
 		}
 	}
 
