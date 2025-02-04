@@ -16,6 +16,7 @@ interface CompressProps {
 export class Compressor {
 	#decoderWorkers = new Map<string, Worker>()
 	#encoderWorkers = new Map<string, Worker>()
+	#alreadyCompressingVideos = new Map<string, string>()
 	#taskQueue: (() => void)[] = []
 	#maxWorkers = 8
 
@@ -55,10 +56,11 @@ export class Compressor {
 				}
 			})
 
+			// compress in actual width and height of video
 			encoder.worker.postMessage({
 				action: "configure",
-				width: 1920,
-				height: 1080,
+				width: metadata.width ?? 1920,
+				height: metadata.height ?? 1080,
 				bitrate: 5000,
 				timebase: metadata.fps ?? 30,
 				bitrateMode: "quantizer",
@@ -127,7 +129,9 @@ export class Compressor {
 		for(const effect of state.effects) {
 			if(effect.kind === "video") {
 				const media = omnislate.context.controllers.media.get(effect.file_hash) as VideoFile
-				if(media) {
+				const alreadyCompressing = this.#alreadyCompressingVideos.get(media.hash)
+				if(media && !alreadyCompressing) {
+					this.#alreadyCompressingVideos.set(media.hash, media.hash)
 					this.compressVideo(media.file, {
 						onChunk: (chunk) => {
 							this.collaboration.opfs.writeChunk(media.hash, chunk)
