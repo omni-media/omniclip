@@ -32,8 +32,18 @@ export const OmniAnim = shadow_component(use => {
 		return () => dispose()
 	})
 
+	const getAnimationDuration = () => {
+		if(selectedImageOrVideoEffect) {
+			const effect = use.context.state.animations.find(a => a.targetEffect.id === selectedImageOrVideoEffect.id && a.type === kind && a.for === "Animation")
+			const duration = effect?.duration
+			if(duration) {
+				return duration
+			} else return 520
+		} else return 520
+	}
+
 	const imageAndVideoEffects = () => use.context.state.effects.filter(effect => effect.kind === "image" || effect.kind === "video") as VideoEffect[] | ImageEffect[]
-	const duration = selectedImageOrVideoEffect ? manager.getAnimationDuration(selectedImageOrVideoEffect, kind)! : 520
+	const duration = getAnimationDuration()
 
 	const renderAnimationsIn = () => {
 		return animationIn.map(animation => {
@@ -123,20 +133,25 @@ export const OmniAnim = shadow_component(use => {
 
 	const renderDurationSlider = () => {
 		const frameDuration = 1000 / use.context.state.timebase
+		const maxAnimationDuration = selectedImageOrVideoEffect ? (selectedImageOrVideoEffect.end - selectedImageOrVideoEffect.start) : 10000
+		const normalizeMaxAnimationDuration = Math.round(maxAnimationDuration / frameDuration) * frameDuration
+
 		return html`
 			<div class=duration-slider>
 				<label for="duration">Duration:</label>
 				<input
-					@change=${(e: InputEvent) => manager.refresh(use.context.state, {duration: +(e.target as HTMLInputElement).value, kind},  false)}
+					@change=${(e: InputEvent) => manager.updateAnimation(
+						{duration: +(e.target as HTMLInputElement).value, kind, effect: selectedImageOrVideoEffect!}
+					)}
 					type="range"
 					min="520"
-					max="10000"
+					max=${normalizeMaxAnimationDuration}
 					step=${frameDuration}
 					.value=${duration}
 					name="duration"
 					id="duration"
 				>
-				<span>${(duration ?? 500) / 1000}s</span>
+				<span>${duration / 1000}s</span>
 			</div>
 		`
 	}
