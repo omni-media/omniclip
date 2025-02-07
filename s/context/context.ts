@@ -38,8 +38,14 @@ export class OmniContext extends Context {
 		})
 		watch.track(() => this.#core.state.effects, async () => {
 			queue = queue.then(async () => {
-				await this.controllers.compositor.managers.transitionManager.refresh(this.state, undefined, true)
-				await this.controllers.compositor.managers.animationManager.refresh(this.state, undefined, true)
+				await this.controllers.compositor.managers.transitionManager.refresh(this.state)
+				await this.controllers.compositor.managers.animationManager.refresh(this.state)
+			})
+		})
+		watch.track(() => this.#core.state.animations, async () => {
+			queue = queue.then(async () => {
+				await this.controllers.compositor.managers.transitionManager.refresh(this.state)
+				await this.controllers.compositor.managers.animationManager.refresh(this.state)
 			})
 		})
 	}
@@ -92,10 +98,11 @@ export class OmniContext extends Context {
 		this.controllers.compositor.update_canvas_objects(this.state)
 	}
 
-	clear_project() {
-		this.actions.remove_all_effects()
-		this.actions.remove_tracks()
-		this.controllers.compositor.clear()
+	clear_project(omit?: boolean) {
+		this.actions.clear_project({omit})
+		this.actions.remove_all_effects({omit})
+		this.actions.remove_tracks({omit})
+		this.controllers.compositor.clear(omit)
 	}
 
 	get history() {
