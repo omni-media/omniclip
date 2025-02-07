@@ -31,7 +31,7 @@ export const OmniTransitions = shadow_component(use => {
 		return transition.map(transition => {
 			const {incoming, outgoing} = manager.selected!
 			const selectedAnimation = use.context.state.animations.find(a => a.targetEffect.id === manager.selected?.incoming.id)
-			const duration = selectedAnimation!.duration
+			const duration = selectedAnimation?.duration ?? 520
 
 			return html`
 				<div
@@ -77,7 +77,10 @@ export const OmniTransitions = shadow_component(use => {
 			<div class=duration-slider>
 				<label for="duration">Duration:</label>
 				<input
-					@change=${(e: InputEvent) => manager.updateTransition(use.context.state, {duration: +(e.target as HTMLInputElement).value})}
+					@change=${(e: InputEvent) => manager.updateTransition(
+						use.context.state,
+						{duration: +(e.target as HTMLInputElement).value, effect: selectedImageOrVideoEffect!}
+					)}
 					type="range"
 					min="500"
 					max=${max}

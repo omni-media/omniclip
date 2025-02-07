@@ -47,7 +47,7 @@ export const TransitionIndicator = light_view(use => () => {
 						.selectTransition({
 							incoming,
 							outgoing,
-							duration: normalizeTransitionDuration(transitionDuration <= 0 ? 520 : transitionDuration, 1000 / state.timebase),
+							duration: normalizeTransitionDuration(transitionDuration, 1000 / state.timebase),
 							animation: "fade"
 						}).apply(use.context.state)
 					}
