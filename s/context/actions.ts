@@ -10,6 +10,7 @@ import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, Text
 import {Animation, AnimationFor} from "./controllers/compositor/parts/animation-manager.js"
 
 export const non_historical = actionize_non_historical({
+	clear_project: state => () => {},
 	set_incoming_non_historical_state_webrtc: state => (historical: State) => {
 		for(const k in state) {
 			const key = k as keyof typeof state
@@ -78,8 +79,8 @@ export const historical = actionize_historical({
 	clear_animations: state => () => {
 		state.animations = []
 	},
-	set_animation_duration: state => (duration: number, {id}: VideoEffect | ImageEffect) => {
-		const effect = state.animations.find(a => a.targetEffect.id === id)
+	set_animation_duration: state => (duration: number, {id}: VideoEffect | ImageEffect, animationFor: AnimationFor) => {
+		const effect = state.animations.find(a => a.targetEffect.id === id && a.for === animationFor)
 		if(effect)
 			effect.duration = duration
 	},
@@ -90,7 +91,7 @@ export const historical = actionize_historical({
 		state.animations.push(animation)
 	},
 	remove_animation: state => (effect: VideoEffect | ImageEffect, type: "in" | "out", animationFor: AnimationFor) => {
-		state.animations = state.animations.filter((animation) => !(animation.targetEffect.id === effect.id && animation.type === type))
+		state.animations = state.animations.filter((animation) => !(animation.targetEffect.id === effect.id && animation.type === type && animation.for === animationFor))
 	},
 	remove_filter: state => (effect: ImageEffect | VideoEffect, type: FilterType) => {
 		state.filters.filter(filter => !(filter.targetEffectId === effect.id && filter.type === type))
