@@ -114,14 +114,18 @@ export class Media extends Map<string, AnyMedia> {
 		})
 	}
 
-	delete_file(file: AnyMedia) {
-		const request = this.#database_request.result
-			.transaction(["files"], "readwrite")
-			.objectStore("files")
-			.delete(file.hash)
-		request.onsuccess = (event) => {
-			this.on_media_change.publish({files: [file], action: "removed"})
-		}
+	async delete_file(hash: string) {
+		const media = this.get(hash)
+		return new Promise((resolve) => {
+			const request = this.#database_request.result
+				.transaction(["files"], "readwrite")
+				.objectStore("files")
+				.delete(hash)
+			request.onsuccess = (event) => {
+				resolve(true)
+				this.on_media_change.publish({files: [media!], action: "removed"})
+			}
+		})
 	}
 
 	async getVideoFileMetadata(file: File) {
@@ -135,35 +139,43 @@ export class Media extends Map<string, AnyMedia> {
 			const duration = videoTrack.Source_Duration ? videoTrack.Source_Duration * 1000 : videoTrack.Duration! * 1000
 			const frames = Math.round(videoTrack.FrameRate! * (videoTrack.Source_Duration ?? videoTrack.Duration!))
 			const fps = videoTrack.FrameRate!
-			return {fps, duration, frames}
+			const width = videoTrack.Sampled_Width
+			const height = videoTrack.Sampled_Height
+			return {fps, duration, frames, width, height}
 		} else {
 			throw Error("File is not a video")
 		}
 	}
 
 	// syncing files for collaboration (no permament storing to db)
-	async syncFile(file: File, hash: string, proxy?: boolean) {
+	async syncFile(file: File, hash: string, proxy?: boolean, isHost?: boolean) {
 		const alreadyAdded = this.get(hash)
 		if(alreadyAdded && proxy) {return}
 		if(file.type.startsWith("image")) {
 			const media = {file, hash, kind: "image"} satisfies AnyMedia
 			this.set(hash, media)
-			this.on_media_change.publish({files: [media], action: "added"})
+			if(isHost) {
+				this.import_file(file, hash, proxy)
+			} else this.on_media_change.publish({files: [media], action: "added"})
 		}
 		else if(file.type.startsWith("video")) {
 			const {frames, duration, fps} = await this.getVideoFileMetadata(file)
 			const media = {file, hash, kind: "video", frames, duration, fps, proxy: proxy ?? false} satisfies AnyMedia
 			this.set(hash, media)
-			this.on_media_change.publish({files: [media], action: "added"})
+			if(isHost) {
+				this.import_file(file, hash, proxy)
+			} else this.on_media_change.publish({files: [media], action: "added"})
 		}
 		else if(file.type.startsWith("audio")) {
 			const media = {file, hash, kind: "audio"} satisfies AnyMedia
 			this.set(hash, media)
-			this.on_media_change.publish({files: [media], action: "added"})
+			if(isHost) {
+				this.import_file(file, hash, proxy)
+			} else this.on_media_change.publish({files: [media], action: "added"})
 		}
 	}
 
-	async import_file(input: HTMLInputElement | File) {
+	async import_file(input: HTMLInputElement | File, proxyHash?: string, isProxy?: boolean) {
 		this.#files_ready = false
 		this.on_media_change.publish({files: [], action: "placeholder"})
 		const imported_file = input instanceof File ? input : input.files?.[0]
@@ -171,7 +183,8 @@ export class Media extends Map<string, AnyMedia> {
 			? await this.getVideoFileMetadata(imported_file)
 			: null
 		if(imported_file) {
-			const hash = await quick_hash(imported_file)
+			const hash = proxyHash ?? await quick_hash(imported_file)
+			if(isProxy === false && proxyHash) {await this.delete_file(proxyHash)}
 			const transaction = this.#database_request.result.transaction(["files"], "readwrite")
 			const files_store = transaction.objectStore("files")
 			const check_if_duplicate = files_store.count(hash)
@@ -186,7 +199,7 @@ export class Media extends Map<string, AnyMedia> {
 					}
 					else if(imported_file.type.startsWith("video")) {
 						const {frames, duration, fps} = metadata!
-						const media = {file: imported_file, hash, kind: "video", frames, duration, fps, proxy: false} satisfies AnyMedia
+						const media = {file: imported_file, hash, kind: "video", frames, duration, fps, proxy: isProxy ?? false} satisfies AnyMedia
 						files_store.add(media)
 						this.set(hash, media)
 						this.on_media_change.publish({files: [media], action: "added"})
