@@ -66,7 +66,7 @@ export class MessageHandler {
 
 				// If host, broadcast to other clients
 				if (this.collaboration.host) {
-					await mediaController.syncFile(file, hash, proxy)
+					await mediaController.syncFile(file, hash, proxy, true)
 					const media = mediaController.get(hash)!
 					if (proxy) {
 						this.fileHandler.broadcastMedia(media, connection, true)
@@ -157,6 +157,7 @@ export class MessageHandler {
 		// Apply the received state
 		omnislate.context.actions.set_incoming_historical_state_webrtc(parsed.initState)
 		omnislate.context.actions.set_incoming_non_historical_state_webrtc(parsed.initState)
+		omnislate.context.controllers.compositor.recreate(parsed.initState, omnislate.context.controllers.media)
 		this.collaboration.initiatingProject = false
 		showToast(`You're now collaborating on "${parsed.initState.projectName}"`, "info")
 		// Identify missing files
@@ -198,32 +199,12 @@ type ActionParams<T extends keyof Actions> = PopLast<Parameters<Actions[T]>>
 
 const actionHandlers: ActionHandlers = {
 	clear_animations() {
-		omnislate.context.controllers.compositor.managers.animationManager.clearAnimations()
+		omnislate.context.controllers.compositor.managers.animationManager.clearAnimations(true)
+		omnislate.context.controllers.compositor.managers.transitionManager.clearTransitions(true)
 	},
 
-	add_animation(payload) {
-		omnislate.context.actions.add_animation(...payload, { omit: true })
-
-		const [animation, animationFor] = payload
-		if (animationFor === 'Animation') {
-			omnislate.context.controllers.compositor.managers.animationManager
-				.selectAnimation(animation.targetEffect, animation, omnislate.context.state, true)
-		} else {
-			omnislate.context.controllers.compositor.managers.transitionManager
-				.selectAnimation(animation.targetEffect, animation, omnislate.context.state, true)
-		}
-	},
-
-	remove_animation(payload) {
-		omnislate.context.actions.remove_animation(...payload, { omit: true })
-		const [effect, type, animationFor] = payload
-		if (animationFor === 'Animation') {
-			omnislate.context.controllers.compositor.managers.animationManager
-				.removeAnimation(omnislate.context.state, effect , type, true)
-		} else {
-			omnislate.context.controllers.compositor.managers.transitionManager
-				.removeAnimation(omnislate.context.state, effect, type, true)
-		}
+	clear_project() {
+		omnislate.context.clear_project(true)
 	},
 
 	add_filter(payload) {
