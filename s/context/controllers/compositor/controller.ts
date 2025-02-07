@@ -95,11 +95,11 @@ export class Compositor {
 		this.canvas.clear()
 	}
 
-	clear() {
+	clear(omit?: boolean) {
 		this.canvas.clear()
 		this.init_guidelines()
-		this.managers.animationManager.clearAnimations()
-		this.managers.transitionManager.clearTransitions()
+		this.managers.animationManager.clearAnimations(omit)
+		this.managers.transitionManager.clearTransitions(omit)
 	}
 	
 	#calculate_elapsed_time() {
@@ -335,14 +335,8 @@ export class Compositor {
 				this.managers.filtersManager.addFilterToEffect(effect, filter.type)
 			}
 		}
-		for(const animation of state.animations) {
-			const effect = state.effects.find(e => e.id === animation.targetEffect.id)
-			if(effect && (effect.kind === "video" || effect.kind === "image")) {
-				if(animation.for === "Animation") {
-					this.managers.animationManager.selectAnimation(effect, animation, state, true)
-				} else this.managers.transitionManager.selectAnimation(effect, animation, state, true)
-			}
-		}
+		this.managers.transitionManager.refresh(state)
+		this.managers.animationManager.refresh(state)
 		this.compose_effects(state.effects, this.timecode)
 	}
 
@@ -380,12 +374,6 @@ export class Compositor {
 		this.timebase = value
 	}
 
-	/**
-		* Sets or discards the active object on the canvas based on the specified effect.
-		*
-		* @param effect - The effect to activate or discard on the canvas.
-		* @param state - The current application state.
-	*/
 	setOrDiscardActiveObjectOnCanvas(selectedEffect: AnyEffect | null, state: State) {
 		if (!selectedEffect) {
 			// Discard any active object if no effect is selected
