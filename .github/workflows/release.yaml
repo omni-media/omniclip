@@ -59,10 +59,10 @@ jobs:
       uses: actions/configure-pages@v2
 
     - name: 📤 upload pages artifact
-      uses: actions/upload-pages-artifact@v1
+      uses: actions/upload-pages-artifact@v3
       with:
         path: 'x'
 
     - name: 🚀 deploy to github pages
       id: deployment
-      uses: actions/deploy-pages@v1
+      uses: actions/deploy-pages@v4
