@@ -105,7 +105,7 @@ export const CollaborationManager = shadow_view((use) => () => {
 		return renderModal(
 			html`
 			<div>
-				<h3>Crate Session</h3>
+				<h3>Create Session</h3>
 				<button class="start" @click=${createRoom}>Start session</button>
 			</div>
 			<div>
