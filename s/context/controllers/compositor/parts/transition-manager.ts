@@ -161,15 +161,14 @@ export class TransitionManager extends AnimationManager {
 		return this.getAnyAnimation(effect)
 	}
 
-	getTransitionDuration (effect: AnyEffect) {
-		const transitionAnimation = this.getTransition(effect)
-		let incoming = 0
-		let outgoing = 0
-		if (transitionAnimation) {
-			incoming = transitionAnimation.duration / 2
-			outgoing = transitionAnimation.duration / 2
-		}
-		return {incoming, outgoing}
+	getTransitionByKind(effect: AnyEffect, kind: "in" | "out") {
+		return this.getAnimation(effect, kind)
+	}
+
+	getTransitionDuration(effect: AnyEffect) {
+		let incoming = this.getTransitionByKind(effect, "in")?.duration
+		let outgoing = this.getTransitionByKind(effect, "out")?.duration
+		return {incoming: incoming ? incoming / 2 : 0, outgoing: outgoing ? outgoing / 2 : 0}
 	}
 
 	getTransitions () {
