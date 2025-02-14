@@ -6,9 +6,9 @@ export const styles = css`
 		display: flex;
 		justify-content: center;
 		width: 2px;
-		height: 100vh;
+		height: 100%;
 		background: var(--alpha);
-		z-index: 3;
+		z-index: 15;
 		cursor: pointer;
 		touch-action: none;
 

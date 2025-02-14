@@ -12,8 +12,10 @@ import {calculate_effect_track_placement} from "../../../utils/calculate_effect_
 export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: AnyEffect, content: TemplateResult, style?: CSSResultGroup, inline_css?: string) => {
 	use.styles([style ?? css``, styles])
 	use.watch(() => use.context.state)
-
+	const state = use.context.state
 	const effect = use.context.state.effects.find(effect => effect.id === any_effect.id) ?? any_effect
+	const isVisible = state.tracks.find((_, i) => i === effect.track)?.visible
+	const isLocked = state.tracks.find((_, i) => i === effect.track)?.locked
 	const [[x, y], setCords] = use.state<V2 | [null, null]>([null, null])
 	const zoom = use.context.state.zoom
 	const controller = use.context.controllers.timeline
@@ -187,6 +189,8 @@ export const Effect = shadow_view(use => (timeline: GoldElement, any_effect: Any
 		${renderPreview()}
 		<span
 			class="effect"
+			?data-locked=${isLocked}
+			?data-hidden=${!isVisible}
 			?data-no-file=${fileNotFound}
 			?data-grabbed=${grabbed}
 			?data-selected=${use.context.state.selected_effect?.id === effect.id}

@@ -148,8 +148,8 @@ export const TimeRuler = shadow_view(use => (timeline: GoldElement) => {
 			class=time-ruler
 		>
 			<div style="transform: translateX(${indicatorX}px); display: ${indicator ? "block" : "none"};" class="indicator"></div>
-			${timeCodes.map(({time, offset, kind}) => html`
-			<div class="time ${kind}" style="transform: translateX(${offset}px)">
+			${timeCodes.map(({time, offset, kind}, i) => html`
+			<div class="time ${kind}" style="transform: translateX(${offset}px); ${i === 0 ? "margin-left: 10px;" : ""}">
 				<div class="content">${kind === "normal" ? time : null}</div>
 			</div>
 			`)}

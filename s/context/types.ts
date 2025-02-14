@@ -136,6 +136,9 @@ export interface At {
 
 export interface XTrack {
 	id: string
+	locked: boolean
+	visible: boolean
+	muted: boolean
 }
 
 export interface Grabbed {

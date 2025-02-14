@@ -1,13 +1,16 @@
 import {css} from "@benev/slate"
 
 export const styles = css`
+	:host {
+		width: 100%;
+	}
+
 	.time-ruler {
 		font-size: 0.5em;
 		display: flex;
 		height: 20px;
 		background: rgb(26, 26, 26);
 		align-items: center;
-		border-bottom: 2px solid #111;
 	}
 
 	.indicator {

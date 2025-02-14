@@ -6,7 +6,12 @@ export const historical_state: HistoricalState = {
 	projectName: `project-${generate_id().slice(0, 6)}`,
 	projectId: generate_id(),
 	tracks: [
-		{id: generate_id()}
+		{
+			id: generate_id(),
+			visible: true,
+			locked: false,
+			muted: false
+		}
 	],
 	effects: [],
 	filters: [],

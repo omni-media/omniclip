@@ -28,7 +28,7 @@ export const Toolbar = shadow_view(use => (timeline: GoldElement) => {
 
 	return html`
 		<div class="toolbar">
-			<div style="width: ${timeline.offsetWidth}px;" class=tools>
+			<div class=tools>
 				<div class=flex>
 					<div class=history>
 						${Tooltip(
@@ -95,7 +95,7 @@ export const Toolbar = shadow_view(use => (timeline: GoldElement) => {
 						html`<span>Clear Timeline</span>`
 					)}
 				</div>
-				<div>${convert_ms_to_hmsms(use.context.state.timecode)}</div>
+				<div class=time>${convert_ms_to_hmsms(use.context.state.timecode)}</div>
 				<div class="zoom">
 					${Tooltip(
 						html`

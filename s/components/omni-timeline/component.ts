@@ -1,11 +1,12 @@
-import {Op, html} from "@benev/slate"
 import {repeat} from "lit/directives/repeat.js"
+import {GoldElement, Op, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {Track} from "./views/track/view.js"
 import {Toolbar} from "./views/toolbar/view.js"
 import {Playhead} from "./views/playhead/view.js"
 import {TimeRuler} from "./views/time-ruler/view.js"
+import {TrackSidebar} from "./views/sidebar/view.js"
 import {shadow_component} from "../../context/context.js"
 import {TextEffect} from "./views/effects/text-effect.js"
 import {VideoEffect} from "./views/effects/video-effect.js"
@@ -96,23 +97,34 @@ export const OmniTimeline = shadow_component(use => {
 		` : null
 	}
 
+	const timeline = use.defer(() => use.shadow.querySelector(".timeline-relative")) as GoldElement ?? use.element as GoldElement
+
 	return StateHandler(Op.all(
 		use.context.helpers.ffmpeg.is_loading.value,
 		use.context.helpers.ffmpeg.is_loading.value), () => html`
+		${Toolbar([timeline])}
 		<div
 			class="timeline"
 		>
-			${Toolbar([use.element])}
-			${TimeRuler([use.element])}
-			<div
-				style="width: ${calculate_timeline_width(state.effects, state.zoom)}px;"
-				class=timeline-relative>
-				${renderTimelineInfo()}
-				${Playhead([])}
-				${!noEffects ? render_tracks() : null}
-				${render_effects()}
-				${ProposalIndicator()}
-				${TransitionIndicator()}
+			<div class=flex>
+				<button class="add-track" @click=${() => use.context.actions.add_track()}>add track</button>
+				${TimeRuler([timeline])}
+			</div>
+			<div class=flex>
+				<div class="track-sidebars">
+					${use.context.state.tracks.map((t, i) => html`${TrackSidebar([i, t.id])}`)}
+				</div>
+				<div
+					style="min-width: ${calculate_timeline_width(state.effects, state.zoom)}px;"
+					class=timeline-relative
+				>
+					${renderTimelineInfo()}
+					${Playhead([])}
+					${!noEffects ? render_tracks() : null}
+					${render_effects()}
+					${ProposalIndicator()}
+					${TransitionIndicator()}
+				</div>
 			</div>
 		</div>
  `)

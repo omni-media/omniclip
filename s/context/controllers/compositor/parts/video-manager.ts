@@ -5,6 +5,7 @@ import {Compositor} from "../controller.js"
 import {Actions} from "../../../actions.js"
 import {collaboration} from "../../../context.js"
 import {VideoEffect, State} from "../../../types.js"
+import {isEffectMuted} from "../utils/is_effect_muted.js"
 import {Video} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
@@ -127,7 +128,9 @@ export class VideoManager extends Map<string, FabricImage> {
 				const video = this.get(effect.id)
 				if(video) {
 					const element = video._originalElement as HTMLVideoElement
-					await	element.play()
+					const isMuted = isEffectMuted(effect)
+					element.muted = isMuted
+					await element.play()
 				}
 			}
 		}

@@ -76,6 +76,24 @@ export const non_historical = actionize_non_historical({
 })
 
 export const historical = actionize_historical({
+	toggle_track_muted: state => (trackId: string) => {
+		const track =state.tracks.find(track => track.id === trackId)
+		if(track) {
+			track.muted = !track.muted
+		}
+	},
+	toggle_track_visibility: state => (trackId: string) => {
+		const track =state.tracks.find(track => track.id === trackId)
+		if(track) {
+			track.visible = !track.visible
+		}
+	},
+	toggle_track_locked: state => (trackId: string) => {
+		const track =state.tracks.find(track => track.id === trackId)
+		if(track) {
+			track.locked = !track.locked
+		}
+	},
 	clear_animations: state => () => {
 		state.animations = []
 	},
@@ -181,7 +199,7 @@ export const historical = actionize_historical({
 		effect!.end = end
 	},
 	add_track: state => () => {
-		state.tracks.push({id: generate_id()})
+		state.tracks.push({id: generate_id(), muted: false, locked: false, visible: true})
 	},
 	remove_track: state => (id: string) => {
 		const new_arr = state.tracks.filter(track => track.id !== id)
@@ -189,7 +207,7 @@ export const historical = actionize_historical({
 	},
 	remove_tracks: state => () => {
 		state.tracks = []
-		state.tracks.push({id: generate_id()})
+		state.tracks.push({id: generate_id(), muted: false, locked: false, visible: true})
 	},
 	set_rotation: state => ({id}: TextEffect | ImageEffect | VideoEffect, rotation: number) => {
 		const effect = state.effects.find(effect => effect.id === id) as TextEffect | VideoEffect | ImageEffect

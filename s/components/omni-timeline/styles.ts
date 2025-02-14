@@ -3,6 +3,7 @@ import {css} from "@benev/slate"
 export const styles = css`
 	:host {
 		display: flex;
+		flex-direction: column;
 		overflow: scroll;
 		position: relative;
 		height: 100%;
@@ -13,11 +14,36 @@ export const styles = css`
 		flex-direction: column;
 		user-select: none;
 
+		& .flex {
+			display: flex;
+
+			& .add-track {
+				font-family: "Nippo-Regular";
+				color: #fff;
+				border: 1px solid #111;
+				background-image: -webkit-gradient(
+						linear,
+						left bottom,
+						left top,
+						color-stop(0, rgb(48,48,48)),
+						color-stop(1, rgb(102, 102, 102))
+				);
+				text-shadow: 0px -1px 0px rgba(0,0,0,.5);
+				font-size: 0.8em;
+				border-radius: 0;
+				min-width: 120px;
+				cursor: pointer;
+			}
+		}
+
+		& .track-sidebars {
+			width: 120px;
+		}
+
 		& .timeline-relative {
 			height: 100%;
 			min-width: 100vw;
 			position: relative;
-			overflow-y: scroll;
 			background-color: #111;
 
 			& * {

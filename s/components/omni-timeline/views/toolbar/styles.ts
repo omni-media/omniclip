@@ -2,6 +2,7 @@ import {css} from "@benev/slate"
 
 export const styles = css`
 	:host {
+		position: relative;
 		display: flex;
 		min-height: 50px;
 		--transition: 0.25s;
@@ -12,16 +13,22 @@ export const styles = css`
 		display: flex;
 		align-items: center;
 		gap: 0.5em;
-		margin-left: 0.5em;
+		width: 100%;
 	}
 
 	.tools {
-		z-index: 2;
+		height: 50px;
+		background: #111;
+		z-index: 100;
+		width: 100%;
 		display: flex;
-		position: fixed;
-		padding-right: 2em;
+		padding: 0.5em;
 		align-items: center;
 		justify-content: space-between;
+
+		& .time {
+			font-family: Nippo-Regular;
+		}
 
 		& button {
 			cursor: pointer;

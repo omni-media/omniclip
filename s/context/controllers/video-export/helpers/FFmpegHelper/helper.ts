@@ -7,6 +7,7 @@ import {fetchFile} from "@ffmpeg/util/dist/esm/index.js"
 import {Actions} from "../../../../actions.js"
 import {Media} from "../../../media/controller.js"
 import {AnyEffect, AudioEffect, VideoEffect} from "../../../../types.js"
+import {isEffectMuted} from "../../../compositor/utils/is_effect_muted.js"
 
 export class FFmpegHelper {
 	ffmpeg = new FFmpeg()
@@ -36,9 +37,9 @@ export class FFmpegHelper {
 		/* audio from video to add back to the raw video we composed that consitsts of just frames,
 		* i decided to not use AudioDecoder etc, instead im just using ffmpeg to encode back audio to video
 		*/
-		const audio_from_video_effects = (effects.filter(effect => effect.kind === "video") as VideoEffect[])
+		const audio_from_video_effects = (effects.filter(effect => effect.kind === "video" && !isEffectMuted(effect)) as VideoEffect[])
 		// those below are new audio effects to merge
-		const added_audio_effects = (effects.filter(effect => effect.kind === "audio") as AudioEffect[])
+		const added_audio_effects = (effects.filter(effect => effect.kind === "audio" && !isEffectMuted(effect)) as AudioEffect[])
 
 		const all_audio_effects = [...audio_from_video_effects, ...added_audio_effects]
 

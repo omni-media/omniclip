@@ -4,6 +4,7 @@ import {Compositor} from "../controller.js"
 import {Actions} from "../../../actions.js"
 import {collaboration} from "../../../context.js"
 import {AudioEffect, State} from "../../../types.js"
+import {isEffectMuted} from "../utils/is_effect_muted.js"
 import {Audio} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
@@ -58,8 +59,11 @@ export class AudioManager extends Map<string, HTMLAudioElement> {
 		for(const effect of this.compositor.currently_played_effects.values()) {
 			if(effect.kind === "audio") {
 				const element = this.get(effect.id)
-				if(element)
+				if(element) {
+					const isMuted = isEffectMuted(effect)
+					element.muted = isMuted
 					await element.play()
+				}
 			}
 		}
 	}

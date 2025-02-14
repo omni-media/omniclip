@@ -22,6 +22,7 @@ export const styles = css`
 		}
 
 		&[data-grabbed] {
+			opacity: 1 !important;
 			cursor: grabbing;
 		}
 
@@ -90,11 +91,15 @@ export const styles = css`
 
 		&[data-grabbed] {
 			z-index: 2;
-			opacity: 0.5;
+			opacity: 0.5 !important;
 		}
 
 		&[data-selected] {
 			filter: brightness(0.5);
+		}
+
+		&[data-hidden] {
+			opacity: 0.2;
 		}
 
 		&[data-selected]::after {
