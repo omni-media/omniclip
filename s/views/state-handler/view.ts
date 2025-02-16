@@ -19,6 +19,8 @@ const errorState = shadow_view(use => (reason: string) => {
 				<ul>
 					<li>Google Chrome</li>
 					<li>Microsoft Edge</li>
+					<li>Firefox</li>
+					<li>Other supported browsers: <a href="https://caniuse.com/?search=webcodecs%20api" target="_blank">more</a></li>
 				</ul>
 			</div>
 			`
