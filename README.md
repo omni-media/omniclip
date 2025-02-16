@@ -6,6 +6,25 @@
 If you are tired of paying to use all the features of existing video editing applications then you might have found a gem! Turns out omniclip is fully free and on top of that its open source.
 Everything works inside browser, theres no private data being used, everything is kept within your device disk space.
 
+## Features
+  Note that it is quite basic video editor, but it is my main project and I will keep working on it and improving.
+  It utilizes webcodecs API, it means that the rendering process is fastest it can be on web browsers.
+- Trimming
+- Splitting
+- Supports - Text, Audio, Video (mp4) and Images
+- Clip editing on preview - rotating, resizing, text styling and more
+- Undo/Redo
+- Render in different resolutions, aspect ratios, framerates, up to 4k.
+- Transitions - Applying transitions between video clips for smooth visual effects
+- Filters
+- Project manager - manage multiple projects, persisted in localstorage
+- Collaboration - work with other people on same project in real time
+- Export and import project
+## To be added
+- Better transitions - more customizable transitions (glsl shaders)
+- Audio Editing - Adjusting volume etc
+- Keyframes
+
 ## How to
   #### Use omniclip components in your app:
   1. Install omniclip:  
@@ -26,25 +45,9 @@ Everything works inside browser, theres no private data being used, everything i
   #### Use omniclip tools:
   // no tools yet, but will be added here: https://github.com/omni-media/omnitool
 
-## Features
-  Note that it is quite basic video editor, but it is my main project and I will keep working on it and improving.
-  It utilizes webcodecs API, it means that the rendering process is fastest it can be on web browsers.
-- Trimming
-- Splitting
-- Supports - Text, Audio, Video (mp4) and Images
-- Clip editing on preview - rotating, resizing, text styling and more
-- Undo/Redo
-- Render in different resolutions, up to 4k.
-## To be added
-- Project manager - panel where you can choose from your saved projects, instead just one
-- Transitions - Applying transitions between video clips for smooth visual effects
-- Effects - filters, color adjustments, or some other special effects
-- Audio Editing - Adjusting volume etc
-- Different timebases other than 25 fps
-
 ## Demo
 
-Demo Page - https://omni-media.github.io/omniclip/
+Demo Page - https://omniclip.app/
 <p style="display: flex; flex-direction: row;" align="center">
   <img height="250" width="400" src="./assets/demo1.png"/> <img height="250" width="400" src="./assets/demo2.png"/>
 </p>
