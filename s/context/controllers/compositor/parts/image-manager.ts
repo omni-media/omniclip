@@ -1,14 +1,14 @@
 import {generate_id} from "@benev/slate"
-import {FabricImage} from "fabric/dist/index.mjs"
+import {Sprite, Assets} from "pixi.js/dist/pixi.mjs"
 
 import {Compositor} from "../controller.js"
 import {Actions} from "../../../actions.js"
-import {collaboration} from "../../../context.js"
 import {ImageEffect, State} from "../../../types.js"
+import {collaboration, omnislate} from "../../../context.js"
 import {Image} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
-export class ImageManager extends Map<string, FabricImage> {
+export class ImageManager extends Map<string, Sprite> {
 
 	constructor(private compositor: Compositor, private actions: Actions) {super()}
 
@@ -41,35 +41,34 @@ export class ImageManager extends Map<string, FabricImage> {
 
 	async add_image_effect(effect: ImageEffect, file: File, recreate?: boolean) {
 		const url = URL.createObjectURL(file)
-		const image = await FabricImage.fromURL(url, {}, {
-			scaleX: effect.rect.scaleX,
-			scaleY: effect.rect.scaleY,
-			top: effect.rect.position_on_canvas.y,
-			left: effect.rect.position_on_canvas.x,
-			angle: effect.rect.rotation,
-			objectCaching: false,
-			effect: {...effect}
-		})
-		this.set(effect.id, image)
-		if(recreate) {return}
+		const texture = await Assets.load({src: url, format: file.type, loadParser: 'loadTextures'})
+		const sprite = new Sprite(texture)
+		sprite.x = effect.rect.position_on_canvas.x
+		sprite.y = effect.rect.position_on_canvas.y
+		sprite.scale.set(effect.rect.scaleX, effect.rect.scaleY)
+		sprite.rotation = effect.rect.rotation * (Math.PI / 180)
+		sprite.eventMode = "static"
+		sprite.cursor = "pointer"
+		sprite.on('pointerdown', (e) => this.compositor.canvasElementDrag.onDragStart(e, sprite), sprite)
+		;(sprite as any).effect = {...effect}
+		this.set(effect.id, sprite)
+		if (recreate) {return}
 		this.actions.add_image_effect(effect)
 	}
 
 	add_image_to_canvas(effect: ImageEffect) {
-		const max_track = 4 // lower track means it should draw on top of higher tracks, although moveObjectTo z-index works in reverse
 		const image = this.get(effect.id)
 		if(image) {
-			this.compositor.canvas.add(image)
-			this.compositor.canvas.moveObjectTo(image, max_track - effect.track)
-			this.compositor.canvas.renderAll()
+			this.compositor.app.stage.addChild(image)
+			image.zIndex = omnislate.context.state.tracks.length - effect.track
+			this.compositor.app.stage.sortChildren()
 		}
 	}
 
 	remove_image_from_canvas(effect: ImageEffect) {
 		const image = this.get(effect.id)
 		if(image) {
-			this.compositor.canvas.remove(image)
-			this.compositor.canvas.renderAll()
+			this.compositor.app.stage.removeChild(image)
 		}
 	}
 }
