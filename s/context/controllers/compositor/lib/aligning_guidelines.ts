@@ -1,5 +1,3 @@
-import {Application, Point, Container, FederatedPointerEvent, Renderer, Matrix} from "pixi.js/dist/pixi.mjs"
-
 import {Keys} from "./util.js"
 import {Compositor} from "../controller.js"
 
@@ -18,11 +16,11 @@ type HorizontalLineCoords = {
 type IgnoreObjTypes = { key: string; value: any }[];
 
 type ACoordsAppendCenter = {
-	tl: Point
-	tr: Point
-	bl: Point
-	br: Point
-	c: Point
+	tl: PIXI.Point
+	tr: PIXI.Point
+	bl: PIXI.Point
+	br: PIXI.Point
+	c: PIXI.Point
 }
 
 export class AlignGuidelines {
@@ -32,7 +30,7 @@ export class AlignGuidelines {
 	ignoreObjTypes: IgnoreObjTypes = [];
 	pickObjTypes: IgnoreObjTypes = [];
 
-	app: Application<Renderer<any>>
+	app: PIXI.Application<PIXI.Renderer<any>>
 	compositor: Compositor
 	viewportTransform: any;
 	verticalLines: VerticalLineCoords[] = [];
@@ -45,7 +43,7 @@ export class AlignGuidelines {
 		ignoreObjTypes,
 		pickObjTypes,
 	}: {
-		app: Application
+		app: PIXI.Application
 		compositor: Compositor
 		ignoreObjTypes?: IgnoreObjTypes;
 		pickObjTypes?: IgnoreObjTypes;
@@ -82,8 +80,8 @@ export class AlignGuidelines {
 	}
 
 	private drawLine(x1: number, y1: number, x2: number, y2: number) {
-		const point1 = transformPoint(new Point(x1, y1), new Matrix());
-		const point2 = transformPoint(new Point(x2, y2), new Matrix());
+		const point1 = transformPoint(new PIXI.Point(x1, y1), new PIXI.Matrix());
+		const point2 = transformPoint(new PIXI.Point(x2, y2), new PIXI.Matrix());
 		const strokeColor = parseInt(this.aligningLineColor.replace("#", "0x"))
 		this.compositor.graphics.setStrokeStyle({
 			width: this.aligningLineWidth,
@@ -145,10 +143,10 @@ export class AlignGuidelines {
 		this.verticalLines.length = this.horizontalLines.length = 0;
 	}
 
-	on_object_move_or_scale(e: FederatedPointerEvent) {
+	on_object_move_or_scale(e: PIXI.FederatedPointerEvent) {
 		this.clearLinesMeta()
 		this.clearGuideline()
-		const activeObject = e.target as Container
+		const activeObject = e.target as PIXI.Container
 		if(!activeObject) {return}
 		const canvasObjects = this.compositor.app.stage.children.filter(obj => {
 			if (this.ignoreObjTypes.length) {
@@ -169,28 +167,28 @@ export class AlignGuidelines {
 		// this.canvas.on("object:scaling", (e) => this.on_object_move_or_scale(e));
 	}
 
-	private getObjDraggingObjCoords(activeObject: Container): ACoordsAppendCenter {
+	private getObjDraggingObjCoords(activeObject: PIXI.Container): ACoordsAppendCenter {
 		const bounds = activeObject.getBounds()
 		const aCoords = {
-			tl: new Point(bounds.x, bounds.y),
-			tr: new Point(bounds.x + bounds.width, bounds.y),
-			bl: new Point(bounds.x, bounds.y + bounds.height),
-			br: new Point(bounds.x + bounds.width, bounds.y + bounds.height),
+			tl: new PIXI.Point(bounds.x, bounds.y),
+			tr: new PIXI.Point(bounds.x + bounds.width, bounds.y),
+			bl: new PIXI.Point(bounds.x, bounds.y + bounds.height),
+			br: new PIXI.Point(bounds.x + bounds.width, bounds.y + bounds.height),
 		}
-		const centerPoint = new Point((aCoords.tl.x + aCoords.br.x) / 2, (aCoords.tl.y + aCoords.br.y) / 2)
-		const computedCenter = new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+		const centerPoint = new PIXI.Point((aCoords.tl.x + aCoords.br.x) / 2, (aCoords.tl.y + aCoords.br.y) / 2)
+		const computedCenter = new PIXI.Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
 		const offsetX = centerPoint.x - computedCenter.x
 		const offsetY = centerPoint.y - computedCenter.y
 		return Object.keys(aCoords).reduce((acc, k) => {
 			const key = k as keyof typeof aCoords
-			acc[key] = new Point(aCoords[key].x - offsetX, aCoords[key].y - offsetY)
+			acc[key] = new PIXI.Point(aCoords[key].x - offsetX, aCoords[key].y - offsetY)
 			return acc
 		}, { c: computedCenter } as ACoordsAppendCenter)
 	}
 
 	private omitCoords(objCoords: ACoordsAppendCenter, type: "vertical" | "horizontal") {
 		let newCoords;
-		type PointArr = [keyof ACoordsAppendCenter, Point];
+		type PointArr = [keyof ACoordsAppendCenter, PIXI.Point];
 		if (type === "vertical") {
 			let l: PointArr = ["tl", objCoords.tl];
 			let r: PointArr = ["tl", objCoords.tl];
@@ -237,12 +235,12 @@ export class AlignGuidelines {
 	 * fabric.Object.getCenterPoint will return the center point of the object calc by mouse moving & dragging distance.
 	 * calcCenterPointByACoords will return real center point of the object position.
 	 */
-	private calcCenterPointByACoords(object: Container): Point {
+	private calcCenterPointByACoords(object: PIXI.Container): PIXI.Point {
 		const bounds = object.getBounds()
-		return new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+		return new PIXI.Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
 	}
 
-	private traversAllObjects(event: FederatedPointerEvent, activeObject: Container, canvasObjects: Container[]) {
+	private traversAllObjects(event: PIXI.FederatedPointerEvent, activeObject: PIXI.Container, canvasObjects: PIXI.Container[]) {
 		const objCoordsByMovingDistance = this.getObjDraggingObjCoords(activeObject)
 		const snapXPoints: number[] = []
 		const snapYPoints: number[] = []
@@ -348,8 +346,8 @@ private snap({
 		draggingObjCoords,
 		snapYPoints,
 	}: {
-		event: FederatedPointerEvent,
-		activeObject: Container
+		event: PIXI.FederatedPointerEvent,
+		activeObject: PIXI.Container
 		snapXPoints: number[]
 		draggingObjCoords: ACoordsAppendCenter
 		snapYPoints: number[]
@@ -362,17 +360,17 @@ private snap({
 				.sort((a, b) => a.abs - b.abs)[0].val
 		}
 
-		const candidateSnapGlobal = new Point(
+		const candidateSnapGlobal = new PIXI.Point(
 			sortPoints(snapXPoints, draggingObjCoords.c.x),
 			sortPoints(snapYPoints, draggingObjCoords.c.y)
 		)
 
 		const pivotGlobal = activeObject.parent.toGlobal(activeObject.position)
 		const bounds = activeObject.getBounds()
-		const geometricCenter = new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
-		const offset = new Point(geometricCenter.x - pivotGlobal.x, geometricCenter.y - pivotGlobal.y)
+		const geometricCenter = new PIXI.Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+		const offset = new PIXI.Point(geometricCenter.x - pivotGlobal.x, geometricCenter.y - pivotGlobal.y)
 
-		const newPivotGlobal = new Point(
+		const newPivotGlobal = new PIXI.Point(
 			candidateSnapGlobal.x - offset.x,
 			candidateSnapGlobal.y - offset.y
 		)
@@ -407,13 +405,13 @@ private snap({
 
 export const transformPoint = (
 	p: { x: number, y: number },
-	t: Matrix,
+	t: PIXI.Matrix,
 	ignoreOffset?: boolean
-): Point => {
-	const pt = new Point(p.x, p.y)
+): PIXI.Point => {
+	const pt = new PIXI.Point(p.x, p.y)
 	if (ignoreOffset) {
 		// Create a copy of the matrix without the translation components.
-		const m = new Matrix(t.a, t.b, t.c, t.d, 0, 0)
+		const m = new PIXI.Matrix(t.a, t.b, t.c, t.d, 0, 0)
 		return m.apply(pt)
 	}
 	return t.apply(pt)

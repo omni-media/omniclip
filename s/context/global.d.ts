@@ -22,3 +22,7 @@ declare global {
 		queryLocalFonts(): Promise<FontMetadata[]>
 	}
 }
+
+declare global {
+	const PIXI: typeof PIXI
+}

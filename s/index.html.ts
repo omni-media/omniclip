@@ -7,6 +7,8 @@ export default template(async basic => {
 		css: "index.css",
 		title: "omniclip",
 		head: html`
+			<script src="https://pixijs.download/dev/pixi.min.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/pixi-filters@6.1.0/dist/pixi-filters.min.js"></script>
 			<script src="coi-serviceworker.js"></script>
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">

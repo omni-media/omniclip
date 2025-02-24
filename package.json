@@ -46,7 +46,6 @@
     "@zip.js/zip.js": "^2.7.54",
     "coi-serviceworker": "^0.1.7",
     "es-module-shims": "^1.8.2",
-    "fabric": "^6.0.0-beta20",
     "ffprobe-wasm": "^0.3.1",
     "gsap": "^3.12.5",
     "lit": "^2.6.1",

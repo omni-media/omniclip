@@ -1,5 +1,4 @@
 import {pub, reactor, signal} from "@benev/slate"
-import {Application, Graphics, Container, FederatedPointerEvent, Rectangle} from "pixi.js/dist/pixi.mjs"
 
 import {Actions} from "../../actions.js"
 import {Media} from "../media/controller.js"
@@ -8,7 +7,7 @@ import {ImageManager} from "./parts/image-manager.js"
 import {AudioManager} from "./parts/audio-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
 import {AlignGuidelines} from "./lib/aligning_guidelines.js"
-// import {FiltersManager} from "./parts/filter-manager.js"
+import {FiltersManager} from "./parts/filter-manager.js"
 import {AnyEffect, AudioEffect, State} from "../../types.js"
 // import {AnimationManager} from "./parts/animation-manager.js"
 import {compare_arrays} from "../../../utils/compare_arrays.js"
@@ -22,7 +21,7 @@ export interface Managers {
 	imageManager: ImageManager
 	audioManager: AudioManager
 	// animationManager: AnimationManager
-	// filtersManager: FiltersManager
+	filtersManager: FiltersManager
 	// transitionManager: TransitionManager
 }
 
@@ -35,20 +34,20 @@ export class Compositor {
 	timebase = 25
 	currently_played_effects = new Map<string, AnyEffect>()
 
-	app = new Application()
+	app = new PIXI.Application()
 	#seekedResolve: ((value: unknown) => void) | null = null
 	
 	managers: Managers
 
-	selectedElement: Container | null = null
-	graphics = new Graphics() // graphics for align guidelines
+	selectedElement: PIXI.Container | null = null
+	graphics = new PIXI.Graphics() // graphics for align guidelines
 	guidelines: AlignGuidelines | null = null
 
 
 	constructor(private actions: Actions) {
 	this.#on_new_canvas_object_set_handle_styles()
 	this.#on_selected_canvas_object()
-	this.app.init({width: 1920, height: 1080}).then(() => {
+	this.app.init({width: 1920, height: 1080, preference: "webgl"}).then(() => {
 		this.guidelines = new AlignGuidelines({
 			app: this.app,
 			compositor: this
@@ -66,7 +65,7 @@ export class Compositor {
 		imageManager: new ImageManager(this, actions),
 		audioManager: new AudioManager(this, actions),
 		// animationManager: new AnimationManager(this, actions, "Animation"),
-		// filtersManager: new FiltersManager(this, actions),
+		filtersManager: new FiltersManager(this, actions),
 		// transitionManager: new TransitionManager(this, actions)
 	}
 
@@ -103,7 +102,7 @@ export class Compositor {
 	}
 
 	canvasElementDrag = {
-		onDragStart: (e: FederatedPointerEvent, element: Container) => {
+		onDragStart: (e: PIXI.FederatedPointerEvent, element: PIXI.Container) => {
 			let position = e.getLocalPosition(element)
 			element.pivot.set(position.x, position.y)
 			element.position.set(e.global.x, e.global.y)
@@ -116,7 +115,7 @@ export class Compositor {
 				this.selectedElement = null
 			}
 		},
-		onDragMove: (event: FederatedPointerEvent) => {
+		onDragMove: (event: PIXI.FederatedPointerEvent) => {
 			this.selectedElement?.parent.toLocal(event.global, undefined, this.selectedElement.position)
 			if (this.selectedElement) {
 				if(this.guidelines) {
@@ -172,7 +171,6 @@ export class Compositor {
 	#update_currently_played_effects(effects: AnyEffect[], timecode: number, exporting?: boolean) {
 		const effects_relative_to_timecode = this.get_effects_relative_to_timecode(effects, timecode)
 		const {add, remove} = compare_arrays([...this.currently_played_effects.values()], effects_relative_to_timecode)
-		console.log(add, remove, "a")
 		this.#update_effects(effects_relative_to_timecode)
 		this.#remove_effects_from_canvas(remove, exporting)
 		this.#add_effects_to_canvas(add)
@@ -350,7 +348,7 @@ export class Compositor {
 		for(const filter of state.filters) {
 			const effect = state.effects.find(e => e.id === filter.targetEffectId)
 			if(effect && (effect.kind === "video" || effect.kind === "image")) {
-				// this.managers.filtersManager.addFilterToEffect(effect, filter.type)
+				this.managers.filtersManager.addFilterToEffect(effect, filter.type, true)
 			}
 		}
 		// this.managers.transitionManager.refresh(state)
@@ -360,7 +358,7 @@ export class Compositor {
 
 	update_canvas_objects(state: State) {
 		this.app.stage.children.forEach(object => {
-			if(!(object instanceof Rectangle)) {
+			if(!(object instanceof PIXI.Rectangle)) {
 				//@ts-ignore
 				const object_effect = object.effect as Exclude<AnyEffect, AudioEffect>
 				const effect = state.effects.find(effect => effect.id === object_effect.id)! as Exclude<AnyEffect, AudioEffect>

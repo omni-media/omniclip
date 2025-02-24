@@ -1,5 +1,4 @@
 import {generate_id} from "@benev/slate"
-import {Sprite, Assets} from "pixi.js/dist/pixi.mjs"
 
 import {Compositor} from "../controller.js"
 import {Actions} from "../../../actions.js"
@@ -8,7 +7,7 @@ import {collaboration, omnislate} from "../../../context.js"
 import {Image} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
-export class ImageManager extends Map<string, Sprite> {
+export class ImageManager extends Map<string, PIXI.Sprite> {
 
 	constructor(private compositor: Compositor, private actions: Actions) {super()}
 
@@ -41,8 +40,8 @@ export class ImageManager extends Map<string, Sprite> {
 
 	async add_image_effect(effect: ImageEffect, file: File, recreate?: boolean) {
 		const url = URL.createObjectURL(file)
-		const texture = await Assets.load({src: url, format: file.type, loadParser: 'loadTextures'})
-		const sprite = new Sprite(texture)
+		const texture = await PIXI.Assets.load({src: url, format: file.type, loadParser: 'loadTextures'})
+		const sprite = new PIXI.Sprite(texture)
 		sprite.x = effect.rect.position_on_canvas.x
 		sprite.y = effect.rect.position_on_canvas.y
 		sprite.scale.set(effect.rect.scaleX, effect.rect.scaleY)
