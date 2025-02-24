@@ -61,11 +61,46 @@ h2 {
 	}
 
 	& .filter {
+		position: relative;
+	}
+
+	& .options {
+		display: flex;
+		flex-direction: column;
+		position: absolute;
+		z-index: 10;
+		width: 100%;
+		background: #111;
+
+		& fieldset {
+			display: flex;
+			flex-direction: column;
+		}
+	}
+
+	& button {
+		font-family: "Nippo-Regular";
+		color: #fff;
+		border: 1px solid #111;
+		background-image: -webkit-gradient(
+				linear,
+				left bottom,
+				left top,
+				color-stop(0, rgb(48,48,48)),
+				color-stop(1, rgb(102, 102, 102))
+		);
+		text-shadow: 0px -1px 0px rgba(0,0,0,.5);
+		font-size: 0.8em;
+		border-radius: 0;
+		cursor: pointer;
+		width: 100%;
+	}
+
+	& .filter-preview {
 		display: flex;
 		flex-direction: column;
 		width: 200px;
 		background: black;
-		border-radius: 10px;
 		justify-content: center;
 		align-items: center;
 		cursor: pointer;
@@ -76,8 +111,7 @@ h2 {
 		}
 
 		& canvas {
-			border-top-right-radius: 10px;
-			border-top-left-radius: 10px;
+			width: 100%;
 		}
 
 		&[data-selected] {

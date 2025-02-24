@@ -1,5 +1,4 @@
-import {filters} from "fabric"
-import {Op, html, css} from "@benev/slate"
+import {Op, html, css, TemplateResult} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {Tooltip} from "../../views/tooltip/view.js"
@@ -9,7 +8,7 @@ import {StateHandler} from "../../views/state-handler/view.js"
 import {ImageEffect, VideoEffect} from "../../context/types.js"
 import circleInfoSvg from "../../icons/gravity-ui/circle-info.svg.js"
 import overlapSvg from "../../icons/material-design-icons/overlap.svg.js"
-import {FilterType} from "../../context/controllers/compositor/parts/filter-manager.js"
+import {FilterPropertyConfig, FilterSchemas, FilterType} from "../../context/controllers/compositor/parts/filter-manager.js"
 
 export const OmniFilters = shadow_component(use => {
 	use.watch(() => use.context.state)
@@ -22,7 +21,7 @@ export const OmniFilters = shadow_component(use => {
 
 	const controllers = use.context.controllers
 	const filtersManager = controllers.compositor.managers.filtersManager
-	const [filterPreviews, setFilterPreviews, getFilterPreviews] = use.state<{type: FilterType, canvas: HTMLCanvasElement}[]>([])
+	const [filterPreviews, setFilterPreviews, getFilterPreviews] = use.state<{type: FilterType, canvas: PIXI.ICanvas, uid: number}[]>([])
 
 	const selectedImageOrVideoEffect = use.context.state.selected_effect?.kind === "video" || use.context.state.selected_effect?.kind === "image"
 		? use.context.state.effects.find(effect => effect.id === use.context.state.selected_effect!.id)! as ImageEffect | VideoEffect
@@ -65,14 +64,139 @@ export const OmniFilters = shadow_component(use => {
 		)
 	}
 
+	const renderControl = (
+		filterType: FilterType,
+		propertyPath: string[],
+		config: FilterPropertyConfig
+	): TemplateResult => {
+		const label = propertyPath.join(".");
+		switch (config.type) {
+			case "number":
+				return html`
+					<label>
+						${label}:
+						<input
+							@change=${(e: InputEvent) =>
+								filtersManager.updateEffectFilter(
+									selectedImageOrVideoEffect!,
+									filterType,
+									propertyPath,
+									+(e.target as HTMLInputElement).value
+								)}
+							type="range"
+							min="${config.min}"
+							max="${config.max}"
+							value="${config.default}"
+							step="0.1"
+						>
+					</label>
+				`
+			case "color":
+				return html`
+					<label>
+						${label}:
+						<input
+							@change=${(e: InputEvent) =>
+								filtersManager.updateEffectFilter(
+									selectedImageOrVideoEffect!,
+									filterType,
+									propertyPath,
+									(e.target as HTMLInputElement).value
+								)}
+							type="color"
+							value="${config.default}"
+						>
+					</label>
+				`
+			case "boolean":
+				return html`
+					<label>
+						${label}:
+						<input
+							@change=${(e: InputEvent) =>
+								filtersManager.updateEffectFilter(
+									selectedImageOrVideoEffect!,
+									filterType,
+									propertyPath,
+									(e.target as HTMLInputElement).checked ? 1 : 0
+								)}
+							type="checkbox"
+							?checked="${config.default}"
+						>
+					</label>
+				`
+			case "choice":
+				// Normalize options: if it's an array, map each string to { value, label }
+				// if it's an object, use Object.entries.
+				const normalizedOptions = Array.isArray(config.options)
+					? config.options.map(option => ({ value: option, label: option }))
+					: Object.entries(config.options).map(
+							([value, label]) => ({ value, label })
+						)
+				return html`
+					<label>
+						${label}:
+						<select
+							@change=${(e: InputEvent) =>
+								filtersManager.updateEffectFilter(
+									selectedImageOrVideoEffect!,
+									filterType,
+									propertyPath,
+									+(e.target as HTMLSelectElement).value
+								)}
+						>
+							${normalizedOptions.map(
+								({ value, label }) => html`
+									<option value="${value}" ?selected="${value === config.default}">
+										${label}
+									</option>
+								`
+							)}
+						</select>
+					</label>
+				`
+			case "object":
+				// For an object type, recursively render nested controls.
+				return html`
+					<fieldset>
+						<legend>${label}</legend>
+						${Object.entries(config.properties).map(([subProp, subConfig]) =>
+							renderControl(filterType, [...propertyPath, subProp], subConfig)
+						)}
+					</fieldset>
+				`
+			case "array":
+				return html`
+					<fieldset>
+						${config.items.map((_, i) => {
+							return html`
+								<legend>${label}</legend>
+								${renderControl(filterType, [...propertyPath, `${i}`], config.items[0])}
+								<!-- Optionally, add UI controls to add or remove items -->
+							`})}
+					</fieldset>
+				`
+			default:
+				return html``
+		}
+	}
+
+	const renderFilterOptions = (type: FilterType): TemplateResult => {
+		const { ...params } = FilterSchemas[type] as typeof FilterSchemas[typeof type]
+		return html`
+			${Object.entries(params).map(([propertyName, config]) =>
+				renderControl(type, [propertyName], config)
+			)}
+		`
+	}
+
 	const renderFilters = () => {
 		return filterPreviews.map(({type, canvas}) => {
-			const filter = new filters[type]()
-			const hasNumberParameter = typeof filter.getMainParameter() === "number"
+			const [optionsOpened, setOptionsOpened] = use.state(false)
 			return html`
-			<div>
+			<div class=filter>
 				<div
-					class="filter"
+					class="filter-preview"
 					?data-selected=${filtersManager.selectedFilterForEffect(selectedImageOrVideoEffect!, type)}
 					@pointerdown=${(e: PointerEvent) => {
 						e.preventDefault()
@@ -82,14 +206,11 @@ export const OmniFilters = shadow_component(use => {
 					${canvas}
 					<p>${type}</p>
 				</div>
-				${hasNumberParameter
+				<button @click=${() => setOptionsOpened(!optionsOpened)}>Options</button>
+				${optionsOpened
 					? html`
-						<div class=filter-intensity>
-							<span>Intensity</span>
-							<input
-								@change=${(v: InputEvent) => filtersManager.updateEffectFilter(selectedImageOrVideoEffect!, type, +(v.target as HTMLInputElement).value)}
-								type="range" min="-1" max="1" value="0.75" step="0.01" class="slider" id="myRange"
-							>
+						<div class="options">
+							${renderFilterOptions(type)}
 						</div>
 					`
 					: null
