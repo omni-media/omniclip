@@ -160,12 +160,14 @@ export class TransitionManager {
 	#fragmentShader(fragment: string) {
 		const fragmentShader = `
 			precision highp float;
-			varying vec2 vTextureCoord;
+			in vec2 vTextureCoord;
 			varying vec2 _uv;
-			uniform sampler2D from, to;
-			uniform float progress, ratio, _fromR, _toR;
-
-
+			uniform sampler2D from;
+			uniform sampler2D to;
+			uniform float progress;
+			uniform float ratio;
+			uniform float _fromR;
+			uniform float _toR;
 			uniform float customUniform;
 
 			vec4 getFromColor(vec2 uv){
@@ -184,7 +186,17 @@ export class TransitionManager {
 				gl_FragColor = transition(vTextureCoord);
 			}
 		`
+
 		return fragmentShader
+	}
+
+	#getUniformType(type: string) {
+		if(type === "f32" || type === "i32") {
+			return type
+		} else if(type === "float") {
+			return "f32"
+		}
+		else return `${type}<f32>`
 	}
 
 	async #selectTransition(transition: Transition, state: State) {
@@ -208,30 +220,37 @@ export class TransitionManager {
 				this.compositor.app.renderer.render(incoming, { renderTexture: rtTo })
 			}
 
-			const filter = new PIXI.Filter(
-				vertexShader,
-				this.#fragmentShader(transition.transition.glsl),
-				{
-					_fromR: 1,
-					_toR: 1,
-					ratio: 1,
-					progress: 0,
-					customUniform: 0,
-					from: rtFrom,
-					to: rtTo,
-				}
-			)
+			const uniforms: any = {}
 
 			for(const uniform in transition.transition.defaultParams) {
-				filter.uniforms[uniform] = transition.transition.defaultParams[uniform]
+				uniforms[uniform] = {value: transition.transition.defaultParams[uniform], type: this.#getUniformType(transition.transition.paramsTypes[uniform])}
 			}
+
+			const filter = new PIXI.Filter({
+				glProgram: new PIXI.GlProgram({
+					vertex: vertexShader,
+					fragment: this.#fragmentShader(transition.transition.glsl),
+				}),
+				resources: {
+					from: rtFrom.source,
+					to: rtTo.source,
+					uniforms: {
+						_fromR: {value: 1, type: "f32"},
+						_toR: {value: 1, type: "f32"},
+						ratio: {value: 1, type: "f32"},
+						progress: {value: 0, type: "f32"},
+						customUniform: {value: 0, type: "f32"},
+						...uniforms
+					}
+				}
+			})
 
 			transitionSprite.filters = [filter]
 			this.compositor.app.stage.addChild(transitionSprite)
 			const margin = 10 // 10 ms
 
 			const incomingTween = gsap.fromTo(
-				filter.uniforms,
+				filter.resources.uniforms.uniforms,
 				{
 					progress: 0,
 					customUniform: 0,
@@ -246,7 +265,10 @@ export class TransitionManager {
 						incoming.alpha = 0
 						outgoing.alpha = 0
 						this.compositor.app.stage.addChild(transitionSprite)
-					}, true),
+					}, true, () => {
+						rtFrom.source.updateMipmaps()
+						rtTo.source.updateMipmaps()
+					}),
 					onComplete: () => {
 						incoming.alpha = 1
 						outgoing.alpha = 1
@@ -285,10 +307,10 @@ export class TransitionManager {
 		}
 	}
 
-	#onReverse(func: () => void, onlyAfterComplete: boolean) {
+	#onReverse(func: () => void, onlyAfterComplete: boolean, tick: () => void) {
 		let previousTime = 0
 		let reverseTriggered = false
-
+		tick()
 		return function(this: GSAPTweenVars) {
 			const currentTime = this.time()
 			const isReversing = currentTime < previousTime
@@ -392,31 +414,34 @@ export class TransitionManager {
 }
 
 const vertexShader = `
-	attribute vec2 aVertexPosition;
+	in vec2 aPosition;
 	varying vec2 _uv;                          // gl-transition
 	uniform mat3 projectionMatrix;
-	uniform vec4 inputSize;
-	uniform vec4 outputFrame;
-	varying vec2 vTextureCoord;
-	uniform float uTextureWidth;
-	uniform float uTextureHeight;
+	uniform vec4 uInputSize;
+	uniform vec4 uOutputFrame;
+	out vec2 vTextureCoord;
+	uniform vec4 uOutputTexture;
 
 	vec4 filterVertexPosition( void )
 	{
-	vec2 position = aVertexPosition * max(outputFrame.zw, vec2(0.)) + outputFrame.xy;
-	return vec4((projectionMatrix * vec3(position, 1.0)).xy, 0.0, 1.0);
+			vec2 position = aPosition * uOutputFrame.zw + uOutputFrame.xy;
+			
+			position.x = position.x * (2.0 / uOutputTexture.x) - 1.0;
+			position.y = position.y * (2.0*uOutputTexture.z / uOutputTexture.y) - uOutputTexture.z;
+
+			return vec4(position, 0.0, 1.0);
 	}
 
 	vec2 filterTextureCoord( void )
 	{
-	return aVertexPosition * (outputFrame.zw * inputSize.zw);
+	return aPosition * (uOutputFrame.zw * uInputSize.zw);
 	}
 
 	void main(void)
 	{
 	gl_Position = filterVertexPosition();
 	vTextureCoord = filterTextureCoord();
-	_uv = vec2(0.5, 0.5) * (aVertexPosition +vec2(1.0, 1.0));    // gl-transition
+	_uv = vec2(0.5, 0.5) * (aPosition +vec2(1.0, 1.0));    // gl-transition
 	}
 `
 
