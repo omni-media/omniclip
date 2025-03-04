@@ -20,7 +20,6 @@ export interface Transition {
 }
 
 interface PropsToUpdate {
-	effect: ImageEffect | VideoEffect
 	duration: number
 }
 
@@ -42,6 +41,7 @@ export class TransitionManager {
 		this.#transitions.forEach(a => this.removeTransition(a.id))
 		this.#transitions = []
 		this.actions.clear_animations({omit})
+		this.actions.clear_transitions({omit})
 		this.timeline.clear()
 		this.selected = null
 	}
@@ -56,15 +56,22 @@ export class TransitionManager {
 		}
 	}
 
-	isSelected(effect: AnyEffect | null, name: string) {
-		if(!effect) {return false}
-		return this.getTransitionByEffect(effect)?.transition.name === name
+	isSelected(name: string) {
+		if(!this.selected) {return false}
+		return this.getTransition(this.selected)?.transition.name === name
 	}
 
 	selectTransition(transition: Transition) {
 		const halfDuration = transition.duration / 2
 		this.selected = transition.id
-		const alreadyAdded = this.getTransitionByEffect(transition.outgoing) || this.getTransitionByEffect(transition.incoming)
+		const alreadyAdded = this.getTransition(transition.id)
+		const sameSelected = alreadyAdded?.transition.name === transition.transition.name
+
+		if(alreadyAdded && !sameSelected) {
+			this.removeTransition(transition.id)
+			this.selected = transition.id
+		}
+
 		if(!alreadyAdded) {
 			this.actions.set_effect_start_position(
 				transition.incoming,
@@ -88,17 +95,11 @@ export class TransitionManager {
 			apply: async (state: State) => {
 				const incoming = state.effects.find(e => e.id === transition.incoming.id) as VideoEffect | ImageEffect
 				const outgoing = state.effects.find(e => e.id === transition.outgoing.id) as VideoEffect | ImageEffect
-				const alreadyAdded = this.getTransitionByEffect(outgoing) || this.getTransitionByEffect(incoming)
+				const alreadyAdded = this.getTransition(transition.id)
 				if(!alreadyAdded) {
 					this.#selectTransition(
-						{
-							incoming,
-							outgoing,
-							transition: transition.transition,
-							duration: transition.duration,
-							id: transition.id
-						},
-					state
+						{...transition, incoming, outgoing},
+						state
 					)
 				}
 			}
@@ -109,7 +110,7 @@ export class TransitionManager {
 		this.timeline.getChildren().forEach(children => children.kill())
 		omnislate.context.state.transitions.forEach(transition => {
 			this.removeTransition(transition.id)
-			this.selectTransition(transition).apply(omnislate.context.state)
+			this.selectTransition(transition)?.apply(omnislate.context.state)
 		})
 	}
 
@@ -121,8 +122,8 @@ export class TransitionManager {
 			const transition = this.getTransition(this.selected)
 			if(transition) {
 				const {outgoing, incoming} = transition
-				this.actions.set_animation_duration(fullDuration, outgoing, "Transition")
-				this.actions.set_animation_duration(fullDuration, incoming, "Transition")
+				this.actions.set_animation_duration(fullDuration, outgoing)
+				this.actions.set_animation_duration(fullDuration, incoming)
 				this.actions.set_effect_start_position(
 					incoming,
 					incoming.start_at_position - halfDuration
@@ -210,6 +211,7 @@ export class TransitionManager {
 
 			const filter = new PIXI.Filter(
 				vertexShader,
+				//@ts-ignore
 				this.#fragmentShader(transition.transition.glsl),
 				{
 					_fromR: 1,
@@ -223,6 +225,7 @@ export class TransitionManager {
 			)
 
 			for(const uniform in transition.transition.defaultParams) {
+				//@ts-ignore
 				filter.uniforms[uniform] = transition.transition.defaultParams[uniform]
 			}
 
@@ -231,6 +234,7 @@ export class TransitionManager {
 			const margin = 10 // 10 ms
 
 			const incomingTween = gsap.fromTo(
+				//@ts-ignore
 				filter.uniforms,
 				{
 					progress: 0,
@@ -319,7 +323,7 @@ export class TransitionManager {
 		this.timeline.seek(time / 1000, false)
 	}
 
-	getTransition(id: string) {
+	getTransition(id: string | null) {
 		return omnislate.context.state.transitions.find(t => t.id === id)
 	}
 
@@ -331,7 +335,7 @@ export class TransitionManager {
 		return omnislate.context.state.transitions.filter(a => a.incoming.id === effect.id)
 	}
 
-	getTransitionDuration(id: string) {
+	getTransitionDuration(id: string | null) {
 		let duration = this.getTransition(id)
 		return duration
 	}
