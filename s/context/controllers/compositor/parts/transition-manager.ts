@@ -47,8 +47,8 @@ export class TransitionManager {
 	}
 
 	#getObject(effect: VideoEffect | ImageEffect) {
-		const videoObject = this.compositor.managers.videoManager.get(effect.id)
-		const imageObject = this.compositor.managers.imageManager.get(effect.id)
+		const videoObject = this.compositor.managers.videoManager.get(effect.id)?.sprite
+		const imageObject = this.compositor.managers.imageManager.get(effect.id)?.sprite
 		if (videoObject) {
 			return videoObject
 		} else if (imageObject) {
@@ -209,6 +209,24 @@ export class TransitionManager {
 				this.compositor.app.renderer.render(incoming, { renderTexture: rtTo })
 			}
 
+			let incomingTween: GSAPTween
+
+			const updateVideoTexture = () => {
+				if(incomingTween !== undefined) {
+					if(incomingTween.progress() > 0 && incomingTween.progress() < 1) {
+						if(transition.incoming.kind === "video") {
+							incoming.alpha = 1
+						}
+						if(transition.outgoing.kind === "video") {
+							outgoing.alpha = 1
+						}
+						updateRT()
+						outgoing.alpha = 0
+						incoming.alpha = 0
+					}
+				}
+			}
+
 			const filter = new PIXI.Filter(
 				vertexShader,
 				//@ts-ignore
@@ -233,7 +251,7 @@ export class TransitionManager {
 			this.compositor.app.stage.addChild(transitionSprite)
 			const margin = 10 // 10 ms
 
-			const incomingTween = gsap.fromTo(
+			incomingTween = gsap.fromTo(
 				//@ts-ignore
 				filter.uniforms,
 				{
@@ -250,7 +268,7 @@ export class TransitionManager {
 						incoming.alpha = 0
 						outgoing.alpha = 0
 						this.compositor.app.stage.addChild(transitionSprite)
-					}, true),
+					}, true, () => updateVideoTexture()),
 					onComplete: () => {
 						incoming.alpha = 1
 						outgoing.alpha = 1
@@ -289,13 +307,14 @@ export class TransitionManager {
 		}
 	}
 
-	#onReverse(func: () => void, onlyAfterComplete: boolean) {
+	#onReverse(func: () => void, onlyAfterComplete: boolean, tick: () => void) {
 		let previousTime = 0
 		let reverseTriggered = false
 
 		return function(this: GSAPTweenVars) {
 			const currentTime = this.time()
 			const isReversing = currentTime < previousTime
+			tick()
 
 			if (
 				isReversing &&
@@ -338,6 +357,19 @@ export class TransitionManager {
 	getTransitionDuration(id: string | null) {
 		let duration = this.getTransition(id)
 		return duration
+	}
+
+	getTransitionDurationPerEffect(transition: Transition | undefined, effect: AnyEffect) {
+		let incoming = 0
+		let outgoing = 0
+		if(transition) {
+			if(effect.id === transition.incoming.id) {
+				incoming = transition.duration
+			} else if(effect.id === transition.outgoing.id) {
+				outgoing = transition.duration
+			}
+		}
+		return {incoming, outgoing}
 	}
 
 	getTransitions () {
