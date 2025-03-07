@@ -32,14 +32,14 @@ export class TransitionManager {
 	})
 	selected: null | string = null
 	onChange = pub()
-	#transitions: Transition[] = []
-	#destroyTransitions = new Map<string, () => void>()
+	#transitions = new Map<string, {
+		destroy: () => void
+		update: () => void
+	}>()
 
 	constructor (private compositor: Compositor, private actions: Actions) {}
 
 	clearTransitions (omit?: boolean) {
-		this.#transitions.forEach(a => this.removeTransition(a.id))
-		this.#transitions = []
 		this.actions.clear_animations({omit})
 		this.actions.clear_transitions({omit})
 		this.timeline.clear()
@@ -101,42 +101,43 @@ export class TransitionManager {
 						{...transition, incoming, outgoing},
 						state
 					)
+					this.updateTransition(state)
 				}
 			}
 		}
 	}
 
-	refreshTransitions() {
-		this.timeline.getChildren().forEach(children => children.kill())
-		omnislate.context.state.transitions.forEach(transition => {
-			this.removeTransition(transition.id)
-			this.selectTransition(transition)?.apply(omnislate.context.state)
-		})
-	}
-
-	async updateTransition (state: State, propsToUpdate?: PropsToUpdate) {
+	async updateTransition(state: State, propsToUpdate?: PropsToUpdate) {
 		if (this.selected && propsToUpdate) {
-			const fullDuration = normalizeTransitionDuration(propsToUpdate.duration, 1000 / state.timebase)
-			const halfDuration = fullDuration / 2
+			const newFullDuration = normalizeTransitionDuration(
+				propsToUpdate.duration,
+				1000 / state.timebase
+			)
 
 			const transition = this.getTransition(this.selected)
-			if(transition) {
-				const {outgoing, incoming} = transition
-				this.actions.set_animation_duration(fullDuration, outgoing)
-				this.actions.set_animation_duration(fullDuration, incoming)
+			if (transition) {
+				const incoming = state.effects.find(e => e.id === transition.incoming.id)!
+				const outgoing = state.effects.find(e => e.id === transition.outgoing.id)!
+				const delta = (transition.duration - newFullDuration) / 2
+
+				this.actions.set_transition_duration(newFullDuration, this.selected)
+
 				this.actions.set_effect_start_position(
 					incoming,
-					incoming.start_at_position - halfDuration
+					incoming.start_at_position + delta
 				)
 				this.actions.set_effect_start(
 					incoming,
-					incoming.start + halfDuration
+					incoming.start + delta
 				)
 				this.actions.set_effect_end(
 					outgoing,
-					outgoing.end - halfDuration
+					outgoing.end + delta
 				)
 			}
+		}
+		if (this.selected) {
+			this.#transitions.get(this.selected)?.update()
 		}
 	}
 
@@ -147,10 +148,10 @@ export class TransitionManager {
 		}
 	}
 
-	async removeTransition (id: string) {
+	removeTransition(id: string) {
 		const transition = this.getTransition(id)
 		this.actions.remove_transition(id)
-		this.#destroyTransitions.get(id)?.()
+		this.#transitions.get(id)?.destroy()
 		if (transition) {
 			if (transition.id === this.selected) {
 				this.selected = null
@@ -262,7 +263,7 @@ export class TransitionManager {
 				{
 					progress: 1,
 					customUniform: 1,
-					duration: (transition.duration * 2 + margin) / 1000,
+					duration: (transition.duration + margin) / 1000,
 					onUpdate: this.#onReverse(() => {
 						updateRT()
 						incoming.alpha = 0
@@ -290,12 +291,22 @@ export class TransitionManager {
 				}
 			)
 
-			const startTime = (transition.incoming.start_at_position - transition.duration - margin) / 1000
+			const startTime = (transition.incoming.start_at_position - (transition.duration / 2) - margin) / 1000
 			this.timeline.add(incomingTween, startTime)
 			this.actions.add_transition(transition)
 			this.compositor.app.stage.sortChildren()
+
+			const update = () => {
+				const t = this.getTransition(transition.id)
+				if(t) {
+					const incoming = omnislate.context.state.effects.find(e => e.id === t.incoming.id)!
+					const startTime = (incoming.start_at_position - (t.duration / 2) - margin) / 1000
+					incomingTween.startTime(startTime)
+					incomingTween.duration((t.duration + margin) / 1000)
+				}
+			}
 			
-			const destroyTransition = () => {
+			const destroy = () => {
 				transitionSprite.destroy()
 				rtFrom.destroy()
 				rtTo.destroy()
@@ -303,7 +314,11 @@ export class TransitionManager {
 				incomingTween.kill()
 				this.timeline.remove(incomingTween)
 			}
-			this.#destroyTransitions.set(transition.id, destroyTransition)
+
+			this.#transitions.set(transition.id, {
+				destroy,
+				update
+			})
 		}
 	}
 
@@ -355,7 +370,7 @@ export class TransitionManager {
 	}
 
 	getTransitionDuration(id: string | null) {
-		let duration = this.getTransition(id)
+		let duration = this.getTransition(id)?.duration
 		return duration
 	}
 
@@ -364,9 +379,9 @@ export class TransitionManager {
 		let outgoing = 0
 		if(transition) {
 			if(effect.id === transition.incoming.id) {
-				incoming = transition.duration
+				incoming = transition.duration / 2
 			} else if(effect.id === transition.outgoing.id) {
-				outgoing = transition.duration
+				outgoing = transition.duration / 2
 			}
 		}
 		return {incoming, outgoing}
@@ -419,9 +434,9 @@ export class TransitionManager {
 			stillTouchingIds.add(incoming.id)
 		})
 
-		this.#transitions.map(async transition => {
+		omnislate.context.state.transitions.map(transition => {
 			if (!stillTouchingIds.has(transition.incoming.id) || !stillTouchingIds.has(transition.outgoing.id)) {
-				await this.removeTransition(transition.id)
+				this.removeTransition(transition.id)
 			}
 		})
 	}
