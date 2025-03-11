@@ -10,24 +10,76 @@ export const styles = css`
 
 	.examples {
 		display: flex;
+		flex-direction: column;
+		margin: 1em;
+		gap: 1em;
+
+		& .styles {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5em;
+		}
+
+		& .cnt {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5em;
+
+			& sl-input, sl-select {
+				display: flex;
+			}
+		}
+
+		& .pick-color {
+			display: flex;
+			align-items: center;
+			gap: 0.5em;
+		}
+
+		.color-cnt {
+			display: flex;
+			align-items: center;
+			font-family: Poppins-Regular;
+
+			& label {
+				display: flex;
+				width: 100px;
+				font-size: 0.9rem;
+			}
+		}
+
+		.color-cnt {
+			align-items: baseline;
+		}
+
+		& .font-styles {
+			display: flex;
+			flex-direction: column;
+			gap: 0.7em;
+			margin-bottom: 1em;
+		}
+
+		& select, input {
+			max-width: 150px;
+			width: 100%;
+		}
 
 		& .example {
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			height: 150px;
+			width: 150px;
 			background: black;
 			font-size: 1.5em;
 			border-radius: 5px;
 			margin: 1em;
-			padding: 3em 2em;
-			position: relative;
-			
-			&:hover {
-				& .add-btn {
-					display: flex;
-				}
-			}
+			color: white;
 
 			& .add-btn {
 				margin: 0.4em;
-				display: none;
 				border-radius: 7px;
 				position: absolute;
 				bottom: 0;
@@ -38,10 +90,10 @@ export const styles = css`
 					width: 25px;
 					height: 25px;
 					opacity: 0.5;
-					color: lime;
+					color: white;
 
 					&:hover {
-						opacity: 0.7;
+						opacity: 0.8;
 					}
 				}
 			}
