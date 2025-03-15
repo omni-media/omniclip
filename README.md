@@ -11,7 +11,7 @@ Everything works inside browser, theres no private data being used, everything i
   It utilizes webcodecs API, it means that the rendering process is fastest it can be on web browsers.
 - Trimming
 - Splitting
-- Supports - Text, Audio, Video (mp4) and Images
+- Supports - Text, Audio, Video (mp4 & MOV) and Images
 - Clip editing on preview - rotating, resizing, text styling and more
 - Undo/Redo
 - Render in different resolutions, aspect ratios, framerates, up to 4k.
@@ -24,6 +24,9 @@ Everything works inside browser, theres no private data being used, everything i
 - Better transitions - more customizable transitions (glsl shaders)
 - Audio Editing - Adjusting volume etc
 - Keyframes
+- Auto-Captions
+- Effects
+- Masking
 
 ## How to
   #### Use omniclip components in your app:
