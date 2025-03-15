@@ -130,6 +130,10 @@ export const styles = css`
 			position: relative;
 			border: 1px solid;
 
+			& .text {
+				font-size: 0.6em;
+			}
+
 			&[data-selected] {
 				color: white;
 				border: 1px solid white;

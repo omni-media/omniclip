@@ -92,11 +92,11 @@ export class TransitionManager {
 		// Return an object with an apply method that re-reads state and schedules the tweens.
 		// This ensures that on the receiving side the latest effect properties are used.
 		return {
-			apply: async (state: State) => {
+			apply: async (state: State, recreate?: boolean) => {
 				const incoming = state.effects.find(e => e.id === transition.incoming.id) as VideoEffect | ImageEffect
 				const outgoing = state.effects.find(e => e.id === transition.outgoing.id) as VideoEffect | ImageEffect
 				const alreadyAdded = this.getTransition(transition.id)
-				if(!alreadyAdded) {
+				if(!alreadyAdded || recreate) {
 					this.#selectTransition(
 						{...transition, incoming, outgoing},
 						state
@@ -105,6 +105,10 @@ export class TransitionManager {
 				}
 			}
 		}
+	}
+
+	refreshTransitions() {
+		this.#transitions.forEach(transition => transition.update())
 	}
 
 	async updateTransition(state: State, propsToUpdate?: PropsToUpdate) {
@@ -201,8 +205,8 @@ export class TransitionManager {
 			this.compositor.app.renderer.render(incoming, { renderTexture: rtTo })
 
 			const transitionSprite = new PIXI.Sprite()
-			transitionSprite.width = 1920
-			transitionSprite.height = 1080
+			transitionSprite.width = this.compositor.app.stage.width
+			transitionSprite.height = this.compositor.app.stage.height
 			transitionSprite.zIndex = omnislate.context.state.tracks.length - transition.incoming.track
 
 			const updateRT = () => {
@@ -212,20 +216,28 @@ export class TransitionManager {
 
 			let incomingTween: GSAPTween
 
-			const updateVideoTexture = () => {
+			const updateTransitionTexture = () => {
 				if(incomingTween !== undefined) {
 					if(incomingTween.progress() > 0 && incomingTween.progress() < 1) {
-						if(transition.incoming.kind === "video") {
-							incoming.alpha = 1
-						}
-						if(transition.outgoing.kind === "video") {
-							outgoing.alpha = 1
-						}
+						incoming.alpha = 1
+						outgoing.alpha = 1
 						updateRT()
 						outgoing.alpha = 0
 						incoming.alpha = 0
 					}
 				}
+			}
+
+			const showTransition = () => {
+				incoming.alpha = 0
+				outgoing.alpha = 0
+				this.compositor.app.stage.addChild(transitionSprite)
+			}
+
+			const hideTransition = () => {
+				incoming.alpha = 1
+				outgoing.alpha = 1
+				this.compositor.app.stage.removeChild(transitionSprite)
 			}
 
 			const filter = new PIXI.Filter(
@@ -250,7 +262,8 @@ export class TransitionManager {
 
 			transitionSprite.filters = [filter]
 			this.compositor.app.stage.addChild(transitionSprite)
-			const margin = 10 // 10 ms
+			const startMargin = 10
+			const endMargin = 20
 
 			incomingTween = gsap.fromTo(
 				//@ts-ignore
@@ -263,35 +276,15 @@ export class TransitionManager {
 				{
 					progress: 1,
 					customUniform: 1,
-					duration: (transition.duration + margin) / 1000,
-					onUpdate: this.#onReverse(() => {
-						updateRT()
-						incoming.alpha = 0
-						outgoing.alpha = 0
-						this.compositor.app.stage.addChild(transitionSprite)
-					}, true, () => updateVideoTexture()),
-					onComplete: () => {
-						incoming.alpha = 1
-						outgoing.alpha = 1
-						updateRT()
-						this.compositor.app.stage.removeChild(transitionSprite)
-					},
-					onStart: () => {
-						updateRT()
-						incoming.alpha = 0
-						outgoing.alpha = 0
-						this.compositor.app.stage.addChild(transitionSprite)
-					},
-					onReverseComplete: () => {
-						incoming.alpha = 1
-						outgoing.alpha = 1
-						updateRT()
-						this.compositor.app.stage.removeChild(transitionSprite)
-					}
+					duration: (transition.duration + endMargin) / 1000,
+					onUpdate: this.#onReverse(showTransition, true, () => updateTransitionTexture()),
+					onComplete: hideTransition,
+					onStart: showTransition,
+					onReverseComplete: hideTransition
 				}
 			)
 
-			const startTime = (transition.incoming.start_at_position - (transition.duration / 2) - margin) / 1000
+			const startTime = (transition.incoming.start_at_position - (transition.duration / 2) - startMargin) / 1000
 			this.timeline.add(incomingTween, startTime)
 			this.actions.add_transition(transition)
 			this.compositor.app.stage.sortChildren()
@@ -300,9 +293,10 @@ export class TransitionManager {
 				const t = this.getTransition(transition.id)
 				if(t) {
 					const incoming = omnislate.context.state.effects.find(e => e.id === t.incoming.id)!
-					const startTime = (incoming.start_at_position - (t.duration / 2) - margin) / 1000
+					const startTime = (incoming.start_at_position - (t.duration / 2) - startMargin) / 1000
 					incomingTween.startTime(startTime)
-					incomingTween.duration((t.duration + margin) / 1000)
+					incomingTween.duration((t.duration + endMargin) / 1000)
+					updateTransitionTexture()
 				}
 			}
 			
@@ -392,6 +386,10 @@ export class TransitionManager {
 			...a,
 			duration: a.duration / 2
 		}))
+	}
+
+	getTransitionByPair(outgoing: TransitionAbleEffect, incoming: TransitionAbleEffect) {
+		return omnislate.context.state.transitions.find(t => t.incoming.id === incoming.id && t.outgoing.id === outgoing.id)
 	}
 
 	findTouchingClips (clips: AnyEffect[]) {

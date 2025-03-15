@@ -16,8 +16,8 @@ import {OmniMedia} from "./components/omni-media/component.js"
 import {FiltersPanel} from './components/omni-filters/panel.js'
 import {TimelinePanel} from "./components/omni-timeline/panel.js"
 import {LandingPage} from './components/landingpage/component.js'
-import {OmniFilters} from './components/omni-filters/component.js'
 import {OmniManager} from './components/omni-manager/component.js'
+import {OmniFilters} from './components/omni-filters/component.js'
 import {CollaborationManager} from './views/collaboration/view.js'
 import {OmniTimeline} from "./components/omni-timeline/component.js"
 import pencilSquareSvg from './icons/gravity-ui/pencil-square.svg.js'
@@ -142,7 +142,7 @@ const router = new HashRouter({
 			collaboration.disconnect()
 		}
 		if(!registered) {
-			register_to_dom({OmniTimeline, OmniText, OmniMedia, OmniAnim, ConstructEditor, OmniFilters, OmniTransitions})
+			register_to_dom({OmniTimeline, OmniText, OmniMedia, ConstructEditor, OmniFilters, OmniTransitions, OmniAnim})
 			registered = true
 		}
 		const omnislate = setupContext(projectId)
@@ -151,5 +151,5 @@ const router = new HashRouter({
 })
 
 document.body.append(router.element)
-
+document.documentElement.className = "sl-theme-dark"
 //@ts-ignore

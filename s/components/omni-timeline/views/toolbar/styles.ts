@@ -2,7 +2,10 @@ import {css} from "@benev/slate"
 
 export const styles = css`
 	:host {
-		position: relative;
+		position: sticky;
+		top: 0;
+		left: 0;
+		z-index: 801;
 		display: flex;
 		min-height: 50px;
 		--transition: 0.25s;
@@ -18,7 +21,7 @@ export const styles = css`
 
 	.tools {
 		height: 50px;
-		background: #111;
+		background: var(--bg-a);
 		z-index: 100;
 		width: 100%;
 		display: flex;

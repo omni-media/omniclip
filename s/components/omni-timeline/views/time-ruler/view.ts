@@ -66,7 +66,8 @@ export const TimeRuler = shadow_view(use => (timeline: GoldElement) => {
 	}[] {
 		const time_codes = []
 		const ms = 1000/use.context.state.timebase
-		for(let time_code = timeline.scrollLeft; time_code <= timeline.scrollLeft + timeline.clientWidth; time_code+=5) {
+		const offsetLeft = use.element.offsetLeft + 50
+		for(let time_code = timeline.scrollLeft; time_code <= timeline.scrollLeft + timeline.clientWidth - offsetLeft; time_code+=5) {
 			const exact_time_code = time_code * Math.pow(2, -zoom)
 			const zoom_rounded = round_to_two_decimal_places(zoom)
 			if(zoom_rounded < 0) {

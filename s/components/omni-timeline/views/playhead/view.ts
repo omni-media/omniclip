@@ -1,10 +1,11 @@
-import {html} from "@benev/slate"
+import {GoldElement, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/context.js"
 import playheadSvg from "../../../../icons/remix-icon/playhead.svg.js"
+import {calculate_timeline_width} from "../../utils/calculate_timeline_width.js"
 
-export const Playhead = shadow_view(use => () => {
+export const Playhead = shadow_view(use => (timeline: GoldElement) => {
 	use.styles(styles)
 	use.watch(() => use.context.state)
 	const actions = use.context.actions
@@ -39,8 +40,16 @@ export const Playhead = shadow_view(use => () => {
 	const normalize_to_timebase = (timecode: number) => {
 		const frame_duration = 1000/use.context.state.timebase
 		const normalized = Math.round(((timecode)) / frame_duration) * frame_duration
-		return normalized * Math.pow(2, use.context.state.zoom)
+		const result = normalized * Math.pow(2, use.context.state.zoom)
+		const offsetLeft = 120 // timeline hardcoded sidebar width
+		const timelineWidth = calculate_timeline_width(use.context.state.effects, use.context.state.zoom, timeline) - offsetLeft
+		if(result < timelineWidth) {
+			return result
+		} else {
+			return timelineWidth
+		}
 	}
+
 	const normalized = normalize_to_timebase(use.context.state.timecode)
 
 	return html`

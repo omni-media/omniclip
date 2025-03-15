@@ -38,8 +38,9 @@ export const OmniFilters = shadow_component(use => {
 		return html`
 			<div class=dropdown>
 				<div class=flex>
-					<select
-						@change=${(event: Event) => {
+					<sl-select
+						value=${selectedImageOrVideoEffect?.id ?? "none"}
+						@sl-change=${(event: Event) => {
 							const target = event.target as HTMLSelectElement
 							const effectId = target.value
 							const effect = use.context.state.effects.find(effect => effect.id === effectId)
@@ -48,9 +49,9 @@ export const OmniFilters = shadow_component(use => {
 						id="clip"
 						name="clip"
 					>
-						<option .selected=${!selectedImageOrVideoEffect} value=none>none</option>
-						${imageAndVideoEffects().map(effect => html`<option .selected=${selectedImageOrVideoEffect?.id === effect.id} value=${effect.id}>${effect.name}</option>`)}
-					</select>
+						<sl-option .selected=${!selectedImageOrVideoEffect} value=none>none</sl-option>
+						${imageAndVideoEffects().map(effect => html`<sl-option .selected=${selectedImageOrVideoEffect?.id === effect.id} value=${effect.id}>${effect.name}</sl-option>`)}
+					</sl-select>
 					${renderDropdownInfo()}
 				</div>
 			</div>
@@ -73,23 +74,22 @@ export const OmniFilters = shadow_component(use => {
 		switch (config.type) {
 			case "number":
 				return html`
-					<label>
-						${label}:
-						<input
-							@change=${(e: InputEvent) =>
-								filtersManager.updateEffectFilter(
-									selectedImageOrVideoEffect!,
-									filterType,
-									propertyPath,
-									+(e.target as HTMLInputElement).value
-								)}
-							type="range"
-							min="${config.min}"
-							max="${config.max}"
-							value="${config.default}"
-							step="0.1"
-						>
-					</label>
+					<sl-range
+						label=${label}
+						@sl-change=${(e: InputEvent) =>
+							filtersManager.updateEffectFilter(
+								selectedImageOrVideoEffect!,
+								filterType,
+								propertyPath,
+								+(e.target as HTMLInputElement).value
+							)}
+						type="range"
+						min="${config.min}"
+						max="${config.max}"
+						value="${config.default}"
+						step="0.1"
+					>
+					</sl-range>
 				`
 			case "color":
 				return html`
@@ -134,26 +134,26 @@ export const OmniFilters = shadow_component(use => {
 							([value, label]) => ({ value, label })
 						)
 				return html`
-					<label>
-						${label}:
-						<select
-							@change=${(e: InputEvent) =>
-								filtersManager.updateEffectFilter(
-									selectedImageOrVideoEffect!,
-									filterType,
-									propertyPath,
-									+(e.target as HTMLSelectElement).value
-								)}
-						>
-							${normalizedOptions.map(
-								({ value, label }) => html`
-									<option value="${value}" ?selected="${value === config.default}">
-										${label}
-									</option>
-								`
+					<sl-select
+						hoist
+						size="small"
+						label=${label}
+						@sl-change=${(e: InputEvent) =>
+							filtersManager.updateEffectFilter(
+								selectedImageOrVideoEffect!,
+								filterType,
+								propertyPath,
+								+(e.target as HTMLSelectElement).value
 							)}
-						</select>
-					</label>
+					>
+						${normalizedOptions.map(
+							({ value, label }) => html`
+								<sl-option value="${value}" ?selected="${value === config.default}">
+									${label}
+								</sl-option>
+							`
+						)}
+					</sl-select>
 				`
 			case "object":
 				// For an object type, recursively render nested controls.
@@ -192,7 +192,6 @@ export const OmniFilters = shadow_component(use => {
 
 	const renderFilters = () => {
 		return filterPreviews.map(({type, canvas}) => {
-			const [optionsOpened, setOptionsOpened] = use.state(false)
 			return html`
 			<div class=filter>
 				<div
@@ -203,18 +202,14 @@ export const OmniFilters = shadow_component(use => {
 						filtersManager.addFilterToEffect(selectedImageOrVideoEffect!, type)
 					}}
 				>
-					${canvas}
 					<p>${type}</p>
 				</div>
-				<button @click=${() => setOptionsOpened(!optionsOpened)}>Options</button>
-				${optionsOpened
-					? html`
-						<div class="options">
-							${renderFilterOptions(type)}
-						</div>
-					`
-					: null
-				}
+				<sl-dropdown hoist>
+					<sl-button slot="trigger" size="small" caret>Options</sl-button>
+					<sl-menu class=options>
+						${renderFilterOptions(type)}
+					</sl-menu>
+				</sl-dropdown>
 			</div>
 		`})
 	}

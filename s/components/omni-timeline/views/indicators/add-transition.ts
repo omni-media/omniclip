@@ -24,7 +24,7 @@ export const TransitionIndicator = light_view(use => () => {
 					class="transition-duration"
 					style="
 						height: 50px;
-						width: ${duration * Math.pow(2, state.zoom)}px;
+						width: ${duration / 2 * Math.pow(2, state.zoom)}px;
 					"
 				>
 				</div>
@@ -34,7 +34,7 @@ export const TransitionIndicator = light_view(use => () => {
 
 	return html`
 		${touchingPairs.map(({outgoing, incoming, position}) => {
-			const transition = transitionManager.getTransitionByEffect(incoming) || transitionManager.getTransitionByEffect(outgoing)
+			const transition = transitionManager.getTransitionByPair(outgoing, incoming)
 			const isSelected = transition?.id === transitionManager.selected
 			const transitionDuration = transition?.duration ?? 520
 

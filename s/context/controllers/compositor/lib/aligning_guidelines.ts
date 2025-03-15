@@ -36,6 +36,8 @@ export class AlignGuidelines {
 	verticalLines: VerticalLineCoords[] = [];
 	horizontalLines: HorizontalLineCoords[] = [];
 
+	graphics = new PIXI.Graphics() // graphics for align guidelines
+
 	constructor({
 		compositor,
 		app,
@@ -57,6 +59,7 @@ export class AlignGuidelines {
 		this.app = app
 		this.ignoreObjTypes = ignoreObjTypes || [];
 		this.pickObjTypes = pickObjTypes || [];
+		this.app.stage.addChild(this.graphics)
 
 		if (aligningOptions) {
 			this.aligningLineMargin = aligningOptions.lineMargin || this.aligningLineMargin;
@@ -67,31 +70,23 @@ export class AlignGuidelines {
 
 	private drawSign(x: number, y: number) {
 		// Draw a small "X" at the given point using setStrokeStyle.
-		this.compositor.graphics.setStrokeStyle({
-			width: this.aligningLineWidth,
-			color: parseInt(this.aligningLineColor.replace("#", "0x")),
-			alpha: 1
-		})
+		this.graphics.lineStyle(this.aligningLineWidth, parseInt(this.aligningLineColor.replace("#", "0x")), 1)
 		const size = 2
-		this.compositor.graphics.moveTo(x - size, y - size)
-		this.compositor.graphics.lineTo(x + size, y + size)
-		this.compositor.graphics.moveTo(x + size, y - size)
-		this.compositor.graphics.lineTo(x - size, y + size)
+		this.graphics.moveTo(x - size, y - size)
+		this.graphics.lineTo(x + size, y + size)
+		this.graphics.moveTo(x + size, y - size)
+		this.graphics.lineTo(x - size, y + size)
 	}
 
 	private drawLine(x1: number, y1: number, x2: number, y2: number) {
 		const point1 = transformPoint(new PIXI.Point(x1, y1), new PIXI.Matrix());
 		const point2 = transformPoint(new PIXI.Point(x2, y2), new PIXI.Matrix());
 		const strokeColor = parseInt(this.aligningLineColor.replace("#", "0x"))
-		this.compositor.graphics.setStrokeStyle({
-			width: this.aligningLineWidth,
-			color: this.aligningLineColor,
-			alpha: 1
-		})
-		this.compositor.graphics.moveTo(point1.x, point1.y);
-		this.compositor.graphics.lineTo(point2.x, point2.y)
-		this.compositor.graphics.stroke({width: this.aligningLineWidth, color: this.aligningLineColor})
-		this.compositor.graphics.zIndex = 500
+		this.graphics.lineStyle(this.aligningLineWidth, this.aligningLineColor, 1)
+		this.graphics.moveTo(point1.x, point1.y);
+		this.graphics.lineTo(point2.x, point2.y)
+		// this.compositor.graphics.stroke({width: this.aligningLineWidth, color: this.aligningLineColor})
+		this.graphics.zIndex = 500
 		this.app.stage.sortChildren()
 		this.drawSign(point1.x, point1.y);
 		this.drawSign(point2.x, point2.y);
@@ -100,7 +95,7 @@ export class AlignGuidelines {
 	private drawVerticalLine(coords: VerticalLineCoords) {
 		const activeObject = this.compositor.selectedElement
 		if(!activeObject) {return}
-		const movingCoords = this.getObjDraggingObjCoords(activeObject);
+		const movingCoords = this.getObjDraggingObjCoords(activeObject.sprite);
 		if (!Keys(movingCoords).some((key) => Math.abs(movingCoords[key].x - coords.x) < 0.0001)) return;
 		this.drawLine(coords.x, Math.min(coords.y1, coords.y2), coords.x, Math.max(coords.y1, coords.y2));
 	}
@@ -108,7 +103,7 @@ export class AlignGuidelines {
 	private drawHorizontalLine(coords: HorizontalLineCoords) {
 		const activeObject = this.compositor.selectedElement
 		if(!activeObject) {return}
-		const movingCoords = this.getObjDraggingObjCoords(activeObject);
+		const movingCoords = this.getObjDraggingObjCoords(activeObject.sprite);
 		if (!Keys(movingCoords).some((key) => Math.abs(movingCoords[key].y - coords.y) < 0.0001)) return;
 		this.drawLine(Math.min(coords.x1, coords.x2), coords.y, Math.max(coords.x1, coords.x2), coords.y);
 	}
@@ -128,7 +123,8 @@ export class AlignGuidelines {
 
 	private watchMouseUp() {
 		this.app.stage.on("pointerup", () => {
-			this.clearLinesMeta();
+			this.clearLinesMeta()
+			this.clearGuideline()
 			this.app.renderer.render(this.app.stage);
 		});
 	}
@@ -146,7 +142,7 @@ export class AlignGuidelines {
 	on_object_move_or_scale(e: PIXI.FederatedPointerEvent) {
 		this.clearLinesMeta()
 		this.clearGuideline()
-		const activeObject = e.target as PIXI.Container
+		const activeObject = this.compositor.selectedElement?.sprite
 		if(!activeObject) {return}
 		const canvasObjects = this.compositor.app.stage.children.filter(obj => {
 			if (this.ignoreObjTypes.length) {
@@ -380,7 +376,7 @@ private snap({
 	}
 
 	clearGuideline() {
-		this.compositor.graphics.clear()
+		this.graphics.clear()
 	}
 
 	watchRender() {

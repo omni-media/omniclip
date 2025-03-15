@@ -7,7 +7,7 @@ import {collaboration, omnislate} from "../../../context.js"
 import {Image} from "../../../../components/omni-media/types.js"
 import {find_place_for_new_effect} from "../../timeline/utils/find_place_for_new_effect.js"
 
-export class ImageManager extends Map<string, PIXI.Sprite> {
+export class ImageManager extends Map<string, {sprite: PIXI.Sprite, transformer: PIXI.Container}> {
 
 	constructor(private compositor: Compositor, private actions: Actions) {super()}
 
@@ -48,9 +48,28 @@ export class ImageManager extends Map<string, PIXI.Sprite> {
 		sprite.rotation = effect.rect.rotation * (Math.PI / 180)
 		sprite.eventMode = "static"
 		sprite.cursor = "pointer"
-		sprite.on('pointerdown', (e) => this.compositor.canvasElementDrag.onDragStart(e, sprite), sprite)
+		sprite.filters = []
+		//@ts-ignore
+		const transformer = new PIXI.Transformer({
+			boxRotationEnabled: true,
+			translateEnabled: false, // implemented my own translate which work with align guidelines
+			group: [sprite],
+			stage: this.compositor.app.stage,
+			wireframeStyle: {
+				thickness: 2,
+				color: 0xff0000
+			}
+		})
+		//@ts-ignore
+		sprite.ignoreAlign = false
+		transformer.ignoreAlign = true
+		transformer.name = generate_id()
+		sprite.on('pointerdown', (e) => {
+			this.compositor.canvasElementDrag.onDragStart(e, sprite, transformer)
+			this.compositor.app.stage.addChild(transformer)
+		})
 		;(sprite as any).effect = {...effect}
-		this.set(effect.id, sprite)
+		this.set(effect.id, {transformer, sprite})
 		if (recreate) {return}
 		this.actions.add_image_effect(effect)
 	}
@@ -58,16 +77,16 @@ export class ImageManager extends Map<string, PIXI.Sprite> {
 	add_image_to_canvas(effect: ImageEffect) {
 		const image = this.get(effect.id)
 		if(image) {
-			this.compositor.app.stage.addChild(image)
-			image.zIndex = omnislate.context.state.tracks.length - effect.track
-			this.compositor.app.stage.sortChildren()
+			this.compositor.app.stage.addChild(image.sprite)
+			image.sprite.zIndex = omnislate.context.state.tracks.length - effect.track
 		}
 	}
 
 	remove_image_from_canvas(effect: ImageEffect) {
 		const image = this.get(effect.id)
 		if(image) {
-			this.compositor.app.stage.removeChild(image)
+			this.compositor.app.stage.removeChild(image.sprite)
+			this.compositor.app.stage.removeChild(image.transformer)
 		}
 	}
 }

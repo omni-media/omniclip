@@ -125,7 +125,7 @@ html, body {
 	min-height: 100%;
 
 	color: gray;
-	background: black;
+	background: #101010; /*#111*/
 }
 
 body {
@@ -139,7 +139,7 @@ construct-editor {
 
 	--alpha: yellow;
 	--bravo: lime;
-	--bg-a: #111;
+	--bg-a: #151618; /*#151618*/ /*#111*/
 	--bg-b: #000;
 	--bg-c: #333;
 	--taskbar-size: 1em;

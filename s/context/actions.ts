@@ -1,12 +1,31 @@
+import {LineJoin} from "./pixi.mjs.js"
 import {ZipAction} from "@benev/slate/x/watch/zip/action.js"
 import {generate_id} from "@benev/slate/x/tools/generate_id.js"
+import type {
+	ColorSource, TEXT_GRADIENT, TextStyleAlign, TextStyleFontStyle, TextStyleFontVariant, TextStyleFontWeight, TextStyleTextBaseline, TextStyleWhiteSpace
+} from "pixi.js"
 
 import {Helpers} from "./helpers.js"
 import {collaboration} from "./context.js"
 import {withBroadcast} from "../utils/with-broadcast.js"
+import {Transition} from "./controllers/compositor/parts/transition-manager.js"
 import {Filter, FilterType} from "./controllers/compositor/parts/filter-manager.js"
 import {actionize_historical, actionize_non_historical} from "./../utils/actionize.js"
-import {AnyEffect, AudioEffect, ExportStatus, Font, FontStyle, ImageEffect, TextAlign, TextEffect, EffectRect, VideoEffect, Standard, AspectRatio, State, HistoricalActionsWithBroadcast, NonHistoricalActionsWithBroadcast} from "./types.js"
+import {
+	AnyEffect,
+	AudioEffect,
+	ExportStatus,
+	Font,
+	ImageEffect,
+	TextEffect,
+	EffectRect,
+	VideoEffect,
+	Standard,
+	AspectRatio,
+	State,
+	HistoricalActionsWithBroadcast,
+	NonHistoricalActionsWithBroadcast
+} from "./types.js"
 import {Animation, AnimationFor} from "./controllers/compositor/parts/animation-manager.js"
 
 export const non_historical = actionize_non_historical({
@@ -94,11 +113,25 @@ export const historical = actionize_historical({
 			track.locked = !track.locked
 		}
 	},
+	add_transition: state => (transition: Transition) => {
+		state.transitions.push(transition)
+	},
+	remove_transition: state => (id: string) => {
+		state.transitions = state.transitions.filter(t => t.id !== id)
+	},
+	set_transition_duration: state => (duration: number, transitionId: string) => {
+		const effect = state.transitions.find(t => t.id === transitionId)
+		if(effect)
+			effect.duration = duration
+	},
+	clear_transitions: state => () => {
+		state.transitions = []
+	},
 	clear_animations: state => () => {
 		state.animations = []
 	},
-	set_animation_duration: state => (duration: number, {id}: VideoEffect | ImageEffect, animationFor: AnimationFor) => {
-		const effect = state.animations.find(a => a.targetEffect.id === id && a.for === animationFor)
+	set_animation_duration: state => (duration: number, {id}: VideoEffect | ImageEffect) => {
+		const effect = state.animations.find(a => a.targetEffect.id === id)
 		if(effect)
 			effect.duration = duration
 	},
@@ -112,7 +145,7 @@ export const historical = actionize_historical({
 		state.animations = state.animations.filter((animation) => !(animation.targetEffect.id === effect.id && animation.type === type && animation.for === animationFor))
 	},
 	remove_filter: state => (effect: ImageEffect | VideoEffect, type: FilterType) => {
-		state.filters.filter(filter => !(filter.targetEffectId === effect.id && filter.type === type))
+		state.filters = state.filters.filter(filter => !(filter.targetEffectId === effect.id && filter.type === type))
 	},
 	add_filter: state => (filter: Filter) => {
 		state.filters.push(filter)
@@ -145,25 +178,57 @@ export const historical = actionize_historical({
 	add_audio_effect: state => (effect: AudioEffect) => {
 		state.effects.push(effect)
 	},
-	set_text_color: state => ({id}: TextEffect, color: string) => {
+	set_text_fill: state => ({id}: TextEffect, color: string, index: number) => {
 		const effect = state.effects.find(effect => effect.id === id) as TextEffect
-		effect.color = color
+		effect.fill[index] = color
+	},
+	move_text_fill_up: state => ({id}: TextEffect, index: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		[effect.fill[index - 1], effect.fill[index]] = [effect.fill[index], effect.fill[index - 1]]
+	},
+	move_text_fill_down: state => ({id}: TextEffect, index: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		[effect.fill[index], effect.fill[index + 1]] = [effect.fill[index + 1], effect.fill[index]]
 	},
 	set_text_font: state => ({id}: TextEffect, font: Font) => {
 		const effect = state.effects.find(effect => effect.id === id) as TextEffect
-		effect.font = font
+		effect.fontFamily = font
 	},
 	set_font_size: state => ({id}: TextEffect, size: number) => {
 		const effect = state.effects.find(effect => effect.id === id) as TextEffect
-		effect.size = size
+		effect.fontSize = size
 	},
-	set_font_style: state => ({id}: TextEffect, style: FontStyle) => {
+	set_font_style: state => ({id}: TextEffect, style: TextStyleFontStyle) => {
 		const effect = state.effects.find(effect => effect.id === id) as TextEffect
-		effect.style = style
+		effect.fontStyle = style
 	},
-	set_text_align: state => ({id}: TextEffect, align: TextAlign) => {
+	set_font_align: state => ({id}: TextEffect, align: TextStyleAlign) => {
 		const effect = state.effects.find(effect => effect.id === id) as TextEffect
 		effect.align = align
+	},
+	set_font_variant: state => ({id}: TextEffect, variant: TextStyleFontVariant) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.fontVariant = variant
+	},
+	set_font_weight: state => ({id}: TextEffect, weight: TextStyleFontWeight) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.fontWeight = weight
+	},
+	set_fill_gradient_type: state => ({id}: TextEffect, type: TEXT_GRADIENT) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.fillGradientType = type
+	},
+	add_fill_gradient_stop: state => ({id}: TextEffect) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.fillGradientStops.push(0)
+	},
+	remove_fill_gradient_stop: state => ({id}: TextEffect, index: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.fillGradientStops = effect.fillGradientStops.filter((_, i) => i !== index)
+	},
+	set_fill_gradient_stop: state => ({id}: TextEffect, index: number, value: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.fillGradientStops[index] = value
 	},
 	set_text_rect: state => ({id}: TextEffect, rect: EffectRect) => {
 		const effect = state.effects.find(effect => effect.id === id) as TextEffect
@@ -171,7 +236,87 @@ export const historical = actionize_historical({
 	},
 	set_text_content: state => ({id}: TextEffect, content: string) => {
 		const effect = state.effects.find(effect => effect.id === id) as TextEffect
-		effect.content = content
+		effect.text = content
+	},
+	add_text_fill: state => ({id}: TextEffect) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.fill.push("#FFFFFF")
+	},
+	remove_text_fill: state => ({id}: TextEffect, index: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.fill = effect.fill.filter((_, i) => i !== index)
+	},
+	set_stroke_color: state => ({id}: TextEffect, value: string) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.stroke = value
+	},
+	set_stroke_thickness: state => ({id}: TextEffect, value: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.strokeThickness = value
+	},
+	set_stroke_line_join: state => ({id}: TextEffect, value: LineJoin) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.lineJoin = value
+	},
+	set_stroke_miter_limit: state => ({id}: TextEffect, value: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.miterLimit = value
+	},
+	set_text_baseline: state => ({id}: TextEffect, value: TextStyleTextBaseline) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.textBaseline = value
+	},
+	set_letter_spacing: state => ({id}: TextEffect, value: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.letterSpacing = value
+	},
+	set_drop_shadow_distance: state => ({id}: TextEffect, value: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.dropShadowDistance = value
+	},
+	set_drop_shadow_blur: state => ({id}: TextEffect, value: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.dropShadowBlur = value
+	},
+	set_drop_shadow_alpha: state => ({id}: TextEffect, value: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.dropShadowAlpha = value
+	},
+	set_drop_shadow_angle: state => ({id}: TextEffect, value: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.dropShadowAngle = value
+	},
+	set_drop_shadow_color: state => ({id}: TextEffect, value: ColorSource) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.dropShadowColor = value
+	},
+	toggle_drop_shadow: state => ({id}: TextEffect, value: boolean) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.dropShadow = value
+	},
+	set_word_wrap:state => ({id}: TextEffect, value: boolean) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.wordWrap = value
+	},
+	set_break_words:state => ({id}: TextEffect, value: boolean) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.breakWords = value
+	},
+	set_wrap_width:state => ({id}: TextEffect, value: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.wordWrapWidth = value
+	},
+	set_leading:state => ({id}: TextEffect, value: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.leading = value
+	},
+	set_line_height:state => ({id}: TextEffect, value: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.lineHeight = value
+	},
+	set_white_space:state => ({id}: TextEffect, value: TextStyleWhiteSpace) => {
+		const effect = state.effects.find(effect => effect.id === id) as TextEffect
+		effect.whiteSpace = value
 	},
 	set_effect_track: state => (effect: AnyEffect, track: number) => {
 		const helper = new Helpers(state)

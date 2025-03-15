@@ -97,7 +97,7 @@ export const OmniTimeline = shadow_component(use => {
 		` : null
 	}
 
-	const timeline = use.defer(() => use.shadow.querySelector(".timeline-relative")) as GoldElement ?? use.element as GoldElement
+	const timeline = use.defer(() => use.shadow.querySelector(".timeline-relative")) as GoldElement ?? use.element
 
 	return StateHandler(Op.all(
 		use.context.helpers.ffmpeg.is_loading.value,
@@ -105,21 +105,19 @@ export const OmniTimeline = shadow_component(use => {
 		${Toolbar([timeline])}
 		<div
 			class="timeline"
+			style="width: ${calculate_timeline_width(state.effects, state.zoom, use.element)}px;"
 		>
 			<div class=flex>
 				<button class="add-track" @click=${() => use.context.actions.add_track()}>add track</button>
 				${TimeRuler([timeline])}
 			</div>
-			<div class=flex>
+			<div class="flex">
 				<div class="track-sidebars">
 					${use.context.state.tracks.map((t, i) => html`${TrackSidebar([i, t.id])}`)}
 				</div>
-				<div
-					style="min-width: ${calculate_timeline_width(state.effects, state.zoom)}px;"
-					class=timeline-relative
-				>
+				<div class=timeline-relative>
 					${renderTimelineInfo()}
-					${Playhead([])}
+					${Playhead([use.element])}
 					${!noEffects ? render_tracks() : null}
 					${render_effects()}
 					${ProposalIndicator()}

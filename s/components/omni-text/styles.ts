@@ -18,6 +18,20 @@ export const styles = css`
 			display: flex;
 			flex-direction: column;
 			gap: 0.5em;
+
+			& .flex {
+				display: flex;
+				align-items: center;
+			}
+		}
+
+		& .select-text {
+			display: flex;
+		}
+
+		& .add-text {
+			width: 100%;
+			padding: 0.5em 1em 0em 1em;
 		}
 
 		& .cnt {
@@ -36,20 +50,29 @@ export const styles = css`
 			gap: 0.5em;
 		}
 
-		.color-cnt {
+		& .stops-cnt {
+			& .flex {
+				align-items: center;
+			}
+		}
+
+		& .colors-cnt, .stops-cnt {
 			display: flex;
 			align-items: center;
 			font-family: Poppins-Regular;
+			align-items: baseline;
+			cursor: pointer;
+
+			& .flex {
+				display: flex;
+				align-items: end;
+			}
 
 			& label {
 				display: flex;
 				width: 100px;
 				font-size: 0.9rem;
 			}
-		}
-
-		.color-cnt {
-			align-items: baseline;
 		}
 
 		& .font-styles {
@@ -62,6 +85,10 @@ export const styles = css`
 		& select, input {
 			max-width: 150px;
 			width: 100%;
+		}
+
+		& .add-stop-btn, .add-color-btn {
+			margin-top: 0.5rem;
 		}
 
 		& .example {

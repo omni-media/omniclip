@@ -4,9 +4,10 @@ export const styles = css`
 	:host {
 		display: flex;
 		justify-content: center;
-		height: 100vh;
+		height: 100%;
 		width: 100vw;
 		background: rgba(0, 0, 0, 1);
+		padding: 2em !important;
 	}
 
 	.box {
@@ -76,10 +77,6 @@ export const styles = css`
 			align-items: center;
 			justify-content: center;
 			flex-wrap: wrap;
-
-			&:first-child {
-				padding: 4em 1em 0;
-			}
 
 			&:nth-of-type(2) {
 				padding: 0 1em 1em 1em;

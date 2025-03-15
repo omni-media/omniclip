@@ -15,7 +15,8 @@ export const historical_state: HistoricalState = {
 	],
 	effects: [],
 	filters: [],
-	animations: []
+	animations: [],
+	transitions: []
 }
 
 export const non_historical_state: NonHistoricalState = {

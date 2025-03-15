@@ -2,7 +2,12 @@ import {historical, non_historical} from "./actions.js"
 import {BroadcastOptions} from "../utils/with-broadcast.js"
 import {Filter} from "./controllers/compositor/parts/filter-manager.js"
 import {Animation} from "./controllers/compositor/parts/animation-manager.js"
+import {Transition} from "./controllers/compositor/parts/transition-manager.js"
+import type {
+	ColorSource, TEXT_GRADIENT, TextStyleAlign, TextStyleFontStyle, TextStyleFontVariant, TextStyleFontWeight, TextStyleTextBaseline, TextStyleWhiteSpace
+} from "pixi.js"
 
+import type {LineJoin, StrokeInput} from "./pixi.mjs.js"
 // export interface OmniStateHistorical {
 // 	timeline: HistoricalState
 // }
@@ -25,6 +30,7 @@ export interface HistoricalState {
 	tracks: XTrack[]
 	filters: Filter[]
 	animations: Animation[]
+	transitions: Transition[]
 }
 
 export interface NonHistoricalState {
@@ -78,9 +84,7 @@ export interface ImageEffect extends Effect {
 }
 
 export type TextEffectProps = Omit<TextEffect, keyof Effect | "kind">
-export type FontStyle = "italic" | "bold" | "normal"
 export type Font = string
-export type TextAlign = "left" | "right" | "center"
 
 export interface EffectRect {
 	width: number
@@ -96,13 +100,35 @@ export interface EffectRect {
 
 export interface TextEffect extends Effect {
 	kind: "text"
-	font: Font
-	content: string
-	color: string
-	size: number
-	style: FontStyle
-	align: TextAlign
+	fontFamily: Font
+	text: string
+	fontSize: number
+	fontStyle: TextStyleFontStyle
+	align: TextStyleAlign
+	fontVariant: TextStyleFontVariant
+	fontWeight: TextStyleFontWeight
+	fill: PIXI.FillInput[]
+	fillGradientType: TEXT_GRADIENT
+	fillGradientStops: number[]
 	rect: EffectRect
+	stroke: StrokeInput
+	strokeThickness: number
+	lineJoin: LineJoin
+	miterLimit: number
+	letterSpacing: number
+	dropShadow: boolean
+	dropShadowAlpha: number
+	dropShadowAngle: number
+	dropShadowBlur: number
+	dropShadowDistance: number
+	dropShadowColor: ColorSource
+	wordWrap: boolean
+	wordWrapWidth: number
+	lineHeight: number
+	leading: number
+	breakWords: boolean
+	whiteSpace: TextStyleWhiteSpace
+	textBaseline: TextStyleTextBaseline
 }
 
 export type AnyEffect = (

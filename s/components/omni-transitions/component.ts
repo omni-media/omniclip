@@ -69,7 +69,7 @@ export const OmniTransitions = shadow_component(use => {
 		const transition = manager.getTransition(id)
 		const max = calculateMaxTransitionDuration(transition, use.context.state)
 		const frameDuration = 1000 / use.context.state.timebase
-		const duration = manager.getTransitionDuration(id)?.duration ?? 520
+		const duration = manager.getTransitionDuration(id) ?? 520
 
 		return html`
 			<div class=duration-slider>

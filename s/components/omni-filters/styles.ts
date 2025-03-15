@@ -62,19 +62,26 @@ h2 {
 
 	& .filter {
 		position: relative;
+
+		& sl-dropdown, sl-button {
+			width: 100%;
+		}
+
+		& sl-menu {
+			width: 200px;
+			padding: 0.5em;
+		}
 	}
 
 	& .options {
 		display: flex;
 		flex-direction: column;
-		position: absolute;
-		z-index: 10;
-		width: 100%;
-		background: #111;
+		padding: 0.5em;
 
 		& fieldset {
 			display: flex;
 			flex-direction: column;
+			padding: 0.3em;
 		}
 	}
 
@@ -100,11 +107,12 @@ h2 {
 		display: flex;
 		flex-direction: column;
 		width: 200px;
-		background: black;
+		height: 200px;
 		justify-content: center;
 		align-items: center;
 		cursor: pointer;
 		border: 1px solid #373535;
+		border-radius: 5px;
 
 		& p {
 			padding: 0.2em;
@@ -115,7 +123,7 @@ h2 {
 		}
 
 		&[data-selected] {
-			border: 2px solid white;
+			border: 1px solid white;
 		}
 	}
 
