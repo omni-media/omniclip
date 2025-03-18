@@ -7,6 +7,7 @@ import {Compositor} from '../controller.js'
 import {omnislate} from '../../../context.js'
 import {GLTransition} from "../../../global.js"
 import {AnyEffect, ImageEffect, State, VideoEffect} from '../../../types.js'
+import {get_effect_at_timestamp} from "../../video-export/utils/get_effect_at_timestamp.js"
 import {normalizeTransitionDuration} from '../../../../components/omni-transitions/utils/normalize-transition-duration.js'
 
 export type TransitionAbleEffect = ImageEffect | VideoEffect
@@ -132,7 +133,7 @@ export class TransitionManager {
 				)
 				this.actions.set_effect_start(
 					incoming,
-					incoming.start + delta
+					incoming.start - delta
 				)
 				this.actions.set_effect_end(
 					outgoing,
@@ -156,6 +157,7 @@ export class TransitionManager {
 		const transition = this.getTransition(id)
 		this.actions.remove_transition(id)
 		this.#transitions.get(id)?.destroy()
+		this.#transitions.delete(id)
 		if (transition) {
 			if (transition.id === this.selected) {
 				this.selected = null
@@ -261,7 +263,10 @@ export class TransitionManager {
 			}
 
 			transitionSprite.filters = [filter]
-			this.compositor.app.stage.addChild(transitionSprite)
+			const isTransitionActive = get_effect_at_timestamp(transition.incoming, state.timecode) || get_effect_at_timestamp(transition.outgoing, state.timecode)
+			if(isTransitionActive) {
+				this.compositor.app.stage.addChild(transitionSprite)
+			}
 			const startMargin = 10
 			const endMargin = 20
 
@@ -307,6 +312,8 @@ export class TransitionManager {
 				filter.destroy()
 				incomingTween.kill()
 				this.timeline.remove(incomingTween)
+				incoming.alpha = 1
+				outgoing.alpha = 1
 			}
 
 			this.#transitions.set(transition.id, {
