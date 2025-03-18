@@ -55,9 +55,10 @@ export class TextManager extends Map<string, {sprite: PIXI.Text, transformer: PI
 			wordWrapWidth: 100,
 			whiteSpace: "pre",
 			rect: {
-				position_on_canvas: {
-					x: 100,
-					y: 50,
+				position_on_canvas: {x: this.compositor.app.stage.width / 2, y: this.compositor.app.stage.height / 2},
+				pivot: {
+					x: 0,
+					y: 0
 				},
 				scaleX: 1,
 				scaleY: 1,
@@ -88,6 +89,7 @@ export class TextManager extends Map<string, {sprite: PIXI.Text, transformer: PI
 		text.y = rect.position_on_canvas.y
 		text.scale.set(rect.scaleX, rect.scaleY)
 		text.rotation = rect.rotation
+		text.pivot.set(effect.rect.pivot.x, effect.rect.pivot.y)
 		//@ts-ignore
 		const transformer = new PIXI.Transformer({
 			boxRotationEnabled: true,

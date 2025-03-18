@@ -24,12 +24,16 @@ export class ImageManager extends Map<string, {sprite: PIXI.Sprite, transformer:
 			track: 2,
 			name: image.file.name,
 			rect: {
-				position_on_canvas: {x: 100, y: 50},
+				position_on_canvas: {x: this.compositor.app.stage.width / 2, y: this.compositor.app.stage.height / 2},
 				width: image.element.naturalWidth,
 				height: image.element.naturalHeight,
 				rotation: 0,
 				scaleX: 1,
-				scaleY: 1
+				scaleY: 1,
+				pivot: {
+					x: image.element.naturalWidth / 2,
+					y: image.element.naturalHeight / 2
+				}
 			}
 		}
 		const {position, track} = find_place_for_new_effect(state.effects, state.tracks)
@@ -46,6 +50,7 @@ export class ImageManager extends Map<string, {sprite: PIXI.Sprite, transformer:
 		sprite.y = effect.rect.position_on_canvas.y
 		sprite.scale.set(effect.rect.scaleX, effect.rect.scaleY)
 		sprite.rotation = effect.rect.rotation * (Math.PI / 180)
+		sprite.pivot.set(effect.rect.pivot.x, effect.rect.pivot.y)
 		sprite.eventMode = "static"
 		sprite.cursor = "pointer"
 		sprite.filters = []

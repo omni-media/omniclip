@@ -33,12 +33,16 @@ export class VideoManager extends Map<string, {sprite: PIXI.Sprite, transformer:
 			track: 0,
 			thumbnail: video.thumbnail,
 			rect: {
-				position_on_canvas: {x: 0, y: 0},
+				position_on_canvas: {x: this.compositor.app.stage.width / 2, y: this.compositor.app.stage.height / 2},
 				width: video.element.videoWidth,
 				height: video.element.videoHeight,
 				rotation: 0,
 				scaleX: 1,
-				scaleY: 1
+				scaleY: 1,
+				pivot: {
+					x: video.element.videoWidth / 2,
+					y: video.element.videoHeight / 2
+				}
 			}
 		}
 		const {position, track} = find_place_for_new_effect(state.effects, state.tracks)
@@ -47,16 +51,17 @@ export class VideoManager extends Map<string, {sprite: PIXI.Sprite, transformer:
 		this.add_video_effect(effect, video.file)
 	}
 
-	async add_video_effect(effect: VideoEffect, file: File, recreate?: boolean) {
+	add_video_effect(effect: VideoEffect, file: File, recreate?: boolean) {
 		const element = document.createElement('video')
 		const obj = URL.createObjectURL(file)
 		element.src = obj
-		element.load()
 		element.width = effect.rect.width
 		element.height = effect.rect.height
 		const texture = PIXI.Texture.from(element)
 		this.#videoElements.set(effect.id, texture)
+		texture.baseTexture.resource.autoPlay = false
 		const sprite = new PIXI.Sprite(texture)
+		sprite.pivot.set(effect.rect.pivot.x, effect.rect.pivot.y)
 		sprite.x = effect.rect.position_on_canvas.x
 		sprite.y = effect.rect.position_on_canvas.y
 		sprite.scale.set(effect.rect.scaleX, effect.rect.scaleY)
@@ -120,7 +125,7 @@ export class VideoManager extends Map<string, {sprite: PIXI.Sprite, transformer:
 		}
 	}
 
-	async draw_decoded_frame(effect: VideoEffect, frame: VideoFrame) {
+	draw_decoded_frame(effect: VideoEffect, frame: VideoFrame) {
 		const video = this.get(effect.id)?.sprite
 		if(video) {
 			const canvas = this.#effect_canvas.get(effect.id)!

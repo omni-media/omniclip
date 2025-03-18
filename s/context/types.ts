@@ -96,6 +96,10 @@ export interface EffectRect {
 		y: number
 	}
 	rotation: number
+	pivot: {
+		x: number
+		y: number
+	}
 }
 
 export interface TextEffect extends Effect {

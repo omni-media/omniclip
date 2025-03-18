@@ -178,6 +178,10 @@ export const historical = actionize_historical({
 	add_audio_effect: state => (effect: AudioEffect) => {
 		state.effects.push(effect)
 	},
+	set_pivot: state => ({id}: VideoEffect | ImageEffect | TextEffect, x: number, y: number) => {
+		const effect = state.effects.find(effect => effect.id === id) as VideoEffect | ImageEffect
+		effect!.rect.pivot = {x, y}
+	},
 	set_text_fill: state => ({id}: TextEffect, color: string, index: number) => {
 		const effect = state.effects.find(effect => effect.id === id) as TextEffect
 		effect.fill[index] = color
