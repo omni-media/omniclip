@@ -40,6 +40,10 @@ export class TransitionManager {
 
 	constructor (private compositor: Compositor, private actions: Actions) {}
 
+	updateTimelineDuration(duration: number) {
+		this.timeline.duration(duration / 1000)
+	}
+
 	clearTransitions (omit?: boolean) {
 		this.actions.clear_animations({omit})
 		this.actions.clear_transitions({omit})

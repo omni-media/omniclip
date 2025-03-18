@@ -1,28 +1,28 @@
 import {pub, reactor, signal} from "@benev/slate"
 
 import {Actions} from "../../actions.js"
+import {omnislate} from "../../context.js"
 import {Media} from "../media/controller.js"
-// import {TextManager} from "./parts/text-manager.js"
+import {TextManager} from "./parts/text-manager.js"
 import {ImageManager} from "./parts/image-manager.js"
 import {AudioManager} from "./parts/audio-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
 import {AlignGuidelines} from "./lib/aligning_guidelines.js"
 import {FiltersManager} from "./parts/filter-manager.js"
 import {AnyEffect, AudioEffect, State} from "../../types.js"
-// import {AnimationManager} from "./parts/animation-manager.js"
+import {AnimationManager} from "./parts/animation-manager.js"
 import {compare_arrays} from "../../../utils/compare_arrays.js"
-// import {TransitionManager} from "./parts/transition-manager.js"
-// import {sort_effects_by_track} from "../video-export/utils/sort_effects_by_track.js"
+import {TransitionManager} from "./parts/transition-manager.js"
 import {get_effect_at_timestamp} from "../video-export/utils/get_effect_at_timestamp.js"
 
 export interface Managers {
 	videoManager: VideoManager
-	// textManager: TextManager
+	textManager: TextManager
 	imageManager: ImageManager
 	audioManager: AudioManager
-	// animationManager: AnimationManager
+	animationManager: AnimationManager
 	filtersManager: FiltersManager
-	// transitionManager: TransitionManager
+	transitionManager: TransitionManager
 }
 
 export class Compositor {
@@ -34,53 +34,49 @@ export class Compositor {
 	timebase = 25
 	currently_played_effects = new Map<string, AnyEffect>()
 
-	app = new PIXI.Application()
+	app = new PIXI.Application({width: 1920, height: 1080, backgroundColor: "black", preference: "webgl"})
 	#seekedResolve: ((value: unknown) => void) | null = null
+	#recreated = false
 	
 	managers: Managers
+	guidelines: AlignGuidelines
+	#guidelineRect: PIXI.Sprite
 
-	selectedElement: PIXI.Container | null = null
-	graphics = new PIXI.Graphics() // graphics for align guidelines
-	guidelines: AlignGuidelines | null = null
-
+	#pointerDown = false
 
 	constructor(private actions: Actions) {
-	this.#on_new_canvas_object_set_handle_styles()
-	this.#on_selected_canvas_object()
-	this.app.init({width: 1920, height: 1080, preference: "webgl"}).then(() => {
-		this.guidelines = new AlignGuidelines({
-			app: this.app,
-			compositor: this
-		})
-		this.init_guidelines()
-		this.app.stage.eventMode = "static"
+		this.#on_selected_canvas_object()
+		this.app.stage.sortableChildren = true
+		this.app.stage.interactive = true
+		const {guidelines, guidelintRect} = this.init_guidelines()
+		this.guidelines = guidelines
+		this.#guidelineRect = guidelintRect
 		this.app.stage.hitArea = this.app.screen
-		this.app.stage.addChild(this.graphics)
-		this.app.stage.on('pointerup', this.canvasElementDrag.onDragEnd);
-		this.app.stage.on('pointerupoutside', this.canvasElementDrag.onDragEnd);
-	})
-	this.managers = {
-		videoManager: new VideoManager(this, actions),
-		// textManager: new TextManager(this, actions),
-		imageManager: new ImageManager(this, actions),
-		audioManager: new AudioManager(this, actions),
-		// animationManager: new AnimationManager(this, actions, "Animation"),
-		filtersManager: new FiltersManager(this, actions),
-		// transitionManager: new TransitionManager(this, actions)
-	}
+		this.app.stage.on('pointerup', () => this.canvasElementDrag.onDragEnd())
+		this.app.stage.on('pointerupoutside', this.canvasElementDrag.onDragEnd)
+
+		this.managers = {
+			videoManager: new VideoManager(this, actions),
+			textManager: new TextManager(this, actions),
+			imageManager: new ImageManager(this, actions),
+			audioManager: new AudioManager(this, actions),
+			animationManager: new AnimationManager(this, actions, "Animation"),
+			filtersManager: new FiltersManager(this, actions),
+			transitionManager: new TransitionManager(this, actions)
+		}
 
 		this.#on_playing()
 		reactor.reaction(
 			() => this.#is_playing.value,
 			(is_playing) => {
 				if(is_playing) {
-					// this.managers.transitionManager.play(this.timecode)
-					// this.managers.animationManager.play(this.timecode)
+					this.managers.transitionManager.play(this.timecode)
+					this.managers.animationManager.play(this.timecode)
 					this.managers.videoManager.play_videos()
 					this.managers.audioManager.play_audios()
 				} else {
-					// this.managers.transitionManager.pause()
-					// this.managers.animationManager.pause()
+					this.managers.transitionManager.pause()
+					this.managers.animationManager.pause()
 					this.managers.videoManager.pause_videos()
 					this.managers.audioManager.pause_audios()
 				}
@@ -102,22 +98,23 @@ export class Compositor {
 	}
 
 	canvasElementDrag = {
-		onDragStart: (e: PIXI.FederatedPointerEvent, element: PIXI.Container) => {
-			let position = e.getLocalPosition(element)
-			element.pivot.set(position.x, position.y)
-			element.position.set(e.global.x, e.global.y)
-			this.selectedElement = element
+		onDragStart: (e: PIXI.FederatedPointerEvent, sprite: PIXI.Container, transformer: PIXI.Container) => {
+			if(this.selectedElement) {this.app.stage.removeChild(this.selectedElement?.transformer)}
+			this.#pointerDown = true
+			let position = e.getLocalPosition(sprite)
+			sprite.pivot.set(position.x, position.y)
+			sprite.position.set(e.global.x, e.global.y)
 			this.app.stage.on('pointermove', (e) => this.canvasElementDrag.onDragMove(e))
 		},
 		onDragEnd: () => {
 			if (this.selectedElement) {
 				this.app.stage.off('pointermove', this.canvasElementDrag.onDragMove)
-				this.selectedElement = null
+				this.#pointerDown = false
 			}
 		},
 		onDragMove: (event: PIXI.FederatedPointerEvent) => {
-			this.selectedElement?.parent.toLocal(event.global, undefined, this.selectedElement.position)
-			if (this.selectedElement) {
+			if (this.selectedElement && this.#pointerDown) {
+				this.selectedElement?.sprite.parent.toLocal(event.global, undefined, this.selectedElement.sprite.position)
 				if(this.guidelines) {
 					this.guidelines.on_object_move_or_scale(event)
 				}
@@ -126,15 +123,26 @@ export class Compositor {
 	}
 
 	reset() {
+		omnislate.context.state.effects.forEach(effect => {
+			if(effect.kind === "text") {
+				this.managers.textManager.remove_text_from_canvas(effect)
+			} else if(effect.kind === "video") {
+				this.managers.videoManager.remove_video_from_canvas(effect)
+			} else if(effect.kind === "image") {
+				this.managers.imageManager.remove_image_from_canvas(effect)
+			}
+		})
 		this.currently_played_effects.clear()
 		this.app.renderer.clear()
 	}
 
 	clear(omit?: boolean) {
 		this.app.renderer.clear()
+		this.app.stage.removeChildren()
 		this.init_guidelines()
-		// this.managers.animationManager.clearAnimations(omit)
-		// this.managers.transitionManager.clearTransitions(omit)
+		this.managers.animationManager.clearAnimations(omit)
+		this.managers.transitionManager.clearTransitions(omit)
+		this.actions.set_selected_effect(null)
 	}
 	
 	#calculate_elapsed_time() {
@@ -145,6 +153,7 @@ export class Compositor {
 	}
 
 	compose_effects(effects: AnyEffect[], timecode: number, exporting?: boolean) {
+		if(!this.#recreated) {return}
 		this.timecode = timecode
 		this.#update_currently_played_effects(effects, timecode, exporting)
 		this.app.render()
@@ -155,16 +164,11 @@ export class Compositor {
 		return current_time / 1000
 	}
 
-	// get_effects_relative_to_timecode(effects: AnyEffect[], timecode: number) {
-	// 	return effects.filter(effect => {
-	// 		// const {incoming, outgoing} = this.managers.transitionManager.getTransitionDuration(effect)
-	// 		// return effect.start_at_position - incoming <= timecode && timecode <= effect.start_at_position + (effect.end - effect.start) + outgoing
-	// 	})
-	// }
-
 	get_effects_relative_to_timecode(effects: AnyEffect[], timecode: number) {
 		return effects.filter(effect => {
-			return effect.start_at_position <= timecode && timecode <= effect.start_at_position + (effect.end - effect.start)
+			const transition = this.managers.transitionManager.getTransitionByEffect(effect)
+			const {incoming, outgoing} = this.managers.transitionManager.getTransitionDurationPerEffect(transition, effect)
+			return effect.start_at_position - incoming <= timecode && timecode <= effect.start_at_position + (effect.end - effect.start) + outgoing
 		})
 	}
 
@@ -183,8 +187,8 @@ export class Compositor {
 	}
 
 	async seek(timecode: number, redraw?: boolean) {
-		// this.managers.animationManager.seek(timecode)
-		// this.managers.transitionManager.seek(timecode)
+		this.managers.animationManager.seek(timecode)
+		this.managers.transitionManager.seek(timecode)
 		for(const effect of this.currently_played_effects.values()) {
 			if(effect.kind === "audio") {
 				const audio = this.managers.audioManager.get(effect.id)
@@ -196,9 +200,8 @@ export class Compositor {
 				}
 			}
 			if(effect.kind === "video") {
-				// this.managers.filtersManager.onseek(effect)
-				const video = this.managers.videoManager.get(effect.id)
-				const element = video?.texture.source.resource as any as HTMLVideoElement | null
+				const video = this.managers.videoManager.get(effect.id)?.sprite
+				const element = video?.texture.baseTexture.resource.source as HTMLVideoElement | null
 				if(!redraw && element?.paused && this.#is_playing.value) {await element.play()}
 				if(redraw && timecode && element) {
 					const current_time = this.get_effect_current_time_relative_to_timecode(effect, timecode)
@@ -233,12 +236,12 @@ export class Compositor {
 			else if(effect.kind === "video") {
 				this.currently_played_effects.set(effect.id, effect)
 				this.managers.videoManager.add_video_to_canvas(effect)
-				const element = this.managers.videoManager.get(effect.id)?.texture.source.resource as HTMLVideoElement
+				const element = this.managers.videoManager.get(effect.id)?.sprite?.texture.baseTexture.resource.source as HTMLVideoElement
 				if(element) {element.currentTime = effect.start / 1000}
 			}
 			else if(effect.kind === "text") {
 				this.currently_played_effects.set(effect.id, effect)
-				// this.managers.textManager.add_text_to_canvas(effect)
+				this.managers.textManager.add_text_to_canvas(effect)
 			}
 			else if(effect.kind === "audio") {
 				this.currently_played_effects.set(effect.id, effect)
@@ -256,7 +259,7 @@ export class Compositor {
 			}
 			else if(effect.kind === "text") {
 				this.currently_played_effects.delete(effect.id)
-				// this.managers.textManager.remove_text_from_canvas(effect)
+				this.managers.textManager.remove_text_from_canvas(effect)
 			}
 			else if(effect.kind === "video") {
 				this.currently_played_effects.delete(effect.id)
@@ -275,44 +278,43 @@ export class Compositor {
 	}
 
 	init_guidelines() {
-		if(this.guidelines)
-			this.guidelines.init()
+		const guidelines = new AlignGuidelines({
+			app: this.app,
+			compositor: this,
+			ignoreObjTypes: [{key: "ignoreAlign", value: true}],
+			pickObjTypes: [{key: "ignoreAlign", value: false}]
+		})
 		// add rect as big as canvas so it acts as guideline for canvas borders
-		// const rect = new Rect({width: 1920, height: 1080, fill: "transparent", selectable: false, evented: false, rect_type: "guideline"})
-		// this.canvas.moveObjectTo(rect, 999)
-		// this.canvas.add(rect)
-	}
-
-	#on_new_canvas_object_set_handle_styles() {
-		// this.canvas.on("object:added", (e) => {
-		// 	e.target.set({
-		// 		transparentCorners: false,
-		// 		borderColor: "#03a9c1",
-		// 		cornerColor: "white"
-		// 	})
-		// })
+		guidelines.init()
+		const guidelintRect = new PIXI.Sprite()
+		guidelintRect.width = this.app.view.width
+		guidelintRect.height = this.app.view.height
+		guidelintRect.eventMode = "none"
+		this.app.stage.addChild(guidelintRect)
+		return {guidelintRect, guidelines}
 	}
 
 	#on_selected_canvas_object() {
 		this.app.stage.on("pointerdown", (e) => {
 			//@ts-ignore
-			const selected_effect = e.target ? e.target.effect as AnyEffect : null
-			this.actions.set_selected_effect(selected_effect, {omit: true})
-			// if(e.target) {this.canvas.setActiveObject(e.target)}
-			// if(selected_effect?.kind === "text") {this.managers.textManager.set_clicked_effect(selected_effect)}
+			const selected_effect = e.target ? e.target.effect as AnyEffect : undefined
+			const effect = omnislate.context.state.effects.find(e => e.id === selected_effect?.id)
+			omnislate.context.controllers.timeline.set_selected_effect(effect, omnislate.context.state)
 		})
 		this.app.stage.on("pointerup", (e) => {
 			//@ts-ignore
 			const selected_effect = e.target ? e.target.effect as Exclude<AnyEffect, AudioEffect> : null
 			if(selected_effect) {
+				this.actions.set_pivot(selected_effect, e.target.pivot.x, e.target.pivot.y)
 				const {rect: {position_on_canvas: {x, y}}} = selected_effect
-				if(x !== e.target.x || y !== e.target.y) {
-					this.actions.set_position_on_canvas(selected_effect, e.target.x, e.target.y);
+				if(x !== e.global.x || y !== e.global.y) {
+					const {x, y} = e.target
+					this.actions.set_position_on_canvas(selected_effect, x, y);
 					this.actions.set_rotation(selected_effect, e.target.angle)
 					this.actions.set_effect_scale(selected_effect, {x: e.target.scale.x, y: e.target.scale.y})
 					//@ts-ignore
 					e.target.effect = {...e.target.effect,
-						rect: {position_on_canvas: {x: e.target.x, y: e.target.y},
+						rect: {position_on_canvas: {x, y},
 						rotation: e.target.angle,
 						scaleX: e.target.scale.x,
 						scaleY: e.target.scale.y}
@@ -342,7 +344,7 @@ export class Compositor {
 					this.managers.audioManager.add_audio_effect(effect, file, true)
 			}
 			else if(effect.kind === "text") {
-				// this.managers.textManager.add_text_effect(effect, true)
+				this.managers.textManager.add_text_effect(effect, true)
 			}
 		}
 		for(const filter of state.filters) {
@@ -351,8 +353,11 @@ export class Compositor {
 				this.managers.filtersManager.addFilterToEffect(effect, filter.type, true)
 			}
 		}
-		// this.managers.transitionManager.refresh(state)
-		// this.managers.animationManager.refresh(state)
+		for(const transition of state.transitions) {
+			this.managers.transitionManager.selectTransition(transition).apply(state, true)
+		}
+		this.managers.animationManager.refresh(state)
+		this.#recreated = true
 		this.compose_effects(state.effects, this.timecode)
 	}
 
@@ -361,7 +366,7 @@ export class Compositor {
 			if(!(object instanceof PIXI.Rectangle)) {
 				//@ts-ignore
 				const object_effect = object.effect as Exclude<AnyEffect, AudioEffect>
-				const effect = state.effects.find(effect => effect.id === object_effect.id)! as Exclude<AnyEffect, AudioEffect>
+				const effect = state.effects.find(effect => effect.id === object_effect?.id) as Exclude<AnyEffect, AudioEffect>
 				if(effect) {
 					object.x = effect.rect.position_on_canvas.x
 					object.y = effect.rect.position_on_canvas.y
@@ -376,39 +381,44 @@ export class Compositor {
 	}
 
 	set_canvas_resolution(width: number, height: number) {
-		// this.canvas.setDimensions({width, height})
-		// const guideline_rect = this.canvas.getObjects().find(object => {
-		// 	//@ts-ignore
-		// 	if(object.rect_type === "guideline")
-		// 		return object
-		// })
-		// guideline_rect?.scaleToWidth(width - 1)
-		// guideline_rect?.scaleToHeight(height - 1)
+		this.app.renderer.resize(width, height)
+		this.#guidelineRect.width = width
+		this.#guidelineRect.height = height
+		this.managers.transitionManager.refreshTransitions()
 	}
 
 	set_timebase(value: number) {
 		this.timebase = value
 	}
 
-	setOrDiscardActiveObjectOnCanvas(selectedEffect: AnyEffect | null, state: State) {
-		if (!selectedEffect) {
-			// Discard any active object if no effect is selected
-			// this.canvas.discardActiveObject()
+	get selectedElement() {
+		const selected = omnislate.context.state.selected_effect
+		if(selected?.kind === "video") {
+			return this.managers.videoManager.get(selected.id)
+		} else if(selected?.kind === "image") {
+			return this.managers.imageManager.get(selected.id)
+		} else if(selected?.kind === "text") {
+			return this.managers.textManager.get(selected.id)
+		}
+		return null
+	}
+
+
+	setOrDiscardActiveObjectOnCanvas(selectedEffect: AnyEffect | undefined, state: State) {
+		if(!selectedEffect) {
+			if(this.selectedElement) {
+				this.app.stage.removeChild(this.selectedElement?.transformer)
+			}
 			return
 		}
-
-		const isEffectOnCanvas = get_effect_at_timestamp(selectedEffect, state.timecode)
+		
+		const effect = state.effects.find(e => e.id === selectedEffect.id) ?? selectedEffect // getting again to ensure newest props
+		const isEffectOnCanvas = get_effect_at_timestamp(effect, state.timecode)
 
 		if (isEffectOnCanvas) {
-		// 	const object = this.canvas.getObjects().find((object: any) =>
-		// 		(object?.effect as AnyEffect)?.id === selectedEffect.id
-		// 	)
-
-		// 	if (object && object !== this.canvas.getActiveObject()) {
-		// 		this.canvas.setActiveObject(object)
-		// 	}
-		// } else {
-		// 	this.canvas.discardActiveObject()
+			if(this.selectedElement) {
+				this.app.stage.addChild(this.selectedElement?.transformer)
+			}
 		}
 	}
 

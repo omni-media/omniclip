@@ -38,13 +38,11 @@ export class OmniContext extends Context {
 		})
 		watch.track(() => this.#core.state.effects, async () => {
 			queue = queue.then(async () => {
-				await this.controllers.compositor.managers.transitionManager.refresh(this.state)
 				await this.controllers.compositor.managers.animationManager.refresh(this.state)
 			})
 		})
 		watch.track(() => this.#core.state.animations, async () => {
 			queue = queue.then(async () => {
-				await this.controllers.compositor.managers.transitionManager.refresh(this.state)
 				await this.controllers.compositor.managers.animationManager.refresh(this.state)
 			})
 		})
@@ -59,7 +57,8 @@ export class OmniContext extends Context {
 				effects: state.effects,
 				tracks: state.tracks,
 				filters: state.filters,
-				animations: state.animations
+				animations: state.animations,
+				transitions: state.transitions
 			}
 		}
 	}

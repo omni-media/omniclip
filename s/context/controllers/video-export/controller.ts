@@ -41,6 +41,7 @@ export class VideoExport {
 		this.actions.set_is_exporting(false, {omit: true})
 		this.actions.set_export_status("composing")
 		this.compositor.reset()
+		this.compositor.app.view.style.pointerEvents = "all"
 		state.effects.forEach(effect => {
 			if(effect.kind === "video") {
 				this.compositor.managers.videoManager.reset(effect)
@@ -50,6 +51,8 @@ export class VideoExport {
 
 	export_start(state: State, bitrate: number) {
 		this.#exporting = true
+		this.compositor.app.view.style.pointerEvents = "none"
+		this.compositor.setOrDiscardActiveObjectOnCanvas(undefined, state)
 		this.#Encoder.configure([state.settings.width, state.settings.height], bitrate, state.timebase)
 		const sorted_effects = this.#sort_effects_by_track(state.effects)
 		this.#timestamp_end = Math.max(...sorted_effects.map(effect => effect.start_at_position + (effect.end - effect.start)))
@@ -63,7 +66,7 @@ export class VideoExport {
 		await this.#Decoder.get_and_draw_decoded_frame(effects, this.#timestamp)
 		this.compositor.compose_effects(effects, this.#timestamp, true)
 		this.actions.set_export_status("composing")
-		this.#Encoder.encode_composed_frame(this.compositor.canvas_element, this.#timestamp)
+		this.#Encoder.encode_composed_frame(this.compositor.app.view, this.#timestamp)
 		this.#timestamp += 1000/this.compositor.timebase
 		this.compositor.managers.animationManager.seek(this.#timestamp)
 		this.compositor.managers.transitionManager.seek(this.#timestamp)

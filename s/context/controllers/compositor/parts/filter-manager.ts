@@ -6,6 +6,11 @@ import {ImageEffect, VideoEffect} from "../../../types.js"
 
 //@ts-ignore
 const filters = {...PIXI, ...PIXI.filters}
+export interface Filter {
+	targetEffectId: string
+	type: FilterType
+}
+
 export class FiltersManager {
 	onChange = pub()
 
@@ -26,13 +31,13 @@ export class FiltersManager {
 	}
 
 	#getObject(effect: VideoEffect | ImageEffect) {
-		// const videoObject = this.compositor.managers.videoManager.get(effect.id)
-		const imageObject = this.compositor.managers.imageManager.get(effect.id)
-		// if(videoObject) {
-		// 	return videoObject
-		// } else if(imageObject) {
+		const videoObject = this.compositor.managers.videoManager.get(effect.id)?.sprite
+		const imageObject = this.compositor.managers.imageManager.get(effect.id)?.sprite
+		if(videoObject) {
+			return videoObject
+		} else if(imageObject) {
 			return imageObject
-		// }
+		}
 	}
 
 	addFilterToEffect(
@@ -121,10 +126,13 @@ export class FiltersManager {
 			const image = new PIXI.Sprite(texture)
 			image.filters = []
 			const s = schema as FilterType
-			const filter = new filters[s](image)
-			image.filters = [...image.filters, filter]
-			const canvas = this.compositor.app.renderer.extract.canvas(image)
-			onCreatedPreview({canvas, type: s, uid: filter.uid})
+			// temporal hack to avoid errors with not working filters
+			try {
+				const filter = new filters[s](image)
+				image.filters = [...image.filters, filter]
+				const canvas = this.compositor.app.renderer.extract.canvas(image)
+				onCreatedPreview({canvas, type: s, uid: filter.uid})
+			} catch(e) {}
 		}
 	}
 }

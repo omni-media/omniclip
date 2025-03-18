@@ -84,7 +84,9 @@ export class Decoder {
 			}
 		})
 
-		const {incoming, outgoing} = this.compositor.managers.transitionManager.getTransitionDuration(effect)
+		const transition = this.compositor.managers.transitionManager.getTransitionByEffect(effect)
+		const {incoming, outgoing} = this.compositor.managers.transitionManager.getTransitionDurationPerEffect(transition, effect)
+
 		const file = await this.media.get_file(effect.file_hash)
 		worker.postMessage({
 			action: "demux",
