@@ -139,7 +139,9 @@ export class Compositor {
 	clear(omit?: boolean) {
 		this.app.renderer.clear()
 		this.app.stage.removeChildren()
-		this.init_guidelines()
+		const {guidelines, guidelintRect} = this.init_guidelines()
+		this.guidelines = guidelines
+		this.#guidelineRect = guidelintRect
 		this.managers.animationManager.clearAnimations(omit)
 		this.managers.transitionManager.clearTransitions(omit)
 		this.actions.set_selected_effect(null)
