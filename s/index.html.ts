@@ -25,7 +25,7 @@ export default template(async basic => {
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<script type="importmap-shim" src="./importmap.json"></script>
-			<script defer src="./node_modules/es-module-shims/dist/es-module-shims.js"></script>
+			<script defer src="https://cdn.jsdelivr.net/npm/es-module-shims@1.8.2/dist/es-module-shims.min.js"></script>
 			<script type="module-shim" src="./main.js"></script>
 			<link rel="stylesheet" href="index.css">
 			<link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
