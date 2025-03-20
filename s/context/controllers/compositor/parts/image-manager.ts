@@ -84,6 +84,7 @@ export class ImageManager extends Map<string, {sprite: PIXI.Sprite, transformer:
 		if(image) {
 			this.compositor.app.stage.addChild(image.sprite)
 			image.sprite.zIndex = omnislate.context.state.tracks.length - effect.track
+			image.transformer.zIndex = omnislate.context.state.tracks.length - effect.track
 		}
 	}
 

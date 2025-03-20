@@ -104,6 +104,7 @@ export class VideoManager extends Map<string, {sprite: PIXI.Sprite, transformer:
 		if(video) {
 			this.compositor.app.stage.addChild(video.sprite)
 			video.sprite.zIndex = omnislate.context.state.tracks.length - effect.track
+			video.transformer.zIndex = omnislate.context.state.tracks.length - effect.track
 		}
 	}
 

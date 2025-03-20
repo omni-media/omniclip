@@ -7,13 +7,13 @@ import {TextManager} from "./parts/text-manager.js"
 import {ImageManager} from "./parts/image-manager.js"
 import {AudioManager} from "./parts/audio-manager.js"
 import {VideoManager} from "./parts/video-manager.js"
-import {AlignGuidelines} from "./lib/aligning_guidelines.js"
 import {FiltersManager} from "./parts/filter-manager.js"
-import {AnyEffect, AudioEffect, State} from "../../types.js"
+import {AlignGuidelines} from "./lib/aligning_guidelines.js"
 import {AnimationManager} from "./parts/animation-manager.js"
 import {compare_arrays} from "../../../utils/compare_arrays.js"
 import {TransitionManager} from "./parts/transition-manager.js"
 import {get_effect_at_timestamp} from "../video-export/utils/get_effect_at_timestamp.js"
+import {AnyEffect, AudioEffect, ImageEffect, State, TextEffect, VideoEffect} from "../../types.js"
 
 export interface Managers {
 	videoManager: VideoManager
@@ -180,7 +180,17 @@ export class Compositor {
 		this.#update_effects(effects_relative_to_timecode)
 		this.#remove_effects_from_canvas(remove, exporting)
 		this.#add_effects_to_canvas(add)
+		this.#setEffectsIndexes(effects)
 		this.app.stage.sortChildren()
+	}
+
+	#setEffectsIndexes(effects: AnyEffect[]) {
+		effects.filter(e => e.kind !== "audio").forEach(e => {
+			const effect = e as ImageEffect | VideoEffect | TextEffect
+			const object = this.getObject(effect)
+			object!.sprite.zIndex = omnislate.context.state.tracks.length - effect.track
+			object!.transformer.zIndex = omnislate.context.state.tracks.length - effect.track
+		})
 	}
 
 	#update_effects(new_effects: AnyEffect[]) {
@@ -276,6 +286,19 @@ export class Compositor {
 					this.managers.audioManager.pause_audio(effect)
 				}
 			}
+		}
+	}
+
+	getObject(effect: VideoEffect | ImageEffect | TextEffect) {
+		const videoObject = this.managers.videoManager.get(effect.id)
+		const imageObject = this.managers.imageManager.get(effect.id)
+		const textObject = this.managers.textManager.get(effect.id)
+		if (videoObject) {
+			return videoObject
+		} else if (imageObject) {
+			return imageObject
+		} else if (textObject) {
+			return textObject
 		}
 	}
 

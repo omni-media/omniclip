@@ -122,6 +122,7 @@ export class TextManager extends Map<string, {sprite: PIXI.Text, transformer: PI
 		if(text) {
 			this.compositor.app.stage.addChild(text.sprite)
 			text.sprite.zIndex = omnislate.context.state.tracks.length - effect.track
+			text.transformer.zIndex = omnislate.context.state.tracks.length - effect.track
 		}
 	}
 
