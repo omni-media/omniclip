@@ -4,6 +4,7 @@ import {ConstructEditor, single_panel_layout} from "@benev/construct/x/mini.js"
 
 import {Tooltip} from './views/tooltip/view.js'
 import {HashRouter} from './tools/hash-router.js'
+import {TestEnvAlert} from './views/test-env-alert.js'
 import checkSvg from './icons/gravity-ui/check.svg.js'
 import exportSvg from './icons/gravity-ui/export.svg.js'
 import {ShortcutsManager} from './views/shortcuts/view.js'
@@ -36,6 +37,8 @@ posthog.init('phc_CMbHMWGVJSqM1RqGyGxWCyqgaSGbGFKl964fIN3NDwU',
 			autocapture: false
 	}
 )
+
+const IS_TEST_ENV = window.location.hostname.startsWith("test")
 
 export function setupContext(projectId: string) {
 	omnislate.context = new OmniContext({
@@ -92,6 +95,7 @@ const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((us
 
 	return html`
 		<div class=editor>
+			${IS_TEST_ENV ? TestEnvAlert : null}
 			${ExportConfirmModal([showConfirmExportModal, setShowConfirmExportModal])}
 			${ExportInProgressModal([])}
 			<div class=editor-header>
