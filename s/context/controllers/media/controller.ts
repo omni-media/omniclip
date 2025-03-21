@@ -261,8 +261,8 @@ export class Media extends Map<string, AnyMedia> {
 			const video = document.createElement('video')
 			video.src = URL.createObjectURL(file)
 			video.load()
-			const url = await this.create_video_thumbnail(video)
-			videos.push({element: video, file, hash, kind: "video", thumbnail: url, frames, duration, fps, proxy})
+			const thumbnail = await this.create_video_thumbnail(video)
+			videos.push({element: video, file, hash, kind: "video", thumbnail, frames, duration, fps, proxy})
 		}
 		return videos
 	}

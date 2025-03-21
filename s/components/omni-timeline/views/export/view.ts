@@ -129,7 +129,7 @@ export const ExportInProgressModal = shadow_view(use => () => {
 			<div class="box">
 				${state.is_exporting
 					? html`
-						${compositor.canvas.getElement()}
+						${compositor.app.view}
 					`
 					: null}
 				<div class=progress>

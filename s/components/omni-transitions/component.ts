@@ -1,20 +1,20 @@
-import {Op, html} from "@benev/slate"
+import {Op, generate_id, html} from "@benev/slate"
 
 import {styles} from "./styles.js"
 import transitionSvg from "../../icons/transition.svg.js"
 import {shadow_component} from "../../context/context.js"
 import {StateHandler} from "../../views/state-handler/view.js"
-import {ImageEffect, VideoEffect} from "../../context/types.js"
 import circleInfoSvg from "../../icons/gravity-ui/circle-info.svg.js"
 import circlePlaySvg from "../../icons/gravity-ui/circle-play.svg.js"
 import circlePauseSvg from "../../icons/gravity-ui/circle-pause.svg.js"
 import {normalizeTransitionDuration} from "./utils/normalize-transition-duration.js"
 import {calculateMaxTransitionDuration} from "./utils/calculate-max-transition-duration.js"
-import {SelectedPair, transition} from "../../context/controllers/compositor/parts/transition-manager.js"
+import {transitions} from "../../context/controllers/compositor/parts/transition-manager.js"
 
 export const OmniTransitions = shadow_component(use => {
 	use.styles(styles)
 	use.watch(() => use.context.state)
+	const state = use.context.state
 	const manager = use.context.controllers.compositor.managers.transitionManager
 	const [isTutorialPlaying, setTutorialPlaying] = use.state(false)
 
@@ -23,31 +23,28 @@ export const OmniTransitions = shadow_component(use => {
 		return () => dispose()
 	})
 
-	const selectedImageOrVideoEffect = use.context.state.selected_effect?.kind === "video" || use.context.state.selected_effect?.kind === "image"
-		? use.context.state.effects.find(effect => effect.id === use.context.state.selected_effect!.id)! as ImageEffect | VideoEffect
-		: null
+	const touchingPairs = manager.findTouchingClips(state.effects)
 
 	const renderTransitions = () => {
-		return transition.map(transition => {
-			const {incoming, outgoing} = manager.selected!
-			const selectedAnimation = use.context.state.animations.find(a => a.targetEffect.id === manager.selected?.incoming.id)
-			const duration = selectedAnimation?.duration ?? 520
+		return transitions.map(transition => {
+			const selectedTransition = use.context.state.transitions.find(a => a.id === manager.selected)
+			const duration = selectedTransition?.duration ?? 520
 
 			return html`
 				<div
-					?data-selected=${manager.isSelected(transition)}
-					?disabled=${!selectedImageOrVideoEffect}
+					?data-selected=${manager.isSelected(transition.name)}
+					?disabled=${touchingPairs.length === 0}
 					@click=${() => manager.selectTransition({
-						incoming: incoming,
-						outgoing: outgoing,
+						incoming: selectedTransition?.incoming!,
+						outgoing: selectedTransition?.outgoing!,
 						duration: normalizeTransitionDuration(duration, 1000 / use.context.state.timebase),
-						animation: "fade"})
-						.apply(use.context.state)
-					}
+						transition,
+						id: selectedTransition?.id ?? generate_id()
+					})?.apply(use.context.state)}
 					class="transition"
 				>
 					<span class="text">
-						${transition}
+						${transition.name}
 					</span>
 				</div>
 			`
@@ -58,7 +55,7 @@ export const OmniTransitions = shadow_component(use => {
 		return html`
 			<div
 				?data-selected=${!manager.selected}
-				?disabled=${!selectedImageOrVideoEffect}
+				?disabled=${touchingPairs.length === 0}
 				@click=${() => manager.removeSelectedTransition()}
 				class="transition"
 			>
@@ -68,18 +65,20 @@ export const OmniTransitions = shadow_component(use => {
 			</div>
 	`}
 
-	const renderDurationSlider = (pair: SelectedPair) => {
-		const max = calculateMaxTransitionDuration(pair, use.context.state)
+	const renderDurationSlider = (id: string | null) => {
+		const transition = manager.getTransition(id)
+		const max = calculateMaxTransitionDuration(transition, use.context.state)
 		const frameDuration = 1000 / use.context.state.timebase
-		const duration = manager.getTransitionDuration(pair.incoming).incoming * 2
+		const duration = manager.getTransitionDuration(id) ?? 520
 
 		return html`
 			<div class=duration-slider>
 				<label for="duration">Duration:</label>
 				<input
+					?disabled=${!manager.selected}
 					@change=${(e: InputEvent) => manager.updateTransition(
 						use.context.state,
-						{duration: +(e.target as HTMLInputElement).value, effect: selectedImageOrVideoEffect!}
+						{duration: +(e.target as HTMLInputElement).value}
 					)}
 					type="range"
 					min="500"
@@ -124,15 +123,11 @@ export const OmniTransitions = shadow_component(use => {
 		use.context.is_webcodecs_supported.value), () => html`
 		<div class="transitions">
 			<h2>${transitionSvg} Transitions</h2>
-			${manager.selected
-				? html`
-					${renderDurationSlider(manager.selected)}
-					<div class="transition-cnt" ?disabled=${!manager.selected}>
-						${renderAnimationNone()}
-						${renderTransitions()}
-					</div>
-				`
-				: renderTutorialVideo()}
+				${renderDurationSlider(manager.selected)}
+				<div class="transition-cnt" ?disabled=${!manager.selected}>
+					${renderAnimationNone()}
+					${renderTransitions()}
+				</div>
 		</div>
 	`)
 })

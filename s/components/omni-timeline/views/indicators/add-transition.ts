@@ -1,10 +1,9 @@
-import {html} from "@benev/slate"
+import {generate_id, html} from "@benev/slate"
 
 import {light_view} from "../../../../context/context.js"
 import transitionSvg from "../../../../icons/transition.svg.js"
 import {calculate_start_position} from "../../utils/calculate_start_position.js"
 import {calculate_effect_track_placement} from "../../utils/calculate_effect_track_placement.js"
-import {TransitionAbleEffect} from "../../../../context/controllers/compositor/parts/transition-manager.js"
 import {normalizeTransitionDuration} from "../../../omni-transitions/utils/normalize-transition-duration.js"
 
 export const TransitionIndicator = light_view(use => () => {
@@ -18,15 +17,14 @@ export const TransitionIndicator = light_view(use => () => {
 		return () => dispose()
 	})
 
-	const renderAnimationDurationIndicators = (pair: {outgoing: TransitionAbleEffect, incoming: TransitionAbleEffect}) => {
-		return Object.values(pair).map(effect => {
-			const {incoming, outgoing} = transitionManager.getTransitionDuration(effect)
+	const renderAnimationDurationIndicators = (duration: number) => {
+		return Object.values([0, 1]).map(_ => {
 			return html`
 				<div
 					class="transition-duration"
 					style="
 						height: 50px;
-						width: ${incoming ? incoming * Math.pow(2, state.zoom) : outgoing * Math.pow(2, state.zoom)}px;
+						width: ${duration / 2 * Math.pow(2, state.zoom)}px;
 					"
 				>
 				</div>
@@ -36,10 +34,9 @@ export const TransitionIndicator = light_view(use => () => {
 
 	return html`
 		${touchingPairs.map(({outgoing, incoming, position}) => {
-			const selected = transitionManager.selected
-			const isTransition = transitionManager.getTransition(incoming) && transitionManager.getTransition(outgoing)
-			const isSelected = outgoing.id === selected?.outgoing.id && incoming.id === selected?.incoming.id
-			const transitionDuration = transitionManager.getTransitionDuration(incoming).incoming * 2
+			const transition = transitionManager.getTransitionByPair(outgoing, incoming)
+			const isSelected = transition?.id === transitionManager.selected
+			const transitionDuration = transition?.duration ?? 520
 
 			return html`
 				<div
@@ -48,10 +45,11 @@ export const TransitionIndicator = light_view(use => () => {
 							incoming,
 							outgoing,
 							duration: normalizeTransitionDuration(transitionDuration, 1000 / state.timebase),
-							animation: "fade"
-						}).apply(use.context.state)
+							transition: transition?.transition ?? window.GLTransitions[1],
+							id: transition?.id ?? generate_id()
+						})?.apply(use.context.state)
 					}
-					?data-transition=${isTransition}
+					?data-transition=${transition}
 					?data-selected=${isSelected}
 					class="transition-indicator"
 					style="
@@ -61,8 +59,8 @@ export const TransitionIndicator = light_view(use => () => {
 						);
 					"
 				>
-					${isTransition ? transitionSvg : "+"}
-					${isSelected ? renderAnimationDurationIndicators({outgoing, incoming}) : null}
+					${transition ? transitionSvg : "+"}
+					${isSelected ? renderAnimationDurationIndicators(transitionDuration) : null}
 				</div>
 	`})}
 	`

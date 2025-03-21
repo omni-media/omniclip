@@ -20,5 +20,22 @@ interface FontMetadata {
 declare global {
 	interface Window {
 		queryLocalFonts(): Promise<FontMetadata[]>
+		GLTransitions: GLTransition[]
 	}
 }
+
+declare global {
+	const PIXI: typeof import("pixi.js")
+}
+
+export interface GLTransition {
+	author: string
+	createdAt: string
+	glsl: string
+	license: string
+	name: string
+	updatedAt: string
+	defaultParams: any
+	paramsTypes: any
+}
+

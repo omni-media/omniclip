@@ -61,27 +61,69 @@ h2 {
 	}
 
 	& .filter {
+		position: relative;
+
+		& sl-dropdown, sl-button {
+			width: 100%;
+		}
+
+		& sl-menu {
+			width: 200px;
+			padding: 0.5em;
+		}
+	}
+
+	& .options {
+		display: flex;
+		flex-direction: column;
+		padding: 0.5em;
+
+		& fieldset {
+			display: flex;
+			flex-direction: column;
+			padding: 0.3em;
+		}
+	}
+
+	& button {
+		font-family: "Nippo-Regular";
+		color: #fff;
+		border: 1px solid #111;
+		background-image: -webkit-gradient(
+				linear,
+				left bottom,
+				left top,
+				color-stop(0, rgb(48,48,48)),
+				color-stop(1, rgb(102, 102, 102))
+		);
+		text-shadow: 0px -1px 0px rgba(0,0,0,.5);
+		font-size: 0.8em;
+		border-radius: 0;
+		cursor: pointer;
+		width: 100%;
+	}
+
+	& .filter-preview {
 		display: flex;
 		flex-direction: column;
 		width: 200px;
-		background: black;
-		border-radius: 10px;
+		height: 200px;
 		justify-content: center;
 		align-items: center;
 		cursor: pointer;
 		border: 1px solid #373535;
+		border-radius: 5px;
 
 		& p {
 			padding: 0.2em;
 		}
 
 		& canvas {
-			border-top-right-radius: 10px;
-			border-top-left-radius: 10px;
+			width: 100%;
 		}
 
 		&[data-selected] {
-			border: 2px solid white;
+			border: 1px solid white;
 		}
 	}
 

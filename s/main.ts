@@ -4,6 +4,7 @@ import {ConstructEditor, single_panel_layout} from "@benev/construct/x/mini.js"
 
 import {Tooltip} from './views/tooltip/view.js'
 import {HashRouter} from './tools/hash-router.js'
+import {TestEnvAlert} from './views/test-env-alert.js'
 import checkSvg from './icons/gravity-ui/check.svg.js'
 import exportSvg from './icons/gravity-ui/export.svg.js'
 import {ShortcutsManager} from './views/shortcuts/view.js'
@@ -16,8 +17,8 @@ import {OmniMedia} from "./components/omni-media/component.js"
 import {FiltersPanel} from './components/omni-filters/panel.js'
 import {TimelinePanel} from "./components/omni-timeline/panel.js"
 import {LandingPage} from './components/landingpage/component.js'
-import {OmniFilters} from './components/omni-filters/component.js'
 import {OmniManager} from './components/omni-manager/component.js'
+import {OmniFilters} from './components/omni-filters/component.js'
 import {CollaborationManager} from './views/collaboration/view.js'
 import {OmniTimeline} from "./components/omni-timeline/component.js"
 import pencilSquareSvg from './icons/gravity-ui/pencil-square.svg.js'
@@ -36,6 +37,8 @@ posthog.init('phc_CMbHMWGVJSqM1RqGyGxWCyqgaSGbGFKl964fIN3NDwU',
 			autocapture: false
 	}
 )
+
+const IS_TEST_ENV = window.location.hostname.startsWith("test")
 
 export function setupContext(projectId: string) {
 	omnislate.context = new OmniContext({
@@ -92,6 +95,7 @@ const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((us
 
 	return html`
 		<div class=editor>
+			${IS_TEST_ENV ? TestEnvAlert : null}
 			${ExportConfirmModal([showConfirmExportModal, setShowConfirmExportModal])}
 			${ExportInProgressModal([])}
 			<div class=editor-header>
@@ -142,7 +146,7 @@ const router = new HashRouter({
 			collaboration.disconnect()
 		}
 		if(!registered) {
-			register_to_dom({OmniTimeline, OmniText, OmniMedia, OmniAnim, ConstructEditor, OmniFilters, OmniTransitions})
+			register_to_dom({OmniTimeline, OmniText, OmniMedia, ConstructEditor, OmniFilters, OmniTransitions, OmniAnim})
 			registered = true
 		}
 		const omnislate = setupContext(projectId)
@@ -151,5 +155,5 @@ const router = new HashRouter({
 })
 
 document.body.append(router.element)
-
+document.documentElement.className = "sl-theme-dark"
 //@ts-ignore

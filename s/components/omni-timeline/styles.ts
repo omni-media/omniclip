@@ -18,6 +18,9 @@ export const styles = css`
 			display: flex;
 
 			& .add-track {
+				position: sticky;
+				left: 0;
+				z-index: 800;
 				font-family: "Nippo-Regular";
 				color: #fff;
 				border: 1px solid #111;
@@ -37,12 +40,15 @@ export const styles = css`
 		}
 
 		& .track-sidebars {
+			position: sticky;
 			width: 120px;
+			left: 0;
+			z-index: 800;
 		}
 
 		& .timeline-relative {
 			height: 100%;
-			min-width: 100vw;
+			width: 100%;
 			position: relative;
 			background-color: #111;
 

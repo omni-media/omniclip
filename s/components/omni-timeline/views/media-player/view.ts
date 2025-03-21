@@ -4,7 +4,6 @@ import {styles} from "./styles.js"
 import {shadow_view} from "../../../../context/context.js"
 import playSvg from "../../../../icons/gravity-ui/play.svg.js"
 import pauseSvg from "../../../../icons/gravity-ui/pause.svg.js"
-import {TextUpdater} from "../../../../views/text-updater/view.js"
 import {StateHandler} from "../../../../views/state-handler/view.js"
 import fullscreenSvg from "../../../../icons/gravity-ui/fullscreen.svg.js"
 
@@ -63,14 +62,8 @@ export const MediaPlayer = shadow_view(use => () => {
 		<div class="flex">
 			<figure>
 				<div class="canvas-container" style="aspect-ratio: ${state.settings.width}/${state.settings.height};">
-					${use.context.state.selected_effect?.kind === "text" && compositor.canvas.getActiveObject()
-					? TextUpdater([use.context.state.selected_effect])
-					: null}
 					${!state.is_exporting
-						? html`
-							${compositor.canvas.getSelectionElement()}
-							${compositor.canvas.getElement()}
-						`
+						? html`${compositor.app.view}`
 						: null}
 				</div>
 			</figure>

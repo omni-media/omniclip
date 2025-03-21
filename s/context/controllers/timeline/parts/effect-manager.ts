@@ -135,31 +135,17 @@ export class EffectManager {
 			this.#lowerTracksAboveLevel(effect.track, state.effects)
 		}
 
+		if(this.compositor.selectedElement) {
+			this.compositor.app.stage.removeChild(this.compositor.selectedElement.transformer)
+		}
+
 		this.compositor.managers.animationManager.removeAnimations(effect)
-		
-		// removal of transitions related stuff
-		this.compositor.managers.transitionManager.removeAllTransitions(effect)
-		const effectAfter = this.#getEffectAfter(effect, effect.track, state)
-		const effectBefore = this.#getEffectBefore(effect, effect.track, state)
-
-		if(effectAfter) {
-			// removing transition chained to effect after the removed effect
-			this.compositor.managers.transitionManager.removeTransition(effectAfter, "incoming")
-		}
-
-		if(effectBefore) {
-			// removing transition chained to effect before the removed effect
-			this.compositor.managers.transitionManager.removeTransition(effectBefore, "outgoing")
-		}
-
-		const selected = this.compositor.managers.transitionManager.selected
-		if(selected) {
-			if(selected.incoming.id === effect.id || selected.outgoing.id === effect.id) {
-				this.compositor.managers.transitionManager.selected = null
-			}
-		}
+		this.compositor.managers.transitionManager.getTransitions()
+			.filter(transition => transition.incoming.id === effect.id || transition.outgoing.id === effect.id)
+				.forEach(transition => this.compositor.managers.transitionManager.removeTransition(transition.id))
 
 		this.actions.remove_effect(effect)
+		this.actions.set_selected_effect(null)
 	}
 
 	#getEffectAfter(effect: AnyEffect, track: number, state: State) {
@@ -237,20 +223,21 @@ export class EffectManager {
 	}
 
 	setSelectedEffect(effect: AnyEffect | undefined, state: State) {
+		this.compositor.setOrDiscardActiveObjectOnCanvas(undefined, state)
 		if (!effect) {
-			// Clear selection if no effect is provided
-			this.compositor.canvas.discardActiveObject()
 			this.actions.set_selected_effect(null, {omit: true})
+				this.compositor.managers.textManager.set_selected_effect(null)
 		} else {
-			// Set the effect as selected in actions and update canvas
-			this.actions.set_selected_effect(effect, {omit: true})
 			if (effect.kind === "text") {
-				this.compositor.managers.textManager.set_clicked_effect(effect)
+				this.compositor.managers.textManager.set_selected_effect(effect)
+				this.actions.set_selected_effect(effect, {omit: true})
+			} else {
+				this.compositor.managers.textManager.set_selected_effect(null)
+				this.actions.set_selected_effect(effect, {omit: true})
 			}
 			this.compositor.setOrDiscardActiveObjectOnCanvas(effect, state)
 		}
-
-		this.compositor.canvas.renderAll()
+		this.compositor.app.render()
 	}
 
 	#normalizeToTimebase(state: State): number {

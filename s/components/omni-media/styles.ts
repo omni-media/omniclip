@@ -9,8 +9,9 @@ export const styles = css`
 	}
 
 	form {
-		background: #111;
-		position: fixed;
+		background: var(--bg-a);
+		position: absolute;
+		width: 100%;
 		padding: 1em;
 		z-index: 5;
 	}

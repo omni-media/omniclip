@@ -7,11 +7,19 @@ import {getEffectsOnTrack} from "../../../../context/controllers/timeline/utils/
 
 export const TextEffect = shadow_view(use => (effect: XTextEffect, timeline: GoldElement) => {
 
-	return html`${Effect([timeline, effect, html``, css``, `
-		${!getEffectsOnTrack(use.context.state, effect.track)
-			.some(effect => effect.kind !== "text")
+	return html`${Effect([
+		timeline,
+		effect,
+		html`${effect.text}`,
+		css`
+			.content {
+				color: white;
+				margin-left: 2em;
+			}
+		`,
+		`${!getEffectsOnTrack(use.context.state, effect.track).some(effect => effect.kind !== "text")
 			? `height: 30px;`
 			: ""}
-			background-color: ${effect.color};
-	`])}`
+			background-color: #5c5b5b;`
+	])}`
 })

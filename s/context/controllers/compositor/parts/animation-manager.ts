@@ -1,6 +1,5 @@
 import gsap from "gsap"
 import {pub} from "@benev/slate"
-import {FabricImage, FabricObject, ImageProps, Rect, filters} from "fabric"
 
 import {Compositor} from "../controller.js"
 import {Actions} from "../../../actions.js"
@@ -103,7 +102,7 @@ export class AnimationManager {
 	}
 
 	updateAnimation(updatedProps: UpdatedProps) {
-		this.actions.set_animation_duration(updatedProps.duration, updatedProps.effect, this.animationFor)
+		this.actions.set_animation_duration(updatedProps.duration, updatedProps.effect)
 	}
 
 	async refresh(state: State) {
@@ -133,24 +132,24 @@ export class AnimationManager {
 		this.compositor.compose_effects(state.effects, state.timecode)
 	}
 
-	#onAnimationUpdate(object: FabricObject, animation: Animation) {
+	#onAnimationUpdate(object: PIXI.Container, animation: Animation) {
 		const tween = this.timeline.getTweensOf(object).find(a => a.vars.animationName === animation.type)
 		if (!tween) return
 		const isAnimating = tween.progress() < 1 && tween.progress() > 0
 		if (isAnimating) {
-			if (object.selectable && object.evented) {
-				this.compositor.canvas.discardActiveObject()
-				object.selectable = false
-				object.evented = false
-			}
+			// if (object.selectable && object.evented) {
+			// 	// this.compositor.canvas.discardActiveObject()
+			// 	object.selectable = false
+			// 	object.evented = false
+			// }
 		} else {
-			if (!object.selectable && !object.evented) {
-				this.compositor.canvas.setActiveObject(object)
-				object.selectable = true
-				object.evented = true
-			}
+			// if (!object.selectable && !object.evented) {
+			// 	// this.compositor.canvas.setActiveObject(object)
+			// 	object.selectable = true
+			// 	object.evented = true
+			// }
 		}
-		this.compositor.canvas.renderAll()
+		this.compositor.app.render()
 	}
 
 	getAnimationDuration(effect: AnyEffect, kind: "in" | "out") {
@@ -177,16 +176,13 @@ export class AnimationManager {
 			this.timeline.duration(calculateProjectDuration(state.effects) / 1000)
 		}
 
-		const object = this.#getObject(effect)!
+		const object = this.#getObject(effect)?.sprite!
 		if (!recreate) {
 			this.actions.add_animation(animation, this.animationFor, {omit})
 		}
 		this.#animations.push(animation)
 
 		await this.compositor.seek(state.timecode, true)
-		const transitionDurations = animation.for === "Animation"
-			? { incoming: 0, outgoing: 0 }
-			: this.compositor.managers.transitionManager.getTransitionDuration(effect)
 		const tweenDuration = animation.duration / 1000
 		let tweenInfo
 
@@ -198,10 +194,10 @@ export class AnimationManager {
 				tweenInfo = this.#handleSlideOut(object, effect, animation, tweenDuration)
 				break
 			case "fade-in":
-				tweenInfo = this.#handleFadeIn(object, effect, animation, tweenDuration, transitionDurations.incoming)
+				tweenInfo = this.#handleFadeIn(object, effect, animation, tweenDuration)
 				break
 			case "fade-out":
-				tweenInfo = this.#handleFadeOut(object, effect, animation, tweenDuration, transitionDurations.outgoing)
+				tweenInfo = this.#handleFadeOut(object, effect, animation, tweenDuration)
 				break
 			case "spin-in":
 				tweenInfo = this.#handleSpinIn(object, effect, animation, tweenDuration)
@@ -258,15 +254,15 @@ export class AnimationManager {
 		this.timeline.duration(duration / 1000)
 	}
 
-	#resetObjectProperties(fabric: FabricObject, effect: ImageEffect | VideoEffect) {
-		fabric.left = effect.rect.position_on_canvas.x
-		fabric.top = effect.rect.position_on_canvas.y
-		fabric.scaleX = effect.rect.scaleX
-		fabric.scaleY = effect.rect.scaleY
-		fabric.angle = effect.rect.rotation
-		fabric.width = effect.rect.width
-		fabric.height = effect.rect.height
-		fabric.opacity = 1
+	#resetObjectProperties(object: PIXI.Container, effect: ImageEffect | VideoEffect) {
+		object.x = effect.rect.position_on_canvas.x
+		object.y = effect.rect.position_on_canvas.y
+		object.scale.x = effect.rect.scaleX
+		object.scale.y = effect.rect.scaleY
+		object.angle = effect.rect.rotation
+		object.width = effect.rect.width
+		object.height = effect.rect.height
+		object.alpha = 1
 	}
 
 	removeAnimations(effect: AnyEffect) {
@@ -279,7 +275,7 @@ export class AnimationManager {
 		this.refresh(state)
 	}
 
-	#killAnimationTweens(object: FabricImage<Partial<ImageProps>>) {
+	#killAnimationTweens(object: PIXI.Container) {
 		const tweens = gsap.getTweensOf(object)
 		tweens.forEach(tween => {
 			if (tween.vars.data && tween.vars.data.animationFor === this.animationFor) {
@@ -291,15 +287,29 @@ export class AnimationManager {
 	async deselectAnimation(effect: ImageEffect | VideoEffect, type: "in" | "out", refresh?: boolean, omit?: boolean) {
 		return new Promise(resolve => {
 			gsap.ticker.add(() => {
-				const object = this.#getObject(effect)
+				const object = this.#getObject(effect)?.sprite
 				if (object) {
 					this.#resetObjectProperties(object, effect)
 					this.#killAnimationTweens(object)
 					this.#animations = this.#animations.filter(animation => !(animation.targetEffect.id === effect.id && animation.type === type))
-					if (!refresh) {this.actions.remove_animation(effect, type, this.animationFor, {omit})}
-					object.filters = object.filters.filter(f => f.for !== "animation")
-					object.applyFilters()
-					this.compositor.canvas.renderAll()
+					if (!refresh) {
+						this.actions.remove_animation(effect, type, this.animationFor, {omit})
+						if(object.mask instanceof PIXI.Container) {
+							object.mask.destroy()
+							object.mask = null
+						}
+					}
+					if(object.filters instanceof Array) {
+						//@ts-ignore
+						object.filters = object.filters.filter(f => f.for !== "animation")
+					} else {
+						//@ts-ignore
+						if(object.filters.for === "animation") {
+							object.filters.destroy()
+							object.filters = []
+						}
+					}
+					this.compositor.app.render()
 				}
 				this.onChange.publish(true)
 				resolve(true)
@@ -309,39 +319,40 @@ export class AnimationManager {
 
 	// Animation handler methods
 
-	#handleSlideIn(object: FabricObject, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
+	#handleSlideIn(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
 		const targetLeft = effect.rect.position_on_canvas.x
 		const startLeft = targetLeft - effect.rect.width
 		const tween = gsap.fromTo(
 			object,
 			{
 				animationName: animation.type,
-				left: startLeft,
+				x: startLeft,
 				ease: "linear",
 			},
 			{
-				left: targetLeft,
+				x: targetLeft,
 				duration: tweenDuration,
 				data: {animationFor: this.animationFor},
-				onUpdate: () => this.#onAnimationUpdate(object, animation),
+				onUpdate: (e) => this.#onAnimationUpdate(object, animation),
 			}
 		)
+
 		const startTime = effect.start_at_position / 1000
 		return {tween, startTime}
 	}
 
-	#handleSlideOut(object: FabricObject, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
+	#handleSlideOut(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
 		const startLeft = effect.rect.position_on_canvas.x
 		const targetLeft = startLeft + effect.rect.width
 		const tween = gsap.fromTo(
 			object,
 			{
 				animationName: animation.type,
-				left: startLeft,
+				x: startLeft,
 				ease: "linear",
 			},
 			{
-				left: targetLeft,
+				x: targetLeft,
 				duration: tweenDuration,
 				data: {animationFor: this.animationFor},
 				onUpdate: () => this.#onAnimationUpdate(object, animation),
@@ -351,44 +362,43 @@ export class AnimationManager {
 		return {tween, startTime}
 	}
 
-	#handleFadeIn(object: FabricObject, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number, incoming: number) {
+	#handleFadeIn(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
 		const tween = gsap.fromTo(
 			object,
 			{
-				opacity: 0,
+				alpha: 0,
 				ease: "linear",
 			},
 			{
-				opacity: 1,
+				alpha: 1,
 				duration: tweenDuration,
 				data: {animationFor: this.animationFor},
-				onUpdate: () => this.compositor.canvas.renderAll()
+				onUpdate: () => this.compositor.app.render()
 			}
 		)
-		const startTime = (effect.start_at_position - incoming) / 1000
+		const startTime = (effect.start_at_position) / 1000
 		return {tween, startTime}
 	}
 
-	#handleFadeOut(object: FabricObject, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number, outgoing: number) {
+	#handleFadeOut(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
 		const tween = gsap.fromTo(
 			object,
 			{
-				opacity: 1,
+				alpha: 1,
 				ease: "linear",
 			},
 			{
-				opacity: 0,
+				alpha: 0,
 				duration: tweenDuration,
 				data: {animationFor: this.animationFor},
-				onUpdate: () => this.compositor.canvas.renderAll()
+				onUpdate: () => this.compositor.app.render()
 			}
 		)
-		const startTime = (effect.start_at_position + (effect.end + outgoing - effect.start) - animation.duration) / 1000
+		const startTime = (effect.start_at_position + (effect.end - effect.start) - animation.duration) / 1000
 		return {tween, startTime}
 	}
 
-	#handleSpinIn(object: FabricObject, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
-		object.set({ originX: "center", originY: "center" })
+	#handleSpinIn(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
 		const tween = gsap.fromTo(
 			object,
 			{
@@ -407,8 +417,7 @@ export class AnimationManager {
 		return {tween, startTime}
 	}
 
-	#handleSpinOut(object: FabricObject, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
-		object.set({ originX: "center", originY: "center" })
+	#handleSpinOut(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
 		const tween = gsap.fromTo(
 			object,
 			{
@@ -427,18 +436,18 @@ export class AnimationManager {
 		return {tween, startTime}
 	}
 
-	#handleBounceIn(object: FabricObject, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
+	#handleBounceIn(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
 		const startLeft = -effect.rect.width
 		const targetLeft = effect.rect.position_on_canvas.x
 		const tween = gsap.fromTo(
 			object,
 			{
 				animationName: animation.type,
-				left: startLeft,
+				x: startLeft,
 				ease: "bounce.out",
 			},
 			{
-				left: targetLeft,
+				x: targetLeft,
 				duration: tweenDuration,
 				data: {animationFor: this.animationFor},
 				onUpdate: () => this.#onAnimationUpdate(object, animation),
@@ -448,9 +457,9 @@ export class AnimationManager {
 		return {tween, startTime}
 	}
 
-	#handleBounceOut(object: FabricObject, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
+	#handleBounceOut(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
 		const startLeft = effect.rect.position_on_canvas.x
-		const targetLeft = this.compositor.canvas.width + effect.rect.width
+		const targetLeft = this.compositor.app.stage.width + effect.rect.width
 		const tween = gsap.fromTo(
 			object,
 			{
@@ -469,159 +478,141 @@ export class AnimationManager {
 		return {tween, startTime}
 	}
 
-	#handleWipeIn(object: FabricObject, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
+	#handleWipeIn(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
 		const fullWidth = object.width
 		const fullHeight = object.height
-		const clipRect = new Rect({
-			left: 0,
-			top: 0,
-			width: 0,
-			height: fullHeight,
-			absolutePositioned: true,
-		})
-		object.set({ clipPath: clipRect })
-		const tween = gsap.to(clipRect, {
-			duration: tweenDuration,
+		if(!(object.mask instanceof PIXI.Container)) {
+			const maskGraphics = new PIXI.Graphics()
+			maskGraphics.beginFill(0xffffff)
+			maskGraphics.drawRect(0, 0, 0, fullHeight)
+			maskGraphics.endFill()
+			object.mask = maskGraphics
+			object.addChild(maskGraphics)
+		}
+		
+		const dummy = { width: 0 }
+		const tween = gsap.to(dummy, {
 			width: fullWidth,
+			duration: tweenDuration,
 			ease: "linear",
-			data: {animationFor: this.animationFor},
+			data: { animationFor: this.animationFor },
 			onUpdate: () => {
-				object.set({ clipPath: clipRect })
-				this.compositor.canvas.renderAll()
-			},
+				if(object.mask instanceof PIXI.Graphics) {
+					object.mask.clear()
+					object.mask.beginFill(0xffffff)
+					object.mask.drawRect(0, 0, dummy.width, fullHeight)
+					object.mask.endFill()
+				}
+			}
 		})
+
 		const startTime = effect.start_at_position / 1000
-		return {tween, startTime}
+		return { tween, startTime }
 	}
 
-	#handleWipeOut(object: FabricObject, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
+	#handleWipeOut(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
 		const fullWidth = object.width
 		const fullHeight = object.height
-		const clipRect = new Rect({
-			left: 0,
-			top: 0,
-			width: fullWidth,
-			height: fullHeight,
-			absolutePositioned: true,
-		})
-		object.set({ clipPath: clipRect })
-		const tween = gsap.to(clipRect, {
-			duration: tweenDuration,
+		
+		if (!(object.mask instanceof PIXI.Container)) {
+			const maskGraphics = new PIXI.Graphics()
+			maskGraphics.beginFill(0xffffff)
+			maskGraphics.drawRect(0, 0, fullWidth, fullHeight)
+			maskGraphics.endFill()
+			object.mask = maskGraphics
+			object.addChild(maskGraphics)
+		}
+		
+		const dummy = { width: fullWidth }
+		const tween = gsap.to(dummy, {
 			width: 0,
+			duration: tweenDuration,
 			ease: "linear",
-			data: {animationFor: this.animationFor},
+			data: { animationFor: this.animationFor },
 			onUpdate: () => {
-				object.set({ clipPath: clipRect })
-				this.compositor.canvas.renderAll()
+				if (object.mask instanceof PIXI.Graphics) {
+					object.mask.clear()
+					object.mask.beginFill(0xffffff)
+					object.mask.drawRect(0, 0, dummy.width, fullHeight)
+					object.mask.endFill()
+				}
 			},
 		})
+
 		const startTime = (effect.start_at_position + (effect.end - effect.start) - animation.duration) / 1000
-		return {tween, startTime}
+		return { tween, startTime }
 	}
 
-	#handleBlurIn(object: FabricImage<Partial<ImageProps>>, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
-		const blurFilter = new filters.Blur({ blur: 1 })
+	#handleBlurIn(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
+		const blurFilter = new PIXI.BlurFilter()
+		blurFilter.blur = 100
+		blurFilter.quality = 10
+		//@ts-ignore
 		blurFilter.for = "animation"
-		// @ts-ignore
-		object.filters.push(blurFilter)
-		object.applyFilters()
+
+		object.filters = object.filters instanceof Array ? [...object.filters, blurFilter] : [blurFilter]
+
 		const tween = gsap.to(blurFilter, {
 			duration: tweenDuration,
 			blur: 0,
 			ease: "linear",
-			data: {animationFor: this.animationFor},
-			onUpdate: () => {
-				object.applyFilters()
-				this.compositor.canvas.renderAll()
-			},
+			data: { animationFor: this.animationFor },
 		})
+
 		const startTime = effect.start_at_position / 1000
-		return {tween, startTime}
+		return { tween, startTime }
 	}
 
-	#handleBlurOut(object: FabricImage<Partial<ImageProps>>, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
-		const blurFilter = new filters.Blur({ blur: 0 })
+	#handleBlurOut(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
+		const blurFilter = new PIXI.BlurFilter()
+		blurFilter.blur = 0
+		blurFilter.quality = 10
+		//@ts-ignore
 		blurFilter.for = "animation"
-		// @ts-ignore
-		object.filters.push(blurFilter)
-		object.applyFilters()
+		object.filters = object.filters instanceof Array ? [...object.filters, blurFilter] : [blurFilter]
+
 		const tween = gsap.to(blurFilter, {
 			duration: tweenDuration,
-			blur: 1,
+			blur: 100,
 			ease: "linear",
-			data: {animationFor: this.animationFor},
-			onUpdate: () => {
-				object.applyFilters()
-				this.compositor.canvas.renderAll()
-			},
+			data: { animationFor: this.animationFor },
 		})
 		const startTime = (effect.start_at_position + (effect.end - effect.start) - animation.duration) / 1000
 		return {tween, startTime}
 	}
 
-	#handleZoomIn(object: FabricObject, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
-		const originalLeft = object.left
-		const originalTop = object.top
-		const originalWidth = object.getScaledWidth()
-		const originalHeight = object.getScaledHeight()
-		if (object.originX !== "center" || object.originY !== "center") {
-			object.set({
-				originX: "center",
-				originY: "center",
-			})
-			object.left = originalLeft + originalWidth / 2
-			object.top = originalTop + originalHeight / 2
-		}
+	#handleZoomIn(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
 		const tween = gsap.fromTo(
-			object,
+			object.scale,
+			{ x: 0.4, y: 0.4 },
 			{
-				animationName: animation.type,
-				scaleX: 0.5,
-				scaleY: 0.5,
-				ease: "linear",
-			},
-			{
-				scaleX: 1,
-				scaleY: 1,
+				x: 1,
+				y: 1,
 				duration: tweenDuration,
-				data: {animationFor: this.animationFor},
-				onUpdate: () => this.#onAnimationUpdate(object, animation),
-			},
+				ease: "linear",
+				data: { animationFor: this.animationFor },
+				onUpdate: () => this.#onAnimationUpdate(object, animation)
+			}
 		)
+
 		const startTime = effect.start_at_position / 1000
-		return {tween, startTime}
+		return { tween, startTime }
 	}
 
-	#handleZoomOut(object: FabricObject, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
-		const originalLeft = object.left
-		const originalTop = object.top
-		const originalWidth = object.getScaledWidth()
-		const originalHeight = object.getScaledHeight()
-		if (object.originX !== "center" || object.originY !== "center") {
-			object.set({
-				originX: "center",
-				originY: "center",
-			})
-			object.left = originalLeft + originalWidth / 2
-			object.top = originalTop + originalHeight / 2
-		}
-		const tween = gsap.fromTo(
-			object,
+	#handleZoomOut(object: PIXI.Container, effect: ImageEffect | VideoEffect, animation: Animation, tweenDuration: number) {
+		const tween = gsap.fromTo(object.scale,
+			{ x: 1, y: 1 },
 			{
-				animationName: animation.type,
-				scaleX: 1,
-				scaleY: 1,
-				ease: "linear",
-			},
-			{
-				scaleX: 0.5,
-				scaleY: 0.5,
+				x: 0.4,
+				y: 0.4,
 				duration: tweenDuration,
-				data: {animationFor: this.animationFor},
-				onUpdate: () => this.#onAnimationUpdate(object, animation),
-			},
+				ease: "linear",
+				data: { animationFor: this.animationFor },
+				onUpdate: () => this.#onAnimationUpdate(object, animation)
+			}
 		)
+
 		const startTime = (effect.start_at_position + (effect.end - effect.start) - animation.duration) / 1000
-		return {tween, startTime}
+		return { tween, startTime }
 	}
 }
