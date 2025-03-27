@@ -206,77 +206,6 @@ export const styles = css`
 				background: black;
 				box-shadow: black 0px 0px 30px 10px;
 			}
-
-			& .save-button {
-				position: relative;
-				display: flex;
-				align-self: end;
-				justify-content: center;
-				width: 150px;
-				height: 35px;
-				
-				&:disabled {
-					opacity: 0.5;
-					cursor: progress;
-					box-shadow: none;
-
-					& .spark {
-						display: none;
-					}
-				}
-
-				& svg {
-					width: 15px;
-					translate: -25% 35%;
-					color: white;
-				}
-				
-				.text {
-					translate: 0;
-					color: white;
-					font-size: 1.4em;
-				}
-
-				.backdrop {
-					position: absolute;
-					inset: 0.1em;
-					background: inherit;
-					border-radius: 5px;
-					transition: background 0.25s;
-				}
-
-				& .spark {
-					display: block;
-					position: absolute;
-					inset: 0;
-					border-radius: 5px;
-					rotate: 0deg;
-					overflow: hidden;
-					mask: linear-gradient(white, transparent 50%);
-					animation: flip calc(1.8s * 2) infinite steps(2, end);
-				}
-
-				.spark:before {
-					content: "";
-					position: absolute;
-					width: 200%;
-					aspect-ratio: 1;
-					top: 0%;
-					left: 50%;
-					z-index: -1;
-					translate: -50% -15%;
-					rotate: 0;
-					transform: rotate(-90deg);
-					opacity: calc((var(--active)) + 0.4);
-					background: conic-gradient(
-						from 0deg,
-						transparent 0 340deg,
-						white 360deg
-					);
-					transition: opacity 0.25s;
-					animation: rotate 1.8s linear infinite both;
-				}
-			}
 		}
 	}
 
@@ -442,5 +371,165 @@ export const confirmModalStyles = css`
 		color: black;
 		font-size: 0.8em;
 		font-family: Nippo-Regular;
+	}
+`
+export const exportOverlayStyles = css`
+ :host {
+		display: block;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 9999;
+		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		visibility: hidden;
+		opacity: 0;
+		transition: visibility 0s 0.2s, opacity 0.2s ease;
+	}
+
+	:host(.visible) {
+		visibility: visible;
+		opacity: 1;
+		transition: visibility 0s, opacity 0.2s ease;
+	}
+
+	.overlay-backdrop {
+		position: absolute;
+		inset: 0;
+		background-color: rgba(0, 0, 0, 0.8);
+		backdrop-filter: blur(5px);
+	}
+
+	.overlay-container {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+		box-sizing: border-box;
+		color: white;
+	}
+
+	.export-container {
+		background-color: var(--sl-color-neutral-0);
+		color: var(--sl-color-neutral-900);
+		border-radius: 12px;
+		box-shadow: var(--sl-shadow-x-large);
+		width: 100%;
+		max-width: 800px;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.preview-container {
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		background-color: #000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+
+		& canvas {
+			height: 100%;
+		}
+	}
+
+	.progress-container {
+		padding: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+
+	.status-header {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 0.5rem;
+	}
+
+	.status-header h2 {
+		font-size: 1.5rem;
+		font-weight: 600;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.status-icon {
+		font-size: 1.75rem;
+	}
+
+	.status-icon.success {
+		color: var(--sl-color-success-600);
+	}
+
+	.status-icon.error {
+		color: var(--sl-color-danger-600);
+	}
+
+	.progress-stats {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.percentage {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: var(--sl-color-primary-600);
+	}
+
+	.status-text {
+		font-size: 1rem;
+		color: var(--sl-color-neutral-600);
+	}
+
+	sl-progress-bar {
+		--height: 10px;
+		--border-radius: 9999px;
+		--track-color: var(--sl-color-neutral-200);
+	}
+
+	sl-progress-bar::part(base) {
+		border-radius: 9999px;
+	}
+
+	sl-progress-bar::part(indicator) {
+		transition: width 0.3s ease;
+	}
+
+	.action-buttons {
+		display: flex;
+		justify-content: space-between;
+		gap: 1.5rem;
+		margin-top: 1rem;
+	}
+
+	.save-button {
+		position: relative;
+		overflow: hidden;
+	}
+
+	/* Responsive adjustments */
+	@media (max-width: 640px) {
+		.export-container {
+			max-width: 100%;
+		}
+		
+		.action-buttons {
+			flex-direction: column;
+		}
+		
+		.status-header h2 {
+			font-size: 1.25rem;
+		}
 	}
 `

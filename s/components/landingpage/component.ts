@@ -150,7 +150,7 @@ export class LandingPage extends LitElement {
 			<section id="welcome" class="welcome">
 				<p>video editor on the web</p>
 				<h1>
-					<span>Powerful video editing</span><br>
+					<span>Powerful video editor</span><br>
 					<span>right in your browser</span>
 				</h1>
 				<h2>
@@ -213,7 +213,7 @@ export class LandingPage extends LitElement {
 							</div>
 							<div class="item-more">
 								<h3>Filters</h3>
-								<p>As much as 18 filters!<br> you can mix and match them too.</p>
+								<p>As much as 30+ filters!<br> you can mix and match them too.</p>
 								<video autoplay loop muted width="250">
 									<source src="/assets/filters.mp4" type="video/mp4" />
 								</video>
@@ -607,7 +607,7 @@ $ omnitool batch-render ./projects/* --output-dir ./exports
 								</ul>
 								<div class="code-preview json">
 									<pre><code>
-// something like this 🤔
+// e.g. something like this 🤔
 {
   "root": "root-1",
   "items": [
@@ -637,9 +637,9 @@ $ omnitool batch-render ./projects/* --output-dir ./exports
 				<div class="dev-cta">
 					<a href="#" class="notify-link">
 						<span>Get Notified When Available</span>
-						${addSvg}
+						${bellSvg}
 					</a>
-					<a href="https://github.com/omni-media/omniclip" target="_blank" class="github-link">
+					<a href="https://github.com/omni-media/omnitool" target="_blank" class="github-link">
 						<span>Follow Development on GitHub</span>
 						${githubSvg}
 					</a>

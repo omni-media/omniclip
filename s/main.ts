@@ -28,7 +28,7 @@ import {omnislate, OmniContext, collaboration} from "./context/context.js"
 import {OmniTransitions} from "./components/omni-transitions/component.js"
 import {ExportPanel} from "./components/omni-timeline/views/export/panel.js"
 import {MediaPlayerPanel} from "./components/omni-timeline/views/media-player/panel.js"
-import {ExportConfirmModal, ExportInProgressModal} from './components/omni-timeline/views/export/view.js'
+import {ExportConfirmModal, ExportInProgressOverlay} from './components/omni-timeline/views/export/view.js'
 
 posthog.init('phc_CMbHMWGVJSqM1RqGyGxWCyqgaSGbGFKl964fIN3NDwU',
 	{
@@ -97,7 +97,7 @@ const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((us
 		<div class=editor>
 			${IS_TEST_ENV ? TestEnvAlert : null}
 			${ExportConfirmModal([showConfirmExportModal, setShowConfirmExportModal])}
-			${ExportInProgressModal([])}
+			${ExportInProgressOverlay([])}
 			<div class=editor-header>
 				<div class=flex>
 					<img class="logo" src="/assets/icon3.png" />

@@ -1,15 +1,14 @@
-import {Op, html, watch, css} from "@benev/slate"
+import {Op, html, watch} from "@benev/slate"
 
-import {confirmModalStyles, styles} from "./styles.js"
 import {VideoEffect} from "../../../../context/types.js"
 import {Tooltip} from "../../../../views/tooltip/view.js"
-import saveSvg from "../../../../icons/gravity-ui/save.svg.js"
 import xMarkSvg from "../../../../icons/gravity-ui/x-mark.svg.js"
 import {tooltipStyles} from "../../../../views/tooltip/styles.js"
 import exportSvg from "../../../../icons/gravity-ui/export.svg.js"
 import {StateHandler} from "../../../../views/state-handler/view.js"
 import {collaboration, shadow_view} from "../../../../context/context.js"
 import circleInfoSvg from "../../../../icons/gravity-ui/circle-info.svg.js"
+import {confirmModalStyles, exportOverlayStyles, styles} from "./styles.js"
 
 export const Export = shadow_view(use => () => {
 	use.styles([styles, tooltipStyles])
@@ -103,81 +102,137 @@ export const Export = shadow_view(use => () => {
 	`)
 })
 
-export const ExportInProgressModal = shadow_view(use => () => {
-	use.styles([styles, css`
-		:host {
-			display: block;
-			width: auto;
-			height: auto;
-			overflow: auto;
-			font-family: sans-serif;
-		}`
-	])
+export const ExportInProgressOverlay = shadow_view((use) => () => {
+	use.styles([exportOverlayStyles])
 	use.watch(() => use.context.state)
 
 	const state = use.context.state
-	const compositor = use.context.controllers.compositor
-	const video_export = use.context.controllers.video_export
+	const videoExport = use.context.controllers.video_export
 
-	const dialog = use.defer(() => use.shadow.querySelector("dialog"))
-	if(use.context.state.is_exporting) {
-		dialog?.showModal()
+	// Format progress to 2 decimal places
+	const formattedProgress =
+		state.export_status === "complete" || state.export_status === "flushing"
+			? 100
+			: Number.parseFloat(state.export_progress.toFixed(2))
+
+	// Get status text for display
+	const getStatusText = () => {
+		switch (state.export_status) {
+			// case "preparing":
+			//   return "Preparing export..."
+			case "composing":
+				return "Exporting video..."
+			case "flushing":
+				return "Finalizing export..."
+			case "complete":
+				return "Export complete!"
+			case "error":
+				return "Export failed"
+			default:
+				return "Processing..."
+		}
+	}
+
+	// Get variant for progress bar
+	const getProgressVariant = () => {
+		if (state.export_status === "error") return "danger"
+		if (state.export_status === "complete") return "success"
+		return "primary"
+	}
+
+	const handleSaveButtonMouseOver = () => {
+		if (state.export_status === "complete") {
+			use.rerender()
+		}
+	}
+
+	const handleSaveButtonMouseOut = () => {
+		use.rerender()
+	}
+
+	// Update visibility class and body scroll
+	if (state.is_exporting) {
+		use.element.classList.add("visible")
+		document.body.style.overflow = "hidden"
+	} else {
+		use.element.classList.remove("visible")
+		document.body.style.overflow = ""
 	}
 
 	return html`
-		<dialog @cancel=${(e: Event) => e.preventDefault()}>
-			<div class="box">
-				${state.is_exporting
-					? html`
-						${compositor.app.view}
-					`
-					: null}
-				<div class=progress>
-					<div class=stats>
-						<span class=percentage>
-							Progress ${state.export_status === "complete" || state.export_status === "flushing"
-								? "100"
-								: state.export_progress.toFixed(2)}
-							%
-						</span>
-						<span class=status>Status: ${state.export_status}</span>
+		<div class="overlay-backdrop"></div>
+		<div class="overlay-container">
+			<div class="export-container">
+				${
+					state.is_exporting
+						? html`
+					<div class="preview-container">
+						${use.context.controllers.compositor.app.view}
 					</div>
-					<div class=progress-bar>
-						<div
-							class="bar"
-							style="
-								width: ${state.export_status === "complete" || state.export_status === "flushing"
-									? "100"
-									: state.export_progress.toFixed(2)
-							}%"
-						>
-						</div>
+				`
+						: ""
+				}
+				
+				<div class="progress-container">
+					<div class="status-header">
+						<h2>
+							${
+								state.export_status === "complete"
+									? html`
+								<sl-icon name="check-circle-fill" class="status-icon success"></sl-icon>
+								Export Complete
+							`
+									: state.export_status === "error"
+										? html`
+								<sl-icon name="exclamation-circle-fill" class="status-icon error"></sl-icon>
+								Export Failed
+							`
+										: html`
+								<sl-spinner class="status-icon"></sl-spinner>
+								Exporting Video
+							`
+							}
+						</h2>
 					</div>
-					<div class=buttons>
-						<button
+					
+					<div class="progress-stats">
+						<span class="percentage">${formattedProgress}%</span>
+						<span class="status-text">${getStatusText()}</span>
+					</div>
+					
+					<sl-progress-bar 
+						value=${formattedProgress} 
+						variant=${getProgressVariant()}
+						class="export-progress-bar"
+					></sl-progress-bar>
+					
+					<div class="action-buttons">
+						<sl-button 
+							variant="default" 
+							size="large" 
 							@click=${() => {
-								dialog?.close()
-								video_export.resetExporter(use.context.state)
+								videoExport.resetExporter(use.context.state)
 							}}
-							class="cancel"
-							?data-complete=${state.export_status === "complete"}
 						>
-							${state.export_status === "complete" ? "Continue editing" : "Cancel Export"}
-						</button>
-						<button
-							@click=${() => video_export.save_file()}
-							class="sparkle-button save-button"
-							.disabled=${state.export_status !== "complete"}
+							${state.export_status === "complete" ? "Continue Editing" : "Cancel Export"}
+						</sl-button>
+						
+						<sl-button 
+							variant="primary" 
+							size="large" 
+							?disabled=${state.export_status !== "complete"}
+							@click=${() => videoExport.save_file()}
+							class="save-button"
+							@mouseover=${handleSaveButtonMouseOver}
+							@mouseout=${handleSaveButtonMouseOut}
 						>
-							<span  class="spark"></span>
-							<span class="backdrop"></span>
-							${saveSvg}
-							<span class=text>save</span>
-						</button>
+							<sl-icon slot="prefix" name="download"></sl-icon>
+							Save Video
+						</sl-button>
 					</div>
 				</div>
 			</div>
-		</dialog>
+		</div>
 	`
 })
 
@@ -250,7 +305,10 @@ export const ExportConfirmModal = shadow_view(use => (showModal: boolean, setSho
 			</p>
 			<button
 				class="export-button"
-				@click=${() => use.context.controllers.video_export.export_start(use.context.state, use.context.state.settings.bitrate)}
+				@click=${() => {
+					use.context.controllers.video_export.export_start(use.context.state, use.context.state.settings.bitrate)
+					setShowModal(false)
+				}}
 			>
 				Export
 			</button>

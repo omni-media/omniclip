@@ -387,7 +387,7 @@ nav .nav {
 }
 
 .welcome button, .welcome a {
-	width: 200px;
+	width: 220px;
 	height: 50px;
 }
 

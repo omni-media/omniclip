@@ -21,7 +21,7 @@ import type {LineJoin, StrokeInput} from "./pixi.mjs.js"
 export type State = HistoricalState & NonHistoricalState
 
 export type V2 = [number, number]
-export type ExportStatus = "complete" | "composing" | "demuxing" | "flushing"
+export type ExportStatus = "complete" | "composing" | "demuxing" | "flushing" | "error"
 
 export interface HistoricalState {
 	projectName: string
