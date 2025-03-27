@@ -188,8 +188,10 @@ export class Compositor {
 		effects.filter(e => e.kind !== "audio").forEach(e => {
 			const effect = e as ImageEffect | VideoEffect | TextEffect
 			const object = this.getObject(effect)
-			object!.sprite.zIndex = omnislate.context.state.tracks.length - effect.track
-			object!.transformer.zIndex = omnislate.context.state.tracks.length - effect.track
+			if(object) {
+				object.sprite.zIndex = omnislate.context.state.tracks.length - effect.track
+				object.transformer.zIndex = omnislate.context.state.tracks.length - effect.track
+			}
 		})
 	}
 
@@ -261,6 +263,7 @@ export class Compositor {
 				if(element) {element.currentTime = effect.start / 1000}
 			}
 		}
+		this.update_canvas_objects(omnislate.context.state)
 	}
 
 	#remove_effects_from_canvas(effects: AnyEffect[], exporting?: boolean) {
@@ -379,7 +382,7 @@ export class Compositor {
 			}
 		}
 		for(const transition of state.transitions) {
-			this.managers.transitionManager.selectTransition(transition).apply(state, true)
+			this.managers.transitionManager.selectTransition(transition, true).apply(omnislate.context.state)
 		}
 		this.managers.animationManager.refresh(state)
 		this.#recreated = true
@@ -398,7 +401,7 @@ export class Compositor {
 					object.angle = effect.rect.rotation
 					object.scale.x = effect.rect.scaleX
 					object.scale.y = effect.rect.scaleY
-					// object.setCoords()
+					object.pivot.set(effect.rect.pivot.x, effect.rect.pivot.y)
 					this.app.render()
 				}
 			}

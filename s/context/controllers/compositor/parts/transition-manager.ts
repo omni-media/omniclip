@@ -66,7 +66,7 @@ export class TransitionManager {
 		return this.getTransition(this.selected)?.transition.name === name
 	}
 
-	selectTransition(transition: Transition) {
+	selectTransition(transition: Transition, recreate?: boolean) {
 		const halfDuration = transition.duration / 2
 		this.selected = transition.id
 		const alreadyAdded = this.getTransition(transition.id)
@@ -77,7 +77,7 @@ export class TransitionManager {
 			this.selected = transition.id
 		}
 
-		if(!alreadyAdded) {
+		if(!alreadyAdded && !recreate) {
 			this.actions.set_effect_start_position(
 				transition.incoming,
 				transition.incoming.start_at_position - halfDuration
@@ -97,14 +97,16 @@ export class TransitionManager {
 		// Return an object with an apply method that re-reads state and schedules the tweens.
 		// This ensures that on the receiving side the latest effect properties are used.
 		return {
-			apply: async (state: State, recreate?: boolean) => {
-				const incoming = state.effects.find(e => e.id === transition.incoming.id) as VideoEffect | ImageEffect
-				const outgoing = state.effects.find(e => e.id === transition.outgoing.id) as VideoEffect | ImageEffect
+			apply: async (state: State) => {
+				const incoming = state.effects.find(e => e.id === transition.incoming.id) as VideoEffect | ImageEffect | undefined
+				const outgoing = state.effects.find(e => e.id === transition.outgoing.id) as VideoEffect | ImageEffect | undefined
+				if(!incoming || !outgoing) {return}
 				const alreadyAdded = this.getTransition(transition.id)
 				if(!alreadyAdded || recreate) {
 					this.#selectTransition(
 						{...transition, incoming, outgoing},
-						state
+						state,
+						recreate
 					)
 					this.updateTransition(state)
 				}
@@ -147,7 +149,12 @@ export class TransitionManager {
 		}
 		if (this.selected) {
 			this.#transitions.get(this.selected)?.update()
+			this.actions.update_transition(this.selected)
 		}
+	}
+
+	update(transitionId: string) {
+		this.#transitions.get(transitionId)?.update()
 	}
 
 	removeSelectedTransition() {
@@ -157,9 +164,9 @@ export class TransitionManager {
 		}
 	}
 
-	removeTransition(id: string) {
+	removeTransition(id: string, recreate?: boolean) {
 		const transition = this.getTransition(id)
-		this.actions.remove_transition(id)
+		if(!recreate) {this.actions.remove_transition(id)}
 		this.#transitions.get(id)?.destroy()
 		this.#transitions.delete(id)
 		if (transition) {
@@ -199,7 +206,8 @@ export class TransitionManager {
 		return fragmentShader
 	}
 
-	async #selectTransition(transition: Transition, state: State) {
+	async #selectTransition(transition: Transition, state: State, recreate?: boolean) {
+		if(recreate) {this.removeTransition(transition.id, recreate)}
 		const incoming = this.#getObject(transition.incoming)
 		const outgoing = this.#getObject(transition.outgoing)
 
@@ -295,7 +303,7 @@ export class TransitionManager {
 
 			const startTime = (transition.incoming.start_at_position - (transition.duration / 2) - startMargin) / 1000
 			this.timeline.add(incomingTween, startTime)
-			this.actions.add_transition(transition)
+			if(!recreate) {this.actions.add_transition(transition)}
 			this.compositor.app.stage.sortChildren()
 
 			const update = () => {

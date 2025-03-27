@@ -91,6 +91,9 @@ export const non_historical = actionize_non_historical({
 			width,
 			height
 		}
+	},
+	update_transition: state => (transitionId: string) => {
+		// empty action for collaboration to trigger transition update
 	}
 })
 

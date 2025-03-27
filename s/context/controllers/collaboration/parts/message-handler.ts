@@ -240,6 +240,20 @@ const actionHandlers: ActionHandlers = {
 		omnislate.context.actions.add_video_effect(...payload, { omit: true })
 	},
 
+	add_transition(payload) {
+		omnislate.context.controllers.compositor.managers.transitionManager.selectTransition(...payload, true).apply(omnislate.context.state)
+		omnislate.context.actions.add_transition(...payload, { omit: true })
+	},
+
+	update_transition(payload) {
+		omnislate.context.controllers.compositor.managers.transitionManager.update(...payload)
+	},
+
+	remove_transition(payload) {
+		omnislate.context.controllers.compositor.managers.transitionManager.removeTransition(...payload, true)
+		omnislate.context.actions.remove_transition(...payload, { omit: true })
+	},
+
 	// "default" handler for any action that doesn't require additional side effects
 	default(actionType, payload) {
 		// For purely updating state with no ephemeral controller logic:
