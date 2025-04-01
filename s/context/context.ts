@@ -138,6 +138,7 @@ export class OmniContext extends Context {
 
 	constructor(options: MiniContextOptions) {
 		super(options)
+		this.drops.editor.dragover = () => {}
 		this.#core = new AppCore({
 			initial_state: this.#state_from_storage(options.projectId) ?? {...historical_state, projectId: options.projectId},
 			history_limit: 64,
