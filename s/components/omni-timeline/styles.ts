@@ -7,6 +7,7 @@ export const styles = css`
 		overflow: scroll;
 		position: relative;
 		height: 100%;
+		background: rgb(26, 26, 26);
 	}
 
 	.timeline {
@@ -50,7 +51,6 @@ export const styles = css`
 			height: 100%;
 			width: 100%;
 			position: relative;
-			background-color: #111;
 
 			& * {
 				will-change: transform;
