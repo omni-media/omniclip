@@ -1,43 +1,34 @@
 
 import "@benev/slate/x/node.js"
-import {readJson} from "./tools/ssg/read-json.js"
-import {template, html, easypage, headScripts, git_commit_hash, read_file, unsanitized, renderSocialCard} from "@benev/turtle"
+import {template, html, easypage} from "@benev/turtle"
 
-const domain = "omniclip.app"
-const favicon = "/assets/omni.png"
+import {htmlHeaderBoilderplate, htmlHeaderScripts, htmlSocialCard} from "./website/ssg/html-commons.js"
 
 export default template(async basic => {
 	const path = basic.path(import.meta.url)
-	const hash = await git_commit_hash()
 
 	return easypage({
 		path,
 		dark: true,
 		title: "Omniclip",
 		head: html`
-			<link rel="icon" href="${favicon}"/>
-			<style>${unsanitized(await read_file("x/style.css"))}</style>
-			<meta data-commit-hash="${hash}"/>
-			<meta data-version="${(await readJson("package.json")).version}"/>
+			${await htmlHeaderBoilderplate({css: "style.css"})}
 
-			${renderSocialCard({
-				themeColor: "#6d63f2",
-				siteName: "omniclip.app",
+			${htmlSocialCard({
 				title: "Omniclip",
-				description: "Free open source video editor for everybody",
-				image: `https://${domain}${favicon}`,
-				url: `https://${domain}/`,
+				urlpath: "/",
 			})}
 
-			${headScripts({
-				devModulePath: await path.version.root("main.bundle.js"),
-				prodModulePath: await path.version.root("main.bundle.min.js"),
-				importmapContent: await read_file("x/importmap.json"),
+			${htmlHeaderScripts({
+				path,
+				mainDev: "main.bundle.js",
+				mainProd: "main.bundle.min.js",
 			})}
 		`,
 		body: html`
-			<header class=header>Omniclip</header>
-			<lettuce-layout></lettuce-layout>
+			<h1>Omniclip</h1>
+			<p><a href="/editor/">Launch Editor</a></p>
+			<p><a href="https://github.com/omni-media/omniclip">github.com/omni-media/omniclip</a></p>
 		`,
 	})
 })
