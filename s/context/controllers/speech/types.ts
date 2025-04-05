@@ -38,3 +38,21 @@ export interface Transcriber {
 	language?: string
 	setLanguage: (language: string) => void
 }
+
+export type Word = {
+	text: string
+	timestamp: [number, number | null]
+}
+
+export type Subtitle = {
+	start: number
+	end: number
+	text: string
+}
+
+export type GroupOptions = {
+	maxLineWidth?: number
+	maxLineCount?: number
+	maxDuration?: number
+	minWords?: number
+}

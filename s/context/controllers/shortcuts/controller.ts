@@ -4,7 +4,7 @@ import {OmniContext, omnislate} from "../../context.js"
 
 type ShortcutAction = (state: State) => void
 
-export type ActionType =  "Undo" | "Redo" | "Paste" | "Copy" | "Delete" | "Split" | "Cut" | "Next frame" | "Previous frame" | "Play/Pause timeline"
+export type ActionType =  "Undo" | "Redo" | "Paste" | "Copy" | "Delete" | "Split" | "Cut" | "Next frame" | "Previous frame" | "Play/Pause timeline" | "Zoom in" | "Zoom out"
 interface Shortcut {
 	type: string
 	shortcut: string
@@ -254,4 +254,6 @@ export const DEFAULT_SHORTCUTS: {actionType: ActionType; type: string; shortcut:
 	{ actionType: "Previous frame", type: "basic", shortcut: "ArrowLeft" },
 	{ actionType: "Next frame", type: "basic", shortcut: "ArrowRight" },
 	{ actionType: "Play/Pause timeline", type: "basic", shortcut: "space" },
+	{ actionType: "Zoom in", type: "basic", shortcut: "ctrl+scrollUp" },
+	{ actionType: "Zoom out", type: "basic", shortcut: "ctrl+scrollDown" },
 ]

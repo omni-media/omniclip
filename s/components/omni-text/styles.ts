@@ -25,6 +25,22 @@ export const styles = css`
 			}
 		}
 
+		& .captions {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 1em;
+
+			& p {
+				text-align: center;
+			}
+
+			& .cc-badge {
+				font-size: 50px;
+			}
+		}
+
+
 		& .select-text {
 			display: flex;
 		}

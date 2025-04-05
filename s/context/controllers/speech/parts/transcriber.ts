@@ -1,7 +1,7 @@
 import { signal } from "@benev/slate"
 
 import constants from "../constants.js"
-import {ProgressItem, TranscriberData, TranscriberUpdateData} from "../types.js"
+import {ProgressItem, Subtitle, TranscriberData, TranscriberUpdateData, Word} from "../types.js"
 
 export class Transcriber {
 	#transcript = signal<TranscriberData | undefined>(undefined)
@@ -35,6 +35,7 @@ export class Transcriber {
 					chunks: updateMessage.data.chunks,
 				}
 				this.#isBusy.value = busy
+				console.log(this.#transcript.value, this.#transcript.value)
 				break
 			}
 			case "initiate":
@@ -75,7 +76,7 @@ export class Transcriber {
 		this.#language.value = v
 	}
 
-	async start(audioData: AudioBuffer | undefined) {
+	start(audioData: AudioBuffer | undefined): Promise<Word[] | undefined> | undefined {
 		if (!audioData) return
 		this.#transcript.value = undefined
 		this.#isBusy.value = true
@@ -103,6 +104,15 @@ export class Transcriber {
 					? this.#language.value
 					: null,
 		})
+
+		return new Promise((resolve) => {
+			this.#isBusy.subscribe((v) => {
+				if(!v) {
+					resolve(this.#transcript.value?.chunks)
+				}
+			})
+		})
+
 	}
 
 	get isModelLoadingState() {

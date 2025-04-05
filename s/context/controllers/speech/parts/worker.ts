@@ -128,6 +128,7 @@ async function transcribe({
 			}
 		},
 		callback_function: (textChunk: any) => {
+			// console.log("halo", textChunk, chunks)
 			if (!chunks.length) return
 			chunks[chunks.length - 1].text += textChunk
 			self.postMessage({
@@ -160,7 +161,7 @@ async function transcribe({
 		stride_length_s: strideLength,
 		language,
 		task: subtask,
-		return_timestamps: true,
+		return_timestamps: "word",
 		force_full_sequences: false,
 		streamer,
 	}).catch((err: any) => {

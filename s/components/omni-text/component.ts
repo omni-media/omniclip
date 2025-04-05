@@ -15,6 +15,7 @@ export const OmniText = shadow_component(use => {
 	use.styles(styles)
 	use.watch(() => use.context.state)
 	const manager = use.context.controllers.compositor.managers.textManager
+	const speech = use.context.controllers.speech
 	const selectedText = use.context.state.effects.find(e => e.id === manager.selectedText?.id) as TextEffect | undefined
 
 	const [fonts, setFonts] = use.state<FontMetadata[]>([])
@@ -240,10 +241,8 @@ export const OmniText = shadow_component(use => {
 
 	const textEffects = use.context.state.effects.filter(e => e.kind === "text") as TextEffect[]
 
-	return StateHandler(Op.all(
-		use.context.helpers.ffmpeg.is_loading.value,
-		use.context.is_webcodecs_supported.value), () => html`
-		<div class="examples">
+	const renderTextCustomizationPanel = () => {
+		return html`
 			<sl-select
 				@sl-change=${(e: Event) => {
 					const id = (e.target as HTMLSelectElement).value
@@ -276,6 +275,37 @@ export const OmniText = shadow_component(use => {
 				<span>Default text</span>
 				<div @click=${() => manager.create_and_add_text_effect(use.context.state)} class="add-btn">${addSvg}</div>
 			</div>
+		`
+	}
+
+	const renderCaptionsPanel = () => {
+		return html`
+			<div class="captions">
+				<sl-icon class="cc-badge" name="badge-cc"></sl-icon>
+				<p>
+					Use speech recognition<br>
+					to generate captions for your video
+				</p>
+				<sl-button @click=${() => {
+					speech.createCaptions(use.context.state)
+				}}>
+					Generate Captions
+				</sl-button>
+			</div>
+		`
+	}
+
+	return StateHandler(Op.all(
+		use.context.helpers.ffmpeg.is_loading.value,
+		use.context.is_webcodecs_supported.value), () => html`
+		<div class="examples">
+			<sl-tab-group>
+				<sl-tab slot="nav" panel="Text">Text</sl-tab>
+				<sl-tab slot="nav" panel="Captions">Captions</sl-tab>
+
+				<sl-tab-panel name="Text">${renderTextCustomizationPanel()}</sl-tab-panel>
+				<sl-tab-panel name="Captions">${renderCaptionsPanel()}</sl-tab-panel>
+			</sl-tab-group>
 		</div>
 	`)
 })

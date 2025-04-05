@@ -156,7 +156,7 @@ export class OmniContext extends Context {
 			timeline: new Timeline(this.actions, media, compositor),
 			video_export: new VideoExport(this.actions, compositor, media),
 			shortcuts: new Shortcuts(this, this.actions),
-			speech: new Speech(media)
+			speech: new Speech(this.actions, media, compositor)
 		}
 		this.#listen_for_state_changes()
 		this.#recreate_project_from_localstorage_state(this.state, this.controllers.media)

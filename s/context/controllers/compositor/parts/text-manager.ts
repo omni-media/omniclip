@@ -18,55 +18,7 @@ export class TextManager extends Map<string, {sprite: PIXI.Text, transformer: PI
 	constructor(private compositor: Compositor, private actions: Actions) {super()}
 
 	create_and_add_text_effect(state: State) {
-		const effect: TextEffect = {
-			id: generate_id(),
-			kind: "text",
-			start_at_position: 0,
-			duration: 5000,
-			start: 0,
-			end: 5000,
-			track: 0,
-			fontSize: 38,
-			text: "Default text",
-			fontStyle: "normal",
-			fontFamily: "Arial",
-			align: "center",
-			fontVariant: "normal",
-			fontWeight: "normal",
-			fill: ["#FFFFFF"],
-			fillGradientStops: [],
-			fillGradientType: 0,
-			stroke: "#FFFFFF",
-			strokeThickness: 0,
-			lineJoin: "miter",
-			miterLimit: 10,
-			textBaseline: "alphabetic",
-			letterSpacing: 0,
-			dropShadow: false,
-			dropShadowDistance: 5,
-			dropShadowAlpha: 1,
-			dropShadowBlur: 0,
-			dropShadowAngle: 0.5,
-			dropShadowColor: "#FFFFFF",
-			breakWords: false,
-			wordWrap: false,
-			lineHeight: 0,
-			leading: 0,
-			wordWrapWidth: 100,
-			whiteSpace: "pre",
-			rect: {
-				position_on_canvas: {x: this.compositor.app.stage.width / 2, y: this.compositor.app.stage.height / 2},
-				pivot: {
-					x: 0,
-					y: 0
-				},
-				scaleX: 1,
-				scaleY: 1,
-				width: 100,
-				height: 20,
-				rotation: 0,
-			}
-		}
+		const effect: TextEffect = TextEffectDefault(this.compositor)
 		const {position, track} = find_place_for_new_effect(state.effects, state.tracks)
 		effect.start_at_position = position!
 		effect.track = track
@@ -629,3 +581,55 @@ const TextStylesValues: {
 	lineHeight: 0,
 	leading: 0
 }
+
+
+export const TextEffectDefault = (compositor: Compositor): TextEffect => ({
+	id: generate_id(),
+	kind: "text",
+	start_at_position: 0,
+	duration: 5000,
+	start: 0,
+	end: 5000,
+	track: 0,
+	fontSize: 38,
+	text: "Default text",
+	fontStyle: "normal",
+	fontFamily: "Arial",
+	align: "center",
+	fontVariant: "normal",
+	fontWeight: "normal",
+	fill: ["#FFFFFF"],
+	fillGradientStops: [],
+	fillGradientType: 0,
+	stroke: "#FFFFFF",
+	strokeThickness: 0,
+	lineJoin: "miter",
+	miterLimit: 10,
+	textBaseline: "alphabetic",
+	letterSpacing: 0,
+	dropShadow: false,
+	dropShadowDistance: 5,
+	dropShadowAlpha: 1,
+	dropShadowBlur: 0,
+	dropShadowAngle: 0.5,
+	dropShadowColor: "#FFFFFF",
+	breakWords: false,
+	wordWrap: false,
+	lineHeight: 0,
+	leading: 0,
+	wordWrapWidth: 100,
+	whiteSpace: "pre",
+	rect: {
+		position_on_canvas: {x: compositor.app.stage.width / 2, y: compositor.app.stage.height / 2},
+		pivot: {
+			x: 0,
+			y: 0
+		},
+		scaleX: 1,
+		scaleY: 1,
+		width: 100,
+		height: 20,
+		rotation: 0,
+	}
+})
+
