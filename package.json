@@ -19,7 +19,7 @@
 		"links": "run-s links-s links-assets",
 		"links-s": "ln -s \"$(realpath s)\" x/s",
 		"links-assets": "ln -s \"$(realpath assets)\" x/assets",
-		"count": "find s -path '*/mp4boxjs' -prune -o -path '*/icons' -prune -o -name '*.mp4' -prune -o -name '*.ts' -exec wc -l {} +",
+		"count": "find s -path '*/mp4boxjs' -prune -o -path '*/icons' -prune -o -name '*.mp4' -prune -o -name 'pixi.mjs.d.ts' -prune -o -name '*.ts' -exec wc -l {} +",
 		"test": "exit 0"
 	},
 	"author": "zenkyuv",
