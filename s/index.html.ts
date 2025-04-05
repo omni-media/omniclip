@@ -27,9 +27,16 @@ export default template(async basic => {
 			})}
 		`,
 		body: html`
-			<h1>Omniclip v${version}</h1>
-			<p><a href="/editor/">Launch Editor</a></p>
-			<p><a href="https://github.com/omni-media/omniclip">github.com/omni-media/omniclip</a></p>
+			<section class=lead>
+				<div class=logobox>
+					<img class=logo alt="" src="/assets/logo/omni.avif"/>
+				</div>
+				<div class=contentbox>
+					<h1>Omniclip <span>v${version}</span></h1>
+					<p><a href="/editor/">Launch Editor</a></p>
+					<p><a href="https://github.com/omni-media/omniclip">github.com/omni-media/omniclip</a></p>
+				</div>
+			</section>
 		`,
 	})
 })

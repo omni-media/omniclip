@@ -24,10 +24,7 @@ ${standard_panel_styles}
 
 	h2 {
 		font-family: sans-serif;
-		font-weight: normal;
-
-		> span:nth-child(1) { font-weight: bold; color: #8f4f; }
-		> span:nth-child(2) { font-size: 0.7em; color: #ff0; }
+		> span:nth-child(2) { opacity: 0.5; font-weight: normal; }
 	}
 }
 

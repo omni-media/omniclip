@@ -35,7 +35,7 @@ a {
 
 html, body {
 	font-size: 16px;
-	min-height: 100%;
+	height: 100%;
 
 	font-family: sans-serif;
 
@@ -46,11 +46,51 @@ html, body {
 /*============================================================================*/
 
 body {
+	overflow: auto;
+
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
+	justify-content: start;
 	align-items: center;
 	padding: 1em;
 	gap: 1em;
+
+	padding-top: 20vh;
 }
+
+section.lead {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2em;
+
+	> :nth-child(1) {
+		flex: 0 0 auto;
+	}
+
+	> :nth-child(2) {
+		flex: 1 1 10em;
+	}
+
+	.logo {
+		max-width: 100%;
+		width: 10em;
+	}
+
+	.contentbox {
+		font-size: 1.2em;
+
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 1em;
+	}
+
+	h1 {
+		> span {
+			opacity: 0.4;
+			font-weight: normal;
+		}
+	}
+}
+
 
