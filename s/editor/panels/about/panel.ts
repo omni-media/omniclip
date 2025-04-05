@@ -18,6 +18,7 @@ export const AboutPanel = panel({
 
 		return html`
 			<div class=plate>
+				<img alt="" src="/assets/logo/omni.avif"/>
 				<h2><span>Omniclip</span> <span>v${version}</span></h2>
 				<p>a new horizon</p>
 			<div>
