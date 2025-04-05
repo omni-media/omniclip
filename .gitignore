@@ -1,6 +1,7 @@
 /node_modules
 /x
 /notes.md
+/notes
 
 # Local Netlify folder
 .netlify
