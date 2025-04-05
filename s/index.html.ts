@@ -2,10 +2,11 @@
 import "@benev/slate/x/node.js"
 import {template, html, easypage} from "@benev/turtle"
 
-import {htmlHeaderBoilderplate, htmlHeaderScripts, htmlSocialCard} from "./website/ssg/html-commons.js"
+import {getProjectVersion, htmlHeaderBoilderplate, htmlHeaderScripts, htmlSocialCard} from "./website/ssg/html-commons.js"
 
 export default template(async basic => {
 	const path = basic.path(import.meta.url)
+	const version = await getProjectVersion()
 
 	return easypage({
 		path,
@@ -26,7 +27,7 @@ export default template(async basic => {
 			})}
 		`,
 		body: html`
-			<h1>Omniclip</h1>
+			<h1>Omniclip v${version}</h1>
 			<p><a href="/editor/">Launch Editor</a></p>
 			<p><a href="https://github.com/omni-media/omniclip">github.com/omni-media/omniclip</a></p>
 		`,

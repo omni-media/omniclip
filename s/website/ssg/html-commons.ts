@@ -5,13 +5,17 @@ import {readJson} from "./read-json.js"
 const domain = "omniclip.app"
 const favicon = "/assets/logo/omni.png"
 
+export async function getProjectVersion() {
+	return (await readJson("package.json")).version
+}
+
 export async function htmlHeaderBoilderplate({css}: {css: string}) {
 	const hash = await git_commit_hash()
 	return html`
 		<link rel="icon" href="${favicon}"/>
 		<style>${unsanitized(await read_file(`x/${css}`))}</style>
 		<meta data-commit-hash="${hash}"/>
-		<meta data-version="${(await readJson("package.json")).version}"/>
+		<meta data-version="${await getProjectVersion()}"/>
 	`
 }
 
