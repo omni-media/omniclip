@@ -1,0 +1,321 @@
+
+@import url(../assets/fonts/Nippo/Fonts/WEB/css/nippo.css);
+@import url(../assets/fonts/Poppins/Fonts/WEB/css/poppins.css);
+@import url(../assets/fonts/NotoEmoji/Fonts/WEB/css/noto.css);
+@import url(./views/tooltip/styles.css);
+@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Emoji:wght@300..700&display=swap');
+
+* {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+}
+
+.test-env-alert::part(base) {
+	position: fixed;
+	z-index: 999;
+	bottom: 0;
+	margin: 1em;
+}
+
+/*Video editor surface styles*/
+.editor {
+	padding: 0.5em;
+	height: 100vh;
+}
+
+.editor-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 0.3em 0.3em 0.3em;
+	flex-wrap: wrap;
+	gap: 0.5em;
+
+	& .logo {
+		position: relative;
+		top: 1px;
+		width: 70px;
+	}
+
+	& .flex {
+		display: flex;
+		align-items: center;
+		gap: 1em;
+	}
+}
+
+.project-name {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border-radius: 5px;
+
+	& .box {
+		display: flex;
+		align-items: center;
+		border: 1px solid;
+		padding: 0.2em;
+		border-radius: 5px;
+		height: 20px;
+
+		& .icons {
+			display: flex;
+			cursor: pointer;
+
+			& .check {
+				display: flex;
+				color: green;
+			}
+		}
+
+		& input {
+			background: none;
+			border: none;
+			color: gray;
+			font-family: Nippo-Regular;
+
+			&:not(:disabled) {
+				color: white;
+			}
+		}
+
+	}
+}
+
+.export {
+	display: flex;
+	align-items: center;
+	gap: 1em;
+}
+
+.export-button {
+	display: flex;
+	height: 21px;
+	align-items: center;
+	color: white;
+	background: #1d1c1c;
+	cursor: pointer;
+	border-radius: 5px;
+	padding: 0 0.3em;
+	border: 1px solid white;
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: default;
+		border-color: #1d1c1c;
+	}
+
+	& .text {
+		display: flex;
+		gap: 0.3em;
+		font-family: Poppins-Regular;
+
+		& svg {
+			position: relative;
+			top: 1px;
+			width: 14px;
+		}
+	}
+}
+/*Video editor surface styles end*/
+
+/*Global styles*/
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 1em; }
+::-webkit-scrollbar-thumb:hover { background: #444; }
+
+html, body {
+	font-size: 16px;
+	height: 100%;
+
+	color: gray;
+	background: #101010; /*#111*/
+}
+
+body {
+	overflow-x: hidden;
+	display: flex;
+	flex-direction: column;
+	justify-content: stretch;
+}
+
+.header {
+	flex: 0 0 auto;
+	padding: 1em;
+}
+
+lettuce-layout {
+	width: 100vw;
+	flex: 1 1 auto;
+
+	--alpha: yellow;
+	--bravo: lime;
+	--charlie: indigo;
+	--bg-a: #151618; /*#151618*/ /*#111*/
+	--bg-b: #000;
+	--bg-c: #333;
+	--focal: transparent;
+	--pointer-lock: yellow;
+	--taskbar-size: 1.5em;
+}
+
+.logo-loader {
+	max-width: 350px;
+	margin-bottom: 1em;
+}
+
+.loading-page-indicator {
+	display: flex;
+	flex-direction: column;
+	width: 100vw;
+	height: 100vh;
+	justify-content: center;
+	align-items: center;
+	font-family: sans-serif;
+	background: rgba(0, 0, 0, 1);
+	background-image: url(../assets/bg-hero.svg);
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.shine {
+	width: 100%;
+	font-size: 5em;
+	text-align: center;
+	margin-bottom: 0.3em;
+	text-shadow: 0 0px 0px rgba(255, 255, 255, 0.5);
+	background: #222 -webkit-gradient(linear, left top, right top, from(#222), to(#222), color-stop(0.5, #fff)) 0 0 no-repeat;
+	background-size: 150px;
+	color: rgba(255, 255, 255, 0.5);
+	background-clip: text;
+	animation-name: shine;
+	animation-duration: 5s;
+	animation-iteration-count: infinite;
+	font-weight: bold;
+	font-style: italic;
+}
+
+@keyframes shine {
+	0%, 10% {
+		background-position: 0px;
+	}
+	20% {
+		background-position: top left;
+	}
+	100% {
+		background-position: top right;
+	}
+}
+
+.loader {
+  width: 250px;
+  margin:0 auto;
+  border-radius:10px;
+  border:4px solid transparent;
+  position:relative;
+  padding:1px;
+}
+
+.loader:before {
+  content:'';
+  border:1px solid #fff;
+  border-radius:10px;
+  position:absolute;
+  top:-4px;
+  right:-4px;
+  bottom:-4px;
+  left:-4px;
+}
+
+.loader .loaderBar {
+  position:absolute;
+  border-radius:10px;
+  top:0;
+  right:100%;
+  bottom:0;
+  left:0;
+  background:#fff;
+  width:0;
+  animation:borealisBar 2s linear infinite;
+}
+
+@keyframes borealisBar {
+  0% {
+    left:0%;
+    right:100%;
+    width:0%;
+  }
+  10% {
+    left:0%;
+    right:75%;
+    width:25%;
+  }
+  90% {
+    right:0%;
+    left:75%;
+    width:25%;
+  }
+  100% {
+    left:100%;
+    right:0%;
+    width:0%;
+  }
+}
+
+@property --g3-1-x-position { syntax: "<percentage>"; inherits: false; initial-value: 16.09375%; }
+
+@property --g3-1-y-position { syntax: "<percentage>"; inherits: false; initial-value: 33.12500000000001%; }
+
+@property --g3-2-x-position { syntax: "<percentage>"; inherits: false; initial-value: 48.55468750000001%; }
+
+@property --g3-2-y-position { syntax: "<percentage>"; inherits: false; initial-value: 9.648437500000002%; }
+
+@property --g3-3-x-position { syntax: "<percentage>"; inherits: false; initial-value: 78.6328125%; }
+
+@property --g3-3-y-position { syntax: "<percentage>"; inherits: false; initial-value: 79.8046875%; }
+
+
+:root {
+
+--g3-1-x-position: 16.09375%
+
+--g3-1-y-position: 33.12500000000001%
+
+--g3-2-x-position: 48.55468750000001%
+
+--g3-2-y-position: 9.648437500000002%
+
+--g3-3-x-position: 78.6328125%
+
+--g3-3-y-position: 79.8046875%
+
+}
+
+.toast {
+	position: fixed;
+	bottom: 20px;
+	left: 20px;
+	padding: 10px 20px;
+	border-radius: 5px;
+	color: white;
+	background-color: rgba(0, 0, 0, 0.8);
+	z-index: 1000;
+	animation: fade-in-out 5s ease-in-out;
+	font-family: Poppins-Regular;
+}
+
+.toast.error { background-color: #e74c3c; }
+.toast.warning { background-color: #f39c12; }
+.toast.info { background-color: #2ecc71; }
+
+@keyframes fade-in-out {
+	0% { opacity: 0; }
+	10% { opacity: 1; }
+	90% { opacity: 1; }
+	100% { opacity: 0; }
+}
+
