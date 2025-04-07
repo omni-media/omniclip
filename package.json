@@ -44,7 +44,7 @@
 	},
 	"dependencies": {
 		"@benev/slate": "^0.3.0",
-		"@e280/lettuce": "^0.0.0-0",
+		"@e280/lettuce": "^0.0.2",
 		"@ffmpeg/ffmpeg": "^0.12.15",
 		"@ffmpeg/util": "^0.12.2",
 		"@floating-ui/dom": "^1.6.13",

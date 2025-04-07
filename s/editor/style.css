@@ -150,16 +150,6 @@ body {
 lettuce-layout {
 	width: 100vw;
 	flex: 1 1 auto;
-
-	--alpha: yellow;
-	--bravo: lime;
-	--charlie: indigo;
-	--bg-a: #151618; /*#151618*/ /*#111*/
-	--bg-b: #000;
-	--bg-c: #333;
-	--focal: transparent;
-	--pointer-lock: yellow;
-	--taskbar-size: 1.5em;
 }
 
 .logo-loader {

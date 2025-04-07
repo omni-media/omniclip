@@ -1,20 +1,21 @@
 
-import {html, shadowView} from "@benev/slate"
+import {html} from "@benev/slate"
+import {Salad} from "@e280/lettuce"
 
 import {styles} from "./styles.js"
-import {panel, PanelProps} from "@e280/lettuce"
 import warningSvg from "../../icons/gravity-ui/warning.svg.js"
 
-export const UnknownPanel = panel({
+export const UnknownPanel = Salad.pan.shadowView({
 	label: "unknown",
-	icon: warningSvg,
+	icon: () => warningSvg,
 
-	view: shadowView(use => ({}: PanelProps) => {
+	render: use => () => {
 		use.name("unknown")
 		use.styles(styles)
+
 		return html`
 			<h1>unknown</h1>
 		`
-	}),
+	},
 })
 

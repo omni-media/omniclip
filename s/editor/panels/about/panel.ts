@@ -1,19 +1,18 @@
 
-import {html, shadowView} from "@benev/slate"
-import {panel, PanelProps} from "@e280/lettuce"
+import {html} from "@benev/slate"
+import {Salad} from "@e280/lettuce"
 
 import {styles} from "./styles.js"
 import {getMetaVersion} from "../../../tools/get-meta-version.js"
 import circleInfoSvg from "../../icons/gravity-ui/circle-info.svg.js"
 
-export const AboutPanel = panel({
+export const AboutPanel = Salad.pan.shadowView({
 	label: "about",
-	icon: circleInfoSvg,
+	icon: () => circleInfoSvg,
 
-	view: shadowView(use => ({}: PanelProps) => {
+	render: use => () => {
 		use.name("about")
 		use.styles(styles)
-
 		const version = use.once(() => getMetaVersion())
 
 		return html`
@@ -23,6 +22,6 @@ export const AboutPanel = panel({
 				<p>a new horizon</p>
 			<div>
 		`
-	}),
+	},
 })
 

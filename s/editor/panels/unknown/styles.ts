@@ -1,10 +1,6 @@
 
 import {css} from "@benev/slate"
-import {standard_panel_styles} from "@e280/lettuce"
-
 export const styles = css`
-
-${standard_panel_styles}
 
 :host {
 	display: flex;
