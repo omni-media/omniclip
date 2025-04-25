@@ -93,6 +93,14 @@ export class Shortcuts {
 	}
 
 	handleEvent(event: KeyboardEvent, state: State) {
+		const path = event.composedPath()
+		const active = path[0] as HTMLElement
+
+		// Ignore shortcuts if typing inside input/textarea/contentEditable
+		if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) {
+			return
+		}
+
 		const shortcut = this.getKeyCombination(event).toLowerCase()
 		const entry = this.#shortcutsByKey.get(shortcut)
 		if (entry && typeof entry.action === "function") {
