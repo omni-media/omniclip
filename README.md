@@ -1,3 +1,11 @@
+> **Omniclip 2.0 is in development!** <br>
+> We're actively working on the next version of Omniclip to elevate it to the next level.<br>
+Want to help shape it? Join the discussion on our [Discord](https://discord.gg/Nr8t9s5wSM).
+<br>
+<br>
+<br>
+
+
 <p align="center"><img width="300" src="./assets/icon2.png"/></p>
 <p align="center"><a href="https://opensource.org/license/mit"><img src="https://img.shields.io/badge/license-MIT-blue.svg"/></a></a></p>
 <p align="center">Open source video editing web application</p>
