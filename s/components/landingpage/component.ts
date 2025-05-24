@@ -242,7 +242,7 @@ export class LandingPage extends LitElement {
 						<div>
 							<h3>Export your video up to 4k!</h3>
 							<ul>
-								<li>No credit card required! <span class="emoji">&#129327;</span></li>
+								<li>No credit card required! 100% Free and Open Source! <span class="emoji">&#129327;</span></li>
 								<li>Unparalleled speed <span class="emoji">&#9889;</span></li>
 								<li>Choose desired<br> bitrate & aspect ratio <span class="emoji">&#9881;</span></li>
 								<li>
