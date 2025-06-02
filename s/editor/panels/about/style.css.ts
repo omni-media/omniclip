@@ -1,6 +1,6 @@
 
 import {css} from "@benev/slate"
-export const styles = css`
+export const styles = css`@layer view {
 
 .plate {
 	font-size: 1.5em;
@@ -24,5 +24,5 @@ export const styles = css`
 	}
 }
 
-`
+}`
 

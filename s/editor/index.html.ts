@@ -11,7 +11,7 @@ export default template(async basic => {
 		dark: true,
 		title: "Omniclip Editor",
 		head: html`
-			${await htmlHeaderBoilderplate({css: "editor/style.css"})}
+			${await htmlHeaderBoilderplate({css: "editor/editor.css"})}
 
 			${htmlSocialCard({
 				title: "Omniclip Editor",
@@ -20,8 +20,8 @@ export default template(async basic => {
 
 			${htmlHeaderScripts({
 				path,
-				mainDev: "editor/main.bundle.js",
-				mainProd: "editor/main.bundle.min.js",
+				mainDev: "editor/editor.bundle.js",
+				mainProd: "editor/editor.bundle.min.js",
 			})}
 		`,
 		body: html`

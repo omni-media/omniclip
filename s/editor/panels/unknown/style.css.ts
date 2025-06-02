@@ -1,6 +1,6 @@
 
 import {css} from "@benev/slate"
-export const styles = css`
+export const styles = css`@layer view {
 
 :host {
 	display: flex;
@@ -16,5 +16,5 @@ h1 {
 	text-align: center;
 }
 
-`
+}`
 
