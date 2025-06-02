@@ -1,11 +1,14 @@
 
 import {Salad} from "@e280/lettuce"
-import {cssReset, nexus} from "@benev/slate"
+import {register_to_dom} from "@benev/slate"
 
+import {Context} from "./context/context.js"
 import {AboutPanel} from "./panels/about/panel.js"
 import {UnknownPanel} from "./panels/unknown/panel.js"
 
-nexus.context.theme = cssReset
+register_to_dom(
+	new Context().getElements()
+)
 
 Salad
 	.panels(() => ({AboutPanel, UnknownPanel}))
