@@ -3,8 +3,8 @@ import {Salad} from "@e280/lettuce"
 import {register} from "@benev/slate"
 
 import {Context} from "./context/context.js"
-import {getAboutPanel} from "./panels/about/panel.js"
-import {getUnknownPanel} from "./panels/unknown/panel.js"
+import {getAboutPanel} from "./dom/panels/about/panel.js"
+import {getUnknownPanel} from "./dom/panels/unknown/panel.js"
 
 const context = new Context()
 
