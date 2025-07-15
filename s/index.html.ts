@@ -1,31 +1,25 @@
 
 import "@benev/slate/x/node.js"
-import {template, html, easypage} from "@benev/turtle"
+import {html, ssg} from "@e280/scute"
 
-import {getProjectVersion, htmlHeaderBoilderplate, htmlHeaderScripts, htmlSocialCard} from "./website/ssg/html-commons.js"
+import {htmlHeaderBoilderplate, htmlSocialCard} from "./website/ssg/html-commons.js"
 
-export default template(async basic => {
-	const path = basic.path(import.meta.url)
-	const version = await getProjectVersion()
+export default ssg.page(import.meta.url, async orb => {
+	const path = orb.path(import.meta.url)
+	const version = await orb.packageVersion()
 
-	return easypage({
+	return ({
 		path,
 		dark: true,
 		title: "Omniclip",
 		head: html`
-			${await htmlHeaderBoilderplate({css: "style.css"})}
-
-			${htmlSocialCard({
-				title: "Omniclip",
-				urlpath: "/",
-			})}
-
-			${htmlHeaderScripts({
-				path,
-				mainDev: "main.bundle.js",
-				mainProd: "main.bundle.min.js",
-			})}
+			${await htmlHeaderBoilderplate({orb, css: "./style.css"})}
+			<script type="module" src="${orb.hashurl("main.bundle.min.js")}"></script>
 		`,
+		socialCard: htmlSocialCard({
+			title: "Omniclip",
+			urlpath: "/",
+		}),
 		body: html`
 			<section class=lead>
 				<div class=logobox>

@@ -9,7 +9,7 @@ export const getOmniMedia = (context: Context) => shadowComponent(use => {
 	const {LolView} = context.views
 
 	// omg we have context
-	void context.state
+	//void context.state
 
 	return html`
 		<p>omni media</p>
