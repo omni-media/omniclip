@@ -6,10 +6,10 @@ import styleCss from "./style.css.js"
 import themeCss from "../../../theme.css.js"
 import circleInfoSvg from "../../icons/gravity-ui/circle-info.svg.js"
 
-import {Context} from "../../../context/context.js"
+import {EditorContext} from "../../../context/context.js"
 import {getMetaVersion} from "../../../../tools/get-meta-version.js"
 
-export const getAboutPanel = (context: Context) => Salad.pan.shadowView({
+export const getAboutPanel = (context: EditorContext) => Salad.pan.shadowView({
 	label: "about",
 	icon: () => circleInfoSvg,
 
