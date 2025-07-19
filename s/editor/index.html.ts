@@ -1,5 +1,4 @@
 
-import "@benev/slate/x/node.js"
 import {ssg, html} from "@e280/scute"
 import {constants} from "../constants.js"
 import {socialCard} from "../website/social-card.js"
