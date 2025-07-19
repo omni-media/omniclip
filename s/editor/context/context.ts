@@ -8,17 +8,17 @@ import {getOmniMedia} from "../dom/components/omni-media/element.js"
 export class EditorContext {
 	static async setup() {
 		const requirements = await setupRequirements()
-		const controllers = setupControllers(requirements)
-		return new this(requirements, controllers)
+		return new this(requirements)
 	}
 
-	constructor(
-		private requirements: Requirements,
-		public controllers: Controllers,
-	) {}
+	constructor(private requirements: Requirements) {}
 
 	get strata() {
 		return this.requirements.strata
+	}
+
+	get controllers() {
+		return this.requirements.controllers
 	}
 
 	views = {
@@ -31,18 +31,14 @@ export class EditorContext {
 }
 
 type Requirements = Awaited<ReturnType<typeof setupRequirements>>
-type Controllers = ReturnType<typeof setupControllers>
 
 async function setupRequirements() {
 	const strata = new Strata()
 	const forklift = await OpfsForklift.setup("files")
 	const cellar = new Cellar(forklift)
-	return {strata, cellar}
-}
-
-function setupControllers(r: Requirements) {
-	return {
-		cargo: new CargoController(r.strata, r.cellar),
+	const controllers = {
+		cargo: new CargoController(strata, cellar),
 	}
+	return {strata, controllers}
 }
 
