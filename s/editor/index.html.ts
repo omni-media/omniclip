@@ -1,23 +1,22 @@
 
 import "@benev/slate/x/node.js"
 import {ssg, html} from "@e280/scute"
-import {htmlHeaderBoilderplate, htmlSocialCard} from "../website/ssg/html-commons.js"
+import {constants} from "../constants.js"
+import {socialCard} from "../website/social-card.js"
 
 export default ssg.page(import.meta.url, async orb => {
-	const path = orb.path(import.meta.url)
+	const title = "Omniclip Editor"
 
 	return ({
-		path,
+		title,
+		css: "editor.css",
+		js: "editor.bundle.min.js",
+		favicon: constants.favicon,
 		dark: true,
-		title: "Omniclip Editor",
+		socialCard: socialCard(title),
 		head: html`
-			${await htmlHeaderBoilderplate({orb, css: "./editor.css"})}
-			<script type="module" src="${orb.hashurl("editor.bundle.min.js")}"></script>
+			<meta data-version="${await orb.packageVersion("$/package.json")}"/>
 		`,
-		socialCard: htmlSocialCard({
-			title: "Omniclip Editor",
-			urlpath: "/editor/",
-		}),
 		body: html`
 			<header class=header>Omniclip</header>
 			<lettuce-layout></lettuce-layout>

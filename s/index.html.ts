@@ -1,25 +1,22 @@
 
-import "@benev/slate/x/node.js"
 import {html, ssg} from "@e280/scute"
-
-import {htmlHeaderBoilderplate, htmlSocialCard} from "./website/ssg/html-commons.js"
+import {constants} from "./constants.js"
+import {socialCard} from "./website/social-card.js"
 
 export default ssg.page(import.meta.url, async orb => {
-	const path = orb.path(import.meta.url)
+	const title = "Omniclip"
 	const version = await orb.packageVersion()
 
 	return ({
-		path,
+		title,
+		css: "style.css",
+		js: "main.bundle.min.js",
+		favicon: constants.favicon,
 		dark: true,
-		title: "Omniclip",
+		socialCard: socialCard(title),
 		head: html`
-			${await htmlHeaderBoilderplate({orb, css: "./style.css"})}
-			<script type="module" src="${orb.hashurl("main.bundle.min.js")}"></script>
+			<meta data-version="${await orb.packageVersion("$/package.json")}"/>
 		`,
-		socialCard: htmlSocialCard({
-			title: "Omniclip",
-			urlpath: "/",
-		}),
 		body: html`
 			<section class=lead>
 				<div class=logobox>
