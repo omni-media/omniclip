@@ -11,7 +11,7 @@
 	"scripts": {
 		"build": "run-s _clean _coi _ln _tsc _scute",
 		"watch": "npm run build && octo 'scute -wv' 'tsc -w' 'node --watch x/tests.test.js' 'http-server x'",
-		"test": "exit 0",
+		"test": "node x/tests.test.js",
 		"count": "find s -path '*/mp4boxjs' -prune -o -path '*/icons' -prune -o -name '*.mp4' -prune -o -name 'pixi.mjs.d.ts' -prune -o -name '*.ts' -exec wc -l {} +",
 		"_clean": "rm -rf x && mkdir x",
 		"_tsc": "tsc",
@@ -24,6 +24,7 @@
 	"author": "zenkyuv",
 	"license": "ISC",
 	"devDependencies": {
+		"@e280/science": "^0.0.5",
 		"@rollup/plugin-node-resolve": "^16.0.1",
 		"@types/chai": "^5.2.2",
 		"@types/dom-webcodecs": "^0.1.15",
