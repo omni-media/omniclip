@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
 * {
 	padding: 0;
@@ -37,7 +38,7 @@ html, body {
 	font-size: 16px;
 	height: 100%;
 
-	font-family: sans-serif;
+	font-family: Roboto, sans-serif;
 
 	color: #aaa;
 	background: #111;
@@ -52,10 +53,8 @@ body {
 	flex-direction: column;
 	justify-content: start;
 	align-items: center;
-	padding: 1em;
 	gap: 1em;
-
-	padding-top: 20vh;
+	background: black;
 }
 
 section.lead {
