@@ -1,0 +1,51 @@
+name: 🚀 full release deployment
+
+on:
+  push:
+    branches: ["landingpage"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+
+    - run: npm ci
+    - run: npm run build -s
+    - run: npm test
+
+    - name: 🗑️ delete dev symlinks
+      run: |
+        rm -rf x/node_modules
+        rm -rf x/s
+        rm -rf x/assets
+
+    - name: 🗃️ reconstitute node_modules for production
+      run: npm ci --omit=dev
+
+    - name: 🍞 moving files into x
+      run: |
+        mv node_modules x/node_modules
+        mv s x/s
+        mv assets x/assets
+
+    - name: 🚀 Deploy to Cloudflare Pages
+      uses: cloudflare/wrangler-action@v3
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        command: pages deploy x --project-name=omniclip
