@@ -2,17 +2,34 @@ import {css} from "@benev/slate"
 
 export default css`
 .hero {
-	position: relative;
-	background-color: #0a0a0a;
-	min-height: 100vh;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
-	position: relative;
-	z-index: 0;
-	height: 600px;
+  position: relative;
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, black 0%, black 50%, black 80%, black 100%);
+  background-size:
+    64px 64px,
+    64px 64px,
+    cover;
+  background-position: 0 0, 0 0, top;
+  background-color: #000;
+  min-height: 100vh;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 0;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 80%, #000 100%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .img-shadow {
@@ -108,7 +125,7 @@ export default css`
 .btn.discord {
 	display: flex;
 	gap: 0.7em;
-	background: transparent;
+	background: black;
 	border: 1px solid white;
 	color: white;
 

@@ -8,9 +8,6 @@ export const Hero = shadowView(use => () => {
 
 	return html`
 		<section class="hero">
-			<div class=img-shadow>
-				<img src="/assets/background.png" class="hero-bg" alt="" />
-			</div>
 			<div class="hero-background"></div>
 
 			<div class="hero-content">
