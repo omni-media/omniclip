@@ -2,7 +2,7 @@ import {pub} from "@benev/slate"
 import {quick_hash} from "@benev/construct"
 import type {ReadChunkFunc, MediaInfo} from 'mediainfo.js'
 //@ts-ignore
-import {mediaInfoFactory} from 'mediainfo.js/dist/esm-bundle/index.min.js'
+import {mediaInfoFactory} from 'https://cdn.jsdelivr.net/npm/mediainfo.js@0.3.2/+esm'
 
 import {Video, VideoFile, AnyMedia, ImageFile, Image, AudioFile, Audio} from "../../../components/omni-media/types.js"
 
