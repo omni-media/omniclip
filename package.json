@@ -24,8 +24,8 @@
 	"author": "zenkyuv",
 	"license": "ISC",
 	"devDependencies": {
-		"@e280/science": "^0.0.5",
-		"@e280/scute": "^0.0.0-4",
+		"@e280/science": "^0.0.6",
+		"@e280/scute": "^0.0.0-7",
 		"@rollup/plugin-node-resolve": "^16.0.1",
 		"@types/chai": "^5.2.2",
 		"@types/dom-webcodecs": "^0.1.15",
@@ -40,13 +40,13 @@
 		"npm-run-all": "^4.1.5",
 		"rollup": "^4.41.1",
 		"terser": "^5.40.0",
-		"typescript": "^5.8.3"
+		"typescript": "^5.9.2"
 	},
 	"dependencies": {
 		"@benev/slate": "^0.3.9",
 		"@e280/lettuce": "^0.0.3",
 		"@e280/quay": "^0.0.0-2",
-		"@e280/strata": "^0.0.0-8",
+		"@e280/strata": "^0.0.0-10",
 		"@ffmpeg/ffmpeg": "^0.12.15",
 		"@ffmpeg/util": "^0.12.2",
 		"@floating-ui/dom": "^1.7.1",
@@ -57,7 +57,7 @@
 		"ffprobe-wasm": "^0.3.1",
 		"gl-transitions": "^1.43.0",
 		"gsap": "^3.13.0",
-		"lit": "^3.3.0",
+		"lit": "^3.3.1",
 		"mediainfo.js": "^0.3.5",
 		"mp4box": "^0.5.4",
 		"opfs-tools": "^0.7.2",
