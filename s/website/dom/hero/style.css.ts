@@ -1,145 +1,195 @@
+
 import {css} from "@benev/slate"
 
 export default css`
+
+/* ===== Theme tokens for the espresso vibe ===== */
+:host, .hero {
+  --bg: #141110;           /* espresso */
+  --surface: #1B1816;      /* cards/surfaces if needed */
+  --grid: rgba(233,228,222,0.05); /* warm grid lines */
+  --text: #E9E4DE;         /* warm off-white */
+  --text-muted: #CFC9C2;   /* secondary copy */
+  --text-dim: rgba(233,228,222,0.65);
+  --accent: #E0B26E;       /* gold */
+  --accent-ink: #1a1613;   /* dark text on gold */
+  --ring: rgba(224,178,110,0.35);
+}
+
+/* ===== Section ===== */
 .hero {
   position: relative;
-  background:
-    linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px),
-    linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, black 0%, black 50%, black 80%, black 100%);
-  background-size:
-    64px 64px,
-    64px 64px,
-    cover;
-  background-position: 0 0, 0 0, top;
-  background-color: #000;
   min-height: 100vh;
   height: 600px;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
+
+  color: var(--text);
+  background-color: var(--bg);
+
+  /* warm grid + soft top-to-bottom depth */
+  background-image:
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+    linear-gradient(to right,  var(--grid) 1px, transparent 1px);
+  background-size: 64px 64px, 64px 64px;
+  background-position: 0 0, 0 0;
   z-index: 0;
 }
 
-.hero::after {
+/* vignette / radial lift at center */
+.hero::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0) 80%, #000 100%);
+  background:
+    radial-gradient(60% 60% at 50% 45%,
+      rgba(255,255,255,0.05) 0%,
+      rgba(255,255,255,0.00) 55%),
+    linear-gradient(to bottom, rgba(0,0,0,0) 75%, var(--bg) 100%);
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
 }
 
-.img-shadow {
-	position: absolute;
-	width: 100%;
-	height: 100%;
-}
+/* keep your original after for extra bottom fade if you like; now redundant */
+/* .hero::after { ... } */
 
-.hero-bg {
-	height: 100%;
-	width: 100%;
-	pointer-events: none;
-}
-
+/* ===== Content ===== */
 .hero-content {
-	position: relative;
-	z-index: 2;
-	max-width: 800px;
-	width: 100%;
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  width: 100%;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Logo/title line */
 .omniclip-title {
-	font-size: 4rem;
-	font-weight: 800;
-	line-height: 1.1;
-	letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  /* serif headline for cinematic vibe */
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-weight: 800;
+  font-size: 4.25rem;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--text);
+
+  margin: 0 0 0.6rem 0;
 }
 
+.omniclip-title img {
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+
+/* small frosted version tag */
 .version-tag {
-	position: absolute;
-	top: -1.5em;
-	right: 8em;
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 0.25em;
-	padding: 0.2em 0.4em;
-	font-size: 0.65rem;
-	letter-spacing: 0.05em;
-	text-transform: uppercase;
-	color: rgba(255, 255, 255, 0.6);
-	backdrop-filter: blur(6px);
-	pointer-events: none;
+  position: absolute;
+  top: -1.6em;
+  right: 7.5em;
+
+  background: rgba(233,228,222,0.06);
+  border: 1px solid rgba(233,228,222,0.14);
+  color: var(--text-dim);
+
+  border-radius: 6px;
+  padding: 0.22em 0.5em;
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+  pointer-events: none;
 }
 
+/* copy */
 .hero-content .tagline {
-	font-size: 1rem;
-	letter-spacing: 0.03em;
-	opacity: 0.6;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+  color: var(--text-dim);
+  margin-bottom: 0.25rem;
 }
 
 .subheadline {
-	font-size: 1.1rem;
-	line-height: 1.6;
-	color: rgba(255, 255, 255, 0.85);
-	margin-bottom: 4.5em;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 3.8em;
+  position: relative;
 }
 
-.subheadline:after {
-	content: "";
+/* warm divider */
+.subheadline::after {
+  content: "";
   position: absolute;
-  bottom: 105px;
+  bottom: -1.8rem;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
+  width: 64px;
   height: 3px;
-  background: white;
-  border-radius: 3px;
+  background: var(--accent);
+  border-radius: 999px;
+  box-shadow: 0 0 0 4px rgba(224,178,110,0.12);
 }
 
+/* ===== Buttons ===== */
 .buttons {
-	display: flex;
-	gap: 1em;
-	justify-content: center;
-	flex-wrap: wrap;
+  display: flex;
+  gap: 0.9em;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .btn {
-	display: flex;
-	align-items: center;
-	padding: 0.75em 1.5em;
-	border-radius: 7px;
-	text-decoration: none;
-	font-weight: 500;
-	transition: background 0.3s ease, color 0.3s ease;
-	font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65em;
+
+  padding: 0.8em 1.4em;
+  border-radius: 10px;
+  text-decoration: none;
+
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+  will-change: transform;
 }
 
+/* Primary */
 .btn.editor {
-	background: white;
-	color: black;
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 8px 20px rgba(224,178,110,0.18);
 }
-
-.btn.discord {
-	display: flex;
-	gap: 0.7em;
-	background: black;
-	border: 1px solid white;
-	color: white;
-
-		& sl-icon {
-			font-size: 20px;
-	}
-}
-
 .btn.editor:hover {
-	background: #e1e1e1;
+  background: #d7a761;
+  box-shadow: 0 10px 22px rgba(224,178,110,0.24);
+  transform: translateY(-1px);
 }
 
+/* Secondary */
+.btn.discord {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid rgba(233,228,222,0.18);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25) inset;
+}
 .btn.discord:hover {
-	background: rgba(255, 255, 255, 0.1);
+  background: rgba(233,228,222,0.06);
+  border-color: rgba(233,228,222,0.28);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.18) inset, 0 0 0 3px var(--ring);
+  transform: translateY(-1px);
+}
+.btn.discord sl-icon {
+  font-size: 20px;
+  margin-top: 1px;
 }
 `
-

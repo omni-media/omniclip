@@ -10,7 +10,7 @@ import {OpenSource} from "./dom/open-source/view.js"
 
 export const landingPage = shadowComponent(use => {
 	use.styles(css`:host {
-		background: black;
+		background: #141110;
 		width: 100%;
 	}`)
 

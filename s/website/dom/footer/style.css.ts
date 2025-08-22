@@ -1,80 +1,149 @@
 import {css} from "@benev/slate"
 
 export default css`
-footer {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	position: relative;
-	height: 400px;
-  background:
-    linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px),
-    linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, black 0%, black 50%, black 80%, black 100%);
-  background-size:
-    64px 64px,
-    64px 64px,
-    cover;
-  background-position: 0 0, 0 0, top;
-  background-color: #000;
-	margin-top: 5em;
+.footer {
+  --bg: #141110;                        /* espresso */
+  --surface: #1B1816;
+  --grid: rgba(233,228,222,0.05);       /* warm grid */
+  --text: #E9E4DE;
+  --text-dim: rgba(233,228,222,0.72);
+  --border: rgba(233,228,222,0.14);
+  --accent: #E0B26E;                    /* gold */
+  --accent-ink: #1a1613;
+  --ring: rgba(224,178,110,0.35);
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 360px;
+  margin-top: 5em;
+  overflow: hidden;
+  color: var(--text);
+
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+    linear-gradient(to right,  var(--grid) 1px, transparent 1px);
+  background-size: 64px 64px, 64px 64px;
+  background-position: 0 0, 0 0;
 }
 
-footer::before {
+/* soft vignette */
+.footer::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -50px;
+	margin-top: 3em;
   pointer-events: none;
   z-index: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0) 80%, #000 100%);
+  background:
+    radial-gradient(60% 60% at 50% 40%,
+      rgba(255,255,255,0.05) 0%,
+      rgba(255,255,255,0) 60%),
+    linear-gradient(to top, rgba(0,0,0,0) 78%, var(--bg) 100%);
 }
 
+/* giant watermark wordmark */
 .logo {
-	position: absolute;
-	display: flex;
-	font-size: 15em;
-	font-weight: bold;
-	align-self: center;
-	font-family: sans-serif;
-	color: black;
-	-webkit-text-stroke: 1px #121212;
+  position: absolute;
+	opacity: 0.5;
+	text-shadow: 1px 1px 10px #221c1c73;
+  z-index: 1;
+  font-family: sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  font-size: clamp(4rem, 14vw, 12rem);
+  line-height: 1;
+
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(233,228,222,0.12);
+  user-select: none;
+  pointer-events: none;
 }
 
+/* center content */
 .creator-credit {
-	display: flex;
-	z-index: 2;
-	color: white;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	gap: 1em;
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .9em;
+  text-align: center;
+
+  color: var(--text);
+  padding: 0 1rem;
+}
+
+.creator-credit .name {
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-dim);
+}
+
+.github-links {
+  display: flex;
+  gap: .75em;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .github-link {
-	display: flex;
-	align-items: center;
-	gap: 0.5em;
-	color: black;
-	background: white;
-	padding: 0.2em 0.5em;
-	border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: .45em;
+
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 1px solid color-mix(in oklab, var(--accent) 65%, black);
+  border-radius: 999px;
+  padding: .45em .9em;
+
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: .9rem;
+  text-decoration: none;
+
+  box-shadow: 0 6px 16px rgba(224,178,110,0.2);
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, border-color .12s ease;
+}
+.github-link:hover {
+  background: #d7a761;
+  border-color: color-mix(in oklab, #d7a761 65%, black);
+  box-shadow: 0 8px 20px rgba(224,178,110,0.26);
+  transform: translateY(-1px);
+}
+.github-link sl-icon { font-size: 18px; }
+
+/* ambient glow puck */
+.glow {
+  position: absolute;
+  z-index: 1;
+  width: clamp(220px, 40vw, 520px);
+  height: clamp(140px, 24vw, 320px);
+  border-radius: 50%;
+
+  background: conic-gradient(
+    from 180deg,
+    #1a1613 0deg,
+    #1a1613 140deg,
+    #141110 200deg,
+    #1a1613 300deg,
+    #141110 360deg
+  );
+  filter: blur(38px) saturate(1.05);
+  opacity: .7;
 }
 
-.glow {
-	background: conic-gradient(
-		from 180deg,
-		rgb(13, 13, 13) 0deg,
-		rgb(13, 13, 13) 120.07deg,
-		rgb(13, 13, 13) 179.52deg,
-		rgb(13, 13, 13) 241.65deg,
-		rgb(13, 13, 13) 299.6deg,
-		rgb(0, 0, 0) 360deg);
-  border-radius: 50%;
-  font-size: 150px;
-  height: 0.8em;
-  width: 1.5em;
-  filter: blur(32px);
-  position: absolute;
-  z-index: 2;
+/* responsive */
+@media (max-width: 720px) {
+  .footer { height: 300px; }
+  .creator-credit .name { font-size: .95rem; }
+  .github-link { padding: .45em .85em; font-size: .92rem; }
 }
 `
+
