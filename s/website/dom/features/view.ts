@@ -10,7 +10,7 @@ const features = [
     description: "Local AI features powered by Transformers.js — private by design.",
     class: "ai",
     render: () => html`
-      <sl-carousel pagination navigation mouse-dragging style="--carousel-height: 460px;">
+      <sl-carousel loop autoplay pagination navigation mouse-dragging style="--carousel-height: 460px;">
         <!-- Splash -->
         <sl-carousel-item>
           <article class="ai-splash">
