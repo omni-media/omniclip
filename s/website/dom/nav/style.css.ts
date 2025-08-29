@@ -2,8 +2,7 @@
 import {css} from "@benev/slate"
 
 export default css`
-/* Inherit the hero tokens if present, otherwise define sane defaults here */
-nav {
+:host {
   --bg: #141110;                         /* espresso */
   --surface: #1B1816;
   --text: #E9E4DE;                        /* warm off-white */
@@ -12,7 +11,15 @@ nav {
   --hover: rgba(233,228,222,0.06);
   --accent: #E0B26E;                      /* gold */
   --ring: rgba(224,178,110,0.35);
+  --accent: #E0B26E;
+ 	--card: rgba(233,228,222,0.06);
+  --card-hover: rgba(233,228,222,0.10);
+  --accent-ink: #1a1613;
+	--shadow: rgba(0,0,0,0.55);
+	--text-muted: #CFC9C2;
+}
 
+nav {
   position: fixed;
   top: 1.25em;
   left: 50%;
@@ -23,7 +30,6 @@ nav {
   justify-content: space-between;
   padding: 0.7em 1.1em;
   border-radius: 14px;
-
   color: var(--text);
   background: color-mix(in oklab, var(--bg) 78%, black);
   backdrop-filter: blur(12px);
@@ -31,12 +37,139 @@ nav {
   box-shadow:
     0 10px 28px rgba(0,0,0,0.35),
     0 0 0 1px rgba(0,0,0,0.25) inset;
-  z-index: 1000;
-
+  z-index: 100;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   font-size: 0.95rem;
   font-weight: 600;
 }
+
+sl-drawer::part(base) {
+  z-index: 101;
+}
+
+sl-drawer::part(overlay) {
+  background: rgba(10, 8, 7, 0.55);
+  backdrop-filter: blur(8px);
+}
+
+sl-drawer::part(panel) {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%),
+    color-mix(in oklab, var(--surface) 88%, black);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 20px 50px rgba(0,0,0,.55),
+    0 0 0 1px rgba(0,0,0,.25) inset;
+}
+
+sl-drawer::part(header) {
+  border-bottom: 1px solid var(--border);
+  padding: 1em;
+}
+sl-drawer::part(title) {
+  font: 800 1rem/1 Inter, system-ui, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+sl-drawer::part(close-button) {
+  color: var(--text);
+  border-radius: 10px;
+}
+
+sl-drawer::part(close-button):hover {
+  background: var(--card);
+}
+
+sl-drawer::part(body) {
+  padding: 1rem 1rem 0.75rem 1rem;
+}
+
+sl-drawer::part(footer) {
+  position: sticky;
+  bottom: 0;
+  background: color-mix(in oklab, var(--surface) 92%, black);
+  border-top: 1px solid var(--border);
+  padding: 1rem;
+  z-index: 1;
+}
+
+.drawer-primary::part(base) {
+	padding: 0.4em 1em;
+  font: 800 .95rem/1 Inter, system-ui, sans-serif;
+  letter-spacing: .02em;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 1px solid color-mix(in oklab, var(--accent) 65%, black);
+  box-shadow: 0 8px 20px rgba(224,178,110,0.20);
+}
+.drawer-primary:active::part(base) {
+  transform: translateY(1px);
+  box-shadow: 0 4px 12px rgba(224,178,110,0.18);
+}
+.drawer-primary:focus-visible::part(base) {
+  outline: none;
+  box-shadow:
+    0 8px 20px rgba(224,178,110,0.20),
+    0 0 0 3px var(--sl-focus-ring-color-primary);
+}
+
+.drawer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.drawer-links a {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: 0.9rem 1.2rem;
+  border-radius: 12px;
+  font: 600 1rem/1.3 Inter, system-ui, sans-serif;
+  color: var(--text);
+  text-decoration: none;
+  background: color-mix(in oklab, var(--surface) 92%, black);
+  border: 1px solid var(--border);
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .08s ease;
+}
+
+.drawer-links a::after {
+  content: "›";
+  margin-left: auto;
+  font-weight: 900;
+  opacity: .6;
+  transform: translateX(0);
+  transition: transform .12s ease, opacity .12s ease;
+}
+
+.drawer-links a:hover,
+.drawer-links a:active {
+  background: var(--card-hover);
+  color: var(--accent);
+  border-color: color-mix(in oklab, var(--accent) 65%, black);
+}
+.drawer-links a:hover::after,
+.drawer-links a:active::after {
+  transform: translateX(2px);
+  opacity: .85;
+}
+.drawer-links a:active { transform: translateY(1px); }
+
+.drawer-links a[data-current="true"] {
+  background: var(--card-hover);
+  border-color: var(--border);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.25) inset;
+}
+
+.drawer-links a + a {
+  box-shadow: 0 -1px 0 rgba(233,228,222,0.06) inset;
+}
+
 
 /* left / logo */
 .left { width: 10em; }
@@ -115,48 +248,26 @@ nav {
   display: none;
 }
 
-/* mobile menu sheet (warm translucent) */
-.mobile-menu {
-  display: none;
-  flex-direction: column;
-  position: absolute;
-  top: calc(100% + .6em);
-  right: 1.1em;
-
-  background: color-mix(in oklab, var(--surface) 82%, black);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(10px);
-  padding: .8em;
-  border-radius: 12px;
-  box-shadow: 0 14px 28px rgba(0,0,0,0.45);
-  z-index: 999;
-}
-.mobile-menu a {
-  color: var(--text);
-  text-decoration: none;
-  margin: .35em 0;
-  padding: .55em .7em;
-  border-radius: 8px;
-  transition: background-color .12s ease, color .12s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: .6em;
-}
-.mobile-menu a:hover {
-  background: var(--hover);
-}
-.mobile-menu .try {
-  margin-top: .25em;
-  width: 100%;
-  justify-content: center;
-}
-
 /* responsiveness */
 @media (max-width: 768px) {
   .center.desktop-only { display: none; }
   .right .try { display: none; }
   .menu-icon { display: block; }
   .mobile-only { display: block; }
-  .mobile-menu[data-opened="true"] { display: flex; }
 }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .drawer-links a,
+  .drawer-links a::after {
+    transition: none;
+  }
+}
+
+/* Small screens */
+@media (max-width: 420px) {
+  sl-drawer::part(title) { font-size: .9rem; }
+  .drawer-links a { padding: .85rem .95rem; }
+}
+
 `

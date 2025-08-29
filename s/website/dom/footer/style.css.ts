@@ -141,7 +141,10 @@ export default css`
 
 /* responsive */
 @media (max-width: 720px) {
-  .footer { height: 300px; }
+  .footer {
+		height: 300px;
+		margin-top: 0;
+	}
   .creator-credit .name { font-size: .95rem; }
   .github-link { padding: .45em .85em; font-size: .92rem; }
 }

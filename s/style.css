@@ -37,7 +37,7 @@ a {
 }
 
 html, body {
-	font-size: 16px;
+	font-size: clamp(0.875rem, 0.7rem + 0.5vw, 1rem);
 	height: 100%;
 
 	font-family: Roboto, sans-serif;

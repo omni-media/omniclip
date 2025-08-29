@@ -3,7 +3,6 @@ import {css} from "@benev/slate"
 
 export default css`
 
-/* ===== Theme tokens for the espresso vibe ===== */
 :host, .hero {
   --bg: #141110;           /* espresso */
   --surface: #1B1816;      /* cards/surfaces if needed */
@@ -16,7 +15,6 @@ export default css`
   --ring: rgba(224,178,110,0.35);
 }
 
-/* ===== Section ===== */
 .hero {
   position: relative;
   min-height: 100vh;
@@ -31,7 +29,6 @@ export default css`
   color: var(--text);
   background-color: var(--bg);
 
-  /* warm grid + soft top-to-bottom depth */
   background-image:
     linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
     linear-gradient(to right,  var(--grid) 1px, transparent 1px);
@@ -40,7 +37,6 @@ export default css`
   z-index: 0;
 }
 
-/* vignette / radial lift at center */
 .hero::before {
   content: "";
   position: absolute;
@@ -54,10 +50,7 @@ export default css`
   z-index: 1;
 }
 
-/* keep your original after for extra bottom fade if you like; now redundant */
-/* .hero::after { ... } */
 
-/* ===== Content ===== */
 .hero-content {
   position: relative;
   z-index: 2;
@@ -66,20 +59,17 @@ export default css`
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-/* Logo/title line */
 .omniclip-title {
   display: inline-flex;
+	flex-direction: column;
   align-items: center;
   gap: 0.6rem;
-
-  /* serif headline for cinematic vibe */
   font-family: "Playfair Display", Georgia, "Times New Roman", serif;
   font-weight: 800;
   font-size: 4.25rem;
   line-height: 1.05;
   letter-spacing: -0.01em;
   color: var(--text);
-
   margin: 0 0 0.6rem 0;
 }
 
@@ -87,7 +77,6 @@ export default css`
   filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
 }
 
-/* small frosted version tag */
 .version-tag {
   position: absolute;
   top: -1.6em;
@@ -191,5 +180,24 @@ export default css`
 .btn.discord sl-icon {
   font-size: 20px;
   margin-top: 1px;
+}
+
+@media (max-width: 768px) {
+	.omniclip-title img {
+		width: 440px;
+	}
+	.omniclip-title .version-tag {
+		right: auto;
+		top: -4em;
+	}
+}
+
+@media (max-width: 480px) {
+	.omniclip-title img {
+		width: 90%;
+	}
+	.subheadline {
+		font-size: 1rem;
+	}
 }
 `

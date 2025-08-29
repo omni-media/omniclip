@@ -14,13 +14,23 @@ export const landingPage = shadowComponent(use => {
 		width: 100%;
 	}`)
 
+	const sections = use.deferOnce(() => use.shadow.querySelectorAll("section"))
+
 	return html`
-		${Nav([])}
+		${Nav([sections.value!])}
 		${Hero([])}
-		${Features([])}
-		${OpenSource([])}
-		${Ecosystem([])}
-		${Developers([])}
+    <section id="features">
+			${Features([])}
+    </section>
+    <section id="open-source">
+			${OpenSource([])}
+    </section>
+		<section id="ecosystem" class="ecosystem">
+			${Ecosystem([])}
+		</section>
+    <section class="developers" id="developers">
+			${Developers([])}
+    </section>
 		${Footer([])}
 	`
 })

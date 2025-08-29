@@ -1,7 +1,7 @@
 import {css} from "@benev/slate"
 
 export default css`
-.developers {
+:host {
   --bg: #141110;
   --surface: #1B1816;
   --text: #E9E4DE;
@@ -13,13 +13,14 @@ export default css`
   --accent-ink: #1a1613;
   --ring: rgba(224,178,110,0.35);
 
+	display: flex;
+	flex-direction: column;
   color: var(--text);
   padding: 6.5rem 1rem;
   max-width: 1100px;
   margin: 0 auto;
 }
 
-/* header */
 .dev-head { text-align: center; }
 
 .title-row {
@@ -31,7 +32,7 @@ export default css`
   flex-wrap: wrap;
 }
 
-.developers h2 {
+h2 {
   font-family: Inter, Georgia, serif;
   font-weight: 800;
   letter-spacing: -0.01em;
@@ -47,7 +48,6 @@ export default css`
   justify-content: center;
 }
 
-/* badge styles */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -66,7 +66,6 @@ export default css`
   box-shadow: 0 6px 16px rgba(0,0,0,.25) inset;
 }
 
-/* accents per tag */
 .badge--version {
   background: var(--accent);
   color: var(--accent-ink);
@@ -84,16 +83,18 @@ export default css`
   font-size: 1rem;
 }
 
-/* ===== Code Stage (tabs + persistent preview) ===== */
 .code-stage {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   align-items: flex-start;
   margin-bottom: 2rem;
 }
 
 .tabs {
+	overflow: auto;
   flex: 1;
+  min-width: 400px;
 }
 .tabs input { display: none; }
 
@@ -130,7 +131,6 @@ export default css`
 #tab-cli:checked  ~ .tab-panels .panel:nth-child(2),
 #tab-json:checked ~ .tab-panels .panel:nth-child(3) { display: block; }
 
-/* code preview panel */
 .code-preview {
   background: #0f0d0c;
   border: 1px solid var(--border);
@@ -197,7 +197,6 @@ export default css`
 .preview-header .label { font-weight: 700; }
 .preview-header .fps { margin-left: auto; opacity: .8; font-size: .85rem; }
 
-/* faux video frame */
 .preview-frame {
   position: relative;
   width: 100%;
@@ -211,7 +210,6 @@ export default css`
   box-shadow: 0 8px 18px rgba(0,0,0,.45);
 }
 
-/* safe area guides */
 .safe-area {
   position: absolute; inset: 6% 6%;
   border: 1px dashed rgba(233,228,222,0.18);
@@ -219,7 +217,6 @@ export default css`
   pointer-events: none;
 }
 
-/* layers */
 .layer {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
@@ -235,7 +232,6 @@ export default css`
     linear-gradient(180deg, rgba(0,0,0,.3), rgba(0,0,0,.6));
 }
 
-/* watermark */
 .watermark {
   position: absolute; right: 12px; bottom: 10px;
   font-family: Inter, system-ui, sans-serif;
@@ -246,7 +242,6 @@ export default css`
   opacity: .9;
 }
 
-/* transport (no fake clip timeline) */
 .transport {
   display: flex; align-items: center; gap: .5rem;
   margin-top: .6rem;
@@ -264,14 +259,15 @@ export default css`
   font-size: .85rem; color: rgba(233,228,222,.8);
 }
 
-/* ===== Feature cards row ===== */
 .dev-features {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+	display: flex;
+	flex-wrap: wrap;
   gap: 1.1rem;
   margin-top: 1.4rem;
 }
 .card {
+	flex: 1;
+	min-width: 250px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -294,13 +290,20 @@ export default css`
 .feature-list li { list-style: disc; }
 
 .github-btn {
-  justify-self: start; margin-top: .4rem;
-  display: inline-flex; align-items: center; gap: .6em;
+  justify-self: start;
+  margin-top: 1.5rem;
+  display: inline-flex;
+  align-self: start;
+  align-items: center; gap: .6em;
   font-family: Inter, system-ui, sans-serif;
-  font-weight: 700; font-size: .98rem; text-decoration: none;
-  background: var(--accent); color: var(--accent-ink);
+  font-weight: 700;
+  font-size: .98rem;
+  text-decoration: none;
+  background: var(--accent);
+  color: var(--accent-ink);
   border: 1px solid color-mix(in oklab, var(--accent) 65%, black);
-  border-radius: 10px; padding: .7em 1.1em;
+  border-radius: 10px;
+  padding: .7em 1.1em;
   box-shadow: 0 8px 20px rgba(224,178,110,0.20);
   transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, border-color .12s ease;
 }
@@ -314,10 +317,22 @@ export default css`
 
 /* responsive */
 @media (max-width: 980px) {
-  .code-stage { flex-direction: column; }
-  .preview { max-width: 100%; flex: 1 1 auto; }
+  .preview {
+  	max-width: 100%;
+  	flex: 1 1 auto;
+  	min-width: 400px;
+  }
   .code-preview { min-height: 280px; }
   .dev-features { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+	.code-stage .tabs {
+		min-width: 300px;
+	}
+	.preview {
+		min-width: 300px;
+	}
 }
 `
 

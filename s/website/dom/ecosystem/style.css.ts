@@ -1,7 +1,7 @@
 import {css} from "@benev/slate"
 
 export default css`
-.ecosystem {
+:host {
   --bg: #141110;
   --surface: #1B1816;
   --text: #E9E4DE;
@@ -13,6 +13,8 @@ export default css`
   --ring: rgba(224,178,110,0.35);
   --shadow: rgba(0,0,0,0.55);
 
+	display: flex;
+	flex-direction: column;
   padding: 7rem 1rem;
   max-width: 1100px;
   margin: 0 auto;
@@ -20,8 +22,7 @@ export default css`
   color: var(--text);
 }
 
-/* headings + subtitle */
-.ecosystem h2 {
+h2 {
   font-family: Inter, Georgia, serif;
   font-weight: 800;
   letter-spacing: -0.01em;
@@ -29,7 +30,7 @@ export default css`
   margin: 0 0 .5rem 0;
 }
 
-.ecosystem .subtitle {
+.subtitle {
   color: var(--text-muted);
   font-family: Inter, system-ui, sans-serif;
   font-size: 1rem;
@@ -39,28 +40,29 @@ export default css`
   margin-inline: auto;
 }
 
-.ecosystem .subtitle .credit {
+.subtitle .credit {
   color: rgba(233,228,222,0.6);
   font-style: italic;
   font-size: .92em;
 }
 
-.ecosystem .subtitle a {
+.subtitle a {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 3px;
   transition: color .15s ease, text-decoration-color .15s ease;
 }
-.ecosystem .subtitle a:hover {
+
+.subtitle a:hover {
   color: #f0c27f;
 }
 
-/* group titles (@omnistudio / @e280) */
 .libraries {
   display: flex;
   flex-direction: column;
   gap: 2.25rem;
 }
+
 .group-title {
   display: inline-flex;
   align-items: center;
@@ -73,13 +75,13 @@ export default css`
   color: var(--text);
   margin: 0 0 .4rem 0;
 }
+
 .group-title img {
   width: 30px; height: 30px;
   border-radius: 6px;
   box-shadow: 0 6px 16px rgba(0,0,0,.35);
 }
 
-/* grid */
 .ecosystem-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -155,7 +157,6 @@ export default css`
   text-shadow: 0 1px 1px rgba(0,0,0,.3);
 }
 
-/* focus states for a11y */
 .eco-item:focus-visible {
   outline: none;
   box-shadow:
@@ -166,7 +167,7 @@ export default css`
 
 /* small screens */
 @media (max-width: 720px) {
-  .ecosystem { padding: 5.5rem 1rem; }
+  :host { padding: 5.5rem 1rem; }
   .group-title { font-size: 1.2rem; }
   .eco-item { padding: 1.1rem; border-radius: 14px; }
 }

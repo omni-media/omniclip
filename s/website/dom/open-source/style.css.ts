@@ -1,8 +1,7 @@
 import {css} from "@benev/slate"
 
 export default css`
-/* tokens aligned with the hero/nav espresso palette */
-.open-source {
+:host {
   --bg: #141110;
   --surface: #1B1816;
   --text: #E9E4DE;
@@ -22,8 +21,7 @@ export default css`
   text-align: center;
 }
 
-/* heading + subtitle */
-.open-source h2 {
+h2 {
   font-family: Inter, Georgia, serif;
   font-weight: 800;
   letter-spacing: -0.01em;
@@ -32,7 +30,7 @@ export default css`
   color: var(--text);
 }
 
-.open-source .subtitle {
+.subtitle {
   margin: 0 0 3rem 0;
   color: var(--text-muted);
   line-height: 1.5;
@@ -40,7 +38,6 @@ export default css`
   font-size: 1rem;
 }
 
-/* layout */
 .row {
   display: flex;
   gap: 2rem;
@@ -48,7 +45,6 @@ export default css`
   justify-content: center;
 }
 
-/* license card */
 .license {
   display: flex;
   flex-direction: column;
@@ -79,7 +75,6 @@ export default css`
   box-shadow: 0 6px 16px rgba(224,178,110,0.22);
 }
 
-/* checklist */
 .license ul {
   list-style: none;
   padding: 0;
@@ -106,7 +101,6 @@ export default css`
   mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M20.285 2.859l1.414 1.414-12.02 12.02-6.364-6.364 1.414-1.414 4.95 4.95z"/></svg>') center / 70% 70% no-repeat;
 }
 
-/* right column */
 .text {
   display: flex;
   flex-direction: column;
@@ -122,7 +116,6 @@ export default css`
   margin: 0;
 }
 
-/* CTA button – matches site primary button */
 .btn.github {
   display: inline-flex;
   align-items: center;
@@ -154,7 +147,6 @@ export default css`
   margin-top: 1px;
 }
 
-/* ================= Contributors pill ================= */
 .contributors {
   display: flex;
   justify-content: center;
@@ -180,12 +172,12 @@ export default css`
 	margin-bottom: 0.5em;
 }
 
-/* Avatar group (overlapping) */
 .avatar-group {
   display: flex;
   align-items: center;
   padding-left: .1rem;
 }
+
 .avatar {
   position: relative;
   width: 36px;
@@ -206,7 +198,6 @@ export default css`
   width: 100%; height: 100%; object-fit: cover; display: block;
 }
 
-/* Initials fallback */
 .avatar--initials::after {
   content: attr(data-initials);
   position: absolute; inset: 0;
@@ -219,7 +210,6 @@ export default css`
   opacity: .9;
 }
 
-/* "+X" more badge */
 .avatar--more {
   display: grid; place-items: center;
   font-family: Inter, system-ui, sans-serif;
@@ -231,17 +221,15 @@ export default css`
   text-decoration: none;
 }
 
-/* focus ring for accessibility */
 .avatar:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   z-index: 1;
 }
 
-/* responsive niceties */
 @media (max-width: 720px) {
-  .open-source { padding: 4.5rem 1rem; }
-  .license, .text { flex: 1 1 100%; }
+  :host { padding: 4.5rem 1rem; }
+  .text { align-items: center; }
   .contributors-card { padding-right: .6rem; }
   .avatar { width: 32px; height: 32px; margin-left: -8px; }
 }
