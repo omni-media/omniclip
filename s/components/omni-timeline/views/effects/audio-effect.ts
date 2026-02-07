@@ -1,4 +1,4 @@
-import {html, watch, GoldElement} from "@benev/slate"
+import {html, css, watch, GoldElement} from "@benev/slate"
 
 import {Effect} from "./parts/effect.js"
 import {shadow_view} from "../../../../context/context.js"
@@ -32,5 +32,5 @@ export const AudioEffect = shadow_view(use => (effect: XAudioEffect, timeline: G
 		}
 	})
 
-	return html`${Effect([timeline, effect, html`${wave}`])}`
+	return html`${Effect([timeline, effect, html`${wave}`, css``, `background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.5);`])}`
 })

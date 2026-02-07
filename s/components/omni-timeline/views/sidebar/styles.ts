@@ -5,9 +5,9 @@ export const styles = css`
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 120px;
-		background: rgb(26, 26, 26);
-		border-left: 1px solid #111;
+		width: 140px;
+		background: var(--bg-raised, #0f0f14);
+		border-left: 1px solid var(--border-subtle, #1e1e28);
 
 		& .items {
 			display: flex;
@@ -18,27 +18,32 @@ export const styles = css`
 
 			& .index {
 				font-family: Nippo-Regular;
-				font-size: 0.8em;
+				font-size: 11px;
 				border-radius: 2px;
 				margin-right: 0.5em;
-				text-shadow: 0px -1px 0px rgba(0,0,0,.5);
-				color: white;
+				color: var(--text-secondary, #a0a0b4);
 			}
 		}
 
 		& button {
 			display: flex;
 			background: transparent;
-			color: white;
+			color: var(--text-tertiary, #6b6b80);
 			border: none;
 			cursor: pointer;
+			border-radius: 3px;
+			padding: 2px;
+
+			&:hover {
+				color: var(--text-primary, #f0f0f5);
+			}
 
 			&[data-active] {
-				color: yellow;
+				color: var(--color-danger, #f04444);
 			}
 
 			& svg {
-				width: 12px;
+				width: 14px;
 			}
 		}
 	}

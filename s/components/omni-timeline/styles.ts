@@ -7,7 +7,7 @@ export const styles = css`
 		overflow: scroll;
 		position: relative;
 		height: 100%;
-		background: rgb(26, 26, 26);
+		background: var(--bg-surface, #16161e);
 	}
 
 	.timeline {
@@ -23,26 +23,25 @@ export const styles = css`
 				left: 0;
 				z-index: 800;
 				font-family: "Nippo-Regular";
-				color: #fff;
-				border: 1px solid #111;
-				background-image: -webkit-gradient(
-						linear,
-						left bottom,
-						left top,
-						color-stop(0, rgb(48,48,48)),
-						color-stop(1, rgb(102, 102, 102))
-				);
-				text-shadow: 0px -1px 0px rgba(0,0,0,.5);
+				color: var(--text-tertiary, #6b6b80);
+				border: 1px dashed var(--border-default, #2a2a38);
+				background: var(--bg-elevated, #1e1e28);
 				font-size: 0.8em;
 				border-radius: 0;
-				min-width: 120px;
+				min-width: 140px;
 				cursor: pointer;
+
+				&:hover {
+					border-color: var(--accent, #7c6cf0);
+					background: var(--accent-muted, rgba(124, 108, 240, 0.15));
+					color: var(--text-primary, #f0f0f5);
+				}
 			}
 		}
 
 		& .track-sidebars {
 			position: sticky;
-			width: 120px;
+			width: 140px;
 			left: 0;
 			z-index: 800;
 		}
@@ -70,7 +69,7 @@ export const styles = css`
 
 				& p {
 					font-size: 16px;
-					color: gray;
+					color: var(--text-secondary, #a0a0b4);
 					display: flex;
 					align-items: center;
 					gap: 0.3em;
@@ -81,9 +80,9 @@ export const styles = css`
 		& .transition-duration {
 			position: absolute;
 			z-index: 5;
-			background: #0080005e;
-			border-radius: 5px;
-			border: 1px solid green;
+			background: rgba(52,211,153,0.15);
+			border-radius: 3px;
+			border: 1px solid var(--color-success, #34d399);
 			transition: 0.5s ease all;
 
 			&:first-of-type {
@@ -100,17 +99,17 @@ export const styles = css`
 		& .transition-indicator {
 			text-align: center;
 			display: flex;
-			background: #5b8900;
-			border: 2px solid #111;
-			border-radius: 5px;
+			background: var(--bg-elevated, #1e1e28);
+			border: 1px solid var(--border-default, #2a2a38);
+			border-radius: 9999px;
 			color: white;
 			align-items: center;
 			justify-content: center;
 			position: absolute;
-			width: 20px;
-			height: 20px;
+			width: 18px;
+			height: 18px;
 			top: 15px;
-			left: -10px;
+			left: -9px;
 			z-index: 2;
 			opacity: 0;
 			cursor: pointer;
@@ -124,7 +123,7 @@ export const styles = css`
 
 				& svg {
 					z-index: 6;
-					background: #329032;
+					background: var(--color-success, #34d399);
 				}
 			}
 
@@ -132,7 +131,7 @@ export const styles = css`
 				width: 100%;
 				height: 100%;
 				color: white;
-				background: #2d2d2d;
+				background: var(--bg-elevated, #1e1e28);
 			}
 
 			&:hover {
@@ -142,17 +141,17 @@ export const styles = css`
 		}
 
 		& .drop-indicator {
-			height: 50px;
-			border: green dotted 2px;
+			height: 52px;
+			border: 2px dashed var(--color-success, #34d399);
 			position: absolute;
-			background: #0080002e;
+			background: rgba(52,211,153,0.08);
 			border-radius: 5px;
 			top: 0;
-			
+
 			&[data-push-effects] {
 				width: 10px;
 				z-index: 1;
-				border: 1px green solid;
+				border: 1px solid var(--color-success, #34d399);
 				left: -0.5px;
 			}
 		}

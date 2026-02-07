@@ -22,15 +22,17 @@ export const styles = css`
 	}
 
 	.bitrate {
-		background: transparent;
-		color: gray;
-		border: 1px solid gray;
+		background: var(--bg-surface, #16161e);
+		color: var(--text-secondary, #a0a0b4);
+		border: 1px solid var(--border-default, #2a2a38);
+		border-radius: 5px;
 		padding: 0.3em;
+		font-family: Nippo-Regular;
 	}
 
 	.setting-container {
 		& .error {
-			color: red;
+			color: var(--color-danger, #f04444);
 			font-size: 11px;
 		}
 	}
@@ -71,30 +73,26 @@ export const styles = css`
 
 	.sparkle-button {
 		align-self: start;
-		--active: 0;
-		background: #1d1c1c;
+		background: var(--accent, #7c6cf0);
 		cursor: pointer;
 		padding: 0.3em 1em;
 		border-radius: 5px;
-		box-shadow:
-			0 0 calc(var(--active) * 0.6em) calc(var(--active) * 0.1em) hsl(0 0% 61% / 0.75),
-			0 0.05em 0 0 hsl(0 calc(var(--active) * 0%) calc((var(--active) * 50%) + 30%)) inset,
-			0 -0.05em 0 0 hsl(0 calc(var(--active) * 0%) calc(var(--active) * 60%)) inset;
-		transition: all 0.3s ease;
+		border: none;
+		color: white;
+		transition: background 200ms ease;
+
+		&:hover {
+			background: var(--accent-hover, #9488f5);
+		}
 
 		&:disabled {
-			opacity: 0.5;
-			box-shadow: none;
+			opacity: 0.4;
 			cursor: default;
 		}
 	}
 
 	.sparkle-button:active {
 		scale: 1;
-	}
-
-	.sparkle-button:is(:hover, :focus-visible) {
-		--active: 1;
 	}
 
 	.export {
@@ -244,14 +242,14 @@ export const confirmModalStyles = css`
 		justify-self: center;
 		font-family: Poppins-Regular;
 		padding: 0.5em;
-		background: #111;
+		background: var(--bg-raised, #0f0f14);
 		max-width: 350px;
-		color: gray;
-		border: 1px solid gray;
-		border-radius: 5px;
+		color: var(--text-secondary, #a0a0b4);
+		border: 1px solid var(--border-default, #2a2a38);
+		border-radius: 8px;
 
 		&::backdrop {
-			backdrop-filter: blur(5px);
+			backdrop-filter: blur(8px);
 		}
 	}
 
@@ -332,14 +330,14 @@ export const confirmModalStyles = css`
 
 	.export-button {
 		display: flex;
-		height: 21px;
+		height: 28px;
 		align-items: center;
 		color: white;
-		background: #1d1c1c;
+		background: var(--accent, #7c6cf0);
 		cursor: pointer;
 		border-radius: 5px;
-		padding: 0 0.3em;
-		border: 1px solid white;
+		padding: 0 12px;
+		border: none;
 		margin-top: 0.5em;
 		justify-self: end;
 
@@ -397,8 +395,8 @@ export const exportOverlayStyles = css`
 	.overlay-backdrop {
 		position: absolute;
 		inset: 0;
-		background-color: rgba(0, 0, 0, 0.8);
-		backdrop-filter: blur(5px);
+		background-color: rgba(0, 0, 0, 0.85);
+		backdrop-filter: blur(8px);
 	}
 
 	.overlay-container {
@@ -415,8 +413,8 @@ export const exportOverlayStyles = css`
 	}
 
 	.export-container {
-		background-color: var(--sl-color-neutral-0);
-		color: var(--sl-color-neutral-900);
+		background-color: var(--bg-raised, #0f0f14);
+		color: var(--text-primary, #f0f0f5);
 		border-radius: 12px;
 		box-shadow: var(--sl-shadow-x-large);
 		width: 100%;
@@ -523,11 +521,11 @@ export const exportOverlayStyles = css`
 		.export-container {
 			max-width: 100%;
 		}
-		
+
 		.action-buttons {
 			flex-direction: column;
 		}
-		
+
 		.status-header h2 {
 			font-size: 1.25rem;
 		}

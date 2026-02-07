@@ -1,6 +1,6 @@
 import posthog from 'posthog-js'
 import {register_to_dom, html, Nexus} from "@benev/slate"
-import {ConstructEditor, single_panel_layout} from "@benev/construct/x/mini.js"
+import {ConstructEditor, freshId} from "@benev/construct/x/mini.js"
 
 import {Tooltip} from './views/tooltip/view.js'
 import {HashRouter} from './tools/hash-router.js'
@@ -8,26 +8,19 @@ import {TestEnvAlert} from './views/test-env-alert.js'
 import checkSvg from './icons/gravity-ui/check.svg.js'
 import exportSvg from './icons/gravity-ui/export.svg.js'
 import {ShortcutsManager} from './views/shortcuts/view.js'
-import {TextPanel} from "./components/omni-text/panel.js"
-import {AnimPanel} from "./components/omni-anim/panel.js"
-import {MediaPanel} from "./components/omni-media/panel.js"
 import {OmniText} from "./components/omni-text/component.js"
 import {OmniAnim} from "./components/omni-anim/component.js"
 import {OmniMedia} from "./components/omni-media/component.js"
-import {FiltersPanel} from './components/omni-filters/panel.js'
-import {TimelinePanel} from "./components/omni-timeline/panel.js"
 import {LandingPage} from './components/landingpage/component.js'
 import {OmniManager} from './components/omni-manager/component.js'
 import {OmniFilters} from './components/omni-filters/component.js'
 import {CollaborationManager} from './views/collaboration/view.js'
 import {OmniTimeline} from "./components/omni-timeline/component.js"
 import pencilSquareSvg from './icons/gravity-ui/pencil-square.svg.js'
-import {ProjectSettingsPanel} from "./views/project-settings/panel.js"
-import {TransitionsPanel} from "./components/omni-transitions/panel.js"
 import {omnislate, OmniContext, collaboration} from "./context/context.js"
 import {OmniTransitions} from "./components/omni-transitions/component.js"
-import {ExportPanel} from "./components/omni-timeline/views/export/panel.js"
-import {MediaPlayerPanel} from "./components/omni-timeline/views/media-player/panel.js"
+import {MediaPlayer} from './components/omni-timeline/views/media-player/view.js'
+import {ProjectSettings} from './views/project-settings/view.js'
 import {ExportConfirmModal, ExportInProgressOverlay} from './components/omni-timeline/views/export/view.js'
 
 posthog.init('phc_CMbHMWGVJSqM1RqGyGxWCyqgaSGbGFKl964fIN3NDwU',
@@ -40,23 +33,23 @@ posthog.init('phc_CMbHMWGVJSqM1RqGyGxWCyqgaSGbGFKl964fIN3NDwU',
 
 const IS_TEST_ENV = window.location.hostname.startsWith("test")
 
+function emptyLayout() {
+	return () => ({
+		id: freshId(),
+		kind: "cell" as const,
+		size: null,
+		vertical: true,
+		children: [],
+	})
+}
+
 export function setupContext(projectId: string) {
 	omnislate.context = new OmniContext({
 		projectId,
-		panels: {
-			TimelinePanel,
-			MediaPanel,
-			MediaPlayerPanel,
-			TextPanel,
-			ExportPanel,
-			ProjectSettingsPanel,
-			AnimPanel,
-			FiltersPanel,
-			TransitionsPanel
-		},
+		panels: {},
 		layouts: {
-			empty: single_panel_layout("TimelinePanel"),
-			default: single_panel_layout("TimelinePanel"),
+			empty: emptyLayout(),
+			default: emptyLayout(),
 		},
 	})
 	return omnislate
@@ -70,6 +63,9 @@ export function removeLoadingPageIndicator() {
 	if(loadingPageIndicatorElement)
 		document.body.removeChild(loadingPageIndicatorElement!)
 }
+
+type LeftTab = "media" | "text"
+type RightTab = "filters" | "animations" | "transitions"
 
 const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((use) => () => {
 	use.watch(() => use.context.state)
@@ -92,6 +88,55 @@ const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((us
 
 	const [showConfirmExportModal, setShowConfirmExportModal] = use.state(false)
 	const isClient = collaboration.client
+
+	const [leftTab, setLeftTab] = use.state<LeftTab>("media")
+	const [rightTab, setRightTab] = use.state<RightTab>("filters")
+
+	const selected = use.context.state.selected_effect
+
+	const renderRightPanel = () => {
+		if (!selected) {
+			return html`
+				<div class="panel-tabs">
+					<button data-active>Settings</button>
+				</div>
+				<div class="panel-content">
+					${ProjectSettings([])}
+				</div>
+			`
+		}
+		if (selected.kind === "text") {
+			return html`
+				<div class="panel-tabs">
+					<button data-active>Text</button>
+				</div>
+				<div class="panel-content">
+					<omni-text></omni-text>
+				</div>
+			`
+		}
+		return html`
+			<div class="panel-tabs">
+				<button
+					?data-active=${rightTab === "filters"}
+					@click=${() => setRightTab("filters")}
+				>Filters</button>
+				<button
+					?data-active=${rightTab === "animations"}
+					@click=${() => setRightTab("animations")}
+				>Animations</button>
+				<button
+					?data-active=${rightTab === "transitions"}
+					@click=${() => setRightTab("transitions")}
+				>Transitions</button>
+			</div>
+			<div class="panel-content">
+				${rightTab === "filters" ? html`<omni-filters></omni-filters>` : null}
+				${rightTab === "animations" ? html`<omni-anim></omni-anim>` : null}
+				${rightTab === "transitions" ? html`<omni-transitions></omni-transitions>` : null}
+			</div>
+		`
+	}
 
 	return html`
 		<div class=editor>
@@ -128,7 +173,33 @@ const VideoEditor =  (omnislate: Nexus<OmniContext>) => omnislate.light_view((us
 					)}
 				</div>
 			</div>
-			<construct-editor></construct-editor>
+			<div class="editor-layout">
+				<div class="panel-left">
+					<div class="panel-tabs">
+						<button
+							?data-active=${leftTab === "media"}
+							@click=${() => setLeftTab("media")}
+						>Media</button>
+						<button
+							?data-active=${leftTab === "text"}
+							@click=${() => setLeftTab("text")}
+						>Text</button>
+					</div>
+					<div class="panel-content">
+						${leftTab === "media" ? html`<omni-media></omni-media>` : null}
+						${leftTab === "text" ? html`<omni-text></omni-text>` : null}
+					</div>
+				</div>
+				<div class="panel-center">
+					${MediaPlayer([])}
+				</div>
+				<div class="panel-right">
+					${renderRightPanel()}
+				</div>
+				<div class="panel-bottom">
+					<omni-timeline></omni-timeline>
+				</div>
+			</div>
 		</div>
 	`
 })
@@ -156,4 +227,3 @@ const router = new HashRouter({
 
 document.body.append(router.element)
 document.documentElement.className = "sl-theme-dark"
-//@ts-ignore
