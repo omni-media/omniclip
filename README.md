@@ -1,96 +1,97 @@
-> **Omniclip 2.0 is in development!** <br>
-> We're actively working on the next version of Omniclip to elevate it to the next level.<br>
-Want to help shape it? Join the discussion on our [Discord](https://discord.gg/Nr8t9s5wSM).
-<br>
-<br>
-<br>
-
-
 <p align="center"><img width="300" src="./assets/icon2.png"/></p>
-<p align="center"><a href="https://opensource.org/license/mit"><img src="https://img.shields.io/badge/license-MIT-blue.svg"/></a></a></p>
-<p align="center">Open source video editing web application</p>
+<h1 align="center">Picasso Platforms</h1>
+<p align="center"><a href="https://opensource.org/license/mit"><img src="https://img.shields.io/badge/license-MIT-blue.svg"/></a></p>
+<p align="center">AI-powered video editing in your browser</p>
 
 ## Introduction
-Omniclip is a free and open source video editor that runs entirely in your browser. It requires no accounts, stores everything on your device, and never uploads your files.
+Picasso Platforms is a browser-based video editor with a built-in MCP (Model Context Protocol) server that lets AI assistants directly control the editing timeline. No accounts, no uploads, no subscriptions — everything runs locally in your browser.
 
-Designed for privacy, speed, and flexibility — it gives you full editing control without relying on cloud services or subscriptions. You can use it directly, or embed its components into your own web projects.
+Edit videos by hand with a full-featured timeline UI, or let an AI assistant add clips, apply transitions, style text, and render your project — all through natural language.
 
-Omniclip uses modern browser APIs like WebCodecs to achieve high performance rendering — directly in the browser.  
-⚠️ Because of this, it may not work properly on older browsers or devices that don’t support these newer technologies.
+Built on modern browser APIs like WebCodecs for high-performance rendering directly in the browser.
+> Because of this, it may not work properly on older browsers or devices that don't support these newer technologies.
 
 ## Features
-  Omniclip is an actively maintained project with emerging features.  
-- Trimming
-- Splitting
-- Supports - Text, Audio, Video (mp4, mov and much more) and Images
-- Clip editing on preview - rotating, resizing, text styling and more
+
+### Editor
+- Trimming and splitting
+- Supports text, audio, video (mp4, mov, and more), and images
+- On-preview clip editing — rotating, resizing, text styling
 - Undo/Redo
-- Render in different resolutions, up to 4k.
-- Project manager - panel where you can choose from your saved projects, instead just one
-- Transitions - Applying transitions between video clips for smooth visual effects
-- Effects - filters
-- Choose from various timebases ranging from 10-120 fps
-- Collaboration (web rtc)
+- Render in resolutions up to 4K
+- Project manager for multiple saved projects
+- Transitions between video clips
+- Visual effects and filters
+- Configurable timebase (10–120 fps)
+- Real-time collaboration via WebRTC
 
-## To be added
-- Audio Editing - Adjusting volume etc
-- Speech to text
-- Keyframes
+### MCP Server (AI Integration)
+An MCP server bridges AI assistants (like Claude) to the editor via WebSocket, exposing 30 tools across these categories:
 
-## How to
-  #### Use omniclip components in your app:
-  1. Install omniclip:  
-  ```sh
-  npm install omniclip
-  ```
-  2. Import components and register them to the dom
-  ```js
-  import {getComponents, registerElements} from 'omniclip'
-  registerElements(getComponents())
-  ```
-  3. Simply put the components you would like to use, or all components for whole experience:
-  ```html
-  <omni-text></omni-text>
-  <omni-media></omni-media>
-  <omni-timeline></omni-timeline>
-  ```
-#### Use omniclip tools:
-Soon, Omniclip will be powered by [**Omni Tools**](https://github.com/omni-media/omnitool) — a programmatic engine for creating timelines from code, automating rendering, and integrating with AI or scripting workflows.
+| Category | Tools |
+|---|---|
+| **Query** | Get timeline state, list effects/tracks, get effect details, playback status |
+| **Effects** | Add/remove/update video, audio, text, and image effects |
+| **Positioning** | Move, resize, rotate, and crop effects on the canvas |
+| **Text Styling** | Batch-update font, size, color, alignment, and more |
+| **Tracks** | Add, remove, reorder, and configure tracks |
+| **Transitions** | Add, remove, and configure transitions between clips |
+| **Animations** | Add, remove, and configure keyframe animations |
+| **Filters** | Add and remove visual filters |
+| **Playback** | Play, pause, and seek |
+| **Project** | Resolution, FPS, duration, undo/redo |
 
-> ⚠️ **Note:** Omni Tools is still in early development, but it's shaping up to be a powerful foundation for building videos without a UI.
+**Architecture:** `AI Assistant (stdio)` ↔ `MCP Server` ↔ `WebSocket (port 9876)` ↔ `Browser Bridge`
 
-<!-- Tools will be added here once available: https://github.com/omni-media/omnitool -->
+## Getting Started
 
-## Contributing
-Contributing is vital part of this project, so feel free to help and build this awesome video editor together, simply choose the issue you feel like working on and if you are done make a pull request.
-to ease communiaction, its best to join my discord server: https://discord.gg/Nr8t9s5wSM
-#### Development:
-To start contirbuting you need to do those steps first:
-1. Clone the repository: `git clone git@github.com:omni-media/omniclip.git` or fork it
-2. Install the dependencies: `npm install`
-3. Build the project: `npm run build`
-4. Start developing!: `npm start`
+### Prerequisites
+- Node.js (v18+)
+- npm
 
-#### Project architecture
-This project leverages the following key components for managing application state:
-  1. State
-  2. Actions
-  3. Controllers
-  4. Components/Views
+### Setup
+```sh
+# Clone the repository
+git clone https://github.com/ayushsridhar/betterhack.git
+cd betterhack
 
-The architecture follows a unidirectional data flow model, where data flows in a single direction from actions to state and from state to components.
+# Install dependencies
+npm install
+cd mcp-server && npm install && cd ..
 
-#### Tech Stack
-- Typescript
-- @benev/slate
+# Build everything
+npm run build
+cd mcp-server && npm run build && cd ..
 
-### Contact/Sponsorship
-If you are willing to help this project by sponsoring it or have some other questions:
-- discord: zenkyu
-- gmail: przemekgg2002@gmail.com
+# Start the dev server
+npm start
+```
+Then open http://localhost:8080 in your browser.
+
+### Running the MCP Server
+In a separate terminal:
+```sh
+cd mcp-server
+node dist/index.js
+```
+The MCP server starts on stdio and opens a WebSocket bridge on `ws://localhost:9876`. The browser editor will auto-connect to it.
+
+## Architecture
+
+This project follows a unidirectional data flow:
+
+1. **State** — single source of truth for the timeline and project
+2. **Actions** — pure functions that produce state transitions
+3. **Controllers** — manage side effects (compositor, media, MCP bridge, collaboration)
+4. **Components/Views** — Lit web components that render from state
+
+### Tech Stack
+- TypeScript
+- Lit + @benev/slate (UI framework)
+- PIXI.js (canvas rendering)
+- WebCodecs / FFmpeg WASM (encoding)
+- MCP SDK + WebSocket (AI bridge)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
