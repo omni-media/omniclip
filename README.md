@@ -41,7 +41,7 @@ Omniclip uses modern browser APIs like WebCodecs to achieve high performance ren
   #### Use omniclip components in your app:
   1. Install omniclip:  
   ```sh
-  npm install omniclip
+  bun add omniclip
   ```
   2. Import components and register them to the dom
   ```js
@@ -67,9 +67,9 @@ to ease communiaction, its best to join my discord server: https://discord.gg/Nr
 #### Development:
 To start contirbuting you need to do those steps first:
 1. Clone the repository: `git clone git@github.com:omni-media/omniclip.git` or fork it
-2. Install the dependencies: `npm install`
-3. Build the project: `npm run build`
-4. Start developing!: `npm start`
+2. Install the dependencies: `bun install`
+3. Build the project: `bun run build`
+4. Start developing!: `bun start`
 
 #### Project architecture
 This project leverages the following key components for managing application state:

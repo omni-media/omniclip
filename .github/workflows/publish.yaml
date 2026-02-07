@@ -11,13 +11,14 @@ jobs:
     if: "! github.event.pull_request.head.repo.fork"
     steps:
     - uses: actions/checkout@v4
+    - uses: oven-sh/setup-bun@v2
     - uses: actions/setup-node@v4
       with:
         node-version: "22"
 
-    - run: npm ci
-    - run: npm run build -s
-    - run: npm test
+    - run: bun install --frozen-lockfile
+    - run: bun run build -s
+    - run: bun run test
 
     - name: 🚀 npm publish
       uses: JS-DevTools/npm-publish@v3

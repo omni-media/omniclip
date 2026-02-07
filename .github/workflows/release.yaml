@@ -28,16 +28,14 @@ jobs:
     - name: 🔔 checkout
       uses: actions/checkout@v3
 
-    - name: 🔧 setup node
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+    - name: 🔧 setup bun
+      uses: oven-sh/setup-bun@v2
 
     - name: 📦 install dependencies
-      run: npm ci
+      run: bun install --frozen-lockfile
 
     - name: 🔨 build
-      run: npm run build-production
+      run: bun run build-production
 
     - name: 🚚 tracking ignored stuff
       run: |
@@ -47,7 +45,7 @@ jobs:
     - name: 🗃️ reconstitute node_modules for production
       run: |
         rm -rf node_modules
-        npm ci --omit=dev
+        bun install --production --frozen-lockfile
 
     - name: 🗃️ copy files
       run: |
