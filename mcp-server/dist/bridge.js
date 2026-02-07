@@ -9,6 +9,15 @@ export class BrowserBridge {
         this.wss = new WebSocketServer({ port });
         this.wss.on("connection", (ws) => {
             console.error(`[MCP Bridge] Browser connected`);
+            // Clean up existing client if still open
+            if (this.client) {
+                console.error("[MCP Bridge] Replacing existing client connection");
+                try {
+                    this.client.terminate();
+                }
+                catch (_) { }
+                this.rejectAllPending(new Error("Replaced by new browser connection"));
+            }
             this.client = ws;
             ws.on("message", (data) => {
                 try {
@@ -21,16 +30,17 @@ export class BrowserBridge {
             });
             ws.on("close", () => {
                 console.error("[MCP Bridge] Browser disconnected");
-                this.client = null;
-                // Reject all pending requests
-                for (const [id, pending] of this.pending) {
-                    clearTimeout(pending.timer);
-                    pending.reject(new Error("Browser disconnected"));
-                    this.pending.delete(id);
+                if (this.client === ws) {
+                    this.client = null;
+                    this.rejectAllPending(new Error("Browser disconnected"));
                 }
             });
             ws.on("error", (err) => {
                 console.error("[MCP Bridge] WebSocket error:", err);
+                if (this.client === ws) {
+                    this.client = null;
+                    this.rejectAllPending(new Error("WebSocket error"));
+                }
             });
         });
         console.error(`[MCP Bridge] WebSocket server listening on port ${port}`);
@@ -83,12 +93,15 @@ export class BrowserBridge {
             pending.reject(new Error(msg.error || "Unknown error from browser"));
         }
     }
-    close() {
+    rejectAllPending(error) {
         for (const [id, pending] of this.pending) {
             clearTimeout(pending.timer);
-            pending.reject(new Error("Bridge shutting down"));
+            pending.reject(error);
         }
         this.pending.clear();
+    }
+    close() {
+        this.rejectAllPending(new Error("Bridge shutting down"));
         this.wss.close();
     }
 }

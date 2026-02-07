@@ -22,5 +22,6 @@ export declare class BrowserBridge {
     sendQuery(queryType: string, params?: any): Promise<any>;
     private send;
     private handleMessage;
+    private rejectAllPending;
     close(): void;
 }
