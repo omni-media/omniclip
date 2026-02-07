@@ -12,6 +12,7 @@ import {VideoExport} from "./controllers/video-export/controller.js"
 import {HistoricalState, NonHistoricalState, State} from "./types.js"
 import {historical_actions, non_historical_actions} from "./actions.js"
 import {Collaboration} from "./controllers/collaboration/controller.js"
+import {MCPBridge} from "./controllers/mcp-bridge/controller.js"
 import {FFmpegHelper} from "./controllers/video-export/helpers/FFmpegHelper/helper.js"
 import {StockLayouts} from "@benev/construct/x/context/controllers/layout/parts/utils/stock_layouts.js"
 
@@ -121,6 +122,7 @@ export class OmniContext extends Context {
 		video_export: VideoExport
 		shortcuts: Shortcuts
 		collaboration: Collaboration
+		mcp_bridge: MCPBridge
 	}
 
 	#check_if_webcodecs_supported() {
@@ -147,16 +149,19 @@ export class OmniContext extends Context {
 		this.#check_if_webcodecs_supported()
 		const compositor = new Compositor(this.actions)
 		const media = new Media()
+		const mcpBridge = new MCPBridge()
 		this.controllers = {
 			compositor,
 			media,
 			timeline: new Timeline(this.actions, media, compositor),
 			video_export: new VideoExport(this.actions, compositor, media),
 			shortcuts: new Shortcuts(this, this.actions),
-			collaboration
+			collaboration,
+			mcp_bridge: mcpBridge
 		}
 		this.#listen_for_state_changes()
 		this.#recreate_project_from_localstorage_state(this.state, this.controllers.media)
+		mcpBridge.connect()
 		removeLoadingPageIndicator()
 	}
 }
