@@ -38,13 +38,14 @@ h2 {
 	}
 
 	& select {
-		background: #111;
+		background: var(--bg-surface, #16161e);
+		border: 1px solid var(--border-default, #2a2a38);
 		border-radius: 5px;
-		color: gray;
+		color: var(--text-secondary, #a0a0b4);
 		padding: 0.3em;
 
 		& option {
-			background: #111;
+			background: var(--bg-surface, #16161e);
 		}
 	}
 }
@@ -56,8 +57,8 @@ h2 {
 
 	&[disabled] {
 		pointer-events: none;
-		filter: blur(2px);
-		opacity: 0.5;
+		filter: blur(1px);
+		opacity: 0.4;
 	}
 
 	& .filter {
@@ -87,32 +88,29 @@ h2 {
 
 	& button {
 		font-family: "Nippo-Regular";
-		color: #fff;
-		border: 1px solid #111;
-		background-image: -webkit-gradient(
-				linear,
-				left bottom,
-				left top,
-				color-stop(0, rgb(48,48,48)),
-				color-stop(1, rgb(102, 102, 102))
-		);
-		text-shadow: 0px -1px 0px rgba(0,0,0,.5);
+		color: var(--text-secondary, #a0a0b4);
+		border: 1px solid var(--border-default, #2a2a38);
+		background: var(--bg-elevated, #1e1e28);
 		font-size: 0.8em;
-		border-radius: 0;
+		border-radius: 5px;
 		cursor: pointer;
 		width: 100%;
+
+		&:hover {
+			background: var(--bg-overlay, #262632);
+		}
 	}
 
 	& .filter-preview {
 		display: flex;
 		flex-direction: column;
-		width: 200px;
-		height: 200px;
+		width: 180px;
+		height: 180px;
 		justify-content: center;
 		align-items: center;
 		cursor: pointer;
-		border: 1px solid #373535;
-		border-radius: 5px;
+		border: 1px solid var(--border-default, #2a2a38);
+		border-radius: 8px;
 
 		& p {
 			padding: 0.2em;
@@ -123,7 +121,7 @@ h2 {
 		}
 
 		&[data-selected] {
-			border: 1px solid white;
+			border-color: var(--accent, #7c6cf0);
 		}
 	}
 

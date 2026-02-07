@@ -78,7 +78,7 @@ export default css`
 	--secondary-gradient: linear-gradient(135deg, #f59e0b, #f97316);
 	--text-primary: #f0f0f0;
 	--text-secondary: rgba(255, 255, 255, 0.8);
-	--bg-primary: #0a0a0a;
+	--bg-primary: #0a0a0f;
 	--bg-card: rgba(30, 30, 30, 0.5);
 	--border-light: rgba(255, 255, 255, 0.05);
 	--border-medium: rgba(255, 255, 255, 0.1);
@@ -751,7 +751,7 @@ nav .nav {
 }
 
 .collab-demo {
-	background: #111;
+	background: #111118;
 	padding: 16px;
 	border-radius: 10px;
 	max-width: 500px;
@@ -761,7 +761,7 @@ nav .nav {
 }
 
 .media-preview {
-	background: #222;
+	background: #1a1a24;
 	padding: 16px;
 	border-radius: 6px;
 	margin-bottom: 20px;
@@ -770,7 +770,7 @@ nav .nav {
 }
 
 .media-frame {
-	background: #333;
+	background: #242430;
 	color: #fff;
 	height: 160px;
 	display: flex;
@@ -798,7 +798,7 @@ nav .nav {
 
 .timeline {
 	position: relative;
-	background: #1a1a1a;
+	background: #1a1a24;
 	height: 80px;
 	border-radius: 6px;
 	overflow: visible;
@@ -1859,7 +1859,7 @@ nav .nav {
 }
 
 .code-sample {
-	background-color: #1e1e1e;
+	background-color: #111118;
 	border-radius: 8px;
 	overflow: hidden;
 	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -1868,7 +1868,7 @@ nav .nav {
 .code-sample-header {
 	display: flex;
 	align-items: center;
-	background-color: #333;
+	background-color: #242430;
 	padding: 0.5rem 1rem;
 	color: white;
 	font-size: 0.9rem;

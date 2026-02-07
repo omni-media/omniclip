@@ -5,17 +5,18 @@ export const styles = css`
 	.live {
 		display: flex;
 		gap: 0.3em;
-		border: 1px solid white;
+		border: 1px solid var(--border-default, #2a2a38);
 		border-radius: 5px;
 		font-family: Nippo-Regular;
-		background: white;
+		background: var(--bg-elevated, #1e1e28);
+		color: var(--text-primary, #f0f0f5);
 	}
 
 	.settings, .exit {
-		background: black;
-		color: white;
+		background: var(--bg-surface, #16161e);
+		color: var(--text-primary, #f0f0f5);
 		display: flex;
-		outline: 1px solid white;
+		outline: 1px solid var(--border-default, #2a2a38);
 		border-radius: 3px;
 		padding: 0 0.2em;
 		cursor: pointer;
@@ -34,8 +35,8 @@ export const styles = css`
 		& .host {
 			display: flex;
 			gap: 0.2em;
-			background: white;
-			color: black;
+			background: var(--bg-overlay, #262632);
+			color: var(--text-primary, #f0f0f5);
 			padding: 0 0.4em;
 			font-size: 0.8em;
 			border-radius: 5px;
@@ -49,8 +50,8 @@ export const styles = css`
 	.kind {
 		display: flex;
 		gap: 0.2em;
-		background: white;
-		color: black;
+		background: var(--bg-overlay, #262632);
+		color: var(--text-primary, #f0f0f5);
 		padding: 0 0.4em;
 		font-size: 0.8em;
 		align-items: center;
@@ -75,19 +76,19 @@ export const styles = css`
 				align-items: center;
 				gap: 0.2em;
 				border-radius: 3px;
-				color: gray;
+				color: var(--text-tertiary, #6b6b80);
 				margin-right: 0.4em;
 			}
 		}
 
 		& .kick {
-			background: gray;
+			background: var(--text-tertiary, #6b6b80);
 			color: white;
 			padding: 0 0.2em;
 		}
 
 		& .ban {
-			background: #cd0000;
+			background: var(--color-danger, #f04444);
 			color: white;
 			padding: 0 0.2em;
 		}
@@ -95,7 +96,7 @@ export const styles = css`
 
 	.close {
 		& button {
-			background: #cd0000;
+			background: var(--color-danger, #f04444);
 			color: white;
 			padding: 0 0.2em;
 		}
@@ -127,8 +128,7 @@ export const styles = css`
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background-color: #ccc;
-		-webkit-transition: .4s;
+		background-color: var(--bg-elevated, #1e1e28);
 		transition: .4s;
 	}
 
@@ -140,16 +140,15 @@ export const styles = css`
 		left: 2px;
 		bottom: 2px;
 		background-color: white;
-		-webkit-transition: .4s;
 		transition: .4s;
 	}
 
 	input:checked + .slider {
-		background-color: #2196F3;
+		background-color: var(--accent, #7c6cf0);
 	}
 
 	input:focus + .slider {
-		box-shadow: 0 0 1px #2196F3;
+		box-shadow: 0 0 1px var(--accent, #7c6cf0);
 	}
 
 	input:checked + .slider:before {
@@ -172,12 +171,12 @@ export const styles = css`
 		display: flex;
 		align-items: center;
 		gap: 0.3em;
-		color: white;
+		color: var(--text-primary, #f0f0f5);
 		padding: 0 0.4em;
 		font-size: 0.8em;
-		outline: 1px solid white;
+		outline: 1px solid var(--border-default, #2a2a38);
 		border-radius: 3px;
-		background: black;
+		background: var(--bg-surface, #16161e);
 	}
 
 	@keyframes opacity-animation {
@@ -229,13 +228,13 @@ export const styles = css`
 		animation: opacity-animation 1s linear;
 
 		&.red {
-			background: #e60000;
+			background: var(--color-danger, #f04444);
 		}
 		&.orange {
-			background: #ff9900;
+			background: var(--color-warning, #fbbf24);
 		}
 		&.green {
-			background: #00e600;
+			background: var(--color-success, #34d399);
 		}
 		&.gray {
 			background: gray;
@@ -250,7 +249,7 @@ export const styles = css`
 		font-family: Poppins-Regular;
 		display: flex;
 		color: white;
-		height: 21px;
+		height: 28px;
 		font-size: 0.8em;
 		align-items: center;
 		gap: 0.5em;
@@ -261,11 +260,10 @@ export const styles = css`
 		background:
 		linear-gradient(
 			58.2deg,
-			rgba(40,91,212,0.73) -3%,
-			rgba(171,53,163,0.45) 49.3%,
-			rgba(255,204,112,0.37) 97.7%
+			var(--accent, #7c6cf0) -3%,
+			#9b59b6 97.7%
 		);
-		
+
 		background-repeat: no-repeat;
 		background-size: 110% 120%;
 		background-position: center center;
@@ -286,16 +284,17 @@ export const styles = css`
 		transform: translate(-50%, -50%);
 		max-width: 400px;
 		width: 100%;
-		background: #111;
-		border: 1px solid #333;
-		border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+		background: var(--bg-raised, #0f0f14);
+		border: 1px solid var(--border-default, #2a2a38);
+		border-radius: 8px;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 		padding: 20px;
 		z-index: 1000;
 		font-family: Poppins-Regular;
 		overflow-y: scroll;
 		max-height: 100%;
 		gap: 1em;
-		
+
 		& .title {
 			display: flex;
 			align-items: center;
@@ -322,32 +321,36 @@ export const styles = css`
 		}
 
 		& .join {
-			background: white;
-			color: black;
+			background: var(--accent, #7c6cf0);
+			color: white;
+			border: none;
+			border-radius: 5px;
 			font-size: 0.7em;
 			padding: 0 0.4em;
 			height: 20px;
 
 			&:disabled {
-				opacity: 0.5;
+				opacity: 0.4;
 				cursor: default;
 			}
 		}
 
 		& .start {
-			background: white;
-			color: black;
+			background: var(--accent, #7c6cf0);
+			color: white;
+			border: none;
+			border-radius: 5px;
 			font-size: 0.8em;
 			padding: 0 0.2em;
 		}
 
 		& .code-input {
-			background: transparent;
-			border: 1px solid white;
+			background: var(--bg-surface, #16161e);
+			border: 1px solid var(--border-default, #2a2a38);
 			height: 20px;
 			padding: 0 0.2em;
-			color: white;
-			border-radius: 3px;
+			color: var(--text-primary, #f0f0f5);
+			border-radius: 5px;
 		}
 
 		& .error {
@@ -362,7 +365,7 @@ export const styles = css`
 
 			& span {
 				font-size: 0.8em;
-				color: #ff3a3a;
+				color: var(--color-danger, #f04444);
 			}
 		}
 
@@ -370,8 +373,10 @@ export const styles = css`
 			align-self: start;
 			padding: 0 0.4em;
 			font-size: 0.8em;
-			color: black;
-			background: white;
+			color: white;
+			background: var(--accent, #7c6cf0);
+			border: none;
+			border-radius: 5px;
 		}
 
 		&[data-hidden] {

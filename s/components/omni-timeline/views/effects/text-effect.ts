@@ -18,8 +18,8 @@ export const TextEffect = shadow_view(use => (effect: XTextEffect, timeline: Gol
 			}
 		`,
 		`${!getEffectsOnTrack(use.context.state, effect.track).some(effect => effect.kind !== "text")
-			? `height: 30px;`
+			? `height: 26px;`
 			: ""}
-			background-color: #5c5b5b;`
+			background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.5);`
 	])}`
 })

@@ -12,16 +12,17 @@ export const styles = css`
 
 	.settings {
 		display: flex;
-		gap: 1em;
+		gap: 12px;
 		flex-direction: column;
-		padding: 1em;
+		padding: 12px;
 
 		& .bitrate {
-			background: transparent;
-			border: 1px solid gray;
+			background: var(--bg-surface, #16161e);
+			border: 1px solid var(--border-default, #2a2a38);
 			border-radius: 5px;
 			padding: 0.2em;
-			color: gray;
+			color: var(--text-secondary, #a0a0b4);
+			font-family: Nippo-Regular;
 		}
 
 		& .timebases {
@@ -30,15 +31,16 @@ export const styles = css`
 			flex-wrap: wrap;
 
 			& .timebase {
-				border: 1px solid gray;
+				border: 1px solid var(--border-default, #2a2a38);
 				border-radius: 5px;
-				padding: 0.1em 0.5em;
+				padding: 4px 8px;
 				cursor: pointer;
 				font-size: 0.9em;
 
 				&[data-selected] {
-					border-color: white;
-					color: white;
+					border-color: var(--accent, #7c6cf0);
+					background: var(--accent-muted, rgba(124, 108, 240, 0.15));
+					color: var(--text-primary, #f0f0f5);
 				}
 			}
 		}
@@ -49,14 +51,15 @@ export const styles = css`
 			gap: 0.5em;
 
 			& p {
-				border: 1px solid gray;
-				padding: 0.2em 1em;
+				border: 1px solid var(--border-default, #2a2a38);
+				padding: 4px 12px;
 				border-radius: 5px;
 				font-size: 0.9em;
 
 				&[data-selected] {
-					color: white;
-					border-color: white;
+					color: var(--text-primary, #f0f0f5);
+					border-color: var(--accent, #7c6cf0);
+					background: var(--accent-muted, rgba(124, 108, 240, 0.15));
 				}
 			}
 		}
@@ -88,7 +91,7 @@ export const styles = css`
 				}
 
 				&[data-selected] {
-					color: white;
+					color: var(--text-primary, #f0f0f5);
 				}
 
 				& .shape {
@@ -102,6 +105,11 @@ export const styles = css`
 
 		& select {
 			cursor: pointer;
+		}
+
+		& .error {
+			color: var(--color-danger, #f04444);
+			font-size: 11px;
 		}
 	}
 

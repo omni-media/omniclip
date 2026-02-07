@@ -19,10 +19,9 @@ ul {
 }
 
 .container {
-	font-size: 1.5rem;
+	font-size: 15px;
 	padding: 1rem 3rem;
-	color: #f4f4f4;
-	text-transform: uppercase;
+	color: var(--text-primary, #f0f0f5);
 }
 
 .container {
@@ -37,11 +36,11 @@ ul {
 	background: linear-gradient(
 		120deg,
 		transparent,
-		#333,
+		#1e1e28,
 		transparent
 	);
 	animation-name: example;
-	animation-duration: 1.5s;
+	animation-duration: 2s;
 	animation-iteration-count: infinite;
 }
 

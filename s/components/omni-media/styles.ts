@@ -6,15 +6,15 @@ export const styles = css`
 		height: 100%;
 		flex-direction: column;
 		overflow: hidden;
-		--primary-color: #3a86ff;
-		--success-color: #10b981;
-		--danger-color: #ef4444;
-		--surface-color: #1e1e1e;
-		--surface-hover: #2a2a2a;
-		--surface-active: #333333;
-		--border-color: #333333;
-		--text-primary: #ffffff;
-		--text-secondary: #a0a0a0;
+		--primary-color: #7c6cf0;
+		--success-color: #34d399;
+		--danger-color: #f04444;
+		--surface-color: #0f0f14;
+		--surface-hover: #16161e;
+		--surface-active: #1e1e28;
+		--border-color: #2a2a38;
+		--text-primary: #f0f0f5;
+		--text-secondary: #a0a0b4;
 		--card-radius: 8px;
 		--transition-speed: 0.2s;
 	}
@@ -30,7 +30,7 @@ export const styles = css`
 		position: sticky;
 		top: 0;
 		z-index: 10;
-		padding: 16px;
+		padding: 12px;
 		border-bottom: 1px solid var(--border-color);
 		display: flex;
 		justify-content: space-between;
@@ -44,7 +44,8 @@ export const styles = css`
 		background-color: var(--primary-color);
 		color: white;
 		padding: 8px 16px;
-		border-radius: 6px;
+		border-radius: 5px;
+		font-size: 12px;
 		font-weight: 500;
 		cursor: pointer;
 		transition: background-color var(--transition-speed) ease;
@@ -52,11 +53,11 @@ export const styles = css`
 	}
 
 	.import-btn:hover {
-		background-color: #2a75e6;
+		background-color: #9488f5;
 	}
 
 	.import-btn:active {
-		background-color: #1c5dbd;
+		background-color: #6358d4;
 	}
 
 	.import-icon svg {
@@ -70,30 +71,29 @@ export const styles = css`
 
 	.media-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-		gap: 16px;
-		padding: 16px;
+		grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+		gap: 8px;
+		padding: 12px;
 		overflow-y: auto;
 	}
 
 	.media-card {
 		position: relative;
 		border-radius: var(--card-radius);
-		background-color: #252525;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-		transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+		background-color: var(--surface-hover);
+		border: 1px solid #1e1e28;
+		transition: border-color var(--transition-speed) ease;
 		display: flex;
 		flex-direction: column;
 	}
 
 	.media-card:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+		border-color: var(--border-color);
 	}
 
 	.media-element {
 		position: relative;
-		background-color: #1a1a1a;
+		background-color: var(--surface-color);
 		overflow: hidden;
 		aspect-ratio: 16/9;
 	}
@@ -110,7 +110,7 @@ export const styles = css`
 		justify-content: center;
 		align-items: center;
 		height: 100%;
-		background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+		background: linear-gradient(135deg, #16161e 0%, #0f0f14 100%);
 	}
 
 	.audio-wave svg {
@@ -138,7 +138,7 @@ export const styles = css`
 
 	.media-type-badge {
 		align-self: flex-start;
-		background-color: rgba(0, 0, 0, 0.6);
+		background-color: rgba(0, 0, 0, 0.5);
 		color: white;
 		font-size: 0.7rem;
 		padding: 2px 6px;
@@ -159,7 +159,7 @@ export const styles = css`
 		width: 32px;
 		height: 32px;
 		border-radius: 50%;
-		background-color: rgba(0, 0, 0, 0.6);
+		background-color: rgba(0, 0, 0, 0.5);
 		backdrop-filter: blur(4px);
 		border: none;
 		cursor: pointer;
@@ -176,7 +176,7 @@ export const styles = css`
 	}
 
 	.add-btn:hover {
-		background-color: rgba(16, 185, 129, 0.2);
+		background-color: rgba(52, 211, 153, 0.2);
 		transform: scale(1.1);
 	}
 
@@ -185,19 +185,19 @@ export const styles = css`
 	}
 
 	.delete-btn:hover {
-		background-color: rgba(239, 68, 68, 0.2);
+		background-color: rgba(240, 68, 68, 0.2);
 		transform: scale(1.1);
 	}
 
 	.media-info {
 		padding: 10px;
-		background-color: #252525;
+		background-color: var(--surface-hover);
 	}
 
 	.media-name {
 		display: block;
-		font-size: 0.85rem;
-		color: var(--text-primary);
+		font-size: 12px;
+		color: var(--text-secondary);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -209,7 +209,7 @@ export const styles = css`
 		justify-content: center;
 		align-items: center;
 		min-height: 150px;
-		background-color: #252525;
+		background-color: var(--surface-hover);
 	}
 
 	.placeholder-animation {
@@ -291,7 +291,7 @@ export const styles = css`
 		flex-direction: column;
 		align-items: center;
 		padding: 32px;
-		background-color: rgba(30, 30, 30, 0.8);
+		background-color: rgba(15, 15, 20, 0.8);
 		border-radius: 12px;
 		border: 2px dashed var(--primary-color);
 	}
@@ -312,12 +312,12 @@ export const styles = css`
 	@media (max-width: 768px) {
 		.media-grid {
 			grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-			gap: 12px;
-			padding: 12px;
+			gap: 8px;
+			padding: 8px;
 		}
 
 		.header {
-			padding: 12px;
+			padding: 8px;
 		}
 
 		.import-btn {

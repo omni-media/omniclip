@@ -66,7 +66,7 @@ export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: G
 					<img data-index=${i} class="thumbnail" style="
 						position: absolute;
 						transform: translateX(${left + (i * filmstrip.effect_width / filmstrip.frames_count)}px);
-						height: 50px;
+						height: 52px;
 						width: ${filmstrip.effect_width / filmstrip.frames_count}px;
 						pointer-events: none;"
 						src=${url}
@@ -82,7 +82,7 @@ export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: G
 		}
 
 		.filmstrip {
-			height: 50px;
+			height: 52px;
 			display: flex;
 			overflow: hidden;
 			width: 100%;
@@ -97,5 +97,5 @@ export const VideoEffect = shadow_view(use => (effect: XVideoEffect, timeline: G
 				width: 100%;
 			}
 		}
-	`])}`
+	`, `background: rgba(79,141,247,0.12); border-color: rgba(79,141,247,0.5);`])}`
 })

@@ -7,8 +7,7 @@ export const styles = css`
 		left: 0;
 		z-index: 801;
 		display: flex;
-		min-height: 50px;
-		--transition: 0.25s;
+		min-height: 40px;
 	}
 
 	.toolbar {
@@ -20,26 +19,41 @@ export const styles = css`
 	}
 
 	.tools {
-		height: 50px;
-		background: var(--bg-a);
+		height: 40px;
+		background: var(--bg-raised, #0f0f14);
+		border-bottom: 1px solid var(--border-subtle, #1e1e28);
 		z-index: 100;
 		width: 100%;
 		display: flex;
-		padding: 0.5em;
+		padding: 0 12px;
 		align-items: center;
 		justify-content: space-between;
 
 		& .time {
 			font-family: Nippo-Regular;
+			font-size: 12px;
+			color: var(--text-primary, #f0f0f5);
 		}
 
 		& button {
 			cursor: pointer;
+			background: transparent;
+			border: none;
+			border-radius: 3px;
+			padding: 4px;
+			color: var(--text-secondary, #a0a0b4);
+			display: flex;
+			align-items: center;
+
+			&:hover {
+				color: var(--text-primary, #f0f0f5);
+				background: var(--bg-elevated, #1e1e28);
+			}
 		}
 
 		& .clean {
 			display: flex;
-			color: #f13131;
+			color: var(--color-danger, #f04444);
 		}
 
 		& .flex {
@@ -60,7 +74,7 @@ export const styles = css`
 
 	.history {
 		display: flex;
-		fill: #555454;
+		fill: var(--text-disabled, #45455a);
 
 		& button {
 			display: flex;
@@ -68,7 +82,7 @@ export const styles = css`
 		}
 
 		& button[data-past], button[data-future] {
-			fill: #989898;
+			fill: var(--text-secondary, #a0a0b4);
 		}
 
 	}
@@ -79,17 +93,17 @@ export const styles = css`
 
 		& .zoom-in, .zoom-out {
 			display: flex;
-			color: #989898;
+			color: var(--text-secondary, #a0a0b4);
 		}
 	}
 
 	svg {
-		width: 20px;
-		height: 20px;
+		width: 16px;
+		height: 16px;
 	}
 
 	button[disabled] {
-		opacity: 0.5;
+		opacity: 0.3;
 		cursor: default;
 	}
 `

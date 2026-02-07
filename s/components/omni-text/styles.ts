@@ -70,8 +70,8 @@ export const styles = css`
 
 			& label {
 				display: flex;
-				width: 100px;
-				font-size: 0.9rem;
+				width: 90px;
+				font-size: 12px;
 			}
 		}
 
@@ -85,6 +85,10 @@ export const styles = css`
 		& select, input {
 			max-width: 150px;
 			width: 100%;
+			background: var(--bg-surface, #16161e);
+			border: 1px solid var(--border-default, #2a2a38);
+			border-radius: 5px;
+			color: var(--text-secondary, #a0a0b4);
 		}
 
 		& .add-stop-btn, .add-color-btn {
@@ -97,11 +101,11 @@ export const styles = css`
 			align-items: center;
 			justify-content: center;
 			text-align: center;
-			height: 150px;
-			width: 150px;
-			background: black;
+			height: 120px;
+			width: 120px;
+			background: var(--bg-raised, #0f0f14);
 			font-size: 1.5em;
-			border-radius: 5px;
+			border-radius: 8px;
 			margin: 1em;
 			color: white;
 
@@ -114,10 +118,10 @@ export const styles = css`
 				cursor: pointer;
 
 				& svg {
-					width: 25px;
-					height: 25px;
+					width: 20px;
+					height: 20px;
 					opacity: 0.5;
-					color: white;
+					color: var(--color-success, #34d399);
 
 					&:hover {
 						opacity: 0.8;

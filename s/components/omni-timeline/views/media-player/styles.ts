@@ -29,7 +29,7 @@ export const styles = css`
 
 				& .check {
 					display: flex;
-					color: green;
+					color: var(--color-success, #34d399);
 				}
 			}
 
@@ -37,7 +37,7 @@ export const styles = css`
 				background: none;
 				border: none;
 				padding: 0.5em;
-				color: gray;
+				color: var(--text-secondary, #a0a0b4);
 
 				&:not(:disabled) {
 					color: white;
@@ -56,7 +56,7 @@ export const styles = css`
 	}
 
 	.lower-canvas {
-		background: rgb(32, 31, 31);
+		background: var(--bg-raised, #0f0f14);
 	}
 
 	.canvas-container {
@@ -75,8 +75,9 @@ export const styles = css`
 		aspect-ratio: 16/9;
 		display: flex;
 		justify-content: center;
+		border-radius: 5px;
 	}
-	
+
 	video {
 		width: 100%;
 	}
@@ -91,6 +92,15 @@ export const styles = css`
 		& button {
 			display: flex;
 			align-items: center;
+			background: transparent;
+			color: var(--text-secondary, #a0a0b4);
+			border: none;
+			border-radius: 3px;
+			cursor: pointer;
+
+			&:hover {
+				color: var(--text-primary, #f0f0f5);
+			}
 		}
 
 		& .fs {
@@ -145,17 +155,17 @@ export const styles = css`
 		height: 81%;
 		margin-top: 0.125rem;
 		border: none;
-		color: #0095dd;
+		color: var(--accent, #7c6cf0);
 		-moz-border-radius: 2px;
 		-webkit-border-radius: 2px;
 		border-radius: 2px;
 	}
 
 	.controls progress::-moz-progress-bar {
-		background-color: #0095dd;
+		background-color: var(--accent, #7c6cf0);
 	}
 
 	.controls progress::-webkit-progress-value {
-		background-color: #0095dd;
+		background-color: var(--accent, #7c6cf0);
 	}
 `
