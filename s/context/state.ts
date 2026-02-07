@@ -38,4 +38,11 @@ export const non_historical_state: NonHistoricalState = {
 		bitrate: 9000,
 		standard: "1080p"
 	},
+	drawing_mode: {
+		enabled: false,
+		tool: 'freehand',
+		color: '#FF4444',
+		strokeWidth: 3
+	},
+	annotations: []
 }

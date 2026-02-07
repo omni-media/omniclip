@@ -24,7 +24,9 @@ import {
 	AspectRatio,
 	State,
 	HistoricalActionsWithBroadcast,
-	NonHistoricalActionsWithBroadcast
+	NonHistoricalActionsWithBroadcast,
+	Annotation,
+	DrawingToolType
 } from "./types.js"
 import {Animation, AnimationFor} from "./controllers/compositor/parts/animation-manager.js"
 
@@ -94,6 +96,34 @@ export const non_historical = actionize_non_historical({
 	},
 	update_transition: state => (transitionId: string) => {
 		// empty action for collaboration to trigger transition update
+	},
+	// Drawing mode actions
+	set_drawing_mode: state => (enabled: boolean, tool?: DrawingToolType, color?: string, strokeWidth?: number) => {
+		state.drawing_mode.enabled = enabled
+		if (tool !== undefined) state.drawing_mode.tool = tool
+		if (color !== undefined) state.drawing_mode.color = color
+		if (strokeWidth !== undefined) state.drawing_mode.strokeWidth = strokeWidth
+	},
+	set_drawing_tool: state => (tool: DrawingToolType) => {
+		state.drawing_mode.tool = tool
+	},
+	set_drawing_color: state => (color: string) => {
+		state.drawing_mode.color = color
+	},
+	set_drawing_stroke_width: state => (strokeWidth: number) => {
+		state.drawing_mode.strokeWidth = strokeWidth
+	},
+	add_annotation: state => (annotation: Annotation) => {
+		state.annotations.push(annotation)
+	},
+	remove_annotation: state => (id: string) => {
+		state.annotations = state.annotations.filter(a => a.id !== id)
+	},
+	clear_annotations: state => () => {
+		state.annotations = []
+	},
+	set_annotations: state => (annotations: Annotation[]) => {
+		state.annotations = annotations
 	}
 })
 

@@ -10,6 +10,7 @@ import {VideoManager} from "./parts/video-manager.js"
 import {FiltersManager} from "./parts/filter-manager.js"
 import {AlignGuidelines} from "./lib/aligning_guidelines.js"
 import {AnimationManager} from "./parts/animation-manager.js"
+import {DrawingManager} from "./parts/drawing-manager.js"
 import {compare_arrays} from "../../../utils/compare_arrays.js"
 import {TransitionManager} from "./parts/transition-manager.js"
 import {get_effect_at_timestamp} from "../video-export/utils/get_effect_at_timestamp.js"
@@ -23,6 +24,7 @@ export interface Managers {
 	animationManager: AnimationManager
 	filtersManager: FiltersManager
 	transitionManager: TransitionManager
+	drawingManager: DrawingManager
 }
 
 export class Compositor {
@@ -62,7 +64,8 @@ export class Compositor {
 			audioManager: new AudioManager(this, actions),
 			animationManager: new AnimationManager(this, actions, "Animation"),
 			filtersManager: new FiltersManager(this, actions),
-			transitionManager: new TransitionManager(this, actions)
+			transitionManager: new TransitionManager(this, actions),
+			drawingManager: new DrawingManager(this, actions)
 		}
 
 		this.#on_playing()
