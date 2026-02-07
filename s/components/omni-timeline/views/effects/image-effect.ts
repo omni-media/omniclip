@@ -31,5 +31,5 @@ export const ImageEffect = shadow_view(use => (effect: XImageEffect, timeline: G
 		return () => dispose()
 	})
 
-	return html`${Effect([timeline, effect, html``, css``, `${imageURL ? `background-image: url(${imageURL});` : null}background-size: contain;`])}`
+	return html`${Effect([timeline, effect, html``, css``, `${imageURL ? `background-image: url(${imageURL});` : `background: rgba(192,132,252,0.12);`}background-size: contain; border-color: rgba(192,132,252,0.5);`])}`
 })

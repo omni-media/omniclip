@@ -12,8 +12,10 @@ export const styles = css`
 		position: fixed;
 		z-index: 999;
 		display: flex;
-		border-radius: 5px;
-		background: #00000059;
+		border-radius: 8px;
+		background: rgba(15, 15, 20, 0.35);
+		backdrop-filter: blur(12px);
+		border: 1px solid var(--border-default, #2a2a38);
 		padding: 0.5em;
 		margin-top: 2em;
 		flex-direction: column;
@@ -30,7 +32,7 @@ export const styles = css`
 			& img {
 				width: 220px;
 				border-radius: 2px;
-				border: 2px solid red;
+				border: 2px solid var(--color-danger, #f04444);
 				margin-top: 0.2em;
 			}
 
@@ -40,13 +42,13 @@ export const styles = css`
 			}
 
 			& .top {
-				min-width:230px; 
+				min-width:230px;
 				top:-20px;
 				left:50%;
 				transform:translate(-50%, -100%);
 				padding:10px 20px;
-				color:#444444;
-				background-color:#EEEEEE;
+				color: var(--text-secondary, #a0a0b4);
+				background-color: var(--bg-elevated, #1e1e28);
 				font-weight:normal;
 				font-size:13px;
 				border-radius:8px;
@@ -86,21 +88,21 @@ export const styles = css`
 				height:12px;
 				left:50%;
 				transform:translate(-50%,-50%) rotate(45deg);
-				background-color:#EEEEEE;
+				background-color: var(--bg-elevated, #1e1e28);
 				box-shadow:0 1px 8px rgba(0,0,0,0.5);
 			}
 
 			& svg {
 				width: 20px;
 				height: 20px;
-				color: yellow;
+				color: var(--color-danger, #f04444);
 			}
 		}
 
 		& [data-selected] {
-			background: rgb(32, 31, 31);
+			background: var(--bg-surface, #16161e);
 		}
-		
+
 		& .flex-column {
 			display: flex;
 			flex-direction: column;
@@ -134,8 +136,8 @@ export const styles = css`
 		}
 
 		& select {
-			background: rgb(32, 31, 31);
-			border: none;
+			background: var(--bg-surface, #16161e);
+			border: 1px solid var(--border-default, #2a2a38);
 			padding: 0.5em;
 			border-radius: 5px;
 			color: inherit;
@@ -150,8 +152,8 @@ export const styles = css`
 		}
 
 		& .font-size {
-			background: rgb(32, 31, 31);
-			border: none;
+			background: var(--bg-surface, #16161e);
+			border: 1px solid var(--border-default, #2a2a38);
 			border-radius: 5px;
 			padding: 0.5em;
 			color: inherit;
@@ -160,8 +162,8 @@ export const styles = css`
 		}
 
 		& .content {
-			background: rgb(32, 32, 32);
-			border: none;
+			background: var(--bg-surface, #16161e);
+			border: 1px solid var(--border-default, #2a2a38);
 			border-radius: 5px;
 			color: white;
 			padding: 0.3em;
@@ -183,14 +185,14 @@ export const styles = css`
 				border-radius: 100%;
 				background: blue;
 				cursor: pointer;
-				
+
 				&::-webkit-color-swatch {
 					border: none;
 				}
 			}
 		}
 	}
-	
+
 	h2 {
 		padding: 0.3em;
 	}
@@ -206,7 +208,7 @@ export const styles = css`
 	.add-text {
 		padding: 0.5em;
 		margin: 1em;
-		background: rgb(32, 31, 31);
+		background: var(--bg-surface, #16161e);
 		margin-top: 1em;
 		cursor: pointer;
 		transition: all 0.3s ease;

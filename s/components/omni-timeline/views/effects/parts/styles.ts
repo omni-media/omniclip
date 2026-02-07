@@ -12,13 +12,13 @@ export const styles = css`
 		position: absolute;
 		top: 0;
 		z-index: 1;
-		height: 50px;
-		border: 1px solid #111;
+		height: 52px;
+		border: 1px solid var(--border-default, #2a2a38);
 		border-radius: 5px;
 
 		&[data-no-file] {
-			border: 3px dotted red;
-			color: red;
+			border: 2px dashed var(--color-danger, #f04444);
+			color: var(--color-danger, #f04444);
 		}
 
 		&[data-grabbed] {
@@ -28,8 +28,7 @@ export const styles = css`
 
 		&[data-selected] {
 			z-index: 5;
-			mix-blend-mode: overlay;
-			background: rgb(255,255,255,0.8);
+			background: rgba(255,255,255,0.06);
 			touch-action: none;
 
 			& .trim-handle-right, .trim-handle-left {
@@ -41,15 +40,15 @@ export const styles = css`
 				justify-content: center;
 				gap: 3px;
 				position: absolute;
-				width: 18px;
+				width: 14px;
 				height: 100%;
 				cursor: e-resize;
 
 				& .line {
 					opacity: 0.7;
-					width: 3px;
+					width: 2px;
 					height: 40%;
-					background: #333;
+					background: var(--bg-base, #09090b);
 					border-radius: 5px;
 				}
 			}
@@ -74,17 +73,17 @@ export const styles = css`
 		display: flex;
 		z-index: 1;
 		align-items: center;
-		background: #201f1f;
+		background: rgba(59,130,246,0.08);
 		border-radius: 5px;
-		border: 1px solid #111;
+		border: 1px solid transparent;
 		cursor: grab;
 		position: absolute;
 		top: 0;
-		height: 50px;
+		height: 52px;
 		overflow: hidden;
 
 		& .not-found {
-			background: repeating-linear-gradient(45deg, #5D5D5D, #5D5D5D 10px, #858585 10px, #858585 20px);
+			background: repeating-linear-gradient(45deg, #2a2a38, #2a2a38 10px, #3a3a4a 10px, #3a3a4a 20px);
 			position: absolute;
 			height: 100%;
 		}
@@ -95,7 +94,7 @@ export const styles = css`
 		}
 
 		&[data-selected] {
-			filter: brightness(0.5);
+			border-color: var(--text-primary, #f0f0f5);
 		}
 
 		&[data-hidden] {
@@ -103,14 +102,14 @@ export const styles = css`
 		}
 
 		&[data-selected]::after {
-			outline: 2px solid white;
+			outline: 2px solid rgba(255,255,255,0.6);
 			outline-offset: -2px;
 			content: "";
 			position: absolute;
 			width: 100%;
 			height: 100%;
 			border-radius: 5px;
-			box-shadow: inset 0px 0px 6px 2px black;
+			box-shadow: inset 0 0 4px 1px rgba(0,0,0,0.4);
 		}
 
 		& .no-file {
@@ -146,7 +145,7 @@ export const styles = css`
 		}
 
 		&:hover {
-			border: 1px solid white;
+			border-color: var(--border-strong, #3a3a4a);
 		}
 	}
 `

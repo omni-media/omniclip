@@ -7,16 +7,18 @@ export const tooltipStyles = css`
 		width: max-content;
 		top: 0;
 		left: 0;
-		background: #0a0a0a;
-		color: gray;
+		background: #1e1e28;
+		color: #a0a0b4;
+		border: 1px solid #1e1e28;
 		z-index: 105;
 		pointer-events: none;
 		max-width: 200px;
 		border-radius: 5px;
 		padding: 0.2em 0.3em;
-		font-size: 12px;
+		font-size: 11px;
 		opacity: 0;
 		transition: opacity 0.3s ease-in-out;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 	}
 
 	#floating {
@@ -61,7 +63,7 @@ export const tooltipStyles = css`
 		height:12px;
 		left:50%;
 		transform:translate(-50%,-50%) rotate(45deg);
-		background-color:#EEEEEE;
+		background-color:#1e1e28;
 		box-shadow:0 1px 8px rgba(0,0,0,0.5);
 	}
 `

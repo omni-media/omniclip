@@ -5,8 +5,8 @@ export const styles = css`
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-left: 1px solid gray;
-	border-right: 1px solid gray;
+	border-left: 1px solid var(--border-default, #2a2a38);
+	border-right: 1px solid var(--border-default, #2a2a38);
 	width: 50px;
 }
 
@@ -16,11 +16,12 @@ export const styles = css`
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	max-width: 400px;
+	max-width: 500px;
 	width: 100%;
-	background: #111;
-	border: 1px solid #333;
-	border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	background: var(--bg-raised, #0f0f14);
+	border: 1px solid var(--border-default, #2a2a38);
+	border-radius: 8px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 	padding: 20px;
 	z-index: 1000;
 	font-family: Poppins-Regular;
@@ -36,10 +37,17 @@ export const styles = css`
 	display: flex;
 	cursor: pointer;
 	padding: 0 0.2em;
-	border: 1px solid gray;
+	border: 1px solid var(--border-default, #2a2a38);
 	border-radius: 5px;
-	height: 21px;
+	height: 28px;
 	align-items: center;
+	background: transparent;
+	color: var(--text-secondary, #a0a0b4);
+
+	&:hover {
+		background: var(--bg-elevated, #1e1e28);
+		color: var(--text-primary, #f0f0f5);
+	}
 }
 
 .modal {
@@ -57,7 +65,7 @@ export const styles = css`
 .modal-content h2 {
 	font-size: 1.5rem;
 	margin: 0;
-	color: white;
+	color: var(--text-primary, #f0f0f5);
 }
 
 .modal-content table {
@@ -70,55 +78,54 @@ export const styles = css`
 .modal-content td {
 	padding: 8px;
 	text-align: left;
+	font-size: 12px;
 }
 
 .modal-content th {
-	font-size: 0.9rem;
-	color: #666;
+	color: var(--text-tertiary, #6b6b80);
 }
 
 .modal-content td {
-	font-size: 0.85rem;
-	color: white;
+	color: var(--text-primary, #f0f0f5);
 }
 
 .modal-content button {
 	padding: 8px 12px;
-	background-color: #007bff;
+	background-color: var(--accent, #7c6cf0);
 	color: #fff;
 	border: none;
-	border-radius: 4px;
+	border-radius: 5px;
 	cursor: pointer;
 	font-size: 0.85rem;
 }
 
 .modal-content button:hover {
-	background-color: #0056b3;
+	background-color: var(--accent-hover, #9488f5);
 }
 
 .modal-content button.change-shortcut {
-	background-color: #28a745;
+	background-color: var(--color-success, #34d399);
 }
 
 .modal-content button.change-shortcut:hover {
-	background-color: #218838;
+	background-color: #2bc48a;
 }
 
 .modal-content #reset-defaults {
-	background-color: #dc3545;
+	background-color: var(--color-danger, #f04444);
 }
 
 .modal-content #reset-defaults:hover {
-	background-color: #c82333;
+	background-color: #d93636;
 }
 
 /* Close button */
 #close-modal {
-	background-color: #6c757d;
+	background-color: var(--text-tertiary, #6b6b80);
 }
 
 #close-modal:hover {
-	background-color: #5a6268;
+	background-color: #5a5a70;
 }
 
 /* Styles for the conflict warning modal */
@@ -128,7 +135,7 @@ export const styles = css`
 
 #conflict-warning p {
 	font-size: 0.9rem;
-	color: white;
+	color: var(--text-primary, #f0f0f5);
 	margin: 0 0 16px 0;
 	text-align: center;
 }
@@ -146,10 +153,11 @@ export const styles = css`
 	padding: 0.2em;
 	border-radius: 2px;
 	cursor: pointer;
-	color: #007bff;
+	color: var(--accent, #7c6cf0);
+	font-family: Nippo-Regular;
 
 	&:hover {
-		outline: 1px solid #333;
+		outline: 1px solid var(--border-default, #2a2a38);
 	}
 }
 
@@ -161,18 +169,19 @@ export const styles = css`
 	border: none;
 	border-radius: 2px;
 	cursor: pointer;
-	color: #007bff;
+	color: var(--accent, #7c6cf0);
 	background: transparent;
+	font-family: Nippo-Regular;
 
 	&:hover {
 		cursor: default;
-		outline: 1px solid #333;
+		outline: 1px solid var(--border-default, #2a2a38);
 	}
 }
 
 .shortcut-input:focus {
 	outline: none;
-	border-color: #007bff;
-	box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+	border-color: var(--accent, #7c6cf0);
+	box-shadow: 0 0 5px rgba(124, 108, 240, 0.5);
 }
 `

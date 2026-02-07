@@ -4,18 +4,18 @@ export const styles = css`
 	.track {
 		display: flex;
 		position: relative;
-		height: 50px;
-		background: rgb(26, 26, 26);
-		outline: 1px #111 solid;
+		height: 52px;
+		background: var(--bg-surface, #16161e);
+		outline: 1px solid var(--border-subtle, #1e1e28);
 
 		&[data-locked] {
-			background: repeating-linear-gradient(45deg, #5D5D5D, #5D5D5D 10px, #858585 10px, #858585 20px);
+			background: repeating-linear-gradient(45deg, #2a2a38, #2a2a38 10px, #3a3a4a 10px, #3a3a4a 20px);
 			z-index: 10;
-			opacity: 0.5;
+			opacity: 0.4;
 		}
 
 		&[data-hidden] {
-			opacity: 0.2;
+			opacity: 0.15;
 		}
 	}
 
@@ -26,8 +26,8 @@ export const styles = css`
 		& .indicator-area {
 			position: absolute;
 			width: 100%;
-			height: 14px;
-			top: -7px;
+			height: 12px;
+			top: -6px;
 			z-index: 10;
 
 			&[data-indicate] {
@@ -41,12 +41,11 @@ export const styles = css`
 			position: relative;
 			align-items: center;
 			width: 100%;
-			outline: 1px solid green;
+			outline: 1px solid var(--color-success, #34d399);
 
 			&[data-indicate] {
 				display: flex;
-				background: #0080002e;
-
+				background: rgba(52,211,153,0.08);
 			}
 		}
 	}

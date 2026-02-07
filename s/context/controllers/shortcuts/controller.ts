@@ -111,6 +111,7 @@ export class Shortcuts {
 
 	#normalizeKey(key: string) {
 		if (key === " ") return "Space"
+		if (key === "Backspace") return "Delete"
 		return key
 	}
 

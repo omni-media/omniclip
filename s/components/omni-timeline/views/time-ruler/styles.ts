@@ -6,11 +6,13 @@ export const styles = css`
 	}
 
 	.time-ruler {
-		font-size: 0.5em;
+		font-size: 11px;
 		display: flex;
-		height: 20px;
-		background: rgb(26, 26, 26);
+		height: 24px;
+		background: var(--bg-raised, #0f0f14);
+		border-bottom: 1px solid var(--border-subtle, #1e1e28);
 		align-items: center;
+		color: var(--text-tertiary, #6b6b80);
 	}
 
 	.indicator {
@@ -18,7 +20,7 @@ export const styles = css`
 		z-index: 10;
 		width: 1px;
 		height: 100%;
-		background: yellow;
+		background: var(--color-danger, #f04444);
 	}
 
 	.time {
@@ -27,9 +29,9 @@ export const styles = css`
 	}
 
 	.dot {
-		width: 3px;
-		height: 3px;
-		background: gray;
+		width: 2px;
+		height: 2px;
+		background: var(--text-tertiary, #6b6b80);
 		border-radius: 5px;
 	}
 

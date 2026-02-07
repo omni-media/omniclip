@@ -31,13 +31,14 @@ export const styles = css`
 		}
 
 		& select {
-			background: #111;
+			background: var(--bg-surface, #16161e);
+			border: 1px solid var(--border-default, #2a2a38);
 			border-radius: 5px;
-			color: gray;
+			color: var(--text-secondary, #a0a0b4);
 			padding: 0.3em;
 
 			& option {
-				background: #111;
+				background: var(--bg-surface, #16161e);
 			}
 		}
 
@@ -53,9 +54,8 @@ export const styles = css`
 
 			&[disabled] {
 				pointer-events: none;
-				filter: blur(5px);
-				opacity: 0.5;
-				filter: blur(2px);
+				filter: blur(1px);
+				opacity: 0.4;
 			}
 		}
 
@@ -65,13 +65,17 @@ export const styles = css`
 			gap: 0.5em;
 
 			& button {
-				padding: 0.5em 1.5em;
-				border-radius: 10px;
-				background: #212121;
+				padding: 8px 16px;
+				border-radius: 5px;
+				background: var(--bg-surface, #16161e);
+				border: 1px solid var(--border-default, #2a2a38);
 				cursor: pointer;
+				color: var(--text-secondary, #a0a0b4);
 
 				&[data-selected] {
-					border: 1px solid gray;
+					border-color: var(--accent, #7c6cf0);
+					background: var(--accent-muted, rgba(124, 108, 240, 0.15));
+					color: var(--text-primary, #f0f0f5);
 				}
 			}
 		}
@@ -80,20 +84,21 @@ export const styles = css`
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			width: 150px;
-			height: 150px;
+			width: 120px;
+			height: 120px;
 			cursor: pointer;
 			font-size: 1.5em;
-			border-radius: 10px;
-			margin: 1em;
+			border-radius: 8px;
+			margin: 8px;
 			position: relative;
-			border: 1px solid;
+			border: 1px solid var(--border-default, #2a2a38);
 
 			&[data-selected] {
-				color: white;
-				border: 1px solid white;
+				color: var(--text-primary, #f0f0f5);
+				border-color: var(--accent, #7c6cf0);
+				background: var(--accent-muted, rgba(124, 108, 240, 0.15));
 			}
-			
+
 			&:hover {
 				& .add-btn {
 					display: flex;
@@ -113,7 +118,7 @@ export const styles = css`
 					width: 25px;
 					height: 25px;
 					opacity: 0.5;
-					color: lime;
+					color: var(--color-success, #34d399);
 
 					&:hover {
 						opacity: 0.7;

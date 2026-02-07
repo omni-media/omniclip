@@ -6,7 +6,7 @@ export const styles = css`
 		justify-content: center;
 		height: 100%;
 		width: 100vw;
-		background: rgba(0, 0, 0, 1);
+		background: #09090b;
 		padding: 2em !important;
 	}
 
@@ -15,7 +15,7 @@ export const styles = css`
 		flex-direction: column;
 		align-items: center;
 		font-family: Poppins-Regular;
-		width: 1000px;
+		width: 1100px;
 	}
 
 	.projects {
@@ -29,10 +29,11 @@ export const styles = css`
 			display: flex;
 			flex-direction: column;
 			gap: 1em;
-			background: #0e0e0e;
+			background: #0f0f14;
+			border: 1px solid #1e1e28;
 			padding: 1em;
 			align-self: center;
-			border-radius: 10px;
+			border-radius: 8px;
 			margin-bottom: 2em;
 
 			& .title {
@@ -60,9 +61,10 @@ export const styles = css`
 			}
 
 			& input {
-				background: transparent;
-				border: 1px solid gray;
-				color: gray;
+				background: #16161e;
+				border: 1px solid #2a2a38;
+				border-radius: 5px;
+				color: #a0a0b4;
 			}
 		}
 
@@ -92,7 +94,7 @@ export const styles = css`
 			}
 
 			& svg {
-				color: gray;
+				color: #6b6b80;
 			}
 
 			&:hover {
@@ -114,7 +116,7 @@ export const styles = css`
 			}
 
 			&:hover {
-				
+
 				& svg {
 					opacity: 1;
 				}
@@ -134,19 +136,25 @@ export const styles = css`
 		}
 
 		& .project, .new-project, .import-project {
-			height: 200px;
-			width: 200px;
+			height: 180px;
+			width: 180px;
 			position: relative;
-			border-radius: 10px;
+			border-radius: 8px;
 			color: inherit;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			background: #0e0e0e;
+			background: #0f0f14;
+			border: 1px solid #1e1e28;
 			text-decoration: none;
 			flex-direction: column;
-			transition: 0.5s all ease;
+			transition: 0.3s all ease;
 			gap: 0.3em;
+
+			&:hover {
+				border-color: #2a2a38;
+				background: #16161e;
+			}
 
 			& .items {
 				display: flex;
@@ -158,7 +166,7 @@ export const styles = css`
 				& .export {
 					background: none;
 					border: none;
-					color: gray;
+					color: #6b6b80;
 					cursor: pointer;
 
 					& svg {
@@ -171,7 +179,7 @@ export const styles = css`
 					}
 				}
 			}
-			
+
 			& .project-name {
 				bottom: 0;
 				right: 0;
@@ -186,14 +194,14 @@ export const styles = css`
 				top: 0;
 				right: 0;
 				z-index: 2;
-				color: gray;
+				color: #6b6b80;
 
 				& .icon {
 					display: flex;
 					cursor: pointer;
 
 					&:hover {
-						color: red;
+						color: #f04444;
 					}
 
 					& svg {
