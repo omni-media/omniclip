@@ -10,8 +10,10 @@ export default css`@layer view {
 }
 
 .ruler {
-	position: relative;
-	height: 2em;
+	display: block;
+	position: sticky;
+	left: 0;
+	height: 32px;
 	background: #1f1f1f;
 	border-bottom: 1px solid #2a2a2a;
 	cursor: ew-resize;
