@@ -2,6 +2,20 @@
 import {Chronicle, Trunk} from "@e280/strata"
 import {TimelineFile} from "@omnimedia/omnitool"
 
+export type EditorUIState = {
+	timelineScrollLeft: number
+	timelineWidth: number
+}
+
+export type EditorSettingsState = {
+	timebase: number
+	zoom: number
+	resolution: {
+		width: number
+		height: number
+	}
+}
+
 export type State = {
 	files: {
 		hashes: string[]
@@ -9,23 +23,13 @@ export type State = {
 	chron: Chronicle<{
 		timeline: TimelineFile
 	}>
-	settings: {
-		timebase: number
-		zoom: number
-		resolution: {
-			width: number
-			height: number
-		}
-	}
+	settings: EditorSettingsState
 	outliner: {
 		starred: number[]
 	}
 	viewedItemId: {id: number}
 	selectedItem: {id: number | null}
-	ui: {
-		timelineScrollLeft: number
-		timelineWidth: number
-	}
+	ui: EditorUIState
 }
 
 export class Strata {

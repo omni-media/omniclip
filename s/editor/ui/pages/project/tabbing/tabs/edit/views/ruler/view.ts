@@ -1,6 +1,6 @@
 
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {dom, view} from "@e280/sly"
 import {debounce} from "@e280/stz"
 
 import styleCss from "./style.css.js"
@@ -14,80 +14,75 @@ export const Ruler = view(use => (context: EditorContext) => {
 	const {settings, ui} = context.strata
 	const player = context.controllers.player
 
-	const throttledSeek = use.once(() => debounce(50, time => player.seek(time)))
-	const mem = use.once(() => ({
-		dragLeft: 0,
-		rafId: 0,
-		grid: null as HTMLElement | null,
-		render: () => {}
+	const throttledSeek = use.once(() =>
+		debounce(50, time => player.seek(time))
+	)
+
+	const drag = use.once(() => ({
+		leftOffset: 0
 	}))
 
-	const scheduleRender = () => {
-		if (mem.rafId) return
-		mem.rafId = requestAnimationFrame(() => {
-			mem.rafId = 0
-			mem.render()
+	const scheduleDraw = () => requestAnimationFrame(draw)
+
+	const pointerToTime = (e: PointerEvent) => {
+		const scrollLeft = ui.state.timelineScrollLeft
+
+		const relativeX = e.clientX - drag.leftOffset + scrollLeft
+		const zoom = settings.state.zoom
+		const ms = relativeX / (PIXELS_PER_MILLISECOND * zoom)
+
+		return Math.max(0, ms)
+	}
+
+	const updateDrag = (e: PointerEvent) => {
+		const time = pointerToTime(e)
+		throttledSeek(time)
+		player.currentTime.value = time
+	}
+
+	const startDrag = (e: PointerEvent) => {
+		const canvas = e.target as HTMLCanvasElement
+		drag.leftOffset = canvas.getBoundingClientRect().left
+		updateDrag(e)
+		const detach = dom.events(window, {
+  		pointermove: updateDrag,
+  		pointerup: () => detach(),
 		})
 	}
 
-	const seek = (e: PointerEvent) => {
-		const scrollX = mem.grid?.scrollLeft ?? ui.state.timelineScrollLeft
-		const ms = Math.max(0, (e.clientX - mem.dragLeft + scrollX) / (PIXELS_PER_MILLISECOND * settings.state.zoom))
-		throttledSeek(ms)
-		player.currentTime.value = ms
+	async function draw() {
+		const {canvas, ctx} = await canvasPromise
+		if(ctx)
+			drawRuler(ctx, canvas, ui.state, settings.state)
 	}
 
-	const handleUp = () => {
-		window.removeEventListener("pointermove", seek)
-		window.removeEventListener("pointerup", handleUp)
-	}
-
-	const handleDown = (e: PointerEvent) => {
-		mem.dragLeft = use.shadow.querySelector(".ruler")?.getBoundingClientRect().left ?? 0
-		seek(e)
-		window.addEventListener("pointermove", seek)
-		window.addEventListener("pointerup", handleUp)
-	}
+	const canvasPromise = use.wake(() => use.rendered.then(() => {
+		const canvas = use.shadow.querySelector(".ruler") as HTMLCanvasElement
+		const ctx = canvas?.getContext("2d")
+		return {canvas, ctx}
+	}))
 
 	use.mount(() => {
-		let disposed = false
-		mem.grid = use.element.closest(".timeline-grid")
+		const unUi = ui.on(scheduleDraw)
+		const unSet = settings.on(scheduleDraw)
 
-		const unUi = ui.on(scheduleRender)
-		const unSet = settings.on(scheduleRender)
+		window.addEventListener(
+			"resize",
+			scheduleDraw,
+			{passive: true}
+		)
 
-		mem.grid?.addEventListener("scroll", scheduleRender, {passive: true})
-		window.addEventListener("resize", scheduleRender, {passive: true})
-
-		;(async () => {
-			await use.rendered
-			if (disposed) return
-
-			const canvas = use.shadow.querySelector(".ruler") as HTMLCanvasElement
-			const ctx = canvas?.getContext("2d")
-			if (!ctx) return
-
-			mem.render = () => drawRuler(ctx, canvas, mem.grid, ui, settings)
-			mem.render()
-		})()
+		use.rendered.then(draw)
 
 		return () => {
-			disposed = true
-			mem.grid?.removeEventListener("scroll", scheduleRender)
-			window.removeEventListener("resize", scheduleRender)
-			window.removeEventListener("pointermove", seek)
-			window.removeEventListener("pointerup", handleUp)
 			unUi()
 			unSet()
-			cancelAnimationFrame(mem.rafId)
+			window.removeEventListener("resize", scheduleDraw)
 		}
 	})
 
 	return html`
-		<canvas
-			class="ruler"
-			style="display: block; position: sticky; left: 0; height: 32px; cursor: ew-resize;"
-			@pointerdown=${handleDown}
-		></canvas>`
+		<canvas class="ruler" @pointerdown=${startDrag}></canvas>
+	`
 })
 
