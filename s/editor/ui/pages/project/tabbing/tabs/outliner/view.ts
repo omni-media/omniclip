@@ -27,10 +27,10 @@ export const OutlinerTab = view(use => (context: EditorContext) => {
 	}
 
 	const toggleStar = (id: number) => {
-		const starred = outliner.state.starred.some(s => s === id)
-		if(starred)
-			outliner.mutate(state => state.starred = state.starred.filter(starred => starred !== id))
-		else outliner.mutate(s => s.starred.push(id))
+		outliner.mutate(state => {
+			const item = state.items.find(({itemId}) => itemId === id)
+			item!.starred = !item!.starred
+		})
 	}
 
 	const renderIcon = (kind: Kind) => {
@@ -43,7 +43,7 @@ export const OutlinerTab = view(use => (context: EditorContext) => {
 		}
 	}
 
-	const isStarred = (itemId: number) => outliner.state.starred.some(id => itemId === id)
+	const isStarred = (id: number) => outliner.state.items.find(({itemId}) => itemId === id)?.starred
 
 	const renderItemRow = (item: Item.Any) => {
 		const duration = (item as any).duration ? `${((item as any).duration / 1000).toFixed(2)}s` : "—"
@@ -54,7 +54,7 @@ export const OutlinerTab = view(use => (context: EditorContext) => {
 				<span class="icon">${renderIcon(item.kind)}</span>
 				<span class="label">${"label"}</span>
 				<span class="duration">${duration}</span>
-				<button class="star-button" ?data-starred=${isStarred} @click=${(e: Event) => {e.stopPropagation(); toggleStar(item.id)}}>
+				<button class="star-button" ?data-starred=${starred} @click=${(e: Event) => {e.stopPropagation(); toggleStar(item.id)}}>
 					${starred ? starFillSvg : starSvg}
 				</button>
 			</div>

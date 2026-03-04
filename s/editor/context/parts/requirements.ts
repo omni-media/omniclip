@@ -48,7 +48,11 @@ async function demo(strata: Strata, omni: Omni) {
 		))
 	)
 	const stack = strata.timeline.state.timeline.items.find(item => item.kind === Kind.Stack)
+	await strata.outliner.mutate(
+		state => state.items = strata
+			.timeline.state.timeline.items
+			.map(item => ({itemId: item.id, starred: false, tagIds: [], roleIds: []}))
+	)
 	await strata.timeline.mutate(state => state.timeline.rootId = stack!.id)
-	await strata.outliner.mutate(state => state.starred = [stack!.id])
 	await strata.viewedItemId.mutate(state => state.id = stack!.id)
 }

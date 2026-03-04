@@ -1,6 +1,6 @@
 
 import {Chronicle, Trunk} from "@e280/strata"
-import {TimelineFile} from "@omnimedia/omnitool"
+import {TimelineFile, Id} from "@omnimedia/omnitool"
 
 export type EditorUIState = {
 	timelineScrollLeft: number
@@ -16,6 +16,31 @@ export type EditorSettingsState = {
 	}
 }
 
+export type RoleScope = "video" | "audio" | "text" | "global"
+
+export type Role = {
+	id: Id
+	key: string
+	name: string
+	scope: RoleScope
+	color: string
+	parentRoleId?: Id
+	enabled: boolean
+}
+
+export type Tag = {
+	id: Id
+	name: string
+	color: string
+}
+
+export type OutlinerItem = {
+	itemId: Id
+	roleIds: Id[]
+	tagIds: Id[]
+	starred: boolean
+}
+
 export type State = {
 	files: {
 		hashes: string[]
@@ -25,7 +50,9 @@ export type State = {
 	}>
 	settings: EditorSettingsState
 	outliner: {
-		starred: number[]
+		roles: Role[]
+		tags: Tag[]
+		items: OutlinerItem[]
 	}
 	viewedItemId: {id: number}
 	selectedItem: {id: number | null}
@@ -47,7 +74,9 @@ export class Strata {
 			}
 		}),
 		outliner: {
-			starred: [4]
+			roles: [],
+			tags: [],
+			items: []
 		},
 		selectedItem: {id: null},
 		viewedItemId: {id: 3},

@@ -16,12 +16,12 @@ export const ExportTab = view(use => (context: EditorContext) => {
 	// const {starredItems, itemLabels} = viewState.state
 	// const {isExporting, progress} = exportState.state
 
-	const starredItems = outliner.state.starred
-	const selectedItemId = use.signal(outliner.state.starred[0] ?? null)
+	const starredItems = outliner.state.items.filter(item => item.starred)
+	const selectedItemId = use.signal(outliner.state.items[0]?.itemId ?? null)
 	const itemLabels = ["example.mp4"]
 
 	const itemsMap = new Map(timeline.state.timeline?.items.map(i => [i.id, i]))
-	const starredItemDetails = starredItems.map(id => itemsMap.get(id)!).filter(Boolean)
+	const starredItemDetails = starredItems.map(({itemId}) => itemsMap.get(itemId)!).filter(Boolean)
 
 	const progress = 0
 	const isExporting = false
@@ -81,7 +81,7 @@ export const ExportTab = view(use => (context: EditorContext) => {
 							<span>Exporting... ${progress}%</span>
 						</div>
 					` : html`
-						<button class="export-button" @click=${handleExport} ?disabled=${selectedItemId === null}>
+						<button class="export-button" @click=${handleExport} ?disabled=${selectedItemId.value === null}>
 							${exportSvg}
 							<span>Export "${itemLabels[selectedItemId.value!] || `Item ${selectedItemId.value!}`}"</span>
 						</button>
