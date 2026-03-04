@@ -11,7 +11,7 @@ export const Playhead = view(use => (context: EditorContext) => {
 
 	const player = context.controllers.player
 	const zoom = context.strata.settings.state.zoom
-	const position = player.currentTime.value * PIXELS_PER_MILLISECOND * zoom
+	const position = player.currentTime * PIXELS_PER_MILLISECOND * zoom
 
 	return html`
 		<div class="playhead" style="left: ${position}px">

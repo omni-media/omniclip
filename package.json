@@ -53,7 +53,7 @@
 		"@ffmpeg/ffmpeg": "^0.12.15",
 		"@ffmpeg/util": "^0.12.2",
 		"@floating-ui/dom": "^1.7.1",
-		"@omnimedia/omnitool": "^1.1.0-43",
+		"@omnimedia/omnitool": "^1.1.0-50",
 		"@pixi/colord": "^2.9.6",
 		"@zip.js/zip.js": "^2.7.62",
 		"coi-serviceworker": "^0.1.7",

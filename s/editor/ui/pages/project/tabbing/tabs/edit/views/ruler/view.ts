@@ -22,7 +22,9 @@ export const Ruler = view(use => (context: EditorContext) => {
 		leftOffset: 0
 	}))
 
-	const scheduleDraw = () => requestAnimationFrame(draw)
+	const scheduleDraw = () => {
+		requestAnimationFrame(draw)
+	}
 
 	const pointerToTime = (e: PointerEvent) => {
 		const scrollLeft = ui.state.timelineScrollLeft
@@ -37,7 +39,6 @@ export const Ruler = view(use => (context: EditorContext) => {
 	const updateDrag = (e: PointerEvent) => {
 		const time = pointerToTime(e)
 		throttledSeek(time)
-		player.currentTime.value = time
 	}
 
 	const startDrag = (e: PointerEvent) => {

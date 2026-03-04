@@ -1,6 +1,6 @@
 
 import {Cellar, OpfsForklift} from "@e280/quay"
-import {Datafile, Driver, Kind, O, Omni, TimelineFile, VideoPlayer} from "@omnimedia/omnitool"
+import {Datafile, Driver, Kind, O, Omni, TimelineFile} from "@omnimedia/omnitool"
 
 import {Strata} from "./strata.js"
 import {CargoController} from "../controllers/cargo.js"
@@ -18,13 +18,13 @@ export async function setupRequirements() {
 	const driver = await Driver.setup()
 	const project = new Omni(driver)
 	await demo(strata, project)
-	const player = await VideoPlayer.create(driver, strata.timeline.state.timeline as TimelineFile)
+	const player = await project.playback(strata.timeline.state.timeline as TimelineFile)
 	const controllers = {cargo: new CargoController(strata, cellar), player}
 	const omni = new O({
-		get project() {
+		get timeline() {
 			return strata.timeline.state.timeline as TimelineFile
 		},
-		set project(p: TimelineFile) {
+		set timeline(p: TimelineFile) {
 			strata.timeline.mutate(state => state.timeline = p)
 		}
 	})
@@ -34,8 +34,8 @@ export async function setupRequirements() {
 
 async function demo(strata: Strata, omni: Omni) {
 	const demoVideo = await fetch("/assets/transitions.mp4")
-	const bytes = await demoVideo.bytes()
-	const {videoA} = await omni.load({videoA: Datafile.make(bytes)})
+	const blob = await demoVideo.blob()
+	const {videoA} = await omni.load({videoA: Datafile.make(blob)})
 	await strata.timeline.mutate(state => state.timeline =
 		omni.timeline(o =>
 			o.sequence(
