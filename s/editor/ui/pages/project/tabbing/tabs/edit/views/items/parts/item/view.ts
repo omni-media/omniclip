@@ -16,11 +16,12 @@ export const TimelineItem = view(use => (
 	ancestors: Item.Any[]
 ) => {
 	use.styles(themeCss, styleCss)
+	const core = context.omnicore
 
-	const {zoom} = context.strata.settings.state
+	const zoom = core.$zoom.value
 	const visualWidth = (item.duration ?? 0) * PIXELS_PER_MILLISECOND * zoom
-	const setViewedItem = async () => await context.strata.viewedItemId.mutate(i => i.id = item.id)
-	const setSelectedItem = async () => await context.strata.selectedItem.mutate(i => i.id = item.id)
+	const setViewedItem = () => core.$viewedItemId.value = item.id
+	const setSelectedItem = () => core.$selectedItem.value = item.id
 
 	return html`
 		<div

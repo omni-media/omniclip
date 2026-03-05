@@ -10,12 +10,13 @@ import {EditorContext} from "../../../../../../../../context/context.js"
 
 export const TimelineArea = view(use => (context: EditorContext) => {
 	use.styles(themeCss, styleCss)
-	const viewedItemId = context.strata.viewedItemId.state.id
+	const core = context.omnicore
+	const viewedItemId = core.$viewedItemId.value
 
 	const onScroll = (e: Event) => {
 		const element = e.target as HTMLElement
 		const scrollLeft = element.scrollLeft
-		context.strata.ui.mutate(state => state.timelineScrollLeft = scrollLeft)
+		core.$timeline.scrollLeft.value = scrollLeft
 	}
 
 	use.once(async () => {
@@ -23,7 +24,7 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 		const timeline = use.shadow.querySelector(".timeline-grid")
 		const observer = new ResizeObserver(entries => {
 			for (const entry of entries) {
-				context.strata.ui.mutate(state => state.timelineWidth = entry.contentRect.width)
+				core.$timeline.width.value = entry.contentRect.width
 			}
 		})
 		observer.observe(timeline!)

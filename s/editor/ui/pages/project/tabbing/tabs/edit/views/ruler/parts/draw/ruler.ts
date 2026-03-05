@@ -3,17 +3,19 @@ import {tickSteps} from "../constants.js"
 import {drawMajorTick} from "./major-tick.js"
 import {drawMinorTick} from "./minor-tick.js"
 import {PIXELS_PER_MILLISECOND} from "../../../../constants.js"
-import {EditorSettingsState, EditorUIState} from "../../../../../../../../../../context/parts/strata.js"
+import {EditorSettingsState} from "../../../../../../../../../../context/parts/strata.js"
 
 export function drawRuler (
 	ctx: CanvasRenderingContext2D,
 	canvas: HTMLCanvasElement,
-	ui: EditorUIState,
+	timelineScrollLeft: number,
+	timelineWidth: number,
+	zoom: number,
 	settings: EditorSettingsState
 ) {
-	const {zoom, timebase} = settings
-	const scrollX = ui.timelineScrollLeft
-	const width = Math.max(1, Math.round(ui.timelineWidth || canvas.clientWidth || window.innerWidth))
+	const {timebase} = settings
+	const scrollX = timelineScrollLeft
+	const width = Math.max(1, Math.round(timelineWidth || canvas.clientWidth || window.innerWidth))
 
 	if (canvas.width !== width || canvas.height !== 32) {
 		canvas.width = width

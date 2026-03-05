@@ -33,7 +33,7 @@ export async function setupRequirements() {
 }
 
 async function demo(strata: Strata, omni: Omni) {
-	const demoVideo = await fetch("/assets/transitions.mp4")
+	const demoVideo = await fetch("/assets/temp/gl.mp4")
 	const blob = await demoVideo.blob()
 	const {videoA} = await omni.load({videoA: Datafile.make(blob)})
 	await strata.timeline.mutate(state => state.timeline =
@@ -54,5 +54,4 @@ async function demo(strata: Strata, omni: Omni) {
 			.map(item => ({itemId: item.id, starred: false, tagIds: [], roleIds: []}))
 	)
 	await strata.timeline.mutate(state => state.timeline.rootId = stack!.id)
-	await strata.viewedItemId.mutate(state => state.id = stack!.id)
 }

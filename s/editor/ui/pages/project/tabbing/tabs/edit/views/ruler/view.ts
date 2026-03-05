@@ -2,6 +2,7 @@
 import {html} from "lit"
 import {dom, view} from "@e280/sly"
 import {debounce} from "@e280/stz"
+import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import styleCss from "./style.css.js"
 import {drawRuler} from "./parts/draw/ruler.js"
@@ -10,12 +11,13 @@ import {EditorContext} from "../../../../../../../../context/context.js"
 
 export const Ruler = view(use => (context: EditorContext) => {
 	use.styles(styleCss)
+	const core = context.omnicore
 
-	const {settings, ui} = context.strata
+	const {settings} = context.strata
 	const player = context.controllers.player
 
 	const throttledSeek = use.once(() =>
-		debounce(50, time => player.seek(time))
+		debounce(16, time => player.seek(time))
 	)
 
 	const drag = use.once(() => ({
@@ -27,10 +29,10 @@ export const Ruler = view(use => (context: EditorContext) => {
 	}
 
 	const pointerToTime = (e: PointerEvent) => {
-		const scrollLeft = ui.state.timelineScrollLeft
+		const scrollLeft = core.$timeline.scrollLeft.value
 
 		const relativeX = e.clientX - drag.leftOffset + scrollLeft
-		const zoom = settings.state.zoom
+		const zoom = core.$zoom.value
 		const ms = relativeX / (PIXELS_PER_MILLISECOND * zoom)
 
 		return Math.max(0, ms)
@@ -39,6 +41,7 @@ export const Ruler = view(use => (context: EditorContext) => {
 	const updateDrag = (e: PointerEvent) => {
 		const time = pointerToTime(e)
 		throttledSeek(time)
+		core.setPlayhead(ms(time))
 	}
 
 	const startDrag = (e: PointerEvent) => {
@@ -46,15 +49,22 @@ export const Ruler = view(use => (context: EditorContext) => {
 		drag.leftOffset = canvas.getBoundingClientRect().left
 		updateDrag(e)
 		const detach = dom.events(window, {
-  		pointermove: updateDrag,
-  		pointerup: () => detach(),
+	  	pointermove: updateDrag,
+	  	pointerup: () => detach(),
 		})
 	}
 
 	async function draw() {
 		const {canvas, ctx} = await canvasPromise
 		if(ctx)
-			drawRuler(ctx, canvas, ui.state, settings.state)
+			drawRuler(
+				ctx,
+				canvas,
+				core.$timeline.scrollLeft.value,
+				core.$timeline.width.value,
+				core.$zoom.value,
+				settings.state
+			)
 	}
 
 	const canvasPromise = use.wake(() => use.rendered.then(() => {
@@ -64,7 +74,8 @@ export const Ruler = view(use => (context: EditorContext) => {
 	}))
 
 	use.mount(() => {
-		const unUi = ui.on(scheduleDraw)
+		const unScroll = core.$timeline.scrollLeft.on(scheduleDraw)
+		const unWidth = core.$timeline.width.on(scheduleDraw)
 		const unSet = settings.on(scheduleDraw)
 
 		window.addEventListener(
@@ -76,7 +87,8 @@ export const Ruler = view(use => (context: EditorContext) => {
 		use.rendered.then(draw)
 
 		return () => {
-			unUi()
+			unScroll()
+			unWidth()
 			unSet()
 			window.removeEventListener("resize", scheduleDraw)
 		}
