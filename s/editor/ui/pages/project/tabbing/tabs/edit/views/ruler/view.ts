@@ -11,7 +11,7 @@ import {EditorContext} from "../../../../../../../../context/context.js"
 
 export const Ruler = view(use => (context: EditorContext) => {
 	use.styles(styleCss)
-	const core = context.omnicore
+	const session = context.session
 
 	const {settings} = context.strata
 	const player = context.controllers.player
@@ -29,10 +29,10 @@ export const Ruler = view(use => (context: EditorContext) => {
 	}
 
 	const pointerToTime = (e: PointerEvent) => {
-		const scrollLeft = core.$timeline.scrollLeft.value
+		const scrollLeft = session.$timeline.scrollLeft.value
 
 		const relativeX = e.clientX - drag.leftOffset + scrollLeft
-		const zoom = core.$zoom.value
+		const zoom = session.$zoom.value
 		const ms = relativeX / (PIXELS_PER_MILLISECOND * zoom)
 
 		return Math.max(0, ms)
@@ -41,7 +41,7 @@ export const Ruler = view(use => (context: EditorContext) => {
 	const updateDrag = (e: PointerEvent) => {
 		const time = pointerToTime(e)
 		throttledSeek(time)
-		core.setPlayhead(ms(time))
+		session.setPlayhead(ms(time))
 	}
 
 	const startDrag = (e: PointerEvent) => {
@@ -60,9 +60,9 @@ export const Ruler = view(use => (context: EditorContext) => {
 			drawRuler(
 				ctx,
 				canvas,
-				core.$timeline.scrollLeft.value,
-				core.$timeline.width.value,
-				core.$zoom.value,
+				session.$timeline.scrollLeft.value,
+				session.$timeline.width.value,
+				session.$zoom.value,
 				settings.state
 			)
 	}
@@ -74,8 +74,8 @@ export const Ruler = view(use => (context: EditorContext) => {
 	}))
 
 	use.mount(() => {
-		const unScroll = core.$timeline.scrollLeft.on(scheduleDraw)
-		const unWidth = core.$timeline.width.on(scheduleDraw)
+		const unScroll = session.$timeline.scrollLeft.on(scheduleDraw)
+		const unWidth = session.$timeline.width.on(scheduleDraw)
 		const unSet = settings.on(scheduleDraw)
 
 		window.addEventListener(

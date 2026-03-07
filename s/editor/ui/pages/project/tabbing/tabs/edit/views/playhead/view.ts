@@ -7,10 +7,10 @@ import playheadSvg from "../../../../../../../icons/remix-icon/playhead.svg.js"
 
 export const Playhead = view(use => (context: EditorContext) => {
 	use.styles(styleCss)
-	const core = context.omnicore
+	const session = context.session
 
 	return html`
-		<div class="playhead" style="left: ${core.$playhead.value}px">
+		<div class="playhead" style="left: ${session.$playhead.value}px">
 			${playheadSvg}
 			<div class="line"></div>
 		</div>

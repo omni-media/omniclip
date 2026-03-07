@@ -16,12 +16,12 @@ export const TimelineItem = view(use => (
 	ancestors: Item.Any[]
 ) => {
 	use.styles(themeCss, styleCss)
-	const core = context.omnicore
+	const session = context.session
 
-	const zoom = core.$zoom.value
+	const zoom = session.$zoom.value
 	const visualWidth = (item.duration ?? 0) * PIXELS_PER_MILLISECOND * zoom
-	const setViewedItem = () => core.$viewedItemId.value = item.id
-	const setSelectedItem = () => core.$selectedItem.value = item.id
+	const setViewedItem = () => session.$viewedItemId.value = item.id
+	const setSelectedItem = () => session.$selectedItem.value = item.id
 
 	return html`
 		<div

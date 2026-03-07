@@ -24,7 +24,7 @@ const itemMenu = view(use => (context: EditorContext, item: Item.Any) => {
 })
 
 export function renderItemMenu(context: EditorContext) {
-	const viewedItemId = context.omnicore.$viewedItemId.value
+	const viewedItemId = context.session.$viewedItemId.value
 	const timeline = context.strata.timeline.state.timeline
 	const itemsMap = new Map(timeline.items.map(item => [item.id, item]))
 	const viewedItem = itemsMap.get(viewedItemId)

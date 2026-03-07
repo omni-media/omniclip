@@ -6,7 +6,7 @@ import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 import {EditorContext} from "../../context/context.js"
 import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 
-export class OmniCore {
+export class OmniSession {
 	$playhead = signal(0)
 	$timeline = {
 		scrollLeft: signal(0),

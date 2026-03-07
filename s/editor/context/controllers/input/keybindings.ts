@@ -1,6 +1,6 @@
 import * as tact from "@benev/tact"
 
-import {TabManager} from "../../../ui/pages/project/tabbing/tab-manager.js"
+import {TabManager} from "../../../ui/logic/parts/tab-manager.js"
 import {bindings} from "./bindings.js"
 
 export class Keybindings {

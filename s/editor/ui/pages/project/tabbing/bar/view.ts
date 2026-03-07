@@ -4,7 +4,7 @@ import {view} from "@e280/sly"
 import {repeat} from "lit/directives/repeat.js"
 
 import styleCss from "./style.css.js"
-import {TabManager} from "../tab-manager.js"
+import {TabManager} from "../../../../logic/parts/tab-manager.js"
 import themeCss from "../../../../../theme.css.js"
 
 export const TabBar = view(use => (manager: TabManager) => {

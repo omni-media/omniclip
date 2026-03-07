@@ -5,7 +5,7 @@ import {Datafile, Driver, Kind, O, Omni, TimelineFile} from "@omnimedia/omnitool
 import {Strata} from "./strata.js"
 import {CargoController} from "../controllers/cargo.js"
 import {Keybindings} from "../controllers/input/keybindings.js"
-import {TabManager} from "../../ui/pages/project/tabbing/tab-manager.js"
+import {TabManager} from "../../ui/logic/parts/tab-manager.js"
 
 export type Requirements = Awaited<ReturnType<typeof setupRequirements>>
 

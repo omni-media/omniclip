@@ -30,9 +30,9 @@ const TABS: {[key: string]: Tab} = {
 
 export const InspectorTab = view(use => (context: EditorContext) => {
 	use.styles(themeCss, styleCss)
-	const core = context.omnicore
+	const session = context.session
 
-	const selectedItemId = core.$selectedItem.value
+	const selectedItemId = session.$selectedItem.value
 	const timeline = context.strata.timeline.state.timeline
 	const selectedItem = timeline.items.find(item => item.id === selectedItemId)
 	const activeTabId = use.signal(TABS.VIDEO.id)

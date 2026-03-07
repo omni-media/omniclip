@@ -14,7 +14,7 @@ export const StackView = view(use => (
 	ancestors: Item.Any[]
 ) => {
 	use.styles(themeCss, styleCss)
-	const core = context.omnicore
+	const session = context.session
 	const timeline = context.strata.timeline.state.timeline
 
 	const getStackDuration = (item: Item.Stack, items: Item.Any[]) => {
@@ -26,7 +26,7 @@ export const StackView = view(use => (
 		}))
 	}
 
-	const setViewedItem = async () => core.$viewedItemId.value = item.id
+	const setViewedItem = async () => session.$viewedItemId.value = item.id
 
 	const renderFullMode = () => {
 		return html`
@@ -41,7 +41,7 @@ export const StackView = view(use => (
 	}
 
 	const renderCompactMode = () => {
-		const zoom = core.$zoom.value
+		const zoom = session.$zoom.value
 		const stackDuration = getStackDuration(item, timeline.items as Item.Any[])
 		const visualWidth = stackDuration * PIXELS_PER_MILLISECOND * zoom
 

@@ -4,7 +4,6 @@ import {view} from "@e280/sly"
 import styleCss from "./style.css.js"
 import {TabBar} from "./tabbing/bar/view.js"
 import themeCss from "../../../theme.css.js"
-import {TabManager} from "./tabbing/tab-manager.js"
 import {EditTab} from "./tabbing/tabs/edit/view.js"
 import {ExportTab} from "./tabbing/tabs/export/view.js"
 import {EditorContext} from "../../../context/context.js"
@@ -15,8 +14,8 @@ import {TimelineViewport} from "./tabbing/tabs/edit/views/viewport/view.js"
 export const ProjectPage = (context: EditorContext) => view(use => (projectId: string) => {
 	use.styles(themeCss, styleCss)
 	use.mount(() => () => context.dispose())
+	const manager = context.tabs
 
-	const manager = use.once(() => new TabManager())
 	const isEditTabActive = manager.activeTabId.value === "edit"
 	const isOutlinerTabActive = manager.activeTabId.value === "outliner"
 	const isInspectorTabActive = manager.activeTabId.value === "inspector"

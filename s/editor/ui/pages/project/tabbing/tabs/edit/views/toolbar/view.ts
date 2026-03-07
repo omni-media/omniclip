@@ -14,7 +14,7 @@ import zoomOutSvg from "../../../../../../../icons/material-design-icons/zoom-ou
 
 export const Toolbar = view(use => (context: EditorContext) => {
 	use.styles(themeCss, styleCss)
-	const core = context.omnicore
+	const session = context.session
 	const isPlaying = use.signal(false)
 	const canUndo = false
 	const canRedo = false
@@ -59,7 +59,7 @@ export const Toolbar = view(use => (context: EditorContext) => {
 
 			<div class="toolbar-section right">
 				<div class="zoom-controls">
-					<button class="zoom-button" @click=${() => core.$zoom.value -= 0.1}>
+					<button class="zoom-button" @click=${() => session.$zoom.value -= 0.1}>
 						${zoomOutSvg}
 					</button>
 					<input
@@ -68,10 +68,10 @@ export const Toolbar = view(use => (context: EditorContext) => {
 						min="0.2"
 						max="10"
 						step="0.1"
-						.value=${core.$zoom.value}
-						@input=${(e: Event) => core.$zoom.value = +(e.currentTarget as HTMLInputElement).value}
+						.value=${session.$zoom.value}
+						@input=${(e: Event) => session.$zoom.value = +(e.currentTarget as HTMLInputElement).value}
 					>
-					<button class="zoom-button" @click=${() => core.$zoom.value += 0.1}>
+					<button class="zoom-button" @click=${() => session.$zoom.value += 0.1}>
 						${zoomInSvg}
 					</button>
 				</div>

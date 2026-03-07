@@ -12,8 +12,8 @@ export const FilmstripView = view(use => (
 ) => {
 	use.styles(styleCss, themeCss)
 
-	const core = context.omnicore
-	const pixelsPerMillisecond = 0.1 * core.$zoom.value
+	const session = context.session
+	const pixelsPerMillisecond = 0.1 * session.$zoom.value
 
 	const thumbnails = use.signal<{ time: number, canvas: HTMLCanvasElement | OffscreenCanvas }[]>([])
 
@@ -57,7 +57,7 @@ export const FilmstripView = view(use => (
 
 	const update = async (scrollLeft: number) => {
 		const viewportStart = scrollLeft / pixelsPerMillisecond
-		const viewportEnd = (scrollLeft + core.$timeline.width.value) / pixelsPerMillisecond
+		const viewportEnd = (scrollLeft + session.$timeline.width.value) / pixelsPerMillisecond
 		const visibleClipStart = Math.max(clip.start, viewportStart)
 		const visibleClipEnd = Math.min(clip.start + clip.duration, viewportEnd)
 
@@ -71,8 +71,8 @@ export const FilmstripView = view(use => (
 	use.once(async () => update(0))
 
 	use.mount(() => {
-		const dispose1 = core.$zoom.on(async (zoom) => {(await filmstrip).frequency = getFrequencyInSec(zoom)})
-		const dispose2 = core.$timeline.scrollLeft.on(async (scrollLeft) => update(scrollLeft))
+		const dispose1 = session.$zoom.on(async (zoom) => {(await filmstrip).frequency = getFrequencyInSec(zoom)})
+		const dispose2 = session.$timeline.scrollLeft.on(async (scrollLeft) => update(scrollLeft))
 		return () => {
 			dispose1()
 			dispose2()
