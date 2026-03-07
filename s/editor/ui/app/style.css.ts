@@ -7,7 +7,6 @@ export default css`@layer view {
 
 	width: 100%;
 	height: 100%;
-	max-width: 60em;
 	margin: auto;
 }
 
