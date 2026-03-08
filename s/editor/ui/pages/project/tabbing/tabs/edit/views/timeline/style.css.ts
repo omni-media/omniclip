@@ -3,66 +3,33 @@ import {css} from "lit"
 export default css`@layer view {
 
 :host {
-	display: flex;
-	flex-direction: column;
+	display: block;
 	height: 100%;
-	overflow: hidden;
 }
 
-.timeline-grid {
-	display: grid;
-	grid-template-columns: 1fr;
-	grid-template-rows: auto 1fr;
-	flex: 1;
+.timeline-scroll {
+	height: 100%;
 	overflow: auto;
-	position: relative;
-	background: #181818;
+	background: #111;
+	border-top: 1px solid #1c1c1c;
 }
 
-.corner-box {
-	grid-column: 1;
-	grid-row: 1;
-	position: sticky;
-	top: 0;
-	left: 0;
-	background: #222;
-	border-bottom: 1px solid #1a1a1a;
-	border-right: 1px solid #1a1a1a;
-	z-index: 6;
+.timeline-scroll::-webkit-scrollbar {
+	height: 10px;
+	width: 10px;
 }
 
-.ruler-container {
-	grid-column: 2;
-	grid-row: 1;
-	position: sticky;
-	top: 0;
-	overflow: visible;
-	z-index: 4;
+.timeline-scroll::-webkit-scrollbar-thumb {
+	background: #2a2a2a;
+	border-radius: 999px;
 }
 
-.headers-panel {
-	grid-column: 1;
-	grid-row: 2;
-	position: sticky;
-	left: 0;
-	background: #222;
-	height: 100vh;
-	z-index: 6;
+.timeline-scroll::-webkit-scrollbar-track {
+	background: #161616;
 }
 
-.content-panel {
-	grid-column: 2;
-	grid-row: 2;
-	position: relative;
-	z-index: 1;
-}
-
-.playhead-container {
-	grid-column: 2;
-	grid-row: 2;
-	position: relative;
-	z-index: 5;
-	pointer-events: none;
+.timeline-canvas {
+	display: block;
 }
 
 }`
