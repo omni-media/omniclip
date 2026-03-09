@@ -28,7 +28,7 @@ export default css`@layer view {
 	background: #161616;
 }
 
-.timeline-canvas {
+canvas {
 	display: block;
 }
 

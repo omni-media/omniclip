@@ -1,6 +1,6 @@
 
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {dom, view} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import {TimelineCanvas} from "../../canvas/canvas.js"
@@ -10,7 +10,8 @@ import {EditorContext} from "../../../../../../../../context/context.js"
 export const TimelineArea = view(use => (context: EditorContext) => {
 	use.styles(themeCss, styleCss)
 	const session = context.session
-	const editCanvas = use.once(() => new TimelineCanvas({
+
+	const timelineCanvas = use.once(() => new TimelineCanvas({
 		session: context.session,
 		timeline: context.strata.timeline,
 		settings: context.strata.settings,
@@ -23,55 +24,47 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 	}
 
 	use.mount(() => {
-		let observer: ResizeObserver | undefined
-
-		const syncViewport = async() => {
-			await use.rendered
-			const timeline = use.shadow.querySelector(".timeline-scroll") as HTMLElement | null
-			if (!timeline)
-				return
-
-			session.$timeline.width.value = timeline.clientWidth
-			editCanvas.setViewportWidth(timeline.clientWidth)
-		}
-
-		syncViewport()
+		const observer = new ResizeObserver(entries => {
+			for (const entry of entries) {
+				const width = entry.contentRect.width
+				session.$timeline.width.value = width
+				timelineCanvas.resize(width)
+			}
+		})
 
 		use.rendered.then(() => {
-			const timeline = use.shadow.querySelector(".timeline-scroll") as HTMLElement | null
-			if (!timeline)
-				return
-
-			observer = new ResizeObserver(entries => {
-				for (const entry of entries) {
-					const width = entry.contentRect.width
-					session.$timeline.width.value = width
-					editCanvas.setViewportWidth(width)
-				}
-			})
+			const timeline = dom.in(use.shadow).require(".timeline")
+			session.$timeline.width.value = timeline.clientWidth
+			timelineCanvas.resize(timeline.clientWidth)
 			observer.observe(timeline)
 		})
 
-		const unsubscribers = [
-			session.$zoom.on(editCanvas.scheduleDraw),
-			session.$playhead.on(editCanvas.scheduleDraw),
-			session.$selectedItem.on(editCanvas.scheduleDraw),
-			session.$viewedItemId.on(editCanvas.scheduleDraw),
-			context.strata.timeline.on(editCanvas.scheduleDraw),
-			context.strata.settings.on(editCanvas.scheduleDraw),
+		const unsubs = [
+			session.$zoom.on(timelineCanvas.scheduleDraw),
+			session.$playhead.on(timelineCanvas.scheduleDraw),
+			session.$selectedItem.on(timelineCanvas.scheduleDraw),
+			session.$viewedItemId.on(timelineCanvas.scheduleDraw),
+			context.strata.timeline.on(timelineCanvas.scheduleDraw),
+			context.strata.settings.on(timelineCanvas.scheduleDraw),
 		]
 
+		const detach = dom.events(timelineCanvas.canvas, {
+			pointerdown: timelineCanvas.onPointerDown,
+			click: timelineCanvas.onClick,
+			dblclick: timelineCanvas.onDoubleClick
+		})
+
 		return () => {
-			observer?.disconnect()
-			editCanvas.dispose()
-			for (const unsubscribe of unsubscribers)
-				unsubscribe()
+			detach()
+			observer.disconnect()
+			for (const unsub of unsubs)
+				unsub()
 		}
 	})
 
 	return html`
-		<div @scroll=${onScroll} class="timeline-scroll">
-			${editCanvas.canvas}
+		<div @scroll=${onScroll} class="timeline">
+			${timelineCanvas.canvas}
 		</div>
 	`
 })
