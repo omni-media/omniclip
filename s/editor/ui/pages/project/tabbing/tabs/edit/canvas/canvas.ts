@@ -34,12 +34,6 @@ export class TimelineCanvas {
 
 	resize(width: number) {
 		this.#viewportWidth = width
-		const ratio = window.devicePixelRatio || 1
-		this.canvas.width = Math.round(width * ratio)
-		this.canvas.height = Math.round(this.height * ratio)
-		this.canvas.style.width = `${width}px`
-		this.canvas.style.height = `${this.height}px`
-		this.ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
 		this.scheduleDraw()
 	}
 
@@ -67,11 +61,21 @@ export class TimelineCanvas {
 
 	draw() {
 		this.layout = buildLayout(this)
+		this.#resize()
 		this.clearCanvas()
 		drawRuler(this)
 		drawLanes(this)
 		drawClips(this)
 		drawPlayhead(this)
+	}
+
+	#resize() {
+		const ratio = window.devicePixelRatio || 1
+		this.canvas.width = Math.round(this.width * ratio)
+		this.canvas.height = Math.round(this.height * ratio)
+		this.canvas.style.width = `${this.width}px`
+		this.canvas.style.height = `${this.height}px`
+		this.ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
 	}
 
 	clipAt(x: number, y: number) {
