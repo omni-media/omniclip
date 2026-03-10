@@ -29,6 +29,15 @@ export const Toolbar = view(use => (context: EditorContext) => {
 		return () => dispose()
 	})
 
+	const handleSplit = () => {
+		if(session.$selectedItem.value) {
+			session.splitClipAt(
+				session.$selectedItem.value,
+				session.getPlayheadInMs()
+			)
+		}
+	}
+
 	return html`
 		<div class="toolbar">
 			<div class="toolbar-section left">
@@ -41,7 +50,11 @@ export const Toolbar = view(use => (context: EditorContext) => {
 					</button>
 				</div>
 				<div class="button-group">
-					<button title="Split Clip (S)">
+					<button
+						?disabled=${!session.$selectedItem.value}
+						@click=${handleSplit}
+						title="Split Clip (S)"
+					>
 						${scissorsSvg}
 					</button>
 				</div>

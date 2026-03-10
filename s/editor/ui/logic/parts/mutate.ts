@@ -1,0 +1,19 @@
+
+import {Id, Item, TimelineFile} from "@omnimedia/omnitool"
+
+export function add(state: TimelineFile, item: Item.Any) {
+	state.items.push(item)
+}
+
+export function remove(state: TimelineFile, id: Id) {
+	const i = state.items.findIndex(x => x.id === id)
+	if (i !== -1)
+		state.items.splice(i, 1)
+}
+
+export function update(state: TimelineFile, id: Id, patch: Partial<Item.Any>) {
+	const item = state.items.find(x => x.id === id)
+	if (item)
+		Object.assign(item, patch)
+}
+
