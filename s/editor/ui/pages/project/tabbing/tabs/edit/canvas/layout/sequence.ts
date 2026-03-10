@@ -18,10 +18,9 @@ export function layoutSequence(
 		if (!child)
 			continue
 
-		const start = child.start ?? cursor
-		const childLayout = walk(child, row, time + start)
+		const childLayout = walk(child, row, time + cursor)
 		clips.push(...childLayout.clips)
-		cursor = Math.max(cursor, start + (childLayout.duration - (time + start)))
+		cursor += childLayout.duration - (time + cursor)
 		rows = Math.max(rows, childLayout.rows)
 		duration = Math.max(duration, childLayout.duration)
 	}

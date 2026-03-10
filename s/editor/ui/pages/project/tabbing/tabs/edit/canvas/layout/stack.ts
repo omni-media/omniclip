@@ -17,8 +17,7 @@ function resolveDuration(
 			if (!child)
 				continue
 
-			const start = child.start ?? (item.kind === Kind.Sequence ? duration : 0)
-			const childLayout = walk(child, 0, start)
+			const childLayout = walk(child, 0, 0)
 			duration = Math.max(duration, childLayout.duration)
 		}
 	}
@@ -48,8 +47,7 @@ export function layoutStack(
 		if (!child)
 			continue
 
-		const start = child.start ?? 0
-		const childLayout = walk(child, nextRow, time + start)
+		const childLayout = walk(child, nextRow, time)
 		clips.push(...childLayout.clips)
 		nextRow = Math.max(nextRow + 1, childLayout.rows)
 		duration = Math.max(duration, childLayout.duration)
@@ -61,4 +59,3 @@ export function layoutStack(
 		duration,
 	}
 }
-

@@ -6,16 +6,7 @@ import {Id, Item, Kind, TimelineFile} from '@omnimedia/omnitool'
 export namespace Idx {
 	export type Clip = Item.Audio | Item.Video | Item.Text
 	export type Struct = Item.Sequence | Item.Stack
-	export type AnyItem =
-		| Item.Audio
-		| Item.Video
-		| Item.Text
-		| Item.Gap
-		| Item.Sequence
-		| Item.Stack
-		| Item.Spatial
-		| Item.Transition
-		| Item.TextStyle
+	export type AnyItem = Item.Any
 }
 
 export class Index {
@@ -92,12 +83,11 @@ export class Index {
 
 				for (const childId of item.childrenIds) {
 					const child = this.getItem(childId)
-					const childStart = 'start' in child ? (child.start ?? cursor) : cursor
 
-					this.#indexLaneStarts(childId, childStart)
+					this.#indexLaneStarts(childId, cursor)
 
 					if ('duration' in child)
-						cursor = Math.max(cursor, childStart + child.duration)
+						cursor += child.duration
 				}
 
 				break
