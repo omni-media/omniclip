@@ -49,7 +49,7 @@ export class OmniSession {
 			if (!parent)
 				return
 
-			const offset = time - this.index.getItemStart(clipId, this.$viewedItemId.value)
+			const offset = time - this.index.getItemLaneStart(clipId, this.$viewedItemId.value)
 			if (offset <= 0 || offset >= clip.duration)
 				return
 

@@ -22,11 +22,10 @@ export class Index {
 
 	items = new GMap<Id, Idx.AnyItem>()
 	parents = new GMap<Id, Idx.Struct>()
-	starts = new GMap<Id, number>()
+	laneStarts = new GMap<Id, number>()
 
 	constructor(strata: Chrono<TimelineFile>) {
 		this.reindex(strata.state as TimelineFile)
-		strata.lens
 		strata.lens(s => s).on(state => {
 			this.reindex(state as TimelineFile)
 		})
@@ -35,7 +34,7 @@ export class Index {
 	reindex(state: TimelineFile) {
 		this.items.clear()
 		this.parents.clear()
-		this.starts.clear()
+		this.laneStarts.clear()
 
 		for (const item of state.items) {
 			this.items.set(item.id, item)
@@ -45,7 +44,7 @@ export class Index {
 			}
 		}
 
-		this.#indexStarts(state.rootId, 0)
+		this.#indexLaneStarts(state.rootId, 0)
 	}
 
 	getItem<T extends Idx.AnyItem>(id: Id) {
@@ -66,22 +65,22 @@ export class Index {
     }
 	}
 
-	getItemStart(id: Id, relativeToId?: Id) {
-		const absStart = this.starts.get(id)
+	getItemLaneStart(id: Id, relativeToId?: Id) {
+		const absStart = this.laneStarts.get(id)
 		if (absStart == null)
 			return 0
 
 		if (!relativeToId)
 			return absStart
 
-		const rootStart = this.starts.get(relativeToId) ?? 0
+		const rootStart = this.laneStarts.get(relativeToId) ?? 0
 		return absStart - rootStart
 	}
 
-	#indexStarts(id: Id, start: number) {
+	#indexLaneStarts(id: Id, start: number) {
 		const item = this.getItem(id)
 
-		this.starts.set(id, start)
+		this.laneStarts.set(id, start)
 
 		if (!('childrenIds' in item))
 			return
@@ -95,7 +94,7 @@ export class Index {
 					const child = this.getItem(childId)
 					const childStart = 'start' in child ? (child.start ?? cursor) : cursor
 
-					this.#indexStarts(childId, childStart)
+					this.#indexLaneStarts(childId, childStart)
 
 					if ('duration' in child)
 						cursor = Math.max(cursor, childStart + child.duration)
@@ -106,7 +105,7 @@ export class Index {
 
 			case Kind.Stack: {
 				for (const childId of item.childrenIds)
-					this.#indexStarts(childId, start)
+					this.#indexLaneStarts(childId, start)
 
 				break
 			}
