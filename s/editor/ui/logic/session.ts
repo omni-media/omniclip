@@ -1,10 +1,10 @@
 
 import {signal} from "@e280/strata"
-import {Id, Item, Kind, O} from "@omnimedia/omnitool"
+import {Id, Kind, O} from "@omnimedia/omnitool"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {Idx, Index} from "./parts/index.js"
-import {add, remove} from "./parts/mutate.js"
+import {add, remove, update} from "./parts/mutate.js"
 import {Strata} from "../../context/parts/strata.js"
 
 export class OmniSession {
@@ -54,40 +54,31 @@ export class OmniSession {
 				return
 
 			const id = () => this.deps.omnitool.getId()
+			const leftId = id()
+			const rightId = id()
 
-			const left = {
-				...clip,
-				id: id(),
-				duration: offset
+			let replacements = [leftId, rightId]
+
+			if (parent.kind === Kind.Stack) {
+				const seqId = id()
+				add(state, {id: seqId, kind: Kind.Sequence, childrenIds: replacements})
+				replacements = [seqId]
 			}
 
-			const right = {
+			add(state, {...clip, id: leftId, duration: offset})
+			add(state, {
 				...clip,
-				id: id(),
-				...(clip.kind !== Kind.Text && { start: (clip.start ?? 0) + offset }),
-				duration: clip.duration - offset
-			}
-
-			const p = state.items.find(i => i.id === parent.id) as Idx.Struct
-			const i = p.childrenIds.indexOf(clipId)
-			if (i === -1)
-				return
-
+				id: rightId,
+				duration: clip.duration - offset,
+				...(clip.kind !== Kind.Text && { start: (clip.start ?? 0) + offset })
+			})
 			remove(state, clipId)
-			add(state, left)
-			add(state, right)
 
-			if (p.kind === Kind.Sequence)
-				p.childrenIds.splice(i, 1, left.id, right.id)
-			else {
-				const seq: Item.Sequence = {
-					id: id(),
-					kind: Kind.Sequence,
-					childrenIds: [left.id, right.id]
-				}
-				add(state, seq)
-				p.childrenIds[i] = seq.id
-			}
+			update(state, parent.id, {
+				childrenIds: parent.childrenIds.flatMap(c =>
+					c === clipId ? replacements : [c]
+				)
+			})
 		})
 	}
 }
