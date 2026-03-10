@@ -8,7 +8,7 @@ import {EditorContext} from "../../../../../../../../../context/context.js"
 export const CropControls = view(use => (context: EditorContext, item: Item.Any) => {
 	use.styles(styleCss)
 
-	const itemsMap = new Map(context.strata.timeline.state.timeline!.items.map(i => [i.id, i]))
+	const itemsMap = new Map(context.strata.timeline.state.items.map(i => [i.id, i]))
 
 	const spatialItem = "spatialId" in item && item.spatialId !== undefined
 		? itemsMap.get(item.spatialId) as Item.Spatial

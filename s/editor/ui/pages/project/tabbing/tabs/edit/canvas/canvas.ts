@@ -60,7 +60,7 @@ export class TimelineCanvas {
 	}
 
 	draw() {
-		this.layout = buildLayout(this)
+		this.layout = buildLayout(this.deps.session.index, this)
 		this.#resize()
 		this.clearCanvas()
 		drawRuler(this)
@@ -108,10 +108,10 @@ export class TimelineCanvas {
 		return this.deps.settings.state.timebase
 	}
 	playheadX() {
-		return this.deps.session.$playhead.value
+		return this.deps.session.$playhead.value * this.pxPerMs()
 	}
 	get timeline(): {rootId: number, items: readonly unknown[]} {
-		return this.deps.timeline.state.timeline
+		return this.deps.timeline.state
 	}
 
 	#pointerPosition(event: PointerEvent) {
@@ -162,4 +162,3 @@ export class TimelineCanvas {
 		this.scheduleDraw()
 	}
 }
-

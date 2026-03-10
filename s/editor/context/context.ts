@@ -17,8 +17,10 @@ export class EditorContext {
 
 	constructor(private requirements: Requirements) {
 		this.session = new OmniSession({
-			strata: requirements.strata
+			strata: requirements.strata,
+			omnitool: requirements.omni,
 		})
+		requirements.strata.timeline.lens(s => s).on(() => console.log('123'))
 
 		requirements.controllers.player.playback.onTick.on(() =>
 			this.session.setPlayhead(ms(requirements.controllers.player.currentTime))

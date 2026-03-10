@@ -13,7 +13,7 @@ const BLEND_MODES = [
 
 export const CompositingControls = view(use => (context: EditorContext, item: Item.Video | Item.Text) => {
 	use.styles(styleCss)
-	const timeline = context.strata.timeline.state.timeline.items
+	const timeline = context.strata.timeline.state.items
 
 	const spatialItem = "spatialId" in item && item.spatialId !== undefined
 		? timeline.find(i => i.id === item.spatialId) as Item.Spatial

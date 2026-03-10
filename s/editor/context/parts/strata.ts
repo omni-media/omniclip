@@ -1,6 +1,6 @@
 
-import {Chronicle, Trunk} from "@e280/strata"
 import {TimelineFile, Id} from "@omnimedia/omnitool"
+import {Chronicle, chronicle, Prism, Chrono} from "@e280/strata"
 
 export type EditorSettingsState = {
 	timebase: number
@@ -39,9 +39,7 @@ export type State = {
 	files: {
 		hashes: string[]
 	}
-	chron: Chronicle<{
-		timeline: TimelineFile
-	}>
+	timeline: Chronicle<TimelineFile>
 	settings: EditorSettingsState
 	outliner: {
 		roles: Role[]
@@ -51,18 +49,16 @@ export type State = {
 }
 
 export class Strata {
-	trunk = new Trunk<State>({
+	trunk = new Prism<State>({
 		files: {
 			hashes: [],
 		},
-		chron: Trunk.chronicle({
-			timeline: {
-				info: "https://omniclip.app/",
-				format: "timeline",
-				version: 0,
-				rootId: 1,
-				items: []
-			}
+		timeline: chronicle({
+			info: "https://omniclip.app/",
+			format: "timeline",
+			version: 0,
+			rootId: 1,
+			items: []
 		}),
 		outliner: {
 			roles: [],
@@ -78,9 +74,9 @@ export class Strata {
 		},
 	})
 
-	settings = this.trunk.branch(s => s.settings)
-	files = this.trunk.branch(s => s.files)
-	timeline = this.trunk.chronobranch(64, s => s.chron)
-	outliner = this.trunk.branch(s => s.outliner)
+	settings = this.trunk.lens(s => s.settings)
+	files = this.trunk.lens(s => s.files)
+	timeline = new Chrono(64, this.trunk.lens(state => state.timeline))
+	outliner = this.trunk.lens(s => s.outliner)
 }
 

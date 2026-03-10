@@ -5,23 +5,16 @@ import {layoutLeaf} from "./leaf.js"
 import {layoutStack} from "./stack.js"
 import {layoutSequence} from "./sequence.js"
 import type {TimelineCanvas} from "../canvas.js"
+import {Index} from "../../../../../../../logic/parts/index.js"
 import {LayoutContext, LayoutResult, TimelineNode} from "./types.js"
 
-export function buildLayout(canvas: TimelineCanvas): LayoutResult {
-	const timelineItems = canvas.timeline.items
-	const items = new Map<number, TimelineNode>(
-		timelineItems.map(item => {
-			const node = item as TimelineNode
-			return [node.id, node]
-		})
-	)
-
-	const root = items.get(canvas.viewedItemId())
+export function buildLayout(index: Index, canvas: TimelineCanvas): LayoutResult {
+	const root = index.getItem(canvas.viewedItemId())
 	if (!root)
 		return {clips: [], rows: 1, duration: 0}
 
 	const resolvedContext: LayoutContext = {
-		items,
+		items: index.items,
 		pxPerMs: canvas.pxPerMs(),
 		selectedItemId: canvas.selectedItemId(),
 		trackY: canvas.trackY,

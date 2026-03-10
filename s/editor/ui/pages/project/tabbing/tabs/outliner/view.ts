@@ -17,7 +17,7 @@ import videoPlayerSvg from "../../../../../icons/carbon-icons/video-player.svg.j
 export const OutlinerTab = view(use => (context: EditorContext) => {
 	use.styles(themeCss, styleCss)
 
-	const items = context.strata.timeline.state.timeline.items
+	const items = context.strata.timeline.state.items
 	const outliner = context.strata.outliner
 	const searchTerm = use.signal("")
 

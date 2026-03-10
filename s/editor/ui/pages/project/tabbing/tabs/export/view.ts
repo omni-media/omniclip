@@ -20,7 +20,7 @@ export const ExportTab = view(use => (context: EditorContext) => {
 	const selectedItemId = use.signal(outliner.state.items[0]?.itemId ?? null)
 	const itemLabels = ["example.mp4"]
 
-	const itemsMap = new Map(timeline.state.timeline?.items.map(i => [i.id, i]))
+	const itemsMap = new Map(timeline.state.items.map(i => [i.id, i]))
 	const starredItemDetails = starredItems.map(({itemId}) => itemsMap.get(itemId)!).filter(Boolean)
 
 	const progress = 0
@@ -91,4 +91,3 @@ export const ExportTab = view(use => (context: EditorContext) => {
 		</div>
 	`
 })
-

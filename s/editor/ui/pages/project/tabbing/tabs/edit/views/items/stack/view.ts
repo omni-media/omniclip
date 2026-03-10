@@ -15,7 +15,7 @@ export const StackView = view(use => (
 ) => {
 	use.styles(themeCss, styleCss)
 	const session = context.session
-	const timeline = context.strata.timeline.state.timeline
+	const timeline = context.strata.timeline.state
 
 	const getStackDuration = (item: Item.Stack, items: Item.Any[]) => {
 		return Math.max(0, ...item.childrenIds.map(id => {

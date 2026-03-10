@@ -33,7 +33,7 @@ export const InspectorTab = view(use => (context: EditorContext) => {
 	const session = context.session
 
 	const selectedItemId = session.$selectedItem.value
-	const timeline = context.strata.timeline.state.timeline
+	const timeline = context.strata.timeline.state
 	const selectedItem = timeline.items.find(item => item.id === selectedItemId)
 	const activeTabId = use.signal(TABS.VIDEO.id)
 
@@ -77,4 +77,3 @@ export const InspectorTab = view(use => (context: EditorContext) => {
 		</div>
 	`
 })
-

@@ -11,7 +11,7 @@ import {EditorContext} from "../../../../../../../context/context.js"
 
 export function renderItem(context: EditorContext, id: number, ancestors: Item.Any[]): Content {
 	const itemsMap = new Map(
-		context.strata.timeline.state.timeline.items
+		context.strata.timeline.state.items
 			.map(item => [item.id, item])
 	)
 

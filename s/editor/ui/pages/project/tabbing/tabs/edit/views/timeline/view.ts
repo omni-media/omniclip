@@ -44,7 +44,7 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 			session.$playhead.on(timelineCanvas.scheduleDraw),
 			session.$selectedItem.on(timelineCanvas.scheduleDraw),
 			session.$viewedItemId.on(timelineCanvas.scheduleDraw),
-			context.strata.timeline.on(timelineCanvas.scheduleDraw),
+			context.strata.timeline.lens(s => s).on(timelineCanvas.scheduleDraw),
 			context.strata.settings.on(timelineCanvas.scheduleDraw),
 		]
 
