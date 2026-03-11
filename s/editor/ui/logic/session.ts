@@ -81,5 +81,20 @@ export class OmniSession {
 			})
 		})
 	}
-}
 
+	deleteClip(clipId: Id) {
+		this.timeline.mutate(state => {
+			const parent = this.index.getParent(clipId)
+			if (!parent)
+				return
+
+			remove(state, clipId)
+			update(state, parent.id, {
+				childrenIds: parent.childrenIds.filter(id => id !== clipId)
+			})
+		})
+
+		if (this.$selectedItem.value === clipId)
+			this.$selectedItem.value = null
+	}
+}

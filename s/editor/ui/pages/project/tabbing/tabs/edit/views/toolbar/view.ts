@@ -3,6 +3,7 @@ import {view} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../../../../../../theme.css.js"
+import binSvg from "../../../../../../../icons/gravity-ui/bin.svg.js"
 import playSvg from "../../../../../../../icons/gravity-ui/play.svg.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 import pauseSvg from "../../../../../../../icons/gravity-ui/pause.svg.js"
@@ -38,6 +39,12 @@ export const Toolbar = view(use => (context: EditorContext) => {
 		}
 	}
 
+	const handleClipDelete = () => {
+		if(session.$selectedItem.value) {
+			session.deleteClip(session.$selectedItem.value)
+		}
+	}
+
 	return html`
 		<div class="toolbar">
 			<div class="toolbar-section left">
@@ -50,6 +57,13 @@ export const Toolbar = view(use => (context: EditorContext) => {
 					</button>
 				</div>
 				<div class="button-group">
+					<button
+						?disabled=${!session.$selectedItem.value}
+						@click=${handleClipDelete}
+						title="Delete Clip"
+					>
+						${binSvg}
+					</button>
 					<button
 						?disabled=${!session.$selectedItem.value}
 						@click=${handleSplit}
