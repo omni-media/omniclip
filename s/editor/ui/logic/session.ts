@@ -82,6 +82,25 @@ export class OmniSession {
 		})
 	}
 
+	trimClip(clipId: Id, time: Ms, edge: 'start' | 'end') {
+		this.timeline.mutate(state => {
+			const clip = this.index.getItem<Idx.Clip>(clipId)
+			const laneStart = this.index.getItemLaneStart(clipId, this.$viewedItemId.value)
+			const offset = time - laneStart
+
+			if (offset <= 0 || offset >= clip.duration)
+				return
+
+			update(state, clipId, edge === 'start'
+				? {
+					duration: clip.duration - offset,
+					...(clip.kind !== Kind.Text && {start: (clip.start ?? 0) + offset})
+				}
+				: {duration: offset}
+				)
+		})
+	}
+
 	deleteClip(clipId: Id) {
 		this.timeline.mutate(state => {
 			const parent = this.index.getParent(clipId)
