@@ -19,6 +19,7 @@ export class EditorContext {
 		this.session = new OmniSession({
 			strata: requirements.strata,
 			omnitool: requirements.omni,
+			player: this.controllers.player
 		})
 		requirements.strata.timeline.lens(s => s).on(() => console.log('123'))
 

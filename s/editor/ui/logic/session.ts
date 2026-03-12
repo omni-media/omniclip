@@ -1,11 +1,14 @@
 
 import {signal} from "@e280/strata"
-import {Id, Kind, O} from "@omnimedia/omnitool"
+import {Id, Kind, O, VideoPlayer} from "@omnimedia/omnitool"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {Idx, Index} from "./parts/index.js"
-import {add, remove, update} from "./parts/mutate.js"
+import {Tool} from "./parts/modes/tool.js"
+import {selectTool} from "./parts/modes/select.js"
 import {Strata} from "../../context/parts/strata.js"
+import {add, remove, update} from "./parts/mutate.js"
+import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
 
 export class OmniSession {
 	index
@@ -21,16 +24,30 @@ export class OmniSession {
 
 	$zoom = signal(1)
 
-	constructor(private deps: {
+	canvas
+	activeMode = signal(selectTool(this))
+
+	constructor(public deps: {
 		strata: Strata,
-		omnitool: O
+		omnitool: O,
+		player: VideoPlayer
 	}) {
+		this.canvas = new TimelineCanvas({
+			session: this,
+			timeline: this.deps.strata.timeline,
+			player: this.deps.player,
+			settings: this.deps.strata.settings
+		})
 		this.index = new Index(deps.strata.timeline)
 		this.$viewedItemId.value = deps.strata.timeline.state.rootId
 	}
 
 	get timeline() {
 		return this.deps.strata.timeline
+	}
+
+	setMode(mode: Tool) {
+		this.activeMode.value = mode(this)
 	}
 
 	setPlayhead(time: Ms) {

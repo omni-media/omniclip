@@ -124,6 +124,14 @@ export class TimelineCanvas {
 		return ms(Math.max(0, (x - metrics.paddingX) / this.pxPerMs()))
 	}
 
+	pointAt(event: PointerEvent) {
+		return this.#pointerPosition(event)
+	}
+
+	timeAt(event: PointerEvent): Ms {
+		return this.#pointerToMs(event)
+	}
+
 	onPointerDown = (event: PointerEvent) => {
 		if (this.#pointerPosition(event).y > metrics.rulerHeight) return
 

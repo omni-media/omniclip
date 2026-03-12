@@ -10,13 +10,7 @@ import {EditorContext} from "../../../../../../../../context/context.js"
 export const TimelineArea = view(use => (context: EditorContext) => {
 	use.styles(themeCss, styleCss)
 	const session = context.session
-
-	const timelineCanvas = use.once(() => new TimelineCanvas({
-		session: context.session,
-		timeline: context.strata.timeline,
-		settings: context.strata.settings,
-		player: context.controllers.player,
-	}))
+	const timelineCanvas = context.session.canvas
 
 	const onScroll = (e: Event) => {
 		const element = e.target as HTMLElement
