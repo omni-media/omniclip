@@ -44,7 +44,7 @@
 		"typescript": "^5.8.3"
 	},
 	"dependencies": {
-		"@benev/tact": "^0.1.0-5",
+		"@benev/tact": "^0.1.1",
 		"@e280/quay": "^0.0.0-2",
 		"@e280/shiny": "^0.1.0-9",
 		"@e280/sly": "^0.2.0-25",
