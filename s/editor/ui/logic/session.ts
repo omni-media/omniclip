@@ -47,7 +47,13 @@ export class OmniSession {
 	}
 
 	setMode(mode: Tool) {
-		this.activeMode.value = mode(this)
+		const isSame = mode(this).id === this.activeMode.value.id
+		if(isSame) {
+			this.activeMode(selectTool(this))
+		}
+		else {
+			this.activeMode(mode(this))
+		}
 	}
 
 	setPlayhead(time: Ms) {
@@ -56,6 +62,18 @@ export class OmniSession {
 
 	getPlayheadInMs() {
 		return ms(this.$playhead.value)
+	}
+
+	splitAtPlayhead() {
+		return this.splitSelectedItemAtTime(this.getPlayheadInMs())
+	}
+
+	splitSelectedItemAtTime(time: Ms) {
+		const clipId = this.$selectedItem.value
+		if (clipId === null)
+			return
+
+		this.splitClipAt(clipId, time)
 	}
 
 	splitClipAt(clipId: Id, time: Ms) {
@@ -97,6 +115,8 @@ export class OmniSession {
 				)
 			})
 		})
+
+		this.$selectedItem.value = null
 	}
 
 	trimClip(clipId: Id, time: Ms, edge: 'start' | 'end') {

@@ -1,6 +1,6 @@
 
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
-import {OmniSession} from "../ui/logic/session.js"
+
 import {makeRouter} from "../ui/pages/router.js"
 import {prepareViews} from "../ui/views/views.js"
 import {Requirements, setupRequirements} from "./parts/requirements.js"
@@ -13,14 +13,8 @@ export class EditorContext {
 
 	router = makeRouter(this)
 	views = prepareViews(this)
-	session: OmniSession
 
 	constructor(private requirements: Requirements) {
-		this.session = new OmniSession({
-			strata: requirements.strata,
-			omnitool: requirements.omni,
-			player: this.controllers.player
-		})
 		requirements.strata.timeline.lens(s => s).on(() => console.log('123'))
 
 		requirements.controllers.player.playback.onTick.on(() =>
@@ -28,6 +22,7 @@ export class EditorContext {
 		)
 	}
 
+	get session() { return this.requirements.session }
 	get strata() { return this.requirements.strata }
 	get controllers() { return this.requirements.controllers }
 	get omni() { return this.requirements.omni }

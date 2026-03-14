@@ -1,48 +1,35 @@
 import * as tact from "@benev/tact"
 
-import {TabManager} from "../../../ui/logic/parts/tab-manager.js"
 import {bindings} from "./bindings.js"
+import {OmniSession} from "../../../ui/logic/session.js"
+import {bladeTool} from "../../../ui/logic/parts/modes/blade.js"
+import {selectTool} from "../../../ui/logic/parts/modes/select.js"
 
 export class Keybindings {
 	#running = false
 	#request = 0
-	#unsubscribe: () => void
 
-	static async setup(tabs: TabManager) {
+	static async setup(session: OmniSession) {
 		const deck = await tact.Deck.load({
 			portCount: 1,
 			bindings,
 			kv: tact.localStorageKv(),
 		})
 		deck.hub.plug(new tact.PrimaryDevice())
-		return new Keybindings(deck, tabs)
+		const port = deck.hub.ports[0]
+		port.modes.add("timeline")
+		return new Keybindings(deck, session)
 	}
 
-	constructor(private deck: tact.Deck<typeof bindings>, private tabs: TabManager) {
+	constructor(private deck: tact.Deck<typeof bindings>, private session: OmniSession) {
 		this.#running = true
-
-		this.#unsubscribe = this.tabs.activeTabId.on(
-			this.#syncActiveMode
-		)
-		this.#syncActiveMode()
 		this.#loop()
 	}
 
 	dispose() {
 		this.#running = false
-		this.#unsubscribe()
 		if (this.#request)
 			cancelAnimationFrame(this.#request)
-	}
-
-	#syncActiveMode = () => {
-		const activeTabId = this.tabs.activeTabId.value
-		const port = this.deck.hub.ports[0]
-		if (port) {
-			port.modes.clear()
-			port.modes.add("editor")
-			port.modes.add(activeTabId)
-		}
 	}
 
 	#loop = () => {
@@ -51,20 +38,16 @@ export class Keybindings {
 		const [port] = this.deck.hub.poll()
 
 		if (port) {
-			const {editor, timeline} = port.actions
-
-			if (editor.next_tab.down) this.tabs.next()
-			if (editor.previous_tab.down) this.tabs.previous()
-
-			if (editor.switch_to_tab_1.down) this.tabs.switchToByIndex(0)
-			if (editor.switch_to_tab_2.down) this.tabs.switchToByIndex(1)
-			if (editor.switch_to_tab_3.down) this.tabs.switchToByIndex(2)
-			if (editor.switch_to_tab_4.down) this.tabs.switchToByIndex(3)
-			if (editor.switch_to_tab_5.down) this.tabs.switchToByIndex(4)
+			const {timeline} = port.actions
 
 			if (timeline.play_pause.down) {
 				console.log("play/Pause timeline")
 			}
+			if(timeline.split_clip.down) this.session.splitAtPlayhead()
+			if(timeline.blade_tool.down) this.session.setMode(bladeTool)
+			if (timeline.blade_tool_temp.up) this.session.setMode(selectTool)
+			if(timeline.select_tool.down) this.session.setMode(selectTool)
+
 		}
 
 		this.#request = requestAnimationFrame(this.#loop)

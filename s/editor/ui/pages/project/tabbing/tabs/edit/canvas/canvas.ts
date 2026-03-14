@@ -1,5 +1,4 @@
 
-import {dom} from '@e280/sly'
 import {VideoPlayer} from '@omnimedia/omnitool'
 import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
 
@@ -133,40 +132,30 @@ export class TimelineCanvas {
 	}
 
 	onPointerDown = (event: PointerEvent) => {
-		if (this.#pointerPosition(event).y > metrics.rulerHeight) return
+		const point = this.#pointerPosition(event)
+		const inRuler = point.y <= metrics.rulerHeight
+		const clip = inRuler ? null : this.clipAt(point.x, point.y)
 
-		const seek = (e: PointerEvent) => {
-			const time = this.#pointerToMs(e)
-			this.deps.player.seek(time)
-			this.deps.session.setPlayhead(time)
-			this.scheduleDraw()
-		}
-
-		seek(event)
-
-		const detach = dom.events(window, {
-			pointermove: seek,
-			pointerup: () => detach()
+		this.deps.session.activeMode.value.pointerdown?.({
+			event,
+			time: this.#pointerToMs(event),
+			clip,
+			point,
+			inRuler
 		})
-	}
-
-	onClick = (event: MouseEvent) => {
-		const point = this.#pointerPosition(event as PointerEvent)
-		if (point.y <= metrics.rulerHeight) return
-
-		const clip = this.clipAt(point.x, point.y)
-		this.deps.session.$selectedItem.value = clip?.itemId ?? null
-		this.scheduleDraw()
 	}
 
 	onDoubleClick = (event: MouseEvent) => {
 		const point = this.#pointerPosition(event as PointerEvent)
-		const clip = this.clipAt(point.x, point.y)
+		const inRuler = point.y <= metrics.rulerHeight
+		const clip = inRuler ? null : this.clipAt(point.x, point.y)
 
-		if (!clip?.enterable) return
-
-		this.deps.session.$viewedItemId.value = clip.itemId
-		this.deps.session.$selectedItem.value = clip.itemId
-		this.scheduleDraw()
+		this.deps.session.activeMode.value.doubleclick?.({
+			event: event as PointerEvent,
+			time: this.#pointerToMs(event as PointerEvent),
+			clip,
+			point,
+			inRuler
+		})
 	}
 }

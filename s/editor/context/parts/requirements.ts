@@ -3,6 +3,7 @@ import {Cellar, OpfsForklift} from "@e280/quay"
 import {Datafile, Driver, Kind, O, Omni, TimelineFile} from "@omnimedia/omnitool"
 
 import {Strata} from "./strata.js"
+import {OmniSession} from "../../ui/logic/session.js"
 import {CargoController} from "../controllers/cargo.js"
 import {Keybindings} from "../controllers/input/keybindings.js"
 import {TabManager} from "../../ui/logic/parts/tab-manager.js"
@@ -12,7 +13,6 @@ export type Requirements = Awaited<ReturnType<typeof setupRequirements>>
 export async function setupRequirements() {
 	const strata = new Strata()
 	const tabs = new TabManager()
-	const keybindings = await Keybindings.setup(tabs)
 	const forklift = await OpfsForklift.setup("files")
 	const cellar = new Cellar(forklift)
 	const driver = await Driver.setup()
@@ -28,8 +28,14 @@ export async function setupRequirements() {
 			strata.timeline.mutate(state => Object.assign(state, p))
 		}
 	})
+	const session = new OmniSession({
+		strata,
+		omnitool: omni,
+		player
+	})
+	const keybindings = await Keybindings.setup(session)
 	strata.timeline.lens(s => s).on(state => player.update(state as TimelineFile))
-	return {strata, controllers, tabs, keybindings, omni, project, driver}
+	return {strata, controllers, tabs, keybindings, omni, project, driver, session}
 }
 
 async function demo(strata: Strata, omni: Omni) {

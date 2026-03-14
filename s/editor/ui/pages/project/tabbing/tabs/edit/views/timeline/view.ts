@@ -3,7 +3,6 @@ import {html} from "lit"
 import {dom, view} from "@e280/sly"
 
 import styleCss from "./style.css.js"
-import {TimelineCanvas} from "../../canvas/canvas.js"
 import themeCss from "../../../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
@@ -44,7 +43,6 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 
 		const detach = dom.events(timelineCanvas.canvas, {
 			pointerdown: timelineCanvas.onPointerDown,
-			click: timelineCanvas.onClick,
 			dblclick: timelineCanvas.onDoubleClick
 		})
 
