@@ -43,6 +43,8 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 
 		const detach = dom.events(timelineCanvas.canvas, {
 			pointerdown: timelineCanvas.onPointerDown,
+			pointermove: timelineCanvas.onPointerMove,
+			pointerleave: timelineCanvas.onPointerLeave,
 			dblclick: timelineCanvas.onDoubleClick
 		})
 
@@ -60,4 +62,3 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 		</div>
 	`
 })
-

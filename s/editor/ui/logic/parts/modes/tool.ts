@@ -18,6 +18,7 @@ export type ToolHandlers = {
 	pointerdown?: (e: ToolEvent) => void
 	pointermove?: (e: ToolEvent) => void
 	pointerup?: (e: ToolEvent) => void
+	pointerleave?: (e: ToolEvent) => void
 	doubleclick?: (e: ToolEvent) => void
 }
 

@@ -9,6 +9,7 @@ export const styles = {
 	trackBackground: "#181818",
 	trackBorder: "#262626",
 	playhead: "#f97316",
+	bladePreview: "#fb7185",
 	text: "#d4d4d4",
 	selectedStroke: "#f5f5f5",
 	stackFill: "#3a3a3a",

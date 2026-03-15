@@ -10,8 +10,10 @@ import {LayoutResult} from './layout/types.js'
 import {drawPlayhead} from './draw/playhead.js'
 import {metrics, styles} from './draw/styles.js'
 import {PIXELS_PER_MILLISECOND} from '../constants.js'
+import {drawBladePreview} from './draw/blade-preview.js'
 import {OmniSession} from '../../../../../../logic/session.js'
 import {Strata} from '../../../../../../../context/parts/strata.js'
+import {ToolName} from '../../../../../../logic/parts/modes/tool.js'
 
 type EditCanvasDeps = {
 	session: OmniSession
@@ -19,6 +21,8 @@ type EditCanvasDeps = {
 	settings: Strata['settings']
 	player: VideoPlayer
 }
+
+type CursorIcon = ToolName
 
 export class TimelineCanvas {
 	canvas = document.createElement('canvas')
@@ -29,11 +33,23 @@ export class TimelineCanvas {
 	#viewportWidth = 0
 	#raf = 0
 
-	constructor(private deps: EditCanvasDeps) {}
+	constructor(public deps: EditCanvasDeps) {}
 
 	resize(width: number) {
 		this.#viewportWidth = width
 		this.scheduleDraw()
+	}
+
+	switchCursor(cursor: CursorIcon) {
+		switch(cursor) {
+			case "select": {
+				this.canvas.style.cursor = "default"
+				break
+			}
+			case "blade":
+				this.canvas.style.cursor = "url('/assets/icons/material-design-icons/razor.svg') 12 12, crosshair"
+				break
+		}
 	}
 
 	scheduleDraw = () => {
@@ -65,6 +81,7 @@ export class TimelineCanvas {
 		drawRuler(this)
 		drawLanes(this)
 		drawClips(this)
+		drawBladePreview(this)
 		drawPlayhead(this)
 	}
 
@@ -109,6 +126,7 @@ export class TimelineCanvas {
 	playheadX() {
 		return this.deps.session.$playhead.value * this.pxPerMs()
 	}
+
 	get timeline(): {rootId: number, items: readonly unknown[]} {
 		return this.deps.timeline.state
 	}
@@ -139,6 +157,34 @@ export class TimelineCanvas {
 		this.deps.session.activeMode.value.pointerdown?.({
 			event,
 			time: this.#pointerToMs(event),
+			clip,
+			point,
+			inRuler
+		})
+	}
+
+	onPointerMove = (event: PointerEvent) => {
+		const point = this.#pointerPosition(event)
+		const inRuler = point.y <= metrics.rulerHeight
+		const clip = inRuler ? null : this.clipAt(point.x, point.y)
+
+		this.deps.session.activeMode.value.pointermove?.({
+			event,
+			time: this.#pointerToMs(event),
+			clip,
+			point,
+			inRuler
+		})
+	}
+
+	onPointerLeave = (event: PointerEvent) => {
+		const point = this.#pointerPosition(event)
+		const inRuler = point.y <= metrics.rulerHeight
+		const clip = inRuler ? null : this.clipAt(point.x, point.y)
+
+		this.deps.session.activeMode.value.pointerleave?.({
+			event: event as PointerEvent,
+			time: this.#pointerToMs(event as PointerEvent),
 			clip,
 			point,
 			inRuler

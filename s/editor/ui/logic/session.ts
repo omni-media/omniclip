@@ -22,6 +22,10 @@ export class OmniSession {
 	$selectedItem = signal<Id | null>(null)
 	$viewedItemId = signal<Id>(0)
 
+	$previews = {
+		blade: signal<{time: Ms, clipId: Id} | null>(null)
+	}
+
 	$zoom = signal(1)
 
 	canvas
@@ -46,6 +50,12 @@ export class OmniSession {
 		return this.deps.strata.timeline
 	}
 
+	#clearPreviews() {
+		for(const preview in this.$previews) {
+			this.$previews[preview as keyof typeof this.$previews].value = null
+		}
+	}
+
 	setMode(mode: Tool) {
 		const isSame = mode(this).id === this.activeMode.value.id
 		if(isSame) {
@@ -54,6 +64,9 @@ export class OmniSession {
 		else {
 			this.activeMode(mode(this))
 		}
+		this.#clearPreviews()
+		this.canvas.switchCursor(this.activeMode.value.id)
+		this.canvas.scheduleDraw()
 	}
 
 	setPlayhead(time: Ms) {
@@ -116,6 +129,7 @@ export class OmniSession {
 			})
 		})
 
+		this.#clearPreviews()
 		this.$selectedItem.value = null
 	}
 
