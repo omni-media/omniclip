@@ -2,11 +2,11 @@
 import {html} from "lit"
 import {dom, view} from "@e280/sly"
 import {debounce} from "@e280/stz"
-import {ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {fps} from "@omnimedia/omnitool/x/units/fps.js"
+import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import styleCss from "./style.css.js"
 import {drawRuler} from "./parts/draw/ruler.js"
-import {PIXELS_PER_MILLISECOND} from "../../constants.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
 export const Ruler = view(use => (context: EditorContext) => {
@@ -17,7 +17,7 @@ export const Ruler = view(use => (context: EditorContext) => {
 	const player = context.controllers.player
 
 	const throttledSeek = use.once(() =>
-		debounce(16, time => player.seek(time))
+		debounce(16, (time: Ms) => player.seek(time))
 	)
 
 	const drag = use.once(() => ({
@@ -28,20 +28,19 @@ export const Ruler = view(use => (context: EditorContext) => {
 		requestAnimationFrame(draw)
 	}
 
-	const pointerToTime = (e: PointerEvent) => {
+	const pointerToTime = (e: PointerEvent): Ms => {
 		const scrollLeft = session.$timeline.scrollLeft.value
 
 		const relativeX = e.clientX - drag.leftOffset + scrollLeft
-		const zoom = session.$zoom.value
-		const ms = relativeX / (PIXELS_PER_MILLISECOND * zoom)
+		const time = session.viewport.xToTime(relativeX)
 
-		return Math.max(0, ms)
+		return ms(Math.max(0, time))
 	}
 
 	const updateDrag = (e: PointerEvent) => {
 		const time = pointerToTime(e)
 		throttledSeek(time)
-		session.setPlayhead(ms(time))
+		session.setPlayhead(time)
 	}
 
 	const startDrag = (e: PointerEvent) => {
@@ -63,7 +62,7 @@ export const Ruler = view(use => (context: EditorContext) => {
 				session.$timeline.scrollLeft.value,
 				session.$timeline.width.value,
 				session.$zoom.value,
-				settings.state
+				{...settings.state, timebase: fps(Number(settings.state.timebase))}
 			)
 	}
 

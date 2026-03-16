@@ -1,5 +1,6 @@
 
 import {Kind} from "@omnimedia/omnitool"
+import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {TimelineClipBox} from "../draw/clip.js"
 
@@ -14,7 +15,7 @@ export type TimelineNode = {
 export type LayoutResult = {
 	clips: TimelineClipBox[]
 	rows: number
-	duration: number
+	duration: Ms
 }
 
 export type LayoutContext = {

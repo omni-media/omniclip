@@ -4,16 +4,18 @@ import {Id, Kind, O, VideoPlayer} from "@omnimedia/omnitool"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {Idx, Index} from "./parts/index.js"
+import {Viewport} from "./parts/viewport.js"
 import {Tool} from "./parts/modes/tool.js"
 import {selectTool} from "./parts/modes/select.js"
 import {Strata} from "../../context/parts/strata.js"
 import {add, remove, update} from "./parts/mutate.js"
+import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
 
 export class OmniSession {
 	index
 
-	$playhead = signal(0)
+	$playhead = signal<Ms>(ms(0))
 	$timeline = {
 		scrollLeft: signal(0),
 		width: signal(0)
@@ -23,6 +25,9 @@ export class OmniSession {
 	$viewedItemId = signal<Id>(0)
 
 	$zoom = signal(1)
+	viewport = new Viewport(() =>
+		PIXELS_PER_MILLISECOND * this.$zoom.value
+	)
 
 	canvas
 	activeMode = signal(selectTool(this))
@@ -64,7 +69,7 @@ export class OmniSession {
 	}
 
 	getPlayheadInMs() {
-		return ms(this.$playhead.value)
+		return this.$playhead.value
 	}
 
 	splitAtPlayhead() {

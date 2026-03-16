@@ -1,6 +1,7 @@
 
 import {GMap} from '@e280/stz'
 import {Chrono} from '@e280/strata'
+import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
 import {Id, Item, Kind, TimelineFile} from '@omnimedia/omnitool'
 
 export namespace Idx {
@@ -13,7 +14,7 @@ export class Index {
 
 	items = new GMap<Id, Idx.AnyItem>()
 	parents = new GMap<Id, Idx.Struct>()
-	laneStarts = new GMap<Id, number>()
+	laneStarts = new GMap<Id, Ms>()
 
 	constructor(strata: Chrono<TimelineFile>) {
 		this.reindex(strata.state as TimelineFile)
@@ -35,7 +36,7 @@ export class Index {
 			}
 		}
 
-		this.#indexLaneStarts(state.rootId, 0)
+		this.#indexLaneStarts(state.rootId, ms(0))
 	}
 
 	getItem<T extends Idx.AnyItem>(id: Id) {
@@ -59,16 +60,16 @@ export class Index {
 	getItemLaneStart(id: Id, relativeToId?: Id) {
 		const absStart = this.laneStarts.get(id)
 		if (absStart == null)
-			return 0
+			return ms(0)
 
 		if (!relativeToId)
 			return absStart
 
-		const rootStart = this.laneStarts.get(relativeToId) ?? 0
-		return absStart - rootStart
+		const rootStart = this.laneStarts.get(relativeToId) ?? ms(0)
+		return ms(absStart - rootStart)
 	}
 
-	#indexLaneStarts(id: Id, start: number) {
+	#indexLaneStarts(id: Id, start: Ms) {
 		const item = this.getItem(id)
 
 		this.laneStarts.set(id, start)
@@ -87,7 +88,7 @@ export class Index {
 					this.#indexLaneStarts(childId, cursor)
 
 					if ('duration' in child)
-						cursor += child.duration
+						cursor = ms(cursor + child.duration)
 				}
 
 				break

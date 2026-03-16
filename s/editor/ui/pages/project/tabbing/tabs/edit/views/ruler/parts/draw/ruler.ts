@@ -1,4 +1,6 @@
 
+import {ms} from '@omnimedia/omnitool/x/units/ms.js'
+
 import {tickSteps} from "../constants.js"
 import {drawMajorTick} from "./major-tick.js"
 import {drawMinorTick} from "./minor-tick.js"
@@ -32,14 +34,14 @@ export function drawRuler (
 	const steps = tickSteps(timebase)
 	const scale = steps.find(s => s.major * pxPerMs >= 80) || steps[steps.length - 1]
 
-	const startMs = Math.max(0, scrollX / pxPerMs)
-	const endMs = (scrollX + width) / pxPerMs
+	const startMs = ms(Math.max(0, scrollX / pxPerMs))
+	const endMs = ms((scrollX + width) / pxPerMs)
 
 	const startStep = Math.floor(startMs / scale.minor)
 	const endStep = Math.ceil(endMs / scale.minor)
 
 	for (let step = startStep; step <= endStep; step++) {
-		const time = step * scale.minor
+		const time = ms(step * scale.minor)
 		const x = Math.round(time * pxPerMs - scrollX)
 		const isMajor = Math.round(time) % Math.round(scale.major) === 0
 

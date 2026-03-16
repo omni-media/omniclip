@@ -1,15 +1,15 @@
 
-import {Kind} from "@omnimedia/omnitool"
+import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {layoutLeaf} from "./leaf.js"
 import {LayoutContext, LayoutResult, TimelineNode} from "./types.js"
 
 function resolveDuration(
 	context: LayoutContext,
-	walk: (item: TimelineNode, row: number, time: number, rootStack?: boolean) => LayoutResult,
+	walk: (item: TimelineNode, row: number, time: Ms, rootStack?: boolean) => LayoutResult,
 	item: TimelineNode
 ) {
-	let duration = item.duration ?? 0
+	let duration = ms(item.duration ?? 0)
 
 	if (item.childrenIds?.length) {
 		for (const id of item.childrenIds) {
@@ -17,8 +17,8 @@ function resolveDuration(
 			if (!child)
 				continue
 
-			const childLayout = walk(child, 0, 0)
-			duration = Math.max(duration, childLayout.duration)
+			const childLayout = walk(child, 0, ms(0))
+			duration = ms(Math.max(duration, childLayout.duration))
 		}
 	}
 
@@ -27,10 +27,10 @@ function resolveDuration(
 
 export function layoutStack(
 	context: LayoutContext,
-	walk: (item: TimelineNode, row: number, time: number, rootStack?: boolean) => LayoutResult,
+	walk: (item: TimelineNode, row: number, time: Ms, rootStack?: boolean) => LayoutResult,
 	item: TimelineNode,
 	row: number,
-	time: number,
+	time: Ms,
 	rootStack = false
 ): LayoutResult {
 	if (!rootStack) {
@@ -50,7 +50,7 @@ export function layoutStack(
 		const childLayout = walk(child, nextRow, time)
 		clips.push(...childLayout.clips)
 		nextRow = Math.max(nextRow + 1, childLayout.rows)
-		duration = Math.max(duration, childLayout.duration)
+		duration = ms(Math.max(duration, childLayout.duration))
 	}
 
 	return {

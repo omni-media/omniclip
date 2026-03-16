@@ -1,5 +1,6 @@
 
 import {Kind} from "@omnimedia/omnitool"
+import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {layoutLeaf} from "./leaf.js"
 import {layoutStack} from "./stack.js"
@@ -11,16 +12,16 @@ import {LayoutContext, LayoutResult, TimelineNode} from "./types.js"
 export function buildLayout(index: Index, canvas: TimelineCanvas): LayoutResult {
 	const root = index.getItem(canvas.viewedItemId())
 	if (!root)
-		return {clips: [], rows: 1, duration: 0}
+		return {clips: [], rows: 1, duration: ms(0)}
 
 	const resolvedContext: LayoutContext = {
 		items: index.items,
-		pxPerMs: canvas.pxPerMs(),
+		pxPerMs: canvas.viewport.durationToWidth(ms(1)),
 		selectedItemId: canvas.selectedItemId(),
 		trackY: canvas.trackY,
 	}
 
-	const walk = (item: TimelineNode, row: number, time: number, rootStack = false): LayoutResult => {
+	const walk = (item: TimelineNode, row: number, time: Ms, rootStack = false): LayoutResult => {
 		switch (item.kind) {
 			case Kind.Sequence:
 				return layoutSequence(resolvedContext, walk, item, row, time)
@@ -31,6 +32,6 @@ export function buildLayout(index: Index, canvas: TimelineCanvas): LayoutResult 
 		}
 	}
 
-	return walk(root, 0, 0, true)
+	return walk(root, 0, ms(0), true)
 }
 

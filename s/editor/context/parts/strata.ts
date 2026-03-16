@@ -1,9 +1,10 @@
 
 import {TimelineFile, Id} from "@omnimedia/omnitool"
+import {fps, Fps} from "@omnimedia/omnitool/x/units/fps.js"
 import {Chronicle, chronicle, Prism, Chrono} from "@e280/strata"
 
 export type EditorSettingsState = {
-	timebase: number
+	timebase: Fps
 	resolution: {
 		width: number
 		height: number
@@ -66,7 +67,7 @@ export class Strata {
 			items: []
 		},
 		settings: {
-			timebase: 30,
+			timebase: fps(30),
 			resolution: {
 				width: 1920,
 				height: 1080

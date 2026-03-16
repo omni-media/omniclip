@@ -1,10 +1,13 @@
 
+import {Fps} from '@omnimedia/omnitool/x/units/fps.js'
+import {Ms} from '@omnimedia/omnitool/x/units/ms.js'
+
 export function drawMinorTick (
 	ctx: CanvasRenderingContext2D,
 	x: number,
-	time: number,
-	scaleMajor: number,
-	timebase: number,
+	time: Ms,
+	scaleMajor: Ms,
+	timebase: Fps,
 	pps: number
 ) {
 	if (scaleMajor === 1000) {

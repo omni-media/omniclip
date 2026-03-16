@@ -1,5 +1,6 @@
 
 import {Kind} from "@omnimedia/omnitool"
+import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {metrics} from "../draw/styles.js"
 import {TimelineClipBox} from "../draw/clip.js"
@@ -17,8 +18,8 @@ export function layoutLeaf(
 	context: LayoutContext,
 	item: TimelineNode,
 	row: number,
-	time: number,
-	duration = item.duration ?? 0,
+	time: Ms,
+	duration = ms(item.duration ?? 0),
 	enterable = false
 ): LayoutResult {
 	const clip: TimelineClipBox = {
@@ -36,7 +37,7 @@ export function layoutLeaf(
 	return {
 		clips: [clip],
 		rows: row + 1,
-		duration: time + duration,
+		duration: ms(time + duration),
 	}
 }
 

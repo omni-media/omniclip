@@ -1,15 +1,17 @@
 
+import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
+
 import {LayoutContext, LayoutResult, TimelineNode} from "./types.js"
 
 export function layoutSequence(
 	context: LayoutContext,
-	walk: (item: TimelineNode, row: number, time: number, rootStack?: boolean) => LayoutResult,
+	walk: (item: TimelineNode, row: number, time: Ms, rootStack?: boolean) => LayoutResult,
 	item: TimelineNode,
 	row: number,
-	time: number
+	time: Ms
 ): LayoutResult {
 	const clips = []
-	let cursor = 0
+	let cursor = ms(0)
 	let rows = row + 1
 	let duration = time
 
@@ -18,11 +20,11 @@ export function layoutSequence(
 		if (!child)
 			continue
 
-		const childLayout = walk(child, row, time + cursor)
+		const childLayout = walk(child, row, ms(time + cursor))
 		clips.push(...childLayout.clips)
-		cursor += childLayout.duration - (time + cursor)
+		cursor = ms(childLayout.duration - time)
 		rows = Math.max(rows, childLayout.rows)
-		duration = Math.max(duration, childLayout.duration)
+		duration = ms(Math.max(duration, childLayout.duration))
 	}
 
 	return {clips, rows, duration}

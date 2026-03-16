@@ -1,6 +1,7 @@
 
 import {signal} from '@e280/strata'
 import {Id, VideoPlayer} from '@omnimedia/omnitool'
+import {fps, Fps} from '@omnimedia/omnitool/x/units/fps.js'
 import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
 
 import {drawClips} from './draw/clip.js'
@@ -10,7 +11,6 @@ import {buildLayout} from './layout/build.js'
 import {LayoutResult} from './layout/types.js'
 import {drawPlayhead} from './draw/playhead.js'
 import {metrics, styles} from './draw/styles.js'
-import {PIXELS_PER_MILLISECOND} from '../constants.js'
 import {drawBladePreview} from './draw/blade-preview.js'
 import {OmniSession} from '../../../../../../logic/session.js'
 import {Strata} from '../../../../../../../context/parts/strata.js'
@@ -27,11 +27,10 @@ type CursorIcon = ToolName
 
 export class TimelineCanvas {
 	canvas = document.createElement('canvas')
-	ctx = this.canvas.getContext("2d")!
+	ctx = this.canvas.getContext('2d')!
 
-	layout: LayoutResult = {clips: [], rows: 1, duration: 0}
+	layout: LayoutResult = {clips: [], rows: 1, duration: ms(0)}
 
-	#viewportWidth = 0
 	#raf = 0
 
 	$previews = {
@@ -40,8 +39,12 @@ export class TimelineCanvas {
 
 	constructor(public deps: EditCanvasDeps) {}
 
+	get viewport() {
+		return this.deps.session.viewport
+	}
+
 	resize(width: number) {
-		this.#viewportWidth = width
+		this.viewport.setWidth(width)
 		this.scheduleDraw()
 	}
 
@@ -73,8 +76,8 @@ export class TimelineCanvas {
 
 	get width() {
 		return Math.max(
-			this.#viewportWidth,
-			Math.ceil(this.layout.duration * this.pxPerMs()) + metrics.paddingX * 2
+			this.viewport.width,
+			Math.ceil(this.viewport.durationToWidth(this.layout.duration)) + metrics.paddingX * 2
 		)
 	}
 
@@ -122,20 +125,17 @@ export class TimelineCanvas {
 			   row * (metrics.trackHeight + metrics.trackGap)
 	}
 
-	pxPerMs() {
-		return PIXELS_PER_MILLISECOND * this.deps.session.$zoom.value
-	}
 	selectedItemId() {
 		return this.deps.session.$selectedItem.value
 	}
 	viewedItemId() {
 		return this.deps.session.$viewedItemId.value
 	}
-	timebase() {
-		return this.deps.settings.state.timebase
+	timebase(): Fps {
+		return fps(Number(this.deps.settings.state.timebase))
 	}
 	playheadX() {
-		return this.deps.session.$playhead.value * this.pxPerMs()
+		return this.viewport.timeToX(this.deps.session.$playhead.value)
 	}
 
 	get timeline(): {rootId: number, items: readonly unknown[]} {
@@ -149,7 +149,7 @@ export class TimelineCanvas {
 
 	#pointerToMs(event: PointerEvent): Ms {
 		const {x} = this.#pointerPosition(event)
-		return ms(Math.max(0, (x - metrics.paddingX) / this.pxPerMs()))
+		return ms(Math.max(0, this.viewport.xToTime(x - metrics.paddingX)))
 	}
 
 	pointAt(event: PointerEvent) {

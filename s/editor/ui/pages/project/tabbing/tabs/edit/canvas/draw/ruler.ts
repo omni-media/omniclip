@@ -1,16 +1,18 @@
 
+import {ms} from '@omnimedia/omnitool/x/units/ms.js'
+
 import {metrics, styles} from "./styles.js"
 import type {TimelineCanvas} from "../canvas.js"
 import {formatTime} from "../../../../utils/format-time.js"
 import {tickSteps} from "../../views/ruler/parts/constants.js"
 
 export function drawRuler(canvas: TimelineCanvas) {
-	const pxPerMs = canvas.pxPerMs()
+	const pxPerMs = canvas.viewport.durationToWidth(ms(1))
 	const timebase = canvas.timebase()
 	const pps = pxPerMs * 1000
 	const steps = tickSteps(timebase)
 	const scale = steps.find(step => step.major * pxPerMs >= 80) ?? steps[steps.length - 1]
-	const endMs = Math.max(0, (canvas.width - (metrics.paddingX * 2)) / pxPerMs)
+	const endMs = ms(Math.max(0, canvas.viewport.widthToDuration(canvas.width - (metrics.paddingX * 2))))
 	const endStep = Math.ceil(endMs / scale.minor)
 
 	canvas.ctx.fillStyle = styles.rulerBackground
@@ -25,8 +27,8 @@ export function drawRuler(canvas: TimelineCanvas) {
 	canvas.ctx.textBaseline = "top"
 
 	for (let step = 0; step <= endStep; step += 1) {
-		const time = step * scale.minor
-		const x = Math.round((time * pxPerMs) + metrics.paddingX)
+		const time = ms(step * scale.minor)
+		const x = Math.round(canvas.viewport.timeToX(time) + metrics.paddingX)
 		const isMajor = Math.round(time) % Math.round(scale.major) === 0
 
 		if (isMajor) {
