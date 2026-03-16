@@ -1,5 +1,6 @@
 
-import {VideoPlayer} from '@omnimedia/omnitool'
+import {signal} from '@e280/strata'
+import {Id, VideoPlayer} from '@omnimedia/omnitool'
 import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
 
 import {drawClips} from './draw/clip.js'
@@ -33,11 +34,21 @@ export class TimelineCanvas {
 	#viewportWidth = 0
 	#raf = 0
 
+	$previews = {
+		blade: signal<{time: Ms, clipId: Id} | null>(null)
+	}
+
 	constructor(public deps: EditCanvasDeps) {}
 
 	resize(width: number) {
 		this.#viewportWidth = width
 		this.scheduleDraw()
+	}
+
+	clearPreviews() {
+		for(const preview in this.$previews) {
+			this.$previews[preview as keyof typeof this.$previews].value = null
+		}
 	}
 
 	switchCursor(cursor: CursorIcon) {
