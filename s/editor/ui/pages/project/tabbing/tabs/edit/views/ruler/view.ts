@@ -29,10 +29,7 @@ export const Ruler = view(use => (context: EditorContext) => {
 	}
 
 	const pointerToTime = (e: PointerEvent): Ms => {
-		const scrollLeft = session.$timeline.scrollLeft.value
-
-		const relativeX = e.clientX - drag.leftOffset + scrollLeft
-		const time = session.viewport.xToTime(relativeX)
+		const time = session.viewport.viewportXToTime(e.clientX - drag.leftOffset)
 
 		return ms(Math.max(0, time))
 	}
@@ -59,9 +56,7 @@ export const Ruler = view(use => (context: EditorContext) => {
 			drawRuler(
 				ctx,
 				canvas,
-				session.$timeline.scrollLeft.value,
-				session.$timeline.width.value,
-				session.$zoom.value,
+				session.viewport,
 				{...settings.state, timebase: fps(Number(settings.state.timebase))}
 			)
 	}
@@ -73,8 +68,9 @@ export const Ruler = view(use => (context: EditorContext) => {
 	}))
 
 	use.mount(() => {
-		const unScroll = session.$timeline.scrollLeft.on(scheduleDraw)
-		const unWidth = session.$timeline.width.on(scheduleDraw)
+		const unScroll = session.viewport.$scrollLeft.on(scheduleDraw)
+		const unWidth = session.viewport.$width.on(scheduleDraw)
+		const unZoom = session.viewport.$zoom.on(scheduleDraw)
 		const unSet = settings.on(scheduleDraw)
 
 		window.addEventListener(
@@ -88,6 +84,7 @@ export const Ruler = view(use => (context: EditorContext) => {
 		return () => {
 			unScroll()
 			unWidth()
+			unZoom()
 			unSet()
 			window.removeEventListener("resize", scheduleDraw)
 		}

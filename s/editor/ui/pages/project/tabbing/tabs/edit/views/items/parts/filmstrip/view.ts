@@ -1,6 +1,7 @@
 import {html} from "lit"
 import {view} from "@e280/sly"
 import {Filmstrip, Item} from "@omnimedia/omnitool"
+import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../../../../../../../../theme.css.js"
@@ -13,14 +14,14 @@ export const FilmstripView = view(use => (
 	use.styles(styleCss, themeCss)
 
 	const session = context.session
-	const pixelsPerMillisecond = 0.1 * session.$zoom.value
+	const pixelsPerMillisecond = session.viewport.durationToWidth(ms(1))
 
 	const thumbnails = use.signal<{ time: number, canvas: HTMLCanvasElement | OffscreenCanvas }[]>([])
 
 	const THUMB_WIDTH_PX = 100
 
-	const getFrequencyInSec = (zoom: number) => {
-		const pixelsPerMillisecond = 0.1 * zoom
+	const getFrequencyInSec = () => {
+		const pixelsPerMillisecond = session.viewport.durationToWidth(ms(1))
 		const freq = THUMB_WIDTH_PX / (pixelsPerMillisecond * 1000)
 		return Math.round(freq * 1000) / 1000
 	}
@@ -55,9 +56,9 @@ export const FilmstripView = view(use => (
 
 	const filmstrip = op.isLoading ? op.wait : op.require()
 
-	const update = async (scrollLeft: number) => {
-		const viewportStart = scrollLeft / pixelsPerMillisecond
-		const viewportEnd = (scrollLeft + session.$timeline.width.value) / pixelsPerMillisecond
+	const update = async () => {
+		const viewportStart = session.viewport.visibleStart()
+		const viewportEnd = session.viewport.visibleEnd()
 		const visibleClipStart = Math.max(clip.start, viewportStart)
 		const visibleClipEnd = Math.min(clip.start + clip.duration, viewportEnd)
 
@@ -68,14 +69,16 @@ export const FilmstripView = view(use => (
 			]
 	}
 
-	use.once(async () => update(0))
+	use.once(async () => update())
 
 	use.mount(() => {
-		const dispose1 = session.$zoom.on(async (zoom) => {(await filmstrip).frequency = getFrequencyInSec(zoom)})
-		const dispose2 = session.$timeline.scrollLeft.on(async (scrollLeft) => update(scrollLeft))
+		const dispose1 = session.viewport.$zoom.on(async () => {(await filmstrip).frequency = getFrequencyInSec()})
+		const dispose2 = session.viewport.$scrollLeft.on(async () => update())
+		const dispose3 = session.viewport.$width.on(async () => update())
 		return () => {
 			dispose1()
 			dispose2()
+			dispose3()
 		}
 	})
 

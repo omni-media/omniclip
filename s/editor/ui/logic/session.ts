@@ -16,18 +16,11 @@ export class OmniSession {
 	index
 
 	$playhead = signal<Ms>(ms(0))
-	$timeline = {
-		scrollLeft: signal(0),
-		width: signal(0)
-	}
 
 	$selectedItem = signal<Id | null>(null)
 	$viewedItemId = signal<Id>(0)
 
-	$zoom = signal(1)
-	viewport = new Viewport(() =>
-		PIXELS_PER_MILLISECOND * this.$zoom.value
-	)
+	viewport = new Viewport(PIXELS_PER_MILLISECOND)
 
 	canvas
 	activeMode = signal(selectTool(this))

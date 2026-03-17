@@ -81,7 +81,7 @@ export const Toolbar = view(use => (context: EditorContext) => {
 
 			<div class="toolbar-section right">
 				<div class="zoom-controls">
-					<button class="zoom-button" @click=${() => session.$zoom.value -= 0.1}>
+					<button class="zoom-button" @click=${() => session.viewport.$zoom.value -= 0.1}>
 						${zoomOutSvg}
 					</button>
 					<input
@@ -90,10 +90,10 @@ export const Toolbar = view(use => (context: EditorContext) => {
 						min="0.2"
 						max="10"
 						step="0.1"
-						.value=${session.$zoom.value}
-						@input=${(e: Event) => session.$zoom.value = +(e.currentTarget as HTMLInputElement).value}
+						.value=${session.viewport.zoom}
+						@input=${(e: Event) => session.viewport.$zoom.value = +(e.currentTarget as HTMLInputElement).value}
 					>
-					<button class="zoom-button" @click=${() => session.$zoom.value += 0.1}>
+					<button class="zoom-button" @click=${() => session.viewport.$zoom.value += 0.1}>
 						${zoomInSvg}
 					</button>
 				</div>

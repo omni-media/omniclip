@@ -1,10 +1,10 @@
 import {html} from "lit"
 import {view} from "@e280/sly"
 import {Item, Kind} from "@omnimedia/omnitool"
+import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import styleCss from "./style.css.js"
 import {renderItem} from "../../../parts/render-item.js"
-import {PIXELS_PER_MILLISECOND} from "../../../constants.js"
 import themeCss from "../../../../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 
@@ -41,9 +41,8 @@ export const StackView = view(use => (
 	}
 
 	const renderCompactMode = () => {
-		const zoom = session.$zoom.value
 		const stackDuration = getStackDuration(item, timeline.items as Item.Any[])
-		const visualWidth = stackDuration * PIXELS_PER_MILLISECOND * zoom
+		const visualWidth = session.viewport.durationToWidth(ms(stackDuration))
 
 		return html`
 			<div

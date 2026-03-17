@@ -1,36 +1,63 @@
 
+import {signal} from '@e280/strata'
 import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
 
 export class Viewport {
-	width = 0
+	$zoom = signal(1)
+	$scrollLeft = signal(0)
+	$width = signal(0)
 
-	constructor(readonly getZoom: () => number) {}
+	constructor(readonly pixelsPerMillisecond: number) {}
+
+	get zoom() {
+		return this.$zoom.value
+	}
+
+	get scrollLeft() {
+		return this.$scrollLeft.value
+	}
+
+	get width() {
+		return this.$width.value
+	}
 
 	timeToX(time: Ms) {
-		return time * this.getZoom()
+		return time * this.pxPerMs()
+	}
+
+	timeToViewportX(time: Ms) {
+		return this.timeToX(time) - this.scrollLeft
 	}
 
 	xToTime(x: number) {
-		return ms(x / this.getZoom())
+		return ms(x / this.pxPerMs())
+	}
+
+	viewportXToTime(x: number) {
+		return this.xToTime(x + this.scrollLeft)
 	}
 
 	durationToWidth(duration: Ms) {
-		return duration * this.getZoom()
+		return duration * this.pxPerMs()
 	}
 
 	widthToDuration(width: number) {
-		return ms(width / this.getZoom())
+		return ms(width / this.pxPerMs())
 	}
 
 	setWidth(width: number) {
-		this.width = width
+		this.$width.value = width
 	}
 
 	visibleStart() {
-		return ms(0)
+		return this.xToTime(this.scrollLeft)
 	}
 
 	visibleEnd() {
-		return this.widthToDuration(this.width)
+		return this.xToTime(this.scrollLeft + this.width)
+	}
+
+	pxPerMs() {
+		return this.pixelsPerMillisecond * this.zoom
 	}
 }

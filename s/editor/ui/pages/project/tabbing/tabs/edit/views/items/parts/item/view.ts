@@ -1,10 +1,10 @@
 import {view} from "@e280/sly"
 import {html, TemplateResult} from "lit"
 import {Item} from "@omnimedia/omnitool"
+import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import styleCss from "./style.css.js"
 import {DirectiveResult} from "lit/directive.js"
-import {PIXELS_PER_MILLISECOND} from "../../../../constants.js"
 import themeCss from "../../../../../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../../../../../context/context.js"
 
@@ -18,8 +18,7 @@ export const TimelineItem = view(use => (
 	use.styles(themeCss, styleCss)
 	const session = context.session
 
-	const zoom = session.$zoom.value
-	const visualWidth = (item.duration ?? 0) * PIXELS_PER_MILLISECOND * zoom
+	const visualWidth = session.viewport.durationToWidth(ms(item.duration ?? 0))
 	const setViewedItem = () => session.$viewedItemId.value = item.id
 	const setSelectedItem = () => session.$selectedItem.value = item.id
 

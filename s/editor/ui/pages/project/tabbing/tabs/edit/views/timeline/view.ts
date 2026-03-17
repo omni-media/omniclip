@@ -13,27 +13,24 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 
 	const onScroll = (e: Event) => {
 		const element = e.target as HTMLElement
-		session.$timeline.scrollLeft.value = element.scrollLeft
+		session.viewport.$scrollLeft.value = element.scrollLeft
 	}
 
 	use.mount(() => {
 		const observer = new ResizeObserver(entries => {
 			for (const entry of entries) {
-				const width = entry.contentRect.width
-				session.$timeline.width.value = width
-				timelineCanvas.resize(width)
+				timelineCanvas.resize(entry.contentRect.width)
 			}
 		})
 
 		use.rendered.then(() => {
 			const timeline = dom.in(use.shadow).require(".timeline")
-			session.$timeline.width.value = timeline.clientWidth
 			timelineCanvas.resize(timeline.clientWidth)
 			observer.observe(timeline)
 		})
 
 		const unsubs = [
-			session.$zoom.on(timelineCanvas.scheduleDraw),
+			session.viewport.$zoom.on(timelineCanvas.scheduleDraw),
 			session.$playhead.on(timelineCanvas.scheduleDraw),
 			session.$selectedItem.on(timelineCanvas.scheduleDraw),
 			session.$viewedItemId.on(timelineCanvas.scheduleDraw),
