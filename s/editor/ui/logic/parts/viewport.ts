@@ -49,6 +49,15 @@ export class Viewport {
 		this.$width.value = width
 	}
 
+	setZoom(zoom: number) {
+		const clamped = Math.max(0.2, Math.min(10, zoom))
+		this.$zoom.value = Math.round(clamped * 10) / 10
+	}
+
+	adjustZoom(delta: number) {
+		this.setZoom(this.zoom + delta)
+	}
+
 	visibleStart() {
 		return this.xToTime(this.scrollLeft)
 	}

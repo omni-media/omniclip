@@ -1,13 +1,16 @@
+
 import * as tact from "@benev/tact"
 
 import {bindings} from "./bindings.js"
 import {OmniSession} from "../../../ui/logic/session.js"
 import {bladeTool} from "../../../ui/logic/parts/modes/blade.js"
 import {selectTool} from "../../../ui/logic/parts/modes/select.js"
+import {prevent_default_zoom_browser_behavior} from "./prevent-default-hack.js"
 
 export class Keybindings {
 	#running = false
 	#request = 0
+	#detach
 
 	static async setup(session: OmniSession) {
 		const deck = await tact.Deck.load({
@@ -22,15 +25,18 @@ export class Keybindings {
 	}
 
 	constructor(private deck: tact.Deck<typeof bindings>, private session: OmniSession) {
+		this.#detach = prevent_default_zoom_browser_behavior(deck)
 		this.#running = true
 		this.#loop()
 	}
 
 	dispose() {
 		this.#running = false
+		this.#detach()
 		if (this.#request)
 			cancelAnimationFrame(this.#request)
 	}
+
 
 	#loop = () => {
 		if (!this.#running) return
@@ -39,17 +45,16 @@ export class Keybindings {
 
 		if (port) {
 			const {timeline} = port.actions
-
-			if (timeline.play_pause.down) {
-				console.log("play/Pause timeline")
-			}
-			if(timeline.split_clip.down) this.session.splitAtPlayhead()
-			if(timeline.blade_tool.down) this.session.setMode(bladeTool)
+			if (timeline.play_pause.down) console.log("play/Pause timeline")
+			if (timeline.split_clip.down) this.session.splitAtPlayhead()
+			if (timeline.zoom_in.down) this.session.viewport.adjustZoom(0.1)
+			if (timeline.zoom_out.down) this.session.viewport.adjustZoom(-0.1)
+			if (timeline.blade_tool.down) this.session.setMode(bladeTool)
 			if (timeline.blade_tool_temp.up) this.session.setMode(selectTool)
-			if(timeline.select_tool.down) this.session.setMode(selectTool)
-
+			if (timeline.select_tool.down) this.session.setMode(selectTool)
 		}
 
 		this.#request = requestAnimationFrame(this.#loop)
 	}
 }
+
