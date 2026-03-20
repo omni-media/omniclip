@@ -6,48 +6,96 @@ import {bindings} from "./bindings.js"
 
 type BindingAtom =
 	| string
-	| ["or", ...BindingAtom[]]
-	| ["mods", string, Partial<{ctrl: boolean, alt: boolean, shift: boolean, meta: boolean}>]
 	| ["code", string, unknown?]
+	| ["and", ...BindingAtom[]]
+	| ["or", ...BindingAtom[]]
+	| ["not", BindingAtom]
+	| ["cond", BindingAtom, BindingAtom]
+	| ["mods", BindingAtom, Partial<{ctrl: boolean, alt: boolean, shift: boolean, meta: boolean}>]
 
-type ModsBinding = ["mods", string, Partial<{ctrl: boolean, alt: boolean, shift: boolean, meta: boolean}>]
+type ModsBinding = ["mods", BindingAtom, Partial<{ctrl: boolean, alt: boolean, shift: boolean, meta: boolean}>]
 
-function matchesBinding(event: KeyboardEvent, binding: BindingAtom): boolean {
+function codePressed(event: KeyboardEvent, pressed: Set<string>, code: string) {
+	switch (code) {
+		case "ControlLeft":
+		case "ControlRight":
+			return event.ctrlKey
+		case "AltLeft":
+		case "AltRight":
+			return event.altKey
+		case "MetaLeft":
+		case "MetaRight":
+			return event.metaKey
+		case "ShiftLeft":
+		case "ShiftRight":
+			return event.shiftKey
+		default:
+			return event.code === code || pressed.has(code)
+	}
+}
+
+function matchesBinding(event: KeyboardEvent, pressed: Set<string>, binding: BindingAtom): boolean {
 	if (typeof binding === 'string')
-		return event.code === binding
+		return codePressed(event, pressed, binding)
 
 	switch (binding[0]) {
+		case 'and':
+			return binding.slice(1).every(atom => matchesBinding(event, pressed, atom))
 		case 'or':
-			return binding.slice(1).some(atom => matchesBinding(event, atom))
+			return binding.slice(1).some(atom => matchesBinding(event, pressed, atom))
+		case 'not':
+			return !matchesBinding(event, pressed, binding[1])
+		case 'cond':
+			return matchesBinding(event, pressed, binding[2]) && matchesBinding(event, pressed, binding[1])
 		case 'mods':
-			return matchesMods(event, binding)
+			return matchesMods(event, pressed, binding)
 		case 'code':
-			return event.code === binding[1]
+			return codePressed(event, pressed, binding[1])
 		default:
 			return false
 	}
 }
 
-function matchesMods(event: KeyboardEvent, binding: ModsBinding) {
-	const [, code, mods] = binding
-	return (
-		event.code === code &&
-		event.ctrlKey === !!mods.ctrl &&
-		event.altKey === !!mods.alt &&
-		event.shiftKey === !!mods.shift &&
-		event.metaKey === !!mods.meta
-	)
+function matchesMods(event: KeyboardEvent, pressed: Set<string>, binding: ModsBinding) {
+	const [, subject, mods] = binding
+	const maybe = (value: boolean, ...codes: string[]): BindingAtom =>
+		value
+			? ["or", ...codes]
+			: ["not", ["or", ...codes]]
+
+	return matchesBinding(event, pressed, [
+		'cond',
+		subject,
+		['and',
+			maybe(mods.ctrl ?? false, 'ControlLeft', 'ControlRight'),
+			maybe(mods.alt ?? false, 'AltLeft', 'AltRight'),
+			maybe(mods.meta ?? false, 'MetaLeft', 'MetaRight'),
+			maybe(mods.shift ?? false, 'ShiftLeft', 'ShiftRight'),
+		]
+	])
 }
 
-export const prevent_default_zoom_browser_behavior = (deck: tact.Deck<typeof bindings>) => dom.events(window, {
-	keydown: (event: KeyboardEvent) => {
-		const timeline = deck.hub.portByIndex(0).bindings.timeline
-		if (
-			matchesBinding(event, timeline.zoom_in) ||
-			matchesBinding(event, timeline.zoom_out)
-		) {
-			event.preventDefault()
+export const prevent_default_zoom_browser_behavior = (deck: tact.Deck<typeof bindings>) => {
+	const pressed = new Set<string>()
+
+	return dom.events(window, {
+		keydown: (event: KeyboardEvent) => {
+			pressed.add(event.code)
+
+			const timeline = deck.hub.portByIndex(0).bindings.timeline
+			if (
+				matchesBinding(event, pressed, timeline.zoom_in) ||
+				matchesBinding(event, pressed, timeline.zoom_out)
+			) {
+				event.preventDefault()
+			}
+		},
+		keyup: (event: KeyboardEvent) => {
+			pressed.delete(event.code)
+		},
+		blur: () => {
+			pressed.clear()
 		}
-	}
-})
+	})
+}
 
