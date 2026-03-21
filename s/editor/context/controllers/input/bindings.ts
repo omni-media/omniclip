@@ -1,5 +1,6 @@
 import * as tact from "@benev/tact"
 
+// TODO: FIX TACT, MUTIPLE TIMING BINDS DONT WORK, NO EVENTS HAPPEN
 export const bindings = tact.asBindings({
 	timeline: {
 		play_pause: "Space",
@@ -22,6 +23,8 @@ export const bindings = tact.asBindings({
 			["mods", "NumpadSubtract", {ctrl: true}],
 			["mods", "NumpadSubtract", {meta: true}]
 		],
+		zoom_tool: "KeyZ",
+		zoom_tool_temp: ["code", "KeyZ", {timing: ["hold", 500]}],
 		blade_tool: "KeyB",
 		blade_tool_temp: ["code", "KeyB", {timing: ["hold", 500]}],
 		select_tool: ["or", "Escape", "KeyA"]

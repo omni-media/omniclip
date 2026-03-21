@@ -49,6 +49,10 @@ export class Viewport {
 		this.$width.value = width
 	}
 
+	setScrollLeft(scrollLeft: number) {
+		this.$scrollLeft.value = Math.max(0, scrollLeft)
+	}
+
 	setZoom(zoom: number) {
 		const clamped = Math.max(0.2, Math.min(10, zoom))
 		this.$zoom.value = Math.round(clamped * 10) / 10
@@ -56,6 +60,19 @@ export class Viewport {
 
 	adjustZoom(delta: number) {
 		this.setZoom(this.zoom + delta)
+	}
+
+	zoomAt(viewportX: number, delta: number) {
+		const anchorX = Math.max(0, viewportX)
+		const anchorTime = this.viewportXToTime(anchorX)
+		const previousZoom = this.zoom
+
+		this.setZoom(this.zoom + delta)
+
+		if (this.zoom === previousZoom)
+			return
+
+		this.setScrollLeft(this.timeToX(anchorTime) - anchorX)
 	}
 
 	visibleStart() {
@@ -70,3 +87,4 @@ export class Viewport {
 		return this.pixelsPerMillisecond * this.zoom
 	}
 }
+

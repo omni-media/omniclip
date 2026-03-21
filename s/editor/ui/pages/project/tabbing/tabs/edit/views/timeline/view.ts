@@ -13,7 +13,7 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 
 	const onScroll = (e: Event) => {
 		const element = e.target as HTMLElement
-		session.viewport.$scrollLeft.value = element.scrollLeft
+		session.viewport.setScrollLeft(element.scrollLeft)
 	}
 
 	use.mount(() => {
@@ -23,13 +23,18 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 			}
 		})
 
-		use.rendered.then(() => {
-			const timeline = dom.in(use.shadow).require(".timeline")
-			timelineCanvas.resize(timeline.clientWidth)
-			observer.observe(timeline)
+		const timeline = use.rendered.then(() => dom.in(use.shadow).require(".timeline"))
+
+		use.rendered.then(async () => {
+			timelineCanvas.resize((await timeline).clientWidth)
+			observer.observe(await timeline)
 		})
 
 		const unsubs = [
+			session.viewport.$scrollLeft.on(async scrollLeft => {
+				if ((await timeline).scrollLeft !== scrollLeft)
+					(await timeline).scrollLeft = scrollLeft
+			}),
 			session.viewport.$zoom.on(timelineCanvas.scheduleDraw),
 			session.$playhead.on(timelineCanvas.scheduleDraw),
 			session.$selectedItem.on(timelineCanvas.scheduleDraw),

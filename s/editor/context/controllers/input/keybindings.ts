@@ -1,10 +1,10 @@
-
 import * as tact from "@benev/tact"
 
 import {bindings} from "./bindings.js"
 import {OmniSession} from "../../../ui/logic/session.js"
 import {bladeTool} from "../../../ui/logic/parts/modes/blade.js"
 import {selectTool} from "../../../ui/logic/parts/modes/select.js"
+import {zoomTool} from "../../../ui/logic/parts/modes/zoom.js"
 import {prevent_default_zoom_browser_behavior} from "./prevent-default-hack.js"
 
 export class Keybindings {
@@ -49,6 +49,9 @@ export class Keybindings {
 			if (timeline.split_clip.down) this.session.splitAtPlayhead()
 			if (timeline.zoom_in.down) this.session.viewport.adjustZoom(0.1)
 			if (timeline.zoom_out.down) this.session.viewport.adjustZoom(-0.1)
+			if (timeline.zoom_tool.down) this.session.setMode(zoomTool)
+			if (timeline.zoom_tool_temp.up) this.session.setMode(selectTool)
+			if (timeline.blade_tool_temp.down) this.session.setMode(bladeTool)
 			if (timeline.blade_tool.down) this.session.setMode(bladeTool)
 			if (timeline.blade_tool_temp.up) this.session.setMode(selectTool)
 			if (timeline.select_tool.down) this.session.setMode(selectTool)
