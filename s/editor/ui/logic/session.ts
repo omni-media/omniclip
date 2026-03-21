@@ -16,6 +16,7 @@ export class OmniSession {
 	index
 
 	$playhead = signal<Ms>(ms(0))
+	$ghostPlayhead = signal<Ms | null>(null)
 
 	$selectedItem = signal<Id | null>(null)
 	$viewedItemId = signal<Id>(0)
@@ -59,6 +60,14 @@ export class OmniSession {
 
 	setPlayhead(time: Ms) {
 		this.$playhead.set(time)
+	}
+
+	setGhostPlayhead(time: Ms | null) {
+		this.$ghostPlayhead.set(time)
+	}
+
+	clearGhostPlayhead() {
+		this.$ghostPlayhead.set(null)
 	}
 
 	getPlayheadInMs() {

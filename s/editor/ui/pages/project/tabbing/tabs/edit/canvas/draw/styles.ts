@@ -9,6 +9,7 @@ export const styles = {
 	trackBackground: "#181818",
 	trackBorder: "#262626",
 	playhead: "#f97316",
+	ghostPlayhead: "rgba(249, 115, 22, 0.35)",
 	bladePreview: "#fb7185",
 	text: "#d4d4d4",
 	selectedStroke: "#f5f5f5",

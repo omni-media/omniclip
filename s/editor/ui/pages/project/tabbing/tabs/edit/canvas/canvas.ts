@@ -141,6 +141,11 @@ export class TimelineCanvas {
 		return this.viewport.timeToX(this.deps.session.$playhead.value)
 	}
 
+	ghostPlayheadX() {
+		const time = this.deps.session.$ghostPlayhead.value
+		return time === null ? null : this.viewport.timeToX(time)
+	}
+
 	get timeline(): {rootId: number, items: readonly unknown[]} {
 		return this.deps.timeline.state
 	}
@@ -165,12 +170,16 @@ export class TimelineCanvas {
 
 	onPointerDown = (event: PointerEvent) => {
 		const point = this.#pointerPosition(event)
+		const time = this.#pointerToMs(event)
 		const inRuler = point.y <= metrics.rulerHeight
 		const clip = inRuler ? null : this.clipAt(point.x, point.y)
 
+		this.deps.session.setGhostPlayhead(time)
+		this.scheduleDraw()
+
 		this.deps.session.activeMode.value.pointerdown?.({
 			event,
-			time: this.#pointerToMs(event),
+			time,
 			clip,
 			point,
 			inRuler
@@ -179,12 +188,16 @@ export class TimelineCanvas {
 
 	onPointerMove = (event: PointerEvent) => {
 		const point = this.#pointerPosition(event)
+		const time = this.#pointerToMs(event)
 		const inRuler = point.y <= metrics.rulerHeight
 		const clip = inRuler ? null : this.clipAt(point.x, point.y)
 
+		this.deps.session.setGhostPlayhead(time)
+		this.scheduleDraw()
+
 		this.deps.session.activeMode.value.pointermove?.({
 			event,
-			time: this.#pointerToMs(event),
+			time,
 			clip,
 			point,
 			inRuler
@@ -193,12 +206,16 @@ export class TimelineCanvas {
 
 	onPointerLeave = (event: PointerEvent) => {
 		const point = this.#pointerPosition(event)
+		const time = this.#pointerToMs(event)
 		const inRuler = point.y <= metrics.rulerHeight
 		const clip = inRuler ? null : this.clipAt(point.x, point.y)
 
+		this.deps.session.clearGhostPlayhead()
+		this.scheduleDraw()
+
 		this.deps.session.activeMode.value.pointerleave?.({
-			event: event as PointerEvent,
-			time: this.#pointerToMs(event as PointerEvent),
+			event,
+			time,
 			clip,
 			point,
 			inRuler
