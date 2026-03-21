@@ -7,6 +7,10 @@ export default css`@layer view {
 	height: 100%;
 }
 
+.timeline {
+	overflow: auto;
+}
+
 .timeline-scroll {
 	height: 100%;
 	overflow: auto;

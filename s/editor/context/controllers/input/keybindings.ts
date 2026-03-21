@@ -47,8 +47,8 @@ export class Keybindings {
 			const {timeline} = port.actions
 			if (timeline.play_pause.down) console.log("play/Pause timeline")
 			if (timeline.split_clip.down) this.session.splitAtPlayhead()
-			if (timeline.zoom_in.down) this.session.viewport.adjustZoom(0.1)
-			if (timeline.zoom_out.down) this.session.viewport.adjustZoom(-0.1)
+			if (timeline.zoom_in.down) this.session.viewport.adjustZoomAt(this.session.playheadViewportX(), 0.1)
+			if (timeline.zoom_out.down) this.session.viewport.adjustZoomAt(this.session.playheadViewportX(), -0.1)
 			if (timeline.zoom_tool.down) this.session.setMode(zoomTool)
 			if (timeline.zoom_tool_temp.up) this.session.setMode(selectTool)
 			if (timeline.blade_tool_temp.down) this.session.setMode(bladeTool)

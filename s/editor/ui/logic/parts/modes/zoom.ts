@@ -3,7 +3,12 @@ import {metrics} from "../../../pages/project/tabbing/tabs/edit/canvas/draw/styl
 
 export const zoomTool = tool("zoom", (session) => ({
 	pointerdown: ({point}) => {
-		session.viewport.zoomAt(point.x - metrics.paddingX, 0.1)
+		const ghostTime = session.$ghostPlayhead.value
+		const anchorX = ghostTime === null
+			? point.x - metrics.paddingX
+			: session.viewport.timeToViewportX(ghostTime)
+
+		session.viewport.adjustZoomAt(anchorX, 0.1)
 		session.canvas.scheduleDraw()
 	},
 }))

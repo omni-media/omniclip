@@ -62,17 +62,21 @@ export class Viewport {
 		this.setZoom(this.zoom + delta)
 	}
 
-	zoomAt(viewportX: number, delta: number) {
+	setZoomAt(viewportX: number, zoom: number) {
 		const anchorX = Math.max(0, viewportX)
 		const anchorTime = this.viewportXToTime(anchorX)
 		const previousZoom = this.zoom
 
-		this.setZoom(this.zoom + delta)
+		this.setZoom(zoom)
 
 		if (this.zoom === previousZoom)
 			return
 
 		this.setScrollLeft(this.timeToX(anchorTime) - anchorX)
+	}
+
+	adjustZoomAt(viewportX: number, delta: number) {
+		this.setZoomAt(viewportX, this.zoom + delta)
 	}
 
 	visibleStart() {

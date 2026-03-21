@@ -40,6 +40,14 @@ export const Toolbar = view(use => (context: EditorContext) => {
 		}
 	}
 
+	const setZoomAtPlayhead = (zoom: number) => {
+		session.viewport.setZoomAt(session.playheadViewportX(), zoom)
+	}
+
+	const adjustZoomAtPlayhead = (delta: number) => {
+		session.viewport.adjustZoomAt(session.playheadViewportX(), delta)
+	}
+
 	return html`
 		<div class="toolbar">
 			<div class="toolbar-section left">
@@ -81,7 +89,7 @@ export const Toolbar = view(use => (context: EditorContext) => {
 
 			<div class="toolbar-section right">
 				<div class="zoom-controls">
-					<button class="zoom-button" @click=${() => session.viewport.adjustZoom(-0.1)}>
+					<button class="zoom-button" @click=${() => adjustZoomAtPlayhead(-0.1)}>
 						${zoomOutSvg}
 					</button>
 					<input
@@ -91,9 +99,9 @@ export const Toolbar = view(use => (context: EditorContext) => {
 						max="10"
 						step="0.1"
 						.value=${session.viewport.zoom}
-						@input=${(e: Event) => session.viewport.setZoom(+(e.currentTarget as HTMLInputElement).value)}
+						@input=${(e: Event) => setZoomAtPlayhead(+(e.currentTarget as HTMLInputElement).value)}
 					>
-					<button class="zoom-button" @click=${(e: Event) => session.viewport.adjustZoom(0.1)}>
+					<button class="zoom-button" @click=${() => adjustZoomAtPlayhead(0.1)}>
 						${zoomInSvg}
 					</button>
 				</div>

@@ -74,6 +74,10 @@ export class OmniSession {
 		return this.$playhead.value
 	}
 
+	playheadViewportX() {
+		return this.viewport.timeToViewportX(this.$playhead.value)
+	}
+
 	splitAtPlayhead() {
 		return this.splitSelectedItemAtTime(this.getPlayheadInMs())
 	}
