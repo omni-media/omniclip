@@ -11,10 +11,12 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 	const session = context.session
 	const timelineCanvas = context.session.canvas
 
-	const onScroll = (e: Event) => {
+	const onScroll = async (e: Event) => timelineCanvas.whenDrawn()
+	.then(() => {
 		const element = e.target as HTMLElement
-		session.viewport.setScrollLeft(element.scrollLeft)
-	}
+		if(element)
+			session.viewport.setScrollLeft(element.scrollLeft)
+	})
 
 	use.mount(() => {
 		const observer = new ResizeObserver(entries => {
@@ -30,11 +32,12 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 			observer.observe(await timeline)
 		})
 
-		const scrollLeft = async (scrollLeft: number) => {
-			await timelineCanvas.whenDrawn()
-			if ((await timeline).scrollLeft !== scrollLeft)
+		const scrollLeft = async (scrollLeft: number) => timelineCanvas.whenDrawn()
+		.then(async () => {
+			if ((await timeline).scrollLeft !== scrollLeft) {
 				(await timeline).scrollLeft = scrollLeft
-		}
+			}
+		})
 
 		const unsubs = [
 			session.viewport.$scrollLeft.on(scrollLeft),
