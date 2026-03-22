@@ -32,6 +32,8 @@ export class TimelineCanvas {
 	layout: LayoutResult = {clips: [], rows: 1, duration: ms(0)}
 
 	#raf = 0
+	#drawn = Promise.resolve()
+	#resolveDrawn: (() => void) | null = null
 
 	$previews = {
 		blade: signal<{time: Ms, clipId: Id} | null>(null)
@@ -70,17 +72,39 @@ export class TimelineCanvas {
 	}
 
 	scheduleDraw = () => {
-		if (this.#raf) return
-		this.#raf = requestAnimationFrame(() => {
-			this.#raf = 0
-			this.draw()
-		})
+		if (!this.#resolveDrawn) {
+			this.#drawn = new Promise(resolve => {
+				this.#resolveDrawn = resolve
+			})
+		}
+
+		if (!this.#raf) {
+			this.#raf = requestAnimationFrame(this.#flushDraw)
+		}
+	}
+
+	whenDrawn = () => this.#drawn
+
+	#flushDraw = () => {
+		this.#raf = 0
+		const resolve = this.#resolveDrawn
+		this.#resolveDrawn = null
+		this.draw()
+		resolve?.()
 	}
 
 	get width() {
+		const extent = ms(Math.max(
+			this.layout.duration,
+			this.deps.session.$playhead.value,
+			this.viewport.visibleEnd()
+		))
+		const contentWidth = Math.ceil(this.viewport.durationToWidth(extent)) + metrics.paddingX * 2
+		const trailingViewport = this.viewport.width
+
 		return Math.max(
 			this.viewport.width,
-			Math.ceil(this.viewport.durationToWidth(this.layout.duration)) + metrics.paddingX * 2
+			contentWidth + trailingViewport
 		)
 	}
 

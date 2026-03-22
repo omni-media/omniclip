@@ -30,11 +30,14 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 			observer.observe(await timeline)
 		})
 
+		const scrollLeft = async (scrollLeft: number) => {
+			await timelineCanvas.whenDrawn()
+			if ((await timeline).scrollLeft !== scrollLeft)
+				(await timeline).scrollLeft = scrollLeft
+		}
+
 		const unsubs = [
-			session.viewport.$scrollLeft.on(async scrollLeft => {
-				if ((await timeline).scrollLeft !== scrollLeft)
-					(await timeline).scrollLeft = scrollLeft
-			}),
+			session.viewport.$scrollLeft.on(scrollLeft),
 			session.viewport.$zoom.on(timelineCanvas.scheduleDraw),
 			session.$playhead.on(timelineCanvas.scheduleDraw),
 			session.$ghostPlayhead.on(timelineCanvas.scheduleDraw),
