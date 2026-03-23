@@ -12,6 +12,7 @@ import {LayoutResult} from './layout/types.js'
 import {drawPlayhead} from './draw/playhead.js'
 import {metrics, styles} from './draw/styles.js'
 import {drawBladePreview} from './draw/blade-preview.js'
+import {TimelineFilmstrips} from './parts/filmstrips.js'
 import {OmniSession} from '../../../../../../logic/session.js'
 import {Strata} from '../../../../../../../context/parts/strata.js'
 import {ToolName} from '../../../../../../logic/parts/modes/tool.js'
@@ -21,6 +22,7 @@ type EditCanvasDeps = {
 	timeline: Strata['timeline']
 	settings: Strata['settings']
 	player: VideoPlayer
+	resolveMedia: (hash: string) => Blob | string | URL
 }
 
 type CursorIcon = ToolName
@@ -38,6 +40,8 @@ export class TimelineCanvas {
 	$previews = {
 		blade: signal<{time: Ms, clipId: Id} | null>(null)
 	}
+
+	filmstrips = new TimelineFilmstrips(this)
 
 	constructor(public deps: EditCanvasDeps) {}
 

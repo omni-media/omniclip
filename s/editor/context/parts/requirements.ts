@@ -1,4 +1,3 @@
-
 import {Cellar, OpfsForklift} from "@e280/quay"
 import {Datafile, Driver, Kind, O, Omni, TimelineFile} from "@omnimedia/omnitool"
 
@@ -31,7 +30,8 @@ export async function setupRequirements() {
 	const session = new OmniSession({
 		strata,
 		omnitool: omni,
-		player
+		player,
+		resolveMedia: hash => project.resources.require(hash).url,
 	})
 	const keybindings = await Keybindings.setup(session)
 	strata.timeline.lens(s => s).on(state => player.update(state as TimelineFile))

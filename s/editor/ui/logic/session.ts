@@ -29,13 +29,15 @@ export class OmniSession {
 	constructor(public deps: {
 		strata: Strata,
 		omnitool: O,
-		player: VideoPlayer
+		player: VideoPlayer,
+		resolveMedia: (hash: string) => Blob | string | URL,
 	}) {
 		this.canvas = new TimelineCanvas({
 			session: this,
 			timeline: this.deps.strata.timeline,
 			player: this.deps.player,
-			settings: this.deps.strata.settings
+			settings: this.deps.strata.settings,
+			resolveMedia: this.deps.resolveMedia,
 		})
 		this.index = new Index(deps.strata.timeline)
 		this.$viewedItemId.value = deps.strata.timeline.state.rootId
@@ -161,7 +163,7 @@ export class OmniSession {
 
 			remove(state, clipId)
 			update(state, parent.id, {
-				childrenIds: parent.childrenIds.filter(id => id !== clipId)
+				childrenIds: parent.childrenIds.filter(childId => childId !== clipId)
 			})
 		})
 

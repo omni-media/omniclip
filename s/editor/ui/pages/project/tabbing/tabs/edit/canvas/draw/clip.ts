@@ -43,7 +43,9 @@ function roundedRect(
 	ctx.roundRect(x, y, width, height, radius)
 }
 
-function drawClip(ctx: CanvasRenderingContext2D, clip: TimelineClipBox) {
+function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
+	const ctx = canvas.ctx
+
 	roundedRect(
 		ctx,
 		clip.x,
@@ -54,6 +56,9 @@ function drawClip(ctx: CanvasRenderingContext2D, clip: TimelineClipBox) {
 	)
 	ctx.fillStyle = clipFill(clip.kind)
 	ctx.fill()
+
+	if (clip.kind === Kind.Video)
+		canvas.filmstrips.draw(ctx, clip)
 
 	ctx.lineWidth = clip.selected ? 2 : 1
 	ctx.strokeStyle = clip.selected
@@ -72,7 +77,14 @@ function drawClip(ctx: CanvasRenderingContext2D, clip: TimelineClipBox) {
 }
 
 export function drawClips(canvas: TimelineCanvas) {
-	for (const clip of canvas.layout.clips)
-		drawClip(canvas.ctx, clip)
+	const activeFilmstrips = new Set<number>()
+
+	for (const clip of canvas.layout.clips) {
+		if (clip.kind === Kind.Video)
+			activeFilmstrips.add(clip.itemId)
+		drawClip(canvas, clip)
+	}
+
+	canvas.filmstrips.retain(activeFilmstrips)
 }
 
