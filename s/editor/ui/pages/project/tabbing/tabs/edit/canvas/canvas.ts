@@ -37,6 +37,8 @@ export class TimelineCanvas {
 	spacer = dom.elmer("div").attr("className", "spacer").done()
 
 	layout: LayoutResult = {clips: [], rows: 1, duration: ms(0)}
+	#contentExtent = ms(0)
+	#lastZoom = 0
 
 	#raf = 0
 	#drawn = Promise.resolve()
@@ -68,10 +70,9 @@ export class TimelineCanvas {
 
 	switchCursor(cursor: CursorIcon) {
 		switch(cursor) {
-			case "select": {
+			case "select":
 				this.canvas.style.cursor = "default"
 				break
-			}
 			case "blade":
 				this.canvas.style.cursor = "url('/assets/icons/material-design-icons/razor.svg') 12 12, crosshair"
 				break
@@ -104,18 +105,20 @@ export class TimelineCanvas {
 	}
 
 	get contentWidth() {
-		const extent = ms(Math.max(
+		const stableExtent = ms(Math.max(
 			this.layout.duration,
 			this.deps.session.$playhead.value,
-			this.viewport.visibleEnd()
 		))
-		const contentWidth = Math.ceil(this.viewport.durationToWidth(extent)) + metrics.paddingX * 2
-		const trailingViewport = this.viewport.width
 
-		return Math.max(
-			this.viewport.width,
-			contentWidth + trailingViewport
-		)
+		if (this.viewport.zoom !== this.#lastZoom) {
+			this.#contentExtent = ms(Math.max(stableExtent, this.viewport.visibleEnd()))
+			this.#lastZoom = this.viewport.zoom
+		} else {
+			this.#contentExtent = ms(Math.max(this.#contentExtent, stableExtent))
+		}
+
+		const contentPx = Math.ceil(this.viewport.durationToWidth(this.#contentExtent)) + metrics.paddingX * 2
+		return Math.max(this.viewport.width, contentPx + this.viewport.width)
 	}
 
 	get width() {
@@ -134,8 +137,10 @@ export class TimelineCanvas {
 		this.spacer.style.width = `${this.contentWidth}px`
 		this.#resize()
 		this.clearCanvas()
+
 		drawRuler(this)
 		drawLanes(this)
+
 		this.ctx.save()
 		this.ctx.translate(-this.viewport.scrollLeft, 0)
 		drawClips(this)
@@ -168,18 +173,21 @@ export class TimelineCanvas {
 
 	trackY = (row: number) => {
 		return metrics.rulerHeight + metrics.paddingY +
-			   row * (metrics.trackHeight + metrics.trackGap)
+			row * (metrics.trackHeight + metrics.trackGap)
 	}
 
 	selectedItemId() {
 		return this.deps.session.$selectedItem.value
 	}
+
 	viewedItemId() {
 		return this.deps.session.$viewedItemId.value
 	}
+
 	timebase(): Fps {
 		return fps(Number(this.deps.settings.state.timebase))
 	}
+
 	playheadX() {
 		return this.viewport.timeToX(this.deps.session.$playhead.value)
 	}
@@ -221,11 +229,7 @@ export class TimelineCanvas {
 		this.scheduleDraw()
 
 		this.deps.session.activeMode.value.pointerdown?.({
-			event,
-			time,
-			clip,
-			point,
-			inRuler
+			event, time, clip, point, inRuler
 		})
 	}
 
@@ -239,11 +243,7 @@ export class TimelineCanvas {
 		this.scheduleDraw()
 
 		this.deps.session.activeMode.value.pointermove?.({
-			event,
-			time,
-			clip,
-			point,
-			inRuler
+			event, time, clip, point, inRuler
 		})
 	}
 
@@ -257,11 +257,7 @@ export class TimelineCanvas {
 		this.scheduleDraw()
 
 		this.deps.session.activeMode.value.pointerleave?.({
-			event,
-			time,
-			clip,
-			point,
-			inRuler
+			event, time, clip, point, inRuler
 		})
 	}
 
@@ -273,9 +269,7 @@ export class TimelineCanvas {
 		this.deps.session.activeMode.value.doubleclick?.({
 			event: event as PointerEvent,
 			time: this.#pointerToMs(event as PointerEvent),
-			clip,
-			point,
-			inRuler
+			clip, point, inRuler
 		})
 	}
 }
