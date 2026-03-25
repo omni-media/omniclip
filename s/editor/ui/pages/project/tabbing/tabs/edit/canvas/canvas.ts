@@ -1,4 +1,5 @@
 
+import {dom} from '@e280/sly'
 import {signal} from '@e280/strata'
 import {Driver, Id, VideoPlayer} from '@omnimedia/omnitool'
 import {fps, Fps} from '@omnimedia/omnitool/x/units/fps.js'
@@ -32,6 +33,8 @@ type CursorIcon = ToolName
 export class TimelineCanvas {
 	canvas = document.createElement('canvas')
 	ctx = this.canvas.getContext('2d')!
+
+	spacer = dom.elmer("div").attr("className", "spacer").done()
 
 	layout: LayoutResult = {clips: [], rows: 1, duration: ms(0)}
 
@@ -100,7 +103,7 @@ export class TimelineCanvas {
 		resolve?.()
 	}
 
-	get width() {
+	get contentWidth() {
 		const extent = ms(Math.max(
 			this.layout.duration,
 			this.deps.session.$playhead.value,
@@ -115,6 +118,10 @@ export class TimelineCanvas {
 		)
 	}
 
+	get width() {
+		return this.viewport.width
+	}
+
 	get height() {
 		return metrics.rulerHeight +
 			metrics.paddingY * 2 +
@@ -124,13 +131,17 @@ export class TimelineCanvas {
 
 	draw() {
 		this.layout = buildLayout(this.deps.session.index, this)
+		this.spacer.style.width = `${this.contentWidth}px`
 		this.#resize()
 		this.clearCanvas()
 		drawRuler(this)
 		drawLanes(this)
+		this.ctx.save()
+		this.ctx.translate(-this.viewport.scrollLeft, 0)
 		drawClips(this)
 		drawBladePreview(this)
 		drawPlayhead(this)
+		this.ctx.restore()
 	}
 
 	#resize() {
@@ -143,6 +154,7 @@ export class TimelineCanvas {
 	}
 
 	clipAt(x: number, y: number) {
+		x += this.viewport.scrollLeft
 		return this.layout.clips.find(
 			c => x >= c.x && x <= c.x + c.width && y >= c.y && y <= c.y + c.height
 		) ?? null
@@ -188,7 +200,7 @@ export class TimelineCanvas {
 
 	#pointerToMs(event: PointerEvent): Ms {
 		const {x} = this.#pointerPosition(event)
-		return ms(Math.max(0, this.viewport.xToTime(x - metrics.paddingX)))
+		return ms(Math.max(0, this.viewport.viewportXToTime(x - metrics.paddingX)))
 	}
 
 	pointAt(event: PointerEvent) {

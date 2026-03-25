@@ -80,6 +80,7 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 	return html`
 		<div @scroll=${onScroll} class="timeline">
 			${timelineCanvas.canvas}
+			${timelineCanvas.spacer}
 		</div>
 	`
 })

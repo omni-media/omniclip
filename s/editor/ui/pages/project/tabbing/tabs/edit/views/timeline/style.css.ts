@@ -8,32 +8,35 @@ export default css`@layer view {
 }
 
 .timeline {
-	overflow: auto;
-}
-
-.timeline-scroll {
-	height: 100%;
+	position: relative;
 	overflow: auto;
 	background: #111;
 	border-top: 1px solid #1c1c1c;
 }
 
-.timeline-scroll::-webkit-scrollbar {
+.spacer {
+	height: 1px;
+}
+
+.timeline::-webkit-scrollbar {
 	height: 10px;
 	width: 10px;
 }
 
-.timeline-scroll::-webkit-scrollbar-thumb {
+.timeline::-webkit-scrollbar-thumb {
 	background: #2a2a2a;
 	border-radius: 999px;
 }
 
-.timeline-scroll::-webkit-scrollbar-track {
+.timeline::-webkit-scrollbar-track {
 	background: #161616;
 }
 
 canvas {
 	display: block;
+	position: sticky;
+	left: 0;
+	top: 0;
 }
 
 }`

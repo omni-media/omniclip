@@ -12,7 +12,9 @@ export function drawRuler(canvas: TimelineCanvas) {
 	const pps = pxPerMs * 1000
 	const steps = tickSteps(timebase)
 	const scale = steps.find(step => step.major * pxPerMs >= 80) ?? steps[steps.length - 1]
-	const endMs = ms(Math.max(0, canvas.viewport.widthToDuration(canvas.width - (metrics.paddingX * 2))))
+	const startMs = ms(Math.max(0, canvas.viewport.visibleStart()))
+	const endMs = ms(Math.max(startMs, canvas.viewport.visibleEnd()))
+	const startStep = Math.floor(startMs / scale.minor)
 	const endStep = Math.ceil(endMs / scale.minor)
 
 	canvas.ctx.fillStyle = styles.rulerBackground
@@ -26,9 +28,9 @@ export function drawRuler(canvas: TimelineCanvas) {
 	canvas.ctx.font = "12px sans-serif"
 	canvas.ctx.textBaseline = "top"
 
-	for (let step = 0; step <= endStep; step += 1) {
+	for (let step = startStep; step <= endStep; step += 1) {
 		const time = ms(step * scale.minor)
-		const x = Math.round(canvas.viewport.timeToX(time) + metrics.paddingX)
+		const x = Math.round(canvas.viewport.timeToViewportX(time) + metrics.paddingX)
 		const isMajor = Math.round(time) % Math.round(scale.major) === 0
 
 		if (isMajor) {
