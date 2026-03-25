@@ -11,12 +11,16 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 	const session = context.session
 	const timelineCanvas = context.session.canvas
 
-	const onScroll = async (e: Event) => timelineCanvas.whenDrawn()
-	.then(() => {
+	let ignoreProgrammaticScroll = false
+
+	const onScroll = async (e: Event) => {
+		if (ignoreProgrammaticScroll)
+			return
+
 		const element = e.target as HTMLElement
-		if(element)
+		if (element)
 			session.viewport.setScrollLeft(element.scrollLeft)
-	})
+	}
 
 	use.mount(() => {
 		const observer = new ResizeObserver(entries => {
@@ -32,15 +36,23 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 			observer.observe(await timeline)
 		})
 
-		const scrollLeft = async (scrollLeft: number) => timelineCanvas.whenDrawn()
-		.then(async () => {
-			if ((await timeline).scrollLeft !== scrollLeft) {
-				(await timeline).scrollLeft = scrollLeft
-			}
-		})
+		const scrollLeft = async (scrollLeft: number) => {
+			const element = await timeline
+			if (element.scrollLeft === scrollLeft)
+				return
+
+			ignoreProgrammaticScroll = true
+			await timelineCanvas.whenDrawn()
+			element.scrollLeft = scrollLeft
+
+			requestAnimationFrame(() => {
+				ignoreProgrammaticScroll = false
+			})
+		}
 
 		const unsubs = [
 			session.viewport.$scrollLeft.on(scrollLeft),
+			session.viewport.$scrollLeft.on(timelineCanvas.scheduleDraw),
 			session.viewport.$zoom.on(timelineCanvas.scheduleDraw),
 			session.$playhead.on(timelineCanvas.scheduleDraw),
 			session.$ghostPlayhead.on(timelineCanvas.scheduleDraw),
@@ -71,3 +83,4 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 		</div>
 	`
 })
+

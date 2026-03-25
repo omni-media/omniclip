@@ -1,6 +1,6 @@
 
 import {signal} from '@e280/strata'
-import {Id, VideoPlayer} from '@omnimedia/omnitool'
+import {Driver, Id, VideoPlayer} from '@omnimedia/omnitool'
 import {fps, Fps} from '@omnimedia/omnitool/x/units/fps.js'
 import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
 
@@ -13,6 +13,7 @@ import {drawPlayhead} from './draw/playhead.js'
 import {metrics, styles} from './draw/styles.js'
 import {drawBladePreview} from './draw/blade-preview.js'
 import {TimelineFilmstrips} from './parts/filmstrips.js'
+import {TimelineWaveforms} from './parts/waveforms.js'
 import {OmniSession} from '../../../../../../logic/session.js'
 import {Strata} from '../../../../../../../context/parts/strata.js'
 import {ToolName} from '../../../../../../logic/parts/modes/tool.js'
@@ -22,6 +23,7 @@ type EditCanvasDeps = {
 	timeline: Strata['timeline']
 	settings: Strata['settings']
 	player: VideoPlayer
+	driver: Driver
 	resolveMedia: (hash: string) => Blob | string | URL
 }
 
@@ -42,6 +44,7 @@ export class TimelineCanvas {
 	}
 
 	filmstrips = new TimelineFilmstrips(this)
+	waveforms = new TimelineWaveforms(this)
 
 	constructor(public deps: EditCanvasDeps) {}
 

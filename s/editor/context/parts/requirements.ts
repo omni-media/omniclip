@@ -31,6 +31,7 @@ export async function setupRequirements() {
 		strata,
 		omnitool: omni,
 		player,
+		driver,
 		resolveMedia: hash => project.resources.require(hash).url,
 	})
 	const keybindings = await Keybindings.setup(session)

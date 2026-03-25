@@ -1,7 +1,7 @@
 
 import {signal} from "@e280/strata"
-import {Id, Kind, O, VideoPlayer} from "@omnimedia/omnitool"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Driver, Id, Kind, O, VideoPlayer} from "@omnimedia/omnitool"
 
 import {Idx, Index} from "./parts/index.js"
 import {Viewport} from "./parts/viewport.js"
@@ -30,12 +30,14 @@ export class OmniSession {
 		strata: Strata,
 		omnitool: O,
 		player: VideoPlayer,
+		driver: Driver,
 		resolveMedia: (hash: string) => Blob | string | URL,
 	}) {
 		this.canvas = new TimelineCanvas({
 			session: this,
 			timeline: this.deps.strata.timeline,
 			player: this.deps.player,
+			driver: this.deps.driver,
 			settings: this.deps.strata.settings,
 			resolveMedia: this.deps.resolveMedia,
 		})

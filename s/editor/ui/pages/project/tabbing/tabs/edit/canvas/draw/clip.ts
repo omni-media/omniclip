@@ -60,6 +60,9 @@ function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 	if (clip.kind === Kind.Video)
 		canvas.filmstrips.draw(ctx, clip)
 
+	if (clip.kind === Kind.Audio)
+		canvas.waveforms.draw(ctx, clip)
+
 	ctx.lineWidth = clip.selected ? 2 : 1
 	ctx.strokeStyle = clip.selected
 		? styles.selectedStroke
@@ -78,13 +81,17 @@ function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 
 export function drawClips(canvas: TimelineCanvas) {
 	const activeFilmstrips = new Set<number>()
+	const activeWaveforms = new Set<number>()
 
 	for (const clip of canvas.layout.clips) {
 		if (clip.kind === Kind.Video)
 			activeFilmstrips.add(clip.itemId)
+		if (clip.kind === Kind.Audio)
+			activeWaveforms.add(clip.itemId)
 		drawClip(canvas, clip)
 	}
 
 	canvas.filmstrips.retain(activeFilmstrips)
+	canvas.waveforms.retain(activeWaveforms)
 }
 
