@@ -4,7 +4,7 @@ import {Id, Item, Kind} from "@omnimedia/omnitool"
 import {Index} from "../../index.js"
 import {DropIntent} from "./intent.js"
 
-export type BuildMoveOverlayOpts = {
+export type OverlayFromIntentOpts = {
 	index: Index
 	movingId: Id
 	intent: DropIntent
@@ -65,7 +65,7 @@ const strategies: Record<string, (ctx: any) => any> = {
 	"stack-wrap-leaf": stackWrapLeaf
 }
 
-export function buildMoveOverlay(ctx: BuildMoveOverlayOpts) {
+export function overlayFromIntent(ctx: OverlayFromIntentOpts) {
 	const handler = strategies[ctx.intent.type]
 	const patches = handler ? handler(ctx) : null
 	return patches ? new Map<Id, Item.Any | null>(patches) : null

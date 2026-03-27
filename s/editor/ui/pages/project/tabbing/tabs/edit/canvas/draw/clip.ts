@@ -43,7 +43,7 @@ function roundedRect(
 	ctx.roundRect(x, y, width, height, radius)
 }
 
-function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
+export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 	const ctx = canvas.ctx
 
 	roundedRect(
@@ -82,8 +82,11 @@ function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 export function drawClips(canvas: TimelineCanvas) {
 	const activeFilmstrips = new Set<number>()
 	const activeWaveforms = new Set<number>()
+	const ghostClip = canvas.deps.session.$ghostClip.value
 
 	for (const clip of canvas.layout.clips) {
+		if (clip.itemId === ghostClip?.itemId)
+			continue
 		if (clip.kind === Kind.Video)
 			activeFilmstrips.add(clip.itemId)
 		if (clip.kind === Kind.Audio)

@@ -13,6 +13,8 @@ import {LayoutResult} from './layout/types.js'
 import {drawPlayhead} from './draw/playhead.js'
 import {metrics, styles} from './draw/styles.js'
 import {drawBladePreview} from './draw/blade-preview.js'
+import {drawClipPreview} from './draw/clip-preview.js'
+import {drawSnapTargets} from './draw/snap-targets.js'
 import {TimelineFilmstrips} from './parts/filmstrips.js'
 import {TimelineWaveforms} from './parts/waveforms.js'
 import {OmniSession} from '../../../../../../logic/session.js'
@@ -144,6 +146,8 @@ export class TimelineCanvas {
 		this.ctx.save()
 		this.ctx.translate(-this.viewport.scrollLeft, 0)
 		drawClips(this)
+		drawClipPreview(this)
+		drawSnapTargets(this)
 		drawBladePreview(this)
 		drawPlayhead(this)
 		this.ctx.restore()

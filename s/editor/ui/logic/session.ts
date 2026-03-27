@@ -10,8 +10,10 @@ import {selectTool} from "./parts/modes/select.js"
 import {Strata} from "../../context/parts/strata.js"
 import {add, remove, update} from "./parts/mutate.js"
 import {Proposal} from "./parts/proposal/proposal.js"
-import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
+import {DropIntent} from "./parts/proposal/parts/intent.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
+import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
+import {TimelineClipBox} from "../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
 
 export class OmniSession {
 	#index
@@ -22,6 +24,8 @@ export class OmniSession {
 	$selectedItem = signal<Id | null>(null)
 	$viewedItemId = signal<Id>(0)
 	$proposal = signal<Proposal | null>(null)
+	$ghostClip = signal<TimelineClipBox | null>(null)
+	$dropIntent = signal<{movingId: Id, intent: DropIntent} | null>(null)
 
 	viewport = new Viewport(PIXELS_PER_MILLISECOND)
 
@@ -62,6 +66,14 @@ export class OmniSession {
 
 	clearProposal() {
 		this.$proposal.value = null
+	}
+
+	setDropIntent(dropIntent: {movingId: Id, intent: DropIntent} | null) {
+		this.$dropIntent.value = dropIntent
+	}
+
+	setGhostClip(ghostClip: TimelineClipBox | null) {
+		this.$ghostClip.value = ghostClip
 	}
 
 	setMode(mode: Tool) {
