@@ -165,6 +165,23 @@ export class TimelineCanvas {
 		) ?? null
 	}
 
+	getBox(itemId: Id) {
+		return this.layout.clips.find(clip => clip.itemId === itemId) ?? null
+	}
+
+	getInsertIndex(parentId: Id, movingId: Id, pointerX: number) {
+		const parent = this.deps.session.index.getItem(parentId)
+		if (!("childrenIds" in parent))
+			return 0
+
+		const siblings = parent.childrenIds
+			.filter(id => id !== movingId)
+			.map(id => this.getBox(id))
+			.filter(box => !!box)
+
+		return siblings.filter(box => pointerX >= box.x + box.width / 2).length
+	}
+
 	clearCanvas() {
 		this.ctx.clearRect(0, 0, this.width, this.height)
 		this.ctx.fillStyle = styles.background
@@ -174,6 +191,15 @@ export class TimelineCanvas {
 	trackY = (row: number) => {
 		return metrics.rulerHeight + metrics.paddingY +
 			row * (metrics.trackHeight + metrics.trackGap)
+	}
+
+	rowAt(y: number) {
+		const local = y - metrics.rulerHeight - metrics.paddingY
+		if (local <= 0)
+			return 0
+
+		const row = Math.floor(local / (metrics.trackHeight + metrics.trackGap))
+		return Math.max(0, Math.min(this.layout.rows - 1, row))
 	}
 
 	selectedItemId() {
@@ -220,6 +246,7 @@ export class TimelineCanvas {
 	}
 
 	onPointerDown = (event: PointerEvent) => {
+		this.canvas.setPointerCapture(event.pointerId)
 		const point = this.#pointerPosition(event)
 		const time = this.#pointerToMs(event)
 		const inRuler = point.y <= metrics.rulerHeight
@@ -243,6 +270,20 @@ export class TimelineCanvas {
 		this.scheduleDraw()
 
 		this.deps.session.activeMode.value.pointermove?.({
+			event, time, clip, point, inRuler
+		})
+	}
+
+	onPointerUp = (event: PointerEvent) => {
+		if (this.canvas.hasPointerCapture(event.pointerId))
+			this.canvas.releasePointerCapture(event.pointerId)
+
+		const point = this.#pointerPosition(event)
+		const time = this.#pointerToMs(event)
+		const inRuler = point.y <= metrics.rulerHeight
+		const clip = inRuler ? null : this.clipAt(point.x, point.y)
+
+		this.deps.session.activeMode.value.pointerup?.({
 			event, time, clip, point, inRuler
 		})
 	}

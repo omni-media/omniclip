@@ -1,7 +1,7 @@
 
 import {signal} from "@e280/strata"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
-import {Driver, Id, Kind, O, VideoPlayer} from "@omnimedia/omnitool"
+import {Driver, Id, Kind, O, TimelineFile, VideoPlayer} from "@omnimedia/omnitool"
 
 import {Idx, Index} from "./parts/index.js"
 import {Viewport} from "./parts/viewport.js"
@@ -9,17 +9,19 @@ import {Tool} from "./parts/modes/tool.js"
 import {selectTool} from "./parts/modes/select.js"
 import {Strata} from "../../context/parts/strata.js"
 import {add, remove, update} from "./parts/mutate.js"
+import {Proposal} from "./parts/proposal/proposal.js"
 import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
 
 export class OmniSession {
-	index
+	#index
 
 	$playhead = signal<Ms>(ms(0))
 	$ghostPlayhead = signal<Ms | null>(null)
 
 	$selectedItem = signal<Id | null>(null)
 	$viewedItemId = signal<Id>(0)
+	$proposal = signal<Proposal | null>(null)
 
 	viewport = new Viewport(PIXELS_PER_MILLISECOND)
 
@@ -41,12 +43,25 @@ export class OmniSession {
 			settings: this.deps.strata.settings,
 			resolveMedia: this.deps.resolveMedia,
 		})
-		this.index = new Index(deps.strata.timeline)
+		this.#index = new Index(deps.strata.timeline.state as TimelineFile)
+		deps.strata.timeline.lens(s => s).on(s => this.#index.reindex(s as TimelineFile))
 		this.$viewedItemId.value = deps.strata.timeline.state.rootId
 	}
 
 	get timeline() {
 		return this.deps.strata.timeline
+	}
+
+	get index() {
+		return this.$proposal.value?.index ?? this.#index
+	}
+
+	setProposal(proposal: Proposal | null) {
+		this.$proposal.value = proposal
+	}
+
+	clearProposal() {
+		this.$proposal.value = null
 	}
 
 	setMode(mode: Tool) {

@@ -1,6 +1,5 @@
 
 import {GMap} from '@e280/stz'
-import {Chrono} from '@e280/strata'
 import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
 import {Id, Item, Kind, TimelineFile} from '@omnimedia/omnitool'
 
@@ -16,11 +15,8 @@ export class Index {
 	parents = new GMap<Id, Idx.Struct>()
 	laneStarts = new GMap<Id, Ms>()
 
-	constructor(strata: Chrono<TimelineFile>) {
-		this.reindex(strata.state as TimelineFile)
-		strata.lens(s => s).on(state => {
-			this.reindex(state as TimelineFile)
-		})
+	constructor(source: TimelineFile) {
+		this.reindex(source)
 	}
 
 	reindex(state: TimelineFile) {
