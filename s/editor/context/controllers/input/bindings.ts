@@ -27,6 +27,8 @@ export const bindings = tact.asBindings({
 		zoom_tool_temp: ["code", "KeyZ", {timing: ["hold", 500]}],
 		blade_tool: "KeyB",
 		blade_tool_temp: ["code", "KeyB", {timing: ["hold", 500]}],
+		position_tool: "KeyH",
+		position_tool_temp: ["code", "KeyH", {timing: ["hold", 500]}],
 		select_tool: ["or", "Escape", "KeyA"]
 	},
 })

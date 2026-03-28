@@ -78,6 +78,9 @@ export class TimelineCanvas {
 			case "blade":
 				this.canvas.style.cursor = "url('/assets/icons/material-design-icons/razor.svg') 12 12, crosshair"
 				break
+			case "position":
+				this.canvas.style.cursor = "grab"
+				break
 			case "zoom":
 				this.canvas.style.cursor = "zoom-in"
 				break
