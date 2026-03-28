@@ -1,7 +1,7 @@
 
 import {Id, Kind} from "@omnimedia/omnitool"
-import {OmniSession} from "../../../session.js"
 
+import {DragSnapshot} from "../../drag/parts/snapshot.js"
 
 export type DropIntent =
 	| {type: "sequence", parentId: Id, index: number}
@@ -10,49 +10,48 @@ export type DropIntent =
 	| {type: "stack-wrap-leaf", stackId: Id, targetId: Id, before: boolean}
 
 type GetDropIntentOpts = {
-	session: OmniSession
+	snapshot: DragSnapshot
 	movingId: Id
-	point: {x: number, y: number}
+	pointerX: number
+	rowIndex: number
 }
 
-export function getDropIntent({session, movingId, point}: GetDropIntentOpts): DropIntent | null {
-	const pointerX = point.x + session.viewport.scrollLeft
-	const item = session.index.getItem(movingId)
-	const parent = session.index.getParent(movingId)
+export function getDropIntent({snapshot, movingId, pointerX, rowIndex}: GetDropIntentOpts): DropIntent | null {
+	const item = snapshot.index.getItem(movingId)
+	const parent = snapshot.index.getParent(movingId)
 
 	if (parent?.kind === Kind.Sequence) {
 		return {
 			type: "sequence",
 			parentId: parent.id,
-			index: session.canvas.getInsertIndex(parent.id, item.id, pointerX),
+			index: snapshot.getInsertIndex(parent.id, item.id, pointerX),
 		}
 	}
 
-	const viewed = session.index.getItem(session.$viewedItemId.value)
+	const viewed = snapshot.index.getItem(snapshot.viewedId)
 	if (viewed.kind !== Kind.Stack || !viewed.childrenIds.includes(item.id))
 		return null
 
-	const index = session.canvas.rowAt(point.y)
-	const targetId = viewed.childrenIds[index]
+	const targetId = viewed.childrenIds[rowIndex]
 	if (targetId == null || targetId === item.id) {
 		return {
 			type: "stack",
 			parentId: viewed.id,
-			index
+			index: rowIndex
 		}
 	}
 
-	const target = session.index.getItem(targetId)
+	const target = snapshot.index.getItem(targetId)
 	if (target.kind === Kind.Sequence) {
 		return {
 			type: "stack-sequence",
 			stackId: viewed.id,
 			sequenceId: target.id,
-			index: session.canvas.getInsertIndex(target.id, item.id, pointerX),
+			index: snapshot.getInsertIndex(target.id, item.id, pointerX),
 		}
 	}
 
-	const targetBox = session.canvas.getBox(target.id)
+	const targetBox = snapshot.getBox(target.id)
 	return {
 		type: "stack-wrap-leaf",
 		stackId: viewed.id,

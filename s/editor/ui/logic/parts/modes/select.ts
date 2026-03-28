@@ -1,20 +1,13 @@
 
 import {tool} from "./tool.js"
+import {Dragger} from "../drag/dragger.js"
 import {Proposal} from "../proposal/proposal.js"
 import {getDropIntent} from "../proposal/parts/intent.js"
 import {overlayFromIntent} from "../proposal/parts/overlay.js"
-import {TimelineClipBox} from "../../../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
 import {metrics} from "../../../pages/project/tabbing/tabs/edit/canvas/draw/styles.js"
 
-type DragState = {
-	clipId: number
-	clip: TimelineClipBox
-	startPoint: {x: number, y: number}
-	dragging: boolean
-}
-
 export const selectTool = tool("select", (session) => {
-	let drag: DragState | null = null
+	const dragger = new Dragger()
 
 	return {
 	pointerdown: ({clip, inRuler, time, point}) => {
@@ -24,35 +17,29 @@ export const selectTool = tool("select", (session) => {
 			session.setGhostClip(null)
 			session.setDropIntent(null)
 			session.canvas.scheduleDraw()
-			drag = null
+			dragger.end()
 			return
 		}
 
 		session.$selectedItem.value = clip?.itemId ?? null
 		session.canvas.scheduleDraw()
 
-		drag = clip
-			? {clipId: clip.itemId, clip, startPoint: point, dragging: false}
-			: null
+		if (clip) dragger.start(clip, point, session)
+		else dragger.end()
 	},
 
 	pointermove: ({point}) => {
+		const drag = dragger.move(point)
 		if (!drag)
 			return
 
-		const dx = point.x - drag.startPoint.x
-		const dy = point.y - drag.startPoint.y
-		if (!drag.dragging && Math.hypot(dx, dy) < 4)
-			return
-
-		drag.dragging = true
 		const clampedX = Math.max(0, Math.min(
 			session.canvas.contentWidth - drag.clip.width,
-			drag.clip.x + dx,
+			drag.clip.x + drag.dx,
 		))
 		const clampedY = Math.max(metrics.rulerHeight + metrics.paddingY, Math.min(
 			session.canvas.height - metrics.paddingY - drag.clip.height,
-			drag.clip.y + dy,
+			drag.clip.y + drag.dy,
 		))
 
 		session.setGhostClip({
@@ -62,40 +49,39 @@ export const selectTool = tool("select", (session) => {
 		})
 
 		const intent = getDropIntent({
-			session,
+			snapshot: drag.snapshot,
 			movingId: drag.clipId,
-			point,
+			pointerX: point.x + session.viewport.scrollLeft,
+			rowIndex: drag.snapshot.rowAt(point.y),
 		})
 
 		session.setDropIntent(intent ? {movingId: drag.clipId, intent} : null)
+		if (intent) {
+			const overlay = overlayFromIntent({
+				index: drag.snapshot.index,
+				movingId: drag.clipId,
+				intent,
+				getId: () => session.deps.omnitool.getId(),
+			})
+
+			session.setProposal(
+				overlay ? new Proposal(session.timeline, overlay) : null
+			)
+		}
+		else {
+			session.clearProposal()
+		}
 		session.canvas.scheduleDraw()
 	},
 
-	pointerup: ({point}) => {
-		if (drag?.dragging) {
-			const intent = getDropIntent({
-				session,
-				movingId: drag.clipId,
-				point,
-			})
-
-			if (intent) {
-				const overlay = overlayFromIntent({
-					index: session.index,
-					movingId: drag.clipId,
-					intent,
-					getId: () => session.deps.omnitool.getId(),
-				})
-
-				if (overlay) {
-					new Proposal(session.timeline, overlay).commit()
-				}
-			}
+	pointerup: () => {
+		if (dragger.isDragging) {
+			session.$proposal.value?.commit()
 		}
 		session.clearProposal()
 		session.setGhostClip(null)
 		session.setDropIntent(null)
-		drag = null
+		dragger.end()
 		session.canvas.scheduleDraw()
 	},
 
