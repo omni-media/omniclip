@@ -32,7 +32,9 @@ export async function setupRequirements() {
 		omnitool: omni,
 		player,
 		driver,
-		resolveMedia: hash => project.resources.require(hash).url,
+		resolveMedia: item => "mediaHash" in item
+			? project.resources.require(item.mediaHash)
+			: null,
 	})
 	const keybindings = await Keybindings.setup(session)
 	strata.timeline.lens(s => s).on(state => player.update(state as TimelineFile))
