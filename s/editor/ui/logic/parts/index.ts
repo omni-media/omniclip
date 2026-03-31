@@ -4,7 +4,8 @@ import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
 import {Id, Item, Kind, TimelineFile} from '@omnimedia/omnitool'
 
 export namespace Idx {
-	export type Clip = Item.Audio | Item.Video | Item.Text
+	export type Text = Item.Text & {start?: number}
+	export type Clip = Item.Audio | Item.Video | Text
 	export type Struct = Item.Sequence | Item.Stack
 	export type AnyItem = Item.Any
 }

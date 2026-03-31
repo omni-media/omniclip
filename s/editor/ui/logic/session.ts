@@ -6,13 +6,13 @@ import {Driver, Id, Item, Kind, O, Resource, TimelineFile, VideoPlayer} from "@o
 import {Idx, Index} from "./parts/index.js"
 import {Viewport} from "./parts/viewport.js"
 import {Tool} from "./parts/modes/tool.js"
+import {getBounds} from "./parts/bounds.js"
 import {selectTool} from "./parts/modes/select.js"
 import {Strata} from "../../context/parts/strata.js"
 import {add, remove, update} from "./parts/mutate.js"
 import {Proposal} from "./parts/proposal/proposal.js"
 import {trim} from "./parts/interactions/trim/parts/action.js"
 import {DropIntent} from "./parts/interactions/drag/parts/intent.js"
-import {applyBounds, getBounds} from "./parts/bounds.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
 import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 import {TimelineClipBox} from "../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
@@ -155,15 +155,11 @@ export class OmniSession {
 			const {start} = getBounds(clip)
 			add(
 				state,
-				applyBounds({...clip, id: leftId}, start, offset)
+				{...clip, id: leftId, start, duration: offset}
 			)
 			add(
 				state,
-				applyBounds(
-					{...clip, id: rightId},
-					start + offset,
-					clip.duration - offset
-				)
+				{...clip, id: rightId, start: start + offset, duration: clip.duration - offset}
 			)
 			remove(state, clipId)
 

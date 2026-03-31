@@ -1,11 +1,12 @@
 
 import {Ms, ms} from "@omnimedia/omnitool/x/units/ms.js"
 
+import {Idx} from "../../index.js"
 import {trim} from "./parts/action.js"
+import {getBounds} from "../../bounds.js"
 import {OmniSession} from "../../../session.js"
 import {Proposal} from "../../proposal/proposal.js"
 import {overlayFromTrim} from "./parts/overlay.js"
-import {getBounds, TimelineClip} from "../../bounds.js"
 import {TimelineClipBox} from "../../../../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
 
 export type TrimEdge = "start" | "end"
@@ -17,7 +18,7 @@ export class Trimmer {
 	#state: {
 		clip: TimelineClipBox
 		edge: TrimEdge
-		item: TimelineClip
+		item: Idx.Clip
 		laneStart: Ms
 	} | null = null
 

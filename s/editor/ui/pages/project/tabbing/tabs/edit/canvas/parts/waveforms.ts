@@ -121,14 +121,17 @@ export class TimelineWaveforms {
 	#visibleRange(box: TimelineClipBox, clip: Item.Audio) {
 		const viewportLeft = this.canvas.viewport.scrollLeft
 		const viewportRight = viewportLeft + this.canvas.viewport.width
-		const visibleLeft = Math.max(box.x, viewportLeft)
-		const visibleRight = Math.min(box.x + box.width, viewportRight)
+		const previewOffset = this.canvas.trimPreviewOffsetPx()
+		const renderedLeft = box.x + previewOffset
+		const renderedRight = renderedLeft + box.width
+		const visibleLeft = Math.max(renderedLeft, viewportLeft)
+		const visibleRight = Math.min(renderedRight, viewportRight)
 
 		if (visibleLeft >= visibleRight || clip.duration <= 0 || box.width <= 0)
 			return null
 
-		const visibleStart = (visibleLeft - box.x) / box.width
-		const visibleEnd = (visibleRight - box.x) / box.width
+		const visibleStart = (visibleLeft - renderedLeft) / box.width
+		const visibleEnd = (visibleRight - renderedLeft) / box.width
 		const start = clip.start + clip.duration * visibleStart
 		const end = clip.start + clip.duration * visibleEnd
 		return [start / 1000, end / 1000] as [number, number]

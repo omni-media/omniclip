@@ -48,11 +48,12 @@ export class TimelineFilmstrips {
 		ctx.clip()
 
 		for (const tile of entry.tiles) {
-			const x = box.x + this.#tileLeft(tile.time)
-			if (x >= box.x + box.width || x + THUMB_WIDTH_PX <= box.x)
+			const x = box.x + this.#tileLeft(box, clip, tile.time)
+			const width = this.#tileWidth(box, clip)
+			if (x >= box.x + box.width || x + width <= box.x)
 				continue
 
-			ctx.drawImage(tile.canvas as CanvasImageSource, x, box.y, THUMB_WIDTH_PX, box.height)
+			ctx.drawImage(tile.canvas as CanvasImageSource, x, box.y, width, box.height)
 		}
 
 		ctx.fillStyle = "rgba(0, 0, 0, 0.18)"
@@ -128,14 +129,17 @@ export class TimelineFilmstrips {
 	#visibleRange(box: TimelineClipBox, clip: Item.Video) {
 		const viewportLeft = this.canvas.viewport.scrollLeft
 		const viewportRight = viewportLeft + this.canvas.viewport.width
-		const visibleLeft = Math.max(box.x, viewportLeft)
-		const visibleRight = Math.min(box.x + box.width, viewportRight)
+		const previewOffset = this.canvas.trimPreviewOffsetPx()
+		const renderedLeft = box.x + previewOffset
+		const renderedRight = renderedLeft + box.width
+		const visibleLeft = Math.max(renderedLeft, viewportLeft)
+		const visibleRight = Math.min(renderedRight, viewportRight)
 
 		if (visibleLeft >= visibleRight)
 			return null
 
-		const start = clip.start + this.canvas.viewport.xToTime(visibleLeft - box.x)
-		const end = clip.start + this.canvas.viewport.xToTime(visibleRight - box.x)
+		const start = clip.start + this.canvas.viewport.xToTime(visibleLeft - renderedLeft)
+		const end = clip.start + this.canvas.viewport.xToTime(visibleRight - renderedLeft)
 		return [start / 1000, end / 1000] as [number, number]
 	}
 
@@ -145,9 +149,18 @@ export class TimelineFilmstrips {
 		return Math.round(frequency * 1000) / 1000
 	}
 
-	#tileLeft(time: number) {
-		const pixelsPerMillisecond = this.canvas.viewport.durationToWidth(ms(1))
-		return Math.round((time * 1000 * pixelsPerMillisecond) / THUMB_WIDTH_PX) * THUMB_WIDTH_PX
+	#tileLeft(box: TimelineClipBox, clip: Item.Video, time: number) {
+		if (clip.duration <= 0)
+			return 0
+
+		return ((time * 1000 - clip.start) / clip.duration) * box.width
+	}
+
+	#tileWidth(box: TimelineClipBox, clip: Item.Video) {
+		if (clip.duration <= 0)
+			return 0
+
+		return (this.#frequencyInSeconds() * 1000 / clip.duration) * box.width
 	}
 
 	#closest(tiles: Tile[], time: number) {

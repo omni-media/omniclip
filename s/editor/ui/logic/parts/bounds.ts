@@ -1,24 +1,17 @@
-import {Kind, Item} from "@omnimedia/omnitool"
 
-export type TimelineClip = Item.Video | Item.Audio | Item.Text
+import {Kind} from "@omnimedia/omnitool"
+import {Idx} from "./index.js"
 
 export const getBounds = (
-	item: TimelineClip,
+	item: Idx.Clip,
 	mediaDuration?: number
 ) => {
-	const start = item.kind === Kind.Text ? 0 : (item.start ?? 0)
+	const start = item.kind === Kind.Text ? (item.start ?? 0) : item.start
+	const end = start + item.duration
 	return {
 		start,
-		end: start + item.duration,
-		maxEnd: item.kind === Kind.Text ? Infinity : (mediaDuration ?? start + item.duration)
+		end,
+		maxEnd: item.kind === Kind.Text ? Infinity : (mediaDuration ?? end)
 	}
 }
 
-export const applyBounds = (
-	item: TimelineClip,
-	start: number,
-	duration: number
-): TimelineClip => {
-	if (item.kind === Kind.Text) return { ...item, duration }
-	return { ...item, start, duration }
-}
