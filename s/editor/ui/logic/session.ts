@@ -25,6 +25,7 @@ export class OmniSession {
 	$viewedItemId = signal<Id>(0)
 	$proposal = signal<Proposal | null>(null)
 	$ghostClip = signal<TimelineClipBox | null>(null)
+	$trimPreviewOffsetPx = signal(0)
 	$dropIntent = signal<{movingId: Id, intent: DropIntent} | null>(null)
 
 	viewport = new Viewport(PIXELS_PER_MILLISECOND)
@@ -74,6 +75,10 @@ export class OmniSession {
 
 	setGhostClip(ghostClip: TimelineClipBox | null) {
 		this.$ghostClip.value = ghostClip
+	}
+
+	setTrimPreviewOffsetPx(offset: number) {
+		this.$trimPreviewOffsetPx.value = offset
 	}
 
 	setMode(mode: Tool) {

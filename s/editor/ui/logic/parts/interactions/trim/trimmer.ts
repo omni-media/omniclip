@@ -1,11 +1,10 @@
 
 import {Item} from "@omnimedia/omnitool"
-import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Ms, ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {OmniSession} from "../../../session.js"
 import {overlayFromTrim} from "./parts/overlay.js"
 import {Proposal} from "../../proposal/proposal.js"
-import {metrics} from "../../../../pages/project/tabbing/tabs/edit/canvas/draw/styles.js"
 import {TimelineClipBox} from "../../../../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
 
 export type TrimEdge = "start" | "end"
@@ -48,18 +47,15 @@ export class Trimmer {
 			: Math.max(0, Math.min(item.duration - 1, time - laneStart))
 
 		const duration = ms(isEnd ? offset : item.duration - offset)
-		const width = Math.max(metrics.clipMinWidth, session.viewport.durationToWidth(duration))
 		this.#state.lastOffset = offset
 
-		session.setProposal(isEnd ? new Proposal(session.timeline, overlayFromTrim({
+		session.setProposal(new Proposal(session.timeline, overlayFromTrim({
 			clipId: clip.itemId, edge, item, duration, offset
-		})) : null)
-
-		session.setGhostClip({
-			...clip,
-			width,
-			x: isEnd ? clip.x : clip.x + clip.width - width,
-		})
+		})))
+		session.setGhostClip(null)
+		session.setTrimPreviewOffsetPx(
+			isEnd ? 0 : session.viewport.durationToWidth(ms(offset))
+		)
 
 		session.canvas.scheduleDraw()
 	}
@@ -84,6 +80,7 @@ export class Trimmer {
 	cancel(session: OmniSession) {
 		session.clearProposal()
 		session.setGhostClip(null)
+		session.setTrimPreviewOffsetPx(0)
 		this.#state = null
 		session.canvas.scheduleDraw()
 	}

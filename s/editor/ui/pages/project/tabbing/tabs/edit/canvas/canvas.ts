@@ -152,6 +152,7 @@ export class TimelineCanvas {
 
 		this.ctx.save()
 		this.ctx.translate(-this.viewport.scrollLeft, 0)
+		this.ctx.translate(this.trimPreviewOffsetPx(), 0)
 		drawClips(this)
 		drawClipPreview(this)
 		drawSnapTargets(this)
@@ -170,7 +171,7 @@ export class TimelineCanvas {
 	}
 
 	clipAt(x: number, y: number) {
-		x += this.viewport.scrollLeft
+		x += this.viewport.scrollLeft - this.trimPreviewOffsetPx()
 		return this.layout.clips.find(
 			c => c.kind !== Kind.Gap &&
 				x >= c.x && x <= c.x + c.width && y >= c.y && y <= c.y + c.height
@@ -252,6 +253,10 @@ export class TimelineCanvas {
 	ghostPlayheadX() {
 		const time = this.deps.session.$ghostPlayhead.value
 		return time === null ? null : this.viewport.timeToX(time)
+	}
+
+	trimPreviewOffsetPx() {
+		return this.deps.session.$trimPreviewOffsetPx.value
 	}
 
 	get timeline(): {rootId: number, items: readonly unknown[]} {

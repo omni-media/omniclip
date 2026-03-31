@@ -8,6 +8,7 @@ import {tickSteps} from "../../views/ruler/parts/constants.js"
 
 export function drawRuler(canvas: TimelineCanvas) {
 	const pxPerMs = canvas.viewport.durationToWidth(ms(1))
+	const trimOffsetPx = canvas.trimPreviewOffsetPx()
 	const timebase = canvas.timebase()
 	const pps = pxPerMs * 1000
 	const steps = tickSteps(timebase)
@@ -30,7 +31,7 @@ export function drawRuler(canvas: TimelineCanvas) {
 
 	for (let step = startStep; step <= endStep; step += 1) {
 		const time = ms(step * scale.minor)
-		const x = Math.round(canvas.viewport.timeToViewportX(time) + metrics.paddingX)
+		const x = Math.round(canvas.viewport.timeToViewportX(time) + metrics.paddingX + trimOffsetPx)
 		const isMajor = Math.round(time) % Math.round(scale.major) === 0
 
 		if (isMajor) {
