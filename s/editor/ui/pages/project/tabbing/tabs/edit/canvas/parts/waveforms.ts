@@ -3,7 +3,7 @@ import {Item} from "@omnimedia/omnitool"
 import {Waveform} from "@omnimedia/omnitool/x/timeline/parts/waveform/waveform.js"
 import type {WaveformTileData} from "@omnimedia/omnitool/x/timeline/parts/waveform/parts/types.js"
 
-import {metrics} from "../draw/styles.js"
+import {metrics, styles} from "../draw/styles.js"
 import type {TimelineCanvas} from "../canvas.js"
 import type {TimelineClipBox} from "../draw/clip.js"
 
@@ -26,6 +26,13 @@ export class TimelineWaveforms {
 
 	draw(ctx: CanvasRenderingContext2D, box: TimelineClipBox) {
 		const clip = this.canvas.deps.session.index.getItem<Item.Audio>(box.itemId)
+		const media = this.canvas.deps.resolveMedia(clip)
+
+		if (!media) {
+			this.#drawMissingMedia(ctx, box)
+			return
+		}
+
 		const entry = this.#entry(clip)
 		this.#sync(entry, box, clip)
 
@@ -51,6 +58,8 @@ export class TimelineWaveforms {
 		if (existing)
 			return existing
 
+		const media = this.canvas.deps.resolveMedia(clip)!
+
 		const entry: Entry = {
 			tiles: [],
 			waveform: Promise.resolve(null as never),
@@ -58,7 +67,7 @@ export class TimelineWaveforms {
 
 		entry.waveform = Waveform.init(
 			this.canvas.deps.driver,
-			this.canvas.deps.resolveMedia(clip.mediaHash),
+			media.url,
 			{
 				tileHeight: metrics.trackHeight,
 				color: "rgb(196, 80, 115)",
@@ -74,6 +83,20 @@ export class TimelineWaveforms {
 
 		this.#entries.set(clip.id, entry)
 		return entry
+	}
+
+	#drawMissingMedia(ctx: CanvasRenderingContext2D, box: TimelineClipBox) {
+		ctx.save()
+		ctx.beginPath()
+		ctx.roundRect(box.x, box.y, box.width, box.height, metrics.clipRadius)
+		ctx.clip()
+		ctx.fillStyle = "rgba(0, 0, 0, 0.18)"
+		ctx.fillRect(box.x, box.y, box.width, box.height)
+		ctx.fillStyle = styles.text
+		ctx.font = "12px sans-serif"
+		ctx.textBaseline = "middle"
+		ctx.fillText("missing media for clip", box.x + metrics.labelInsetX, box.y + box.height / 2)
+		ctx.restore()
 	}
 
 	#sync(entry: Entry, box: TimelineClipBox, clip: Item.Audio) {

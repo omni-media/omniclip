@@ -50,9 +50,9 @@ export const selectTool = tool("select", (session) => {
 			dragger.preview(point, session)
 		},
 
-		pointerup: () => {
+		pointerup: ({time}) => {
 			if (trimmer.isTrimming) {
-				trimmer.commit(session)
+				trimmer.commit(time, session)
 				return
 			}
 

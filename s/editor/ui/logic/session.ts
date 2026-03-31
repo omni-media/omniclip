@@ -1,7 +1,7 @@
 
 import {signal} from "@e280/strata"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
-import {Driver, Id, Kind, O, TimelineFile, VideoPlayer} from "@omnimedia/omnitool"
+import {Driver, Id, Item, Kind, O, Resource, TimelineFile, VideoPlayer} from "@omnimedia/omnitool"
 
 import {Idx, Index} from "./parts/index.js"
 import {Viewport} from "./parts/viewport.js"
@@ -10,7 +10,9 @@ import {selectTool} from "./parts/modes/select.js"
 import {Strata} from "../../context/parts/strata.js"
 import {add, remove, update} from "./parts/mutate.js"
 import {Proposal} from "./parts/proposal/proposal.js"
+import {trim} from "./parts/interactions/trim/parts/action.js"
 import {DropIntent} from "./parts/interactions/drag/parts/intent.js"
+import {applyBounds, getBounds} from "./parts/bounds.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
 import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 import {TimelineClipBox} from "../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
@@ -38,7 +40,7 @@ export class OmniSession {
 		omnitool: O,
 		player: VideoPlayer,
 		driver: Driver,
-		resolveMedia: (hash: string) => Blob | string | URL,
+		resolveMedia: (item: Item.Any) => Resource.Media | null,
 	}) {
 		this.canvas = new TimelineCanvas({
 			session: this,
@@ -150,13 +152,19 @@ export class OmniSession {
 				replacements = [seqId]
 			}
 
-			add(state, {...clip, id: leftId, duration: offset})
-			add(state, {
-				...clip,
-				id: rightId,
-				duration: clip.duration - offset,
-				...(clip.kind !== Kind.Text && { start: (clip.start ?? 0) + offset })
-			})
+			const {start} = getBounds(clip)
+			add(
+				state,
+				applyBounds({...clip, id: leftId}, start, offset)
+			)
+			add(
+				state,
+				applyBounds(
+					{...clip, id: rightId},
+					start + offset,
+					clip.duration - offset
+				)
+			)
 			remove(state, clipId)
 
 			update(state, parent.id, {
@@ -174,18 +182,8 @@ export class OmniSession {
 		this.timeline.mutate(state => {
 			const clip = this.index.getItem<Idx.Clip>(clipId)
 			const laneStart = this.index.getItemLaneStart(clipId, this.$viewedItemId.value)
-			const offset = time - laneStart
-
-			if (offset <= 0 || offset >= clip.duration)
-				return
-
-			update(state, clipId, edge === 'start'
-				? {
-					duration: clip.duration - offset,
-					...(clip.kind !== Kind.Text && {start: (clip.start ?? 0) + offset})
-				}
-				: {duration: offset}
-				)
+			const mediaDuration = this.deps.resolveMedia(clip)?.duration
+			update(state, clipId, trim(clip, edge, time - laneStart, mediaDuration))
 		})
 	}
 

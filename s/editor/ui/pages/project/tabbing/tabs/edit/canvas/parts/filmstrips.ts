@@ -2,7 +2,7 @@
 import {Item, Filmstrip} from "@omnimedia/omnitool"
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
-import {metrics} from "../draw/styles.js"
+import {metrics, styles} from "../draw/styles.js"
 import type {TimelineCanvas} from "../canvas.js"
 import type {TimelineClipBox} from "../draw/clip.js"
 
@@ -32,6 +32,13 @@ export class TimelineFilmstrips {
 
 	draw(ctx: CanvasRenderingContext2D, box: TimelineClipBox) {
 		const clip = this.canvas.deps.session.index.getItem<Item.Video>(box.itemId)
+		const media = this.canvas.deps.resolveMedia(clip)
+
+		if (!media) {
+			this.#drawMissingMedia(ctx, box)
+			return
+		}
+
 		const entry = this.#entry(clip)
 		this.#sync(entry, box, clip)
 
@@ -58,12 +65,14 @@ export class TimelineFilmstrips {
 		if (existing)
 			return existing
 
+		const media = this.canvas.deps.resolveMedia(clip)!
+
 		const entry: Entry = {
 			tiles: [],
 			filmstrip: Promise.resolve(null as never)
 		}
 
-		entry.filmstrip = Filmstrip.init(this.canvas.deps.resolveMedia(clip.mediaHash), {
+		entry.filmstrip = Filmstrip.init(media.url, {
 			frequency: this.#frequencyInSeconds(),
 			onPlaceholders: times => {
 				if (entry.tiles.length === 0)
@@ -88,6 +97,20 @@ export class TimelineFilmstrips {
 
 		this.#entries.set(clip.id, entry)
 		return entry
+	}
+
+	#drawMissingMedia(ctx: CanvasRenderingContext2D, box: TimelineClipBox) {
+		ctx.save()
+		ctx.beginPath()
+		ctx.roundRect(box.x, box.y, box.width, box.height, metrics.clipRadius)
+		ctx.clip()
+		ctx.fillStyle = "rgba(0, 0, 0, 0.25)"
+		ctx.fillRect(box.x, box.y, box.width, box.height)
+		ctx.fillStyle = styles.text
+		ctx.font = "12px sans-serif"
+		ctx.textBaseline = "middle"
+		ctx.fillText("missing media for clip", box.x + metrics.labelInsetX, box.y + box.height / 2)
+		ctx.restore()
 	}
 
 	#sync(entry: Entry, box: TimelineClipBox, clip: Item.Video) {

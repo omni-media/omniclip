@@ -1,7 +1,7 @@
 
 import {dom} from '@e280/sly'
 import {signal} from '@e280/strata'
-import {Driver, Id, Kind, VideoPlayer} from '@omnimedia/omnitool'
+import {Driver, Id, Item, Kind, Resource, VideoPlayer} from '@omnimedia/omnitool'
 import {fps, Fps} from '@omnimedia/omnitool/x/units/fps.js'
 import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
 
@@ -28,7 +28,7 @@ type EditCanvasDeps = {
 	settings: Strata['settings']
 	player: VideoPlayer
 	driver: Driver
-	resolveMedia: (hash: string) => Blob | string | URL
+	resolveMedia: (item: Item.Any) => Resource.Media | null
 }
 
 type CursorIcon = ToolName

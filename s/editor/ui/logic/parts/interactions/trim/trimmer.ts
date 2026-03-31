@@ -1,10 +1,11 @@
 
-import {Item} from "@omnimedia/omnitool"
 import {Ms, ms} from "@omnimedia/omnitool/x/units/ms.js"
 
+import {trim} from "./parts/action.js"
 import {OmniSession} from "../../../session.js"
-import {overlayFromTrim} from "./parts/overlay.js"
 import {Proposal} from "../../proposal/proposal.js"
+import {overlayFromTrim} from "./parts/overlay.js"
+import {getBounds, TimelineClip} from "../../bounds.js"
 import {TimelineClipBox} from "../../../../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
 
 export type TrimEdge = "start" | "end"
@@ -16,9 +17,8 @@ export class Trimmer {
 	#state: {
 		clip: TimelineClipBox
 		edge: TrimEdge
-		item: Item.Video | Item.Audio | Item.Text
+		item: TimelineClip
 		laneStart: Ms
-		lastOffset: number
 	} | null = null
 
 	get isTrimming() {
@@ -29,9 +29,8 @@ export class Trimmer {
 		this.#state = {
 			clip,
 			edge,
-			item: session.index.getItem(clip.itemId) as Item.Video | Item.Audio | Item.Text,
+			item: session.index.getItem(clip.itemId),
 			laneStart: session.index.getItemLaneStart(clip.itemId, session.$viewedItemId.value),
-			lastOffset: 0,
 		}
 	}
 
@@ -40,39 +39,31 @@ export class Trimmer {
 			return
 
 		const {clip, edge, item, laneStart} = this.#state
-		const isEnd = edge === "end"
+		const mediaDuration = session.deps.resolveMedia(item)?.duration
+		const patched = trim(item, edge, time - laneStart, mediaDuration)
 
-		const offset = isEnd
-			? Math.max(1, Math.min(item.duration, time - laneStart))
-			: Math.max(0, Math.min(item.duration - 1, time - laneStart))
-
-		const duration = ms(isEnd ? offset : item.duration - offset)
-		this.#state.lastOffset = offset
-
-		session.setProposal(new Proposal(session.timeline, overlayFromTrim({
-			clipId: clip.itemId, edge, item, duration, offset
-		})))
+		session.setProposal(new Proposal(session.timeline, overlayFromTrim(clip.itemId, patched)))
 		session.setGhostClip(null)
+		const patchedStart = getBounds(patched).start
+		const itemStart = getBounds(item).start
 		session.setTrimPreviewOffsetPx(
-			isEnd ? 0 : session.viewport.durationToWidth(ms(offset))
+			edge === "end"
+				? 0
+				: session.viewport.durationToWidth(ms(patchedStart - itemStart))
 		)
 
 		session.canvas.scheduleDraw()
 	}
 
-	commit(session: OmniSession) {
+	commit(time: Ms, session: OmniSession) {
 		if (!this.#state)
 			return
 
-		const {clip, edge, item, lastOffset} = this.#state
+		const {clip, edge, item, laneStart} = this.#state
+		const mediaDuration = session.deps.resolveMedia(item)?.duration
+		const patched = trim(item, edge, time - laneStart, mediaDuration)
 
-		new Proposal(session.timeline, overlayFromTrim({
-			clipId: clip.itemId,
-			edge,
-			item,
-			duration: ms(edge === "end" ? lastOffset : item.duration - lastOffset),
-			offset: lastOffset,
-		})).commit()
+		new Proposal(session.timeline, overlayFromTrim(clip.itemId, patched)).commit()
 
 		this.cancel(session)
 	}
