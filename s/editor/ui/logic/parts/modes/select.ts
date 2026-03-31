@@ -1,97 +1,76 @@
 
 import {tool} from "./tool.js"
-import {Dragger} from "../drag/dragger.js"
-import {Proposal} from "../proposal/proposal.js"
-import {getDropIntent} from "../proposal/parts/intent.js"
-import {overlayFromIntent} from "../proposal/parts/overlay.js"
-import {metrics} from "../../../pages/project/tabbing/tabs/edit/canvas/draw/styles.js"
+import {Dragger} from "../interactions/drag/dragger.js"
+import {Trimmer, cursorForTrimEdge} from "../interactions/trim/trimmer.js"
 
 export const selectTool = tool("select", (session) => {
 	const dragger = new Dragger()
+	const trimmer = new Trimmer()
 
 	return {
-	pointerdown: ({clip, inRuler, time, point}) => {
-		if (inRuler) {
-			session.deps.player.seek(time)
-			session.setPlayhead(time)
-			session.setGhostClip(null)
-			session.setDropIntent(null)
+		pointerdown: ({clip, inRuler, time, point}) => {
+			if (inRuler) {
+				session.deps.player.seek(time)
+				session.setPlayhead(time)
+				session.setGhostClip(null)
+				session.setDropIntent(null)
+				dragger.cancel(session)
+				session.canvas.scheduleDraw()
+				return
+			}
+
+			const pointerX = point.x + session.viewport.scrollLeft
+
+			if (clip) {
+				const edge = session.canvas.trimEdgeAt(clip, pointerX)
+				if (edge) {
+					trimmer.start(clip, edge, session)
+					session.canvas.canvas.style.cursor = cursorForTrimEdge(edge)
+					return
+				}
+			}
+
+			session.$selectedItem.value = clip?.itemId ?? null
 			session.canvas.scheduleDraw()
-			dragger.end()
-			return
+
+			if (clip) dragger.start(clip, point, session)
+			else dragger.cancel(session)
+		},
+
+		pointermove: ({clip, point, time}) => {
+			if (trimmer.isTrimming) return trimmer.preview(time, session)
+
+			const pointerX = point.x + session.viewport.scrollLeft
+
+			if (!dragger.isDragging) {
+				const edge = clip ? session.canvas.trimEdgeAt(clip, pointerX) : null
+				session.canvas.canvas.style.cursor = cursorForTrimEdge(edge)
+			}
+
+			dragger.preview(point, session)
+		},
+
+		pointerup: () => {
+			if (trimmer.isTrimming) {
+				trimmer.commit(session)
+				return
+			}
+
+			dragger.commit(session)
+		},
+
+		pointerleave: () => {
+			trimmer.cancel(session)
+			dragger.cancel(session)
+			session.canvas.canvas.style.cursor = "default"
+		},
+
+		doubleclick: ({clip}) => {
+			if (!clip?.enterable) return
+			session.$viewedItemId.value = clip.itemId
+			session.$selectedItem.value = clip.itemId
+			session.canvas.scheduleDraw()
 		}
-
-		session.$selectedItem.value = clip?.itemId ?? null
-		session.canvas.scheduleDraw()
-
-		if (clip) dragger.start(clip, point, session)
-		else dragger.end()
-	},
-
-	pointermove: ({point}) => {
-		const drag = dragger.move(point)
-		if (!drag)
-			return
-
-		const clampedX = Math.max(0, Math.min(
-			session.canvas.contentWidth - drag.clip.width,
-			drag.clip.x + drag.dx,
-		))
-		const clampedY = Math.max(metrics.rulerHeight + metrics.paddingY, Math.min(
-			session.canvas.height - metrics.paddingY - drag.clip.height,
-			drag.clip.y + drag.dy,
-		))
-
-		session.setGhostClip({
-			...drag.clip,
-			x: clampedX,
-			y: clampedY,
-		})
-
-		const intent = getDropIntent({
-			snapshot: drag.snapshot,
-			movingId: drag.clipId,
-			pointerX: point.x + session.viewport.scrollLeft,
-			rowIndex: drag.snapshot.rowAt(point.y),
-		})
-
-		session.setDropIntent(intent ? {movingId: drag.clipId, intent} : null)
-		if (intent) {
-			const overlay = overlayFromIntent({
-				index: drag.snapshot.index,
-				movingId: drag.clipId,
-				intent,
-				getId: () => session.deps.omnitool.getId(),
-			})
-
-			session.setProposal(
-				overlay ? new Proposal(session.timeline, overlay) : null
-			)
-		}
-		else {
-			session.clearProposal()
-		}
-		session.canvas.scheduleDraw()
-	},
-
-	pointerup: () => {
-		if (dragger.isDragging) {
-			session.$proposal.value?.commit()
-		}
-		session.clearProposal()
-		session.setGhostClip(null)
-		session.setDropIntent(null)
-		dragger.end()
-		session.canvas.scheduleDraw()
-	},
-
-	doubleclick: ({clip}) => {
-		if (!clip?.enterable)
-			return
-
-		session.$viewedItemId.value = clip.itemId
-		session.$selectedItem.value = clip.itemId
-		session.canvas.scheduleDraw()
 	}
-}})
+})
 

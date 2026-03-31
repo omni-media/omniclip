@@ -1,7 +1,7 @@
 
 import {Id, Item, Kind} from "@omnimedia/omnitool"
 
-import {Index} from "../../index.js"
+import {Index} from "../../../index.js"
 import {DropIntent} from "./intent.js"
 
 export type OverlayFromIntentOpts = {
@@ -11,7 +11,7 @@ export type OverlayFromIntentOpts = {
 	getId: () => Id
 }
 
-type Context<T extends DropIntent['type']> = {
+type Context<T extends DropIntent["type"]> = {
 	index: Index
 	movingId: Id
 	intent: Extract<DropIntent, {type: T}>
@@ -42,27 +42,29 @@ const stackSequence = ({index, movingId, intent}: Context<"stack-sequence">) => 
 	const seq = index.getItem<Item.Sequence>(intent.sequenceId)
 	return [
 		[stack.id, {...stack, childrenIds: stack.childrenIds.filter(id => id !== movingId)}],
-		[seq.id, {...seq, childrenIds: spliceInto(seq.childrenIds, movingId, intent.index)}]
+		[seq.id, {...seq, childrenIds: spliceInto(seq.childrenIds, movingId, intent.index)}],
 	]
 }
 
 const stackWrapLeaf = ({index, movingId, intent, getId}: Context<"stack-wrap-leaf">) => {
 	const stack = index.getItem<Item.Stack>(intent.stackId)
 	const seqId = getId()
-	const childrenIds = stack.childrenIds.filter(id => id !== movingId).map(id => id === intent.targetId ? seqId : id)
+	const childrenIds = stack.childrenIds
+		.filter(id => id !== movingId)
+		.map(id => id === intent.targetId ? seqId : id)
 	const seqChildrenIds = intent.before ? [movingId, intent.targetId] : [intent.targetId, movingId]
 
 	return [
 		[stack.id, {...stack, childrenIds}],
-		[seqId, {id: seqId, kind: Kind.Sequence, childrenIds: seqChildrenIds}]
+		[seqId, {id: seqId, kind: Kind.Sequence, childrenIds: seqChildrenIds}],
 	]
 }
 
 const strategies: Record<string, (ctx: any) => any> = {
-	"sequence": reorder,
-	"stack": reorder,
+	sequence: reorder,
+	stack: reorder,
 	"stack-sequence": stackSequence,
-	"stack-wrap-leaf": stackWrapLeaf
+	"stack-wrap-leaf": stackWrapLeaf,
 }
 
 export function overlayFromIntent(ctx: OverlayFromIntentOpts) {

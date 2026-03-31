@@ -1,7 +1,7 @@
 
 import {Id, Kind} from "@omnimedia/omnitool"
 
-import {DragSnapshot} from "../../drag/parts/snapshot.js"
+import {DragSnapshot} from "./snapshot.js"
 
 export type DropIntent =
 	| {type: "sequence", parentId: Id, index: number}
@@ -37,7 +37,7 @@ export function getDropIntent({snapshot, movingId, pointerX, rowIndex}: GetDropI
 		return {
 			type: "stack",
 			parentId: viewed.id,
-			index: rowIndex
+			index: rowIndex,
 		}
 	}
 
