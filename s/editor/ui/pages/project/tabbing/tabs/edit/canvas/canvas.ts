@@ -1,7 +1,7 @@
 
 import {dom} from '@e280/sly'
 import {signal} from '@e280/strata'
-import {Driver, Id, VideoPlayer} from '@omnimedia/omnitool'
+import {Driver, Id, Kind, VideoPlayer} from '@omnimedia/omnitool'
 import {fps, Fps} from '@omnimedia/omnitool/x/units/fps.js'
 import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
 
@@ -15,6 +15,7 @@ import {metrics, styles} from './draw/styles.js'
 import {drawBladePreview} from './draw/blade-preview.js'
 import {drawClipPreview} from './draw/clip-preview.js'
 import {drawSnapTargets} from './draw/snap-targets.js'
+import {TimelineClipBox} from './draw/clip.js'
 import {TimelineFilmstrips} from './parts/filmstrips.js'
 import {TimelineWaveforms} from './parts/waveforms.js'
 import {OmniSession} from '../../../../../../logic/session.js'
@@ -80,6 +81,9 @@ export class TimelineCanvas {
 				break
 			case "position":
 				this.canvas.style.cursor = "grab"
+				break
+			case "trim":
+				this.canvas.style.cursor = "ew-resize"
 				break
 			case "zoom":
 				this.canvas.style.cursor = "zoom-in"
@@ -168,7 +172,8 @@ export class TimelineCanvas {
 	clipAt(x: number, y: number) {
 		x += this.viewport.scrollLeft
 		return this.layout.clips.find(
-			c => x >= c.x && x <= c.x + c.width && y >= c.y && y <= c.y + c.height
+			c => c.kind !== Kind.Gap &&
+				x >= c.x && x <= c.x + c.width && y >= c.y && y <= c.y + c.height
 		) ?? null
 	}
 
@@ -187,6 +192,25 @@ export class TimelineCanvas {
 			.filter(box => !!box)
 
 		return siblings.filter(box => pointerX >= box.x + box.width / 2).length
+	}
+
+	trimEdgeAt(clip: TimelineClipBox, canvasX: number) {
+		return canvasX - clip.x <= 10
+			? "start"
+			: clip.x + clip.width - canvasX <= 10
+				? "end"
+				: null
+	}
+
+	clampClipToCanvasBounds(clip: TimelineClipBox, x: number, y: number) {
+		return {
+			...clip,
+			x: Math.max(0, Math.min(this.contentWidth - clip.width, x)),
+			y: Math.max(
+				metrics.rulerHeight + metrics.paddingY,
+				Math.min(this.height - metrics.paddingY - clip.height, y),
+			),
+		}
 	}
 
 	clearCanvas() {

@@ -85,6 +85,8 @@ export function drawClips(canvas: TimelineCanvas) {
 	const ghostClip = canvas.deps.session.$ghostClip.value
 
 	for (const clip of canvas.layout.clips) {
+		if (clip.kind === Kind.Gap)
+			continue
 		if (clip.itemId === ghostClip?.itemId)
 			continue
 		if (clip.kind === Kind.Video)
