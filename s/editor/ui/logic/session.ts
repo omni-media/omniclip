@@ -183,7 +183,10 @@ export class OmniSession {
 		})
 	}
 
-	deleteClip(clipId: Id) {
+	deleteClip(clipId: Id | null) {
+		if (clipId === null)
+			return
+
 		this.timeline.mutate(state => {
 			const parent = this.index.getParent(clipId)
 			if (!parent)

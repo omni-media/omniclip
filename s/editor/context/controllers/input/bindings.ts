@@ -4,6 +4,7 @@ import * as tact from "@benev/tact"
 export const bindings = tact.asBindings({
 	timeline: {
 		play_pause: "Space",
+		delete_clip: ["or", "Backspace", "Delete"],
 		split_clip: [
 			"or",
 			["mods", "KeyB", {ctrl: true}],

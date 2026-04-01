@@ -35,9 +35,7 @@ export const Toolbar = view(use => (context: EditorContext) => {
 	}
 
 	const handleClipDelete = () => {
-		if(session.$selectedItem.value) {
-			session.deleteClip(session.$selectedItem.value)
-		}
+		session.deleteClip(session.$selectedItem.value)
 	}
 
 	const setZoomAtPlayhead = (zoom: number) => {
