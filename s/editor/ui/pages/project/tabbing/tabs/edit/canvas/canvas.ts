@@ -203,6 +203,25 @@ export class TimelineCanvas {
 				: null
 	}
 
+	rollEdgeAt(clip: TimelineClipBox, canvasX: number) {
+		const parent = this.deps.session.index.getParent(clip.itemId)
+		if (!parent || parent.kind !== Kind.Sequence)
+			return null
+
+		const index = parent.childrenIds.indexOf(clip.itemId)
+		if (index === -1)
+			return null
+
+		const inStartZone = canvasX - clip.x <= 6
+		const inEndZone = clip.x + clip.width - canvasX <= 6
+
+		if (inStartZone && index > 0)
+			return "start"
+		if (inEndZone && index < parent.childrenIds.length - 1)
+			return "end"
+		return null
+	}
+
 	clampClipToCanvasBounds(clip: TimelineClipBox, x: number, y: number) {
 		return {
 			...clip,

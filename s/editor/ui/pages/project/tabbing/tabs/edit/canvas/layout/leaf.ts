@@ -14,6 +14,8 @@ const KIND_NAMES: Record<string | number, string> = {
 	[Kind.Text]: "Text",
 }
 
+const MIND_CLIP_DURATION = 1
+
 export function layoutLeaf(
 	context: LayoutContext,
 	item: TimelineNode,
@@ -28,7 +30,7 @@ export function layoutLeaf(
 		label: `${KIND_NAMES[item.kind] ?? "Item"} ${item.id}`,
 		x: time * context.pxPerMs + metrics.paddingX,
 		y: context.trackY(row),
-		width: Math.max(metrics.clipMinWidth, duration * context.pxPerMs),
+		width: Math.max(MIND_CLIP_DURATION, duration * context.pxPerMs),
 		height: metrics.trackHeight,
 		selected: context.selectedItemId === item.id,
 		enterable,
