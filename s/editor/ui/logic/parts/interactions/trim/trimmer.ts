@@ -56,15 +56,11 @@ export class Trimmer {
 		session.canvas.scheduleDraw()
 	}
 
-	commit(time: Ms, session: OmniSession) {
+	commit(session: OmniSession) {
 		if (!this.#state)
 			return
 
-		const {clip, edge, item, laneStart} = this.#state
-		const mediaDuration = session.deps.resolveMedia(item)?.duration
-		const patched = trim(item, edge, time - laneStart, mediaDuration)
-
-		new Proposal(session.timeline, overlayFromTrim(clip.itemId, patched)).commit()
+		session.$proposal.value?.commit()
 
 		this.cancel(session)
 	}
