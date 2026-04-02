@@ -3,22 +3,11 @@ import {tool} from "./tool.js"
 import {Dragger} from "../interactions/drag/dragger.js"
 import {Roller, cursorForRoll} from "../interactions/roll/roller.js"
 import {Trimmer, cursorForTrimEdge} from "../interactions/trim/trimmer.js"
-import {TimelineClipBox} from "../../../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
 
 export const selectTool = tool("select", (session) => {
 	const dragger = new Dragger()
 	const trimmer = new Trimmer()
 	const roller = new Roller()
-
-	const setCursorForPoint = (clip: TimelineClipBox | null, pointerX: number) => {
-		const rollEdge = clip ? session.canvas.rollEdgeAt(clip, pointerX) : null
-		if (rollEdge)
-			session.canvas.canvas.style.cursor = cursorForRoll()
-		else {
-			const edge = clip ? session.canvas.trimEdgeAt(clip, pointerX) : null
-			session.canvas.canvas.style.cursor = cursorForTrimEdge(edge)
-		}
-	}
 
 	return {
 		pointerdown: ({clip, inRuler, time, point}) => {
@@ -60,21 +49,20 @@ export const selectTool = tool("select", (session) => {
 		},
 
 		pointermove: ({clip, point, time}) => {
-			const pointerX = point.x + session.viewport.scrollLeft
-
-			if (roller.isRolling) {
-				roller.preview(time, session)
-				setCursorForPoint(clip, pointerX)
-				return
-			}
-
-			if (trimmer.isTrimming)
-				return trimmer.preview(time, session)
-
-			if (!dragger.isDragging)
-				setCursorForPoint(clip, pointerX)
+			if (roller.isRolling) return roller.preview(time, session)
+			if (trimmer.isTrimming) return trimmer.preview(time, session)
 
 			dragger.preview(point, session)
+
+			if (!dragger.isDragging) {
+				const pointerX = point.x + session.viewport.scrollLeft
+				const rollEdge = clip ? session.canvas.rollEdgeAt(clip, pointerX) : null
+				const trimEdge = clip ? session.canvas.trimEdgeAt(clip, pointerX) : null
+
+				session.canvas.canvas.style.cursor = rollEdge
+					? cursorForRoll()
+					: cursorForTrimEdge(trimEdge)
+			}
 		},
 
 		pointerup: () => {
