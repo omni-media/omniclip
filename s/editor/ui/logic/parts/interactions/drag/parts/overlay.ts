@@ -1,8 +1,9 @@
 
-import {Id, Item, Kind} from "@omnimedia/omnitool"
+import {Id, Item} from "@omnimedia/omnitool"
 
 import {Index} from "../../../index.js"
 import {DropIntent} from "./intent.js"
+import {spliceChildren, wrapChildInSequence} from "../../../operations.js"
 
 export type OverlayFromIntentOpts = {
 	index: Index
@@ -24,15 +25,9 @@ type ReorderContext = {
 	intent: Extract<DropIntent, {type: "sequence" | "stack"}>
 }
 
-const spliceInto = (ids: Id[], movingId: Id, index: number) => {
-	const next = ids.filter(id => id !== movingId)
-	next.splice(index, 0, movingId)
-	return next
-}
-
 const reorder = ({index, movingId, intent}: ReorderContext) => {
 	const parent = index.getItem<Item.Sequence | Item.Stack>(intent.parentId)
-	const childrenIds = spliceInto(parent.childrenIds, movingId, intent.index)
+	const childrenIds = spliceChildren(parent.childrenIds, movingId, intent.index)
 	if (parent.childrenIds.every((id, i) => id === childrenIds[i])) return null
 	return [[parent.id, {...parent, childrenIds}]]
 }
@@ -42,21 +37,25 @@ const stackSequence = ({index, movingId, intent}: Context<"stack-sequence">) => 
 	const seq = index.getItem<Item.Sequence>(intent.sequenceId)
 	return [
 		[stack.id, {...stack, childrenIds: stack.childrenIds.filter(id => id !== movingId)}],
-		[seq.id, {...seq, childrenIds: spliceInto(seq.childrenIds, movingId, intent.index)}],
+		[seq.id, {...seq, childrenIds: spliceChildren(seq.childrenIds, movingId, intent.index)}],
 	]
 }
 
 const stackWrapLeaf = ({index, movingId, intent, getId}: Context<"stack-wrap-leaf">) => {
 	const stack = index.getItem<Item.Stack>(intent.stackId)
 	const seqId = getId()
-	const childrenIds = stack.childrenIds
-		.filter(id => id !== movingId)
-		.map(id => id === intent.targetId ? seqId : id)
 	const seqChildrenIds = intent.before ? [movingId, intent.targetId] : [intent.targetId, movingId]
+	const wrapped = wrapChildInSequence(
+		stack,
+		intent.targetId,
+		seqId,
+		seqChildrenIds,
+		[movingId],
+	)
 
 	return [
-		[stack.id, {...stack, childrenIds}],
-		[seqId, {id: seqId, kind: Kind.Sequence, childrenIds: seqChildrenIds}],
+		[stack.id, wrapped.parent],
+		[seqId, wrapped.sequence],
 	]
 }
 

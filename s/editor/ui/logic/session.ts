@@ -7,13 +7,13 @@ import {Driver, Id, Item, Kind, O, Resource, TimelineFile, VideoPlayer} from "@o
 import {Idx, Index} from "./parts/index.js"
 import {Viewport} from "./parts/viewport.js"
 import {Tool} from "./parts/modes/tool.js"
-import {getBounds} from "./parts/bounds.js"
 import {selectTool} from "./parts/modes/select.js"
 import {Strata} from "../../context/parts/strata.js"
 import {add, remove, update} from "./parts/mutate.js"
 import {Proposal} from "./parts/proposal/proposal.js"
 import {trim} from "./parts/interactions/trim/parts/action.js"
 import {DropIntent} from "./parts/interactions/drag/parts/intent.js"
+import {replaceChild, splitClip, wrapChildInSequence} from "./parts/operations.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
 import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 import {TimelineClipBox} from "../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
@@ -146,38 +146,29 @@ export class OmniSession {
 			if (!parent)
 				return
 
-			const offset = time - this.index.getItemLaneStart(clipId, this.$viewedItemId.value)
+			const offset = ms(time - this.index.getItemLaneStart(clipId, this.$viewedItemId.value))
 			if (offset <= 0 || offset >= clip.duration)
 				return
 
 			const id = () => this.deps.omnitool.getId()
 			const leftId = id()
 			const rightId = id()
-
-			let replacements = [leftId, rightId]
-
-			if (parent.kind === Kind.Stack) {
-				const seqId = id()
-				add(state, {id: seqId, kind: Kind.Sequence, childrenIds: replacements})
-				replacements = [seqId]
-			}
-
-			const {start} = getBounds(clip)
-			add(
-				state,
-				{...clip, id: leftId, start, duration: offset}
-			)
-			add(
-				state,
-				{...clip, id: rightId, start: start + offset, duration: clip.duration - offset}
-			)
+			const {left, right} = splitClip(clip, leftId, rightId, offset)
+			add(state, left)
+			add(state, right)
 			remove(state, clipId)
 
-			update(state, parent.id, {
-				childrenIds: parent.childrenIds.flatMap(c =>
-					c === clipId ? replacements : [c]
-				)
-			})
+			if (parent.kind === Kind.Sequence) {
+				update(state, parent.id, {
+					childrenIds: replaceChild(parent.childrenIds, clipId, [leftId, rightId])
+				})
+				return
+			}
+
+			const seqId = id()
+			const wrapped = wrapChildInSequence(parent, clipId, seqId, [leftId, rightId])
+			add(state, wrapped.sequence)
+			update(state, parent.id, wrapped.parent)
 		})
 
 		this.canvas.clearPreviews()
