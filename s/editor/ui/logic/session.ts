@@ -1,4 +1,5 @@
 
+import {is} from "@e280/stz"
 import {signal} from "@e280/strata"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 import {Driver, Id, Item, Kind, O, Resource, TimelineFile, VideoPlayer} from "@omnimedia/omnitool"
@@ -53,6 +54,15 @@ export class OmniSession {
 		this.#index = new Index(deps.strata.timeline.state as TimelineFile)
 		deps.strata.timeline.lens(s => s).on(s => this.#index.reindex(s as TimelineFile))
 		this.$viewedItemId.value = deps.strata.timeline.state.rootId
+
+		this.$ghostPlayhead.on(time => {
+			if(!this.deps.player.isPlaying) {
+				if(is.happy(time))
+					this.deps.player.seek(time)
+				else
+					this.deps.player.seek(this.$playhead())
+			}
+		})
 	}
 
 	get timeline() {
