@@ -3,6 +3,7 @@ import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {makeRouter} from "../ui/pages/router.js"
 import {prepareViews} from "../ui/views/views.js"
+import {ModalManager} from "./parts/modal/modal.js"
 import {Requirements, setupRequirements} from "./parts/requirements.js"
 
 export class EditorContext {
@@ -13,9 +14,9 @@ export class EditorContext {
 
 	router = makeRouter(this)
 	views = prepareViews(this)
+	modals = new ModalManager(this)
 
 	constructor(private requirements: Requirements) {
-		requirements.strata.timeline.lens(s => s).on(() => console.log('123'))
 
 		requirements.controllers.player.playback.onTick.on(() =>
 			this.session.setPlayhead(ms(requirements.controllers.player.currentTime))
