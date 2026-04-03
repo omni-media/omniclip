@@ -44,6 +44,7 @@
 		"typescript": "^5.8.3"
 	},
 	"dependencies": {
+		"@awesome.me/webawesome": "^3.4.0",
 		"@benev/tact": "^0.1.1",
 		"@e280/quay": "^0.0.0-2",
 		"@e280/shiny": "^0.1.0-9",
@@ -53,7 +54,7 @@
 		"@ffmpeg/ffmpeg": "^0.12.15",
 		"@ffmpeg/util": "^0.12.2",
 		"@floating-ui/dom": "^1.7.1",
-		"@omnimedia/omnitool": "^1.1.0-61",
+		"@omnimedia/omnitool": "^1.1.0-64",
 		"@pixi/colord": "^2.9.6",
 		"@zip.js/zip.js": "^2.7.62",
 		"coi-serviceworker": "^0.1.7",

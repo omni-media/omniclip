@@ -1,4 +1,6 @@
 
+@import url("/node_modules/@awesome.me/webawesome/dist-cdn/styles/webawesome.css");
+
 @layer vars, core, page;
 
 @layer vars {

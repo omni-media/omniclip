@@ -15,6 +15,7 @@ export default ssg.page(import.meta.url, async orb => {
 		socialCard: socialCard(title),
 		head: html`
 			<meta data-version="${await orb.packageVersion("$/package.json")}"/>
+			<script>document.documentElement.classList.add("wa-dark")</script>
 		`,
 		body: html`
 			<editor-app></editor-app>
