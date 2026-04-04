@@ -36,9 +36,9 @@ export class ModalManager {
 		}
 
 		this.#active.value = {
-			title: modal.title,
+			label: modal.label,
 			body: modal.render(this.context, controls),
-			close: controls.cancel,
+			cancel: controls.cancel,
 		}
 
 		return deferred.promise
@@ -52,9 +52,13 @@ export class ModalManager {
 		return html`
 			<wa-dialog
 				open
-				label=${active.title}
-				@wa-request-close=${active.close}
+				@wa-after-hide=${(e: Event) => {
+					if(e.target === e.currentTarget) {
+						active.cancel()
+					}
+				}}
 			>
+				<div slot=label>${active.label}</div>
 				${active.body}
 			</wa-dialog>
 		`

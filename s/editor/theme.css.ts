@@ -36,10 +36,12 @@ a {
 }
 
 [theme="topper"] {
-	height: 3em;
+	display: flex;
+	align-items: center;
+	height: 2em;
 	width: 100%;
 	background: #fff1;
-	padding-left: 3em;
+	padding: 0.2em 0.5em 0.2em 3em;
 }
 
 [theme="paddy"] {

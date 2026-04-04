@@ -1,15 +1,14 @@
 
-import {html} from "lit"
-import {createRef, ref} from "lit/directives/ref.js"
+import {html} from 'lit'
+import {view} from '@e280/sly'
+import {createRef, ref} from 'lit/directives/ref.js'
 
-import {baseModal} from "./base.js"
-import {ModalDefinition} from "../../../../context/parts/modal/types.js"
+import {ModalDefinition} from '../../../../context/parts/modal/types.js'
 
-import "@awesome.me/webawesome/dist/components/input/input.js"
+import '@awesome.me/webawesome/dist/components/input/input.js'
 
 type PromptModalOptions = {
-	title: string
-	label: string
+	label?: string
 	value?: string
 	placeholder?: string
 	yes?: string
@@ -17,38 +16,46 @@ type PromptModalOptions = {
 }
 
 export const promptModal = ({
-	title,
-	label,
-	value = "",
-	placeholder = "",
-	yes = "Apply",
-	no = "Cancel",
+	label = '',
+	value = '',
+	placeholder = '',
+	yes = 'Apply',
+	no = 'Cancel',
 }: PromptModalOptions): ModalDefinition<string> => {
 	const input = createRef<any>()
 
-	return baseModal<string>({
-		title,
-		body: (_context, controls) => html`
-			<label>${label}</label>
-			<wa-input
-				${ref(input)}
-				value=${value}
-				placeholder=${placeholder}
-				@keydown=${(event: KeyboardEvent) => {
-					if (event.key === "Enter")
-						controls.resolve(input.value?.value ?? "")
-				}}
-			></wa-input>
-		`,
-		footer: (_context, controls) => html`
-			<wa-button variant="neutral" @click=${controls.cancel}>
-				${no}
-			</wa-button>
+	return {
+		label: 'prompt',
+		render: (_, controls) => view(use => {
+			const submit = () => controls.resolve(input.value?.value ?? '')
 
-			<wa-button variant="brand" @click=${() => controls.resolve(input.value?.value ?? "")}>
-				${yes}
-			</wa-button>
-		`,
-	})
+			return () => html`
+				<div class="modal">
+					<div class="modal-body">
+						${label && html`<label>${label}</label>`}
+
+						<wa-input
+							${ref(input)}
+							.value=${value}
+							placeholder=${placeholder}
+							@keydown=${(event: KeyboardEvent) => {
+								if (event.key === 'Enter') submit()
+							}}
+						></wa-input>
+					</div>
+
+					<div class="modal-footer">
+						<wa-button variant="neutral" @click=${controls.cancel}>
+							${no}
+						</wa-button>
+
+						<wa-button variant="brand" @click=${submit}>
+							${yes}
+						</wa-button>
+					</div>
+				</div>
+			`
+		})()
+	}
 }
 

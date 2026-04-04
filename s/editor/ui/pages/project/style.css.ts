@@ -15,6 +15,38 @@ export default css`@layer view {
 	height: 100%;
 }
 
+.right {
+	display: flex;
+	flex: 1;
+	justify-content: end;
+	align-items: center;
+
+	.spacer {
+		width: 1px;
+		height: 20px;
+		margin: 0 1em;
+		background: gray;
+	}
+
+	.settings, .export {
+
+		&::part(base) {
+			height: 20px;
+			padding: 0 0.5em;
+			font-size: var(--font-size-xs);
+		}
+
+		wa-icon {
+			margin-right: 0.5em;
+		}
+
+		&::part(caret) {
+			margin-left: 0.5em;
+		}
+	}
+}
+
+
 /*
  * DEFAULT: COMPACT MODE (Mobile-First)
  */

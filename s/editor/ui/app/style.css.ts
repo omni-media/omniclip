@@ -14,7 +14,7 @@ export default css`@layer view {
 	display: block;
 	width: 100%;
 	height: 100%;
-	--button-size: 3em;
+	--button-size: 2em;
 	--drawer-height: 100%;
 	--blanket-backdrop-filter: blur(0.5em);
 }

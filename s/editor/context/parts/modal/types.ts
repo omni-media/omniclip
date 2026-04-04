@@ -1,7 +1,6 @@
 
-import {Content} from "@e280/sly"
-
-import {EditorContext} from "../../context.js"
+import {Content} from '@e280/sly'
+import {EditorContext} from '../../context.js'
 
 export type ModalControls<Result> = {
 	resolve: (value: Result) => void
@@ -9,18 +8,17 @@ export type ModalControls<Result> = {
 	cancel: () => void
 }
 
-export type ModalRenderer<Result> = (
-	context: EditorContext,
-	controls: ModalControls<Result>
-) => Content
-
 export type ModalDefinition<Result> = {
-	title: string
-	render: ModalRenderer<Result>
+	label: Content
+	render: (
+		context: EditorContext,
+		controls: ModalControls<Result>
+	) => Content
 }
 
 export type ActiveModal = {
-	title: string
+	label: Content
 	body: Content
-	close: () => void
+	cancel: () => void
 }
+

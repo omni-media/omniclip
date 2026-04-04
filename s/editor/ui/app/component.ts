@@ -6,6 +6,9 @@ import styleCss from "./style.css.js"
 import themeCss from "../../theme.css.js"
 import {EditorContext} from "../../context/context.js"
 
+import "@awesome.me/webawesome/dist/components/dialog/dialog.js"
+import "@awesome.me/webawesome/dist/components/button/button.js"
+
 export const EditorApp = (context: EditorContext) => view.component(use => {
 	use.name("editor-app")
 	use.styles(themeCss, styleCss)
@@ -38,6 +41,8 @@ export const EditorApp = (context: EditorContext) => view.component(use => {
 			<section slot=plate>
 				${router.render()}
 			</section>
+
+			${context.modals.render()}
 		`)
 		.render()
 })

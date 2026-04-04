@@ -1,15 +1,6 @@
 
 import {TimelineFile, Id} from "@omnimedia/omnitool"
-import {fps, Fps} from "@omnimedia/omnitool/x/units/fps.js"
 import {Chronicle, chronicle, Prism, Chrono} from "@e280/strata"
-
-export type EditorSettingsState = {
-	timebase: Fps
-	resolution: {
-		width: number
-		height: number
-	}
-}
 
 export type RoleScope = "video" | "audio" | "text" | "global"
 
@@ -36,12 +27,22 @@ export type OutlinerItem = {
 	starred: boolean
 }
 
+export type Settings = {
+	resolution: string
+	timebase: number
+	dropFrame: boolean
+	aspectRatio: "16:9" | "9:16" | "1:1" | "3:2" | "4:3" | "21:9"
+	colorSpace: "rec709" | "displayp3" | "rec2020"
+	sampleRate: "48000" | "44100" | "96000"
+	channels: "stereo" | "mono" | "5.1 Surround"
+}
+
 export type State = {
 	files: {
 		hashes: string[]
 	}
 	timeline: Chronicle<TimelineFile>
-	settings: EditorSettingsState
+	settings: Settings
 	outliner: {
 		roles: Role[]
 		tags: Tag[]
@@ -67,11 +68,13 @@ export class Strata {
 			items: []
 		},
 		settings: {
-			timebase: fps(30),
-			resolution: {
-				width: 1920,
-				height: 1080
-			}
+			dropFrame: true,
+			timebase: 30,
+			resolution: "1920x1080",
+			channels: "stereo",
+			colorSpace: "rec709",
+			aspectRatio: "16:9",
+			sampleRate: "48000",
 		},
 	})
 
