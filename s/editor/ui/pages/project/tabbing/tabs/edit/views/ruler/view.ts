@@ -1,8 +1,6 @@
 
 import {html} from "lit"
 import {dom, view} from "@e280/sly"
-import {debounce} from "@e280/stz"
-import {fps} from "@omnimedia/omnitool/x/units/fps.js"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import styleCss from "./style.css.js"
@@ -15,10 +13,6 @@ export const Ruler = view(use => (context: EditorContext) => {
 
 	const {settings} = context.strata
 	const player = context.controllers.player
-
-	const throttledSeek = use.once(() =>
-		debounce(16, (time: Ms) => player.seek(time))
-	)
 
 	const drag = use.once(() => ({
 		leftOffset: 0
@@ -36,7 +30,7 @@ export const Ruler = view(use => (context: EditorContext) => {
 
 	const updateDrag = (e: PointerEvent) => {
 		const time = pointerToTime(e)
-		throttledSeek(time)
+		player.seek(time)
 		session.setPlayhead(time)
 	}
 
@@ -57,7 +51,7 @@ export const Ruler = view(use => (context: EditorContext) => {
 				ctx,
 				canvas,
 				session.viewport,
-				{...settings.state, timebase: fps(Number(settings.state.timebase))}
+				settings.state
 			)
 	}
 
