@@ -9,6 +9,11 @@
 		--color: #aaa;
 		--prime: skyblue;
 		--link: cyan;
+		--font-size-xs: 0.75rem;
+		--font-size-s: 0.875rem;
+		--font-size-m: 1rem;
+		--font-size-l: 1.125rem;
+		--font-size-xl: 1.25rem;
 
 		--selection: white;
 		--selection-bg: #f70;
@@ -62,7 +67,7 @@
 @layer page {
 	:root {
 		height: 100%;
-		font-size: 16px;
+		font-size: clamp(12px, 1.2dvw, 16px);
 		font-family: sans-serif;
 
 		color-scheme: dark;
@@ -82,4 +87,3 @@
 		align-items: center;
 	}
 }
-
