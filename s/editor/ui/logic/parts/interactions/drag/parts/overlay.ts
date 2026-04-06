@@ -3,7 +3,7 @@ import {Id, Item} from "@omnimedia/omnitool"
 
 import {Index} from "../../../index.js"
 import {DropIntent} from "./intent.js"
-import {spliceChildren, wrapChildInSequence} from "../../../operations.js"
+import {spliceChildren, wrapChildInSequence} from "../../../operations/operations.js"
 
 export type OverlayFromIntentOpts = {
 	index: Index

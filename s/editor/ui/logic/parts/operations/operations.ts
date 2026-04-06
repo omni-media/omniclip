@@ -2,8 +2,9 @@
 import {Id, Item, Kind} from "@omnimedia/omnitool"
 import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
-import {getBounds} from "./bounds.js"
-import {Idx} from "./index.js"
+import {Idx} from "../index.js"
+import {getBounds} from "../bounds.js"
+
 
 export const spliceChildren = (
 	childrenIds: Id[],

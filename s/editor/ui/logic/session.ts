@@ -13,10 +13,10 @@ import {add, remove, update} from "./parts/mutate.js"
 import {Proposal} from "./parts/proposal/proposal.js"
 import {trim} from "./parts/interactions/trim/parts/action.js"
 import {DropIntent} from "./parts/interactions/drag/parts/intent.js"
-import {replaceChild, splitClip, wrapChildInSequence} from "./parts/operations.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
 import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 import {TimelineClipBox} from "../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
+import {replaceChild, splitClip, wrapChildInSequence} from "./parts/operations/operations.js"
 
 export class OmniSession {
 	#index
