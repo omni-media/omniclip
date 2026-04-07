@@ -1,6 +1,7 @@
 
 import {html} from "lit"
 import {view} from "@e280/sly"
+import {TimelineFile} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
 import {TabBar} from "./tabbing/bar/view.js"
@@ -10,6 +11,7 @@ import {ExportTab} from "./tabbing/tabs/export/view.js"
 import {EditorContext} from "../../../context/context.js"
 import {OutlinerTab} from "./tabbing/tabs/outliner/view.js"
 import {InspectorTab} from "./tabbing/tabs/inspector/view.js"
+import {exportModal} from "../../logic/modals/export/modal.js"
 import {settingsModal} from "../../logic/modals/settings/modal.js"
 import {TimelineViewport} from "./tabbing/tabs/edit/views/viewport/view.js"
 
@@ -32,6 +34,19 @@ export const ProjectPage = (context: EditorContext) => view(use => (projectId: s
 			context.strata.settings.mutate(s => s = settings)
 	}
 
+	const openExport = async () => {
+		const settings = await context.modals.openModal(exportModal())
+		if(settings) {
+			const {readable} = await context.project.render(
+				context.strata.timeline.state as TimelineFile,
+				context.strata.settings.state.timebase
+			)
+			const handle = await window.showSaveFilePicker()
+			const writable = await handle.createWritable()
+			readable.pipeTo(writable)
+		}
+	}
+
 	return html`
 		<div class="project-page">
 			<header theme=topper>
@@ -51,7 +66,11 @@ export const ProjectPage = (context: EditorContext) => view(use => (projectId: s
 
 					<div class=spacer></div>
 
-   				<wa-button class=export size="small">
+   				<wa-button
+						@click=${openExport}
+						class=export
+						size="small"
+					>
       			<wa-icon slot="start" name="download"></wa-icon>
       			Export
     			</wa-button>
