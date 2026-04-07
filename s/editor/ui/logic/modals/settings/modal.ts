@@ -7,35 +7,12 @@ import modalCss from '../../../../context/parts/modal/modal.css.js'
 
 import {settings} from './constants.js'
 import {ModalDefinition} from '../../../../context/parts/modal/types.js'
+import {aspectRatioOptions, getResolutions, resolutionToAspectRatio} from './utils.js'
 
 import {Settings} from '../../../../context/parts/strata.js'
 import '@awesome.me/webawesome/dist/components/icon/icon.js'
 import '@awesome.me/webawesome/dist/components/option/option.js'
 import '@awesome.me/webawesome/dist/components/select/select.js'
-
-const getResolutions = (aspectRatio: string) =>
-	settings.format.options
-		.find(f => f.value === aspectRatio)
-		?.resolutions
-		.map(r => ({
-			value: r.value,
-			label: `${r.value.replace('x', ' × ')} (${r.label.match(/\((.+)\)/)?.[1] ?? r.label})`
-		}))
-	?? []
-
-const resolutionToAspectRatio = (res: string) => {
-	const [w, h] = res.split('x').map(Number)
-
-	const gcd = (a: number, b: number): number =>
-		b === 0 ? a : gcd(b, a % b)
-
-	const d = gcd(w, h)
-
-	return `${w / d}/${h / d}`
-}
-
-const aspectRatioOptions =
-	settings.format.options.map(f => ({value: f.value, label: f.label}))
 
 export const settingsModal = (): ModalDefinition<Settings> => ({
 	label: html`
