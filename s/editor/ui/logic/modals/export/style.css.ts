@@ -26,8 +26,42 @@ export default css`
 		font-size: 0.95rem;
 	}
 
-	.export-button {
+	.custom {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 1em;
+    font-size: var(--font-size-s);
+
+		&::part(label) {
+			color: #747e92;
+			margin: 0;
+		}
+	}
+
+	.export {
+		margin-top: 2em;
+		align-items: end;
+		justify-content: space-between;
+		font-size: var(--font-size-xs);
+
+		.info {
+			display: flex;
+			align-items: center;
+			color: #d8deea;
+		}
+
+		.spacer {
+			display: inline-block;
+			height: 15px;
+			width: 1px;
+			background: #747e92;
+			margin: 0.4em;
+		}
+	}
+
+	.export-button, .cancel {
 		margin-top: 0.35rem;
-		width: 100%;
+		font-size: var(--font-size-xs);
 	}
 `
