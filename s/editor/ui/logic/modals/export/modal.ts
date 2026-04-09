@@ -162,7 +162,7 @@ export const exportModal = (): ModalDefinition<ExportResult> => ({
 					<div class=info>
 						<span>Duration: ${formatTime(duration)}</span>
 						<span class=spacer></span>
-						<span>Size: ${estimateFileSize()}MB</span>
+						<span>Size: ~${estimateFileSize()}MB</span>
 					</div>
 
 					<div>
