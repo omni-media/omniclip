@@ -118,6 +118,19 @@ export class OmniSession {
 		this.$ghostPlayhead.set(null)
 	}
 
+	stepPlayheadFrame(direction: -1 | 1) {
+		const frameDuration = 1000 / this.deps.strata.settings.state.timebase
+		const currentFrame = this.$playhead.value / frameDuration
+
+		const nextFrame = direction > 0
+			? Math.floor(currentFrame) + 1
+			: Math.ceil(currentFrame) - 1
+		const time = ms(Math.max(0, Math.min(this.deps.player.duration, nextFrame * frameDuration)))
+
+		this.deps.player.seek(time)
+		this.setPlayhead(time)
+	}
+
 	getPlayheadInMs() {
 		return this.$playhead.value
 	}

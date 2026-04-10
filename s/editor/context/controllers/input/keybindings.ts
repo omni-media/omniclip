@@ -6,7 +6,7 @@ import {bladeTool} from "../../../ui/logic/parts/modes/blade.js"
 import {positionTool} from "../../../ui/logic/parts/modes/position.js"
 import {selectTool} from "../../../ui/logic/parts/modes/select.js"
 import {zoomTool} from "../../../ui/logic/parts/modes/zoom.js"
-import {prevent_default_zoom_browser_behavior} from "./prevent-default-hack.js"
+import {prevent_default_browser_behavior} from "./prevent-default-hack.js"
 
 export class Keybindings {
 	#running = false
@@ -26,7 +26,7 @@ export class Keybindings {
 	}
 
 	constructor(private deck: tact.Deck<typeof bindings>, private session: OmniSession) {
-		this.#detach = prevent_default_zoom_browser_behavior(deck)
+		this.#detach = prevent_default_browser_behavior(deck)
 		this.#running = true
 		this.#loop()
 	}
@@ -52,6 +52,8 @@ export class Keybindings {
 					player.play()
 				else player.pause()
 			}
+			if (timeline.step_backward.down) this.session.stepPlayheadFrame(-1)
+			if (timeline.step_forward.down) {this.session.stepPlayheadFrame(1)}
 			if (timeline.delete_clip.down) this.session.deleteClip(this.session.$selectedItem.value)
 			if (timeline.split_clip.down) this.session.splitAtPlayhead()
 			if (timeline.zoom_in.down) this.session.viewport.adjustZoomAt(this.session.playheadViewportX(), 0.1)

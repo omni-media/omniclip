@@ -75,7 +75,7 @@ function matchesMods(event: KeyboardEvent, pressed: Set<string>, binding: ModsBi
 	])
 }
 
-export const prevent_default_zoom_browser_behavior = (deck: tact.Deck<typeof bindings>) => {
+export const prevent_default_browser_behavior = (deck: tact.Deck<typeof bindings>) => {
 	const pressed = new Set<string>()
 
 	return dom.events(window, {
@@ -85,7 +85,9 @@ export const prevent_default_zoom_browser_behavior = (deck: tact.Deck<typeof bin
 			const timeline = deck.hub.portByIndex(0).bindings.timeline
 			if (
 				matchesBinding(event, pressed, timeline.zoom_in) ||
-				matchesBinding(event, pressed, timeline.zoom_out)
+				matchesBinding(event, pressed, timeline.zoom_out) ||
+				matchesBinding(event, pressed, timeline.step_backward) ||
+				matchesBinding(event, pressed, timeline.step_forward)
 			) {
 				event.preventDefault()
 			}
