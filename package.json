@@ -54,7 +54,7 @@
 		"@ffmpeg/ffmpeg": "^0.12.15",
 		"@ffmpeg/util": "^0.12.2",
 		"@floating-ui/dom": "^1.7.1",
-		"@omnimedia/kimura": "^1.0.5-0",
+		"@omnimedia/kimura": "^1.0.5-2",
 		"@omnimedia/omnitool": "^1.1.0-74",
 		"@pixi/colord": "^2.9.6",
 		"@zip.js/zip.js": "^2.7.62",
