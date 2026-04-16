@@ -1,14 +1,13 @@
 
 import {is} from "@e280/stz"
 import {signal} from "@e280/strata"
-import {Kimura} from "@omnimedia/kimura"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 import {Driver, Id, Item, Kind, O, Resource, TimelineFile, VideoPlayer} from "@omnimedia/omnitool"
 
+import {Stage} from "./parts/stage.js"
 import {Tool} from "./parts/modes/tool.js"
 import {Idx, Index} from "./parts/index.js"
 import {Viewport} from "./parts/viewport.js"
-import {setupKimura} from "./parts/kimura.js"
 import {selectTool} from "./parts/modes/select.js"
 import {Strata} from "../../context/parts/strata.js"
 import {add, remove, update} from "./parts/mutate.js"
@@ -36,7 +35,7 @@ export class OmniSession {
 	viewport = new Viewport(PIXELS_PER_MILLISECOND)
 
 	canvas
-	kimura: Kimura
+	stage
 	activeMode = signal(selectTool(this))
 
 	constructor(public deps: {
@@ -54,7 +53,7 @@ export class OmniSession {
 			settings: this.deps.strata.settings,
 			resolveMedia: this.deps.resolveMedia,
 		})
-		this.kimura = setupKimura(this)
+		this.stage = new Stage(this)
 		this.#index = new Index(deps.strata.timeline.state as TimelineFile)
 		deps.strata.timeline.lens(s => s).on(s => this.#index.reindex(s as TimelineFile))
 		this.$viewedItemId.value = deps.strata.timeline.state.rootId
