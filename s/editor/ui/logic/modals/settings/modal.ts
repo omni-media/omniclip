@@ -59,7 +59,7 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 			</div>
 		`
 
-		return () => html`
+		return html`
 			<div class="modal">
 
 				<div class="modal-body">

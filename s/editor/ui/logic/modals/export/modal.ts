@@ -82,7 +82,7 @@ export const exportModal = (): ModalDefinition<ExportResult> => ({
 			return `${h}h:${m}m:${s}s`
 		}
 
-		return () => html`
+		return html`
 			<div class="modal">
 				<div class="grid">
 
