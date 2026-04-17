@@ -1,5 +1,5 @@
 // import {html} from "lit"
-// import {view} from "@e280/sly"
+// import {shadow, useCss, useName, useMount, useOnce, useSignal, useRendered, useShadow, useWake, } from "@e280/sly"
 // import {Item, Kind} from "@omnimedia/omnitool"
 // import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 //
@@ -8,12 +8,12 @@
 // import themeCss from "../../../../../../../../../theme.css.js"
 // import {EditorContext} from "../../../../../../../../../context/context.js"
 //
-// export const StackView = view(use => (
+// export const StackView = shadow((
 // 	context: EditorContext,
 // 	item: Item.Stack,
 // 	ancestors: Item.Any[]
 // ) => {
-// 	use.styles(themeCss, styleCss)
+// 	useCss(themeCss, styleCss)
 // 	const session = context.session
 // 	const timeline = context.strata.timeline.state
 //

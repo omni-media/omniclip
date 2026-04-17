@@ -1,15 +1,17 @@
 
 import {html} from "lit"
-import {dom, view} from "@e280/sly"
+import {dom, shadow, useCss, useMount, useRendered, useShadow} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
-export const TimelineArea = view(use => (context: EditorContext) => {
-	use.styles(themeCss, styleCss)
+export const TimelineArea = shadow((context: EditorContext) => {
+	useCss(themeCss, styleCss)
 	const session = context.session
 	const timelineCanvas = context.session.canvas
+
+	const shadow = useShadow()
 
 	let ignoreProgrammaticScroll = false
 
@@ -22,16 +24,16 @@ export const TimelineArea = view(use => (context: EditorContext) => {
 			session.viewport.setScrollLeft(element.scrollLeft)
 	}
 
-	use.mount(() => {
+	useMount(() => {
 		const observer = new ResizeObserver(entries => {
 			for (const entry of entries) {
 				timelineCanvas.resize(entry.contentRect.width)
 			}
 		})
 
-		const timeline = use.rendered.then(() => dom.in(use.shadow).require(".timeline"))
+		const timeline = useRendered().then(() => dom.in(shadow).require(".timeline"))
 
-		use.rendered.then(async () => {
+		useRendered().then(async () => {
 			timelineCanvas.resize((await timeline).clientWidth)
 			observer.observe(await timeline)
 		})

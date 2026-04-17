@@ -1,5 +1,5 @@
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss, useSignal} from "@e280/sly"
 import {Item, Kind} from "@omnimedia/omnitool"
 import {repeat} from "lit/directives/repeat.js"
 
@@ -14,12 +14,12 @@ import sequenceSvg from "../../../../../icons/gravity-ui/timeline.svg.js"
 import starFillSvg from "../../../../../icons/gravity-ui/star-fill.svg.js"
 import videoPlayerSvg from "../../../../../icons/carbon-icons/video-player.svg.js"
 
-export const OutlinerTab = view(use => (context: EditorContext) => {
-	use.styles(themeCss, styleCss)
+export const OutlinerTab = shadow((context: EditorContext) => {
+	useCss(themeCss, styleCss)
 
 	const items = context.strata.timeline.state.items
 	const outliner = context.strata.outliner
-	const searchTerm = use.signal("")
+	const searchTerm = useSignal("")
 
 	const handleItemClick = (id: number) => {
 		// context.controllers.navigation.stepTo(id)

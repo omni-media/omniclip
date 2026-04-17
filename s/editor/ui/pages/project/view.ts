@@ -1,6 +1,6 @@
 
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss, useMount} from "@e280/sly"
 import {TimelineFile} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
@@ -17,9 +17,9 @@ import {TimelineViewport} from "./tabbing/tabs/edit/views/viewport/view.js"
 
 import "@awesome.me/webawesome/dist/components/button/button.js"
 
-export const ProjectPage = (context: EditorContext) => view(use => (projectId: string) => {
-	use.styles(themeCss, styleCss)
-	use.mount(() => () => context.dispose())
+export const ProjectPage = (context: EditorContext) => shadow((projectId: string) => {
+	useCss(themeCss, styleCss)
+	useMount(() => () => context.dispose())
 
 	const manager = context.tabs
 

@@ -1,5 +1,5 @@
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss, useMount, useOnce, useSignal, useOpPromise} from "@e280/sly"
 import {Filmstrip, Item} from "@omnimedia/omnitool"
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
@@ -7,16 +7,16 @@ import styleCss from "./style.css.js"
 import themeCss from "../../../../../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../../../../../context/context.js"
 
-export const FilmstripView = view(use => (
+export const FilmstripView = shadow((
 	context: EditorContext,
 	clip: Item.Video,
 ) => {
-	use.styles(styleCss, themeCss)
+	useCss(styleCss, themeCss)
 
 	const session = context.session
 	const pixelsPerMillisecond = session.viewport.durationToWidth(ms(1))
 
-	const thumbnails = use.signal<{ time: number, canvas: HTMLCanvasElement | OffscreenCanvas }[]>([])
+	const thumbnails = useSignal<{ time: number, canvas: HTMLCanvasElement | OffscreenCanvas }[]>([])
 
 	const THUMB_WIDTH_PX = 100
 
@@ -35,7 +35,7 @@ export const FilmstripView = view(use => (
 		return clone
 	}
 
-	const op = use.op.promise<Filmstrip>(
+	const op = useOpPromise<Filmstrip>(
 		Filmstrip.init("/assets/temp/gl.mp4", {
 			frequency: 1,
 			onPlaceholders: times => {
@@ -69,9 +69,9 @@ export const FilmstripView = view(use => (
 			]
 	}
 
-	use.once(async () => update())
+	useOnce(async () => update())
 
-	use.mount(() => {
+	useMount(() => {
 		const dispose1 = session.viewport.$zoom.on(async () => {(await filmstrip).frequency = getFrequencyInSec()})
 		const dispose2 = session.viewport.$scrollLeft.on(async () => update())
 		const dispose3 = session.viewport.$width.on(async () => update())

@@ -1,5 +1,5 @@
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss, useSignal} from "@e280/sly"
 import {Item, Kind} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
@@ -28,14 +28,14 @@ const TABS: {[key: string]: Tab} = {
 	TEXT: {id: "text", icon: textSvg, label: "Text", component: (c, i) => TextControls(c, i as Item.Text)},
 }
 
-export const InspectorTab = view(use => (context: EditorContext) => {
-	use.styles(themeCss, styleCss)
+export const InspectorTab = shadow((context: EditorContext) => {
+	useCss(themeCss, styleCss)
 	const session = context.session
 
 	const selectedItemId = session.$selectedItem.value
 	const timeline = context.strata.timeline.state
 	const selectedItem = timeline.items.find(item => item.id === selectedItemId)
-	const activeTabId = use.signal(TABS.VIDEO.id)
+	const activeTabId = useSignal(TABS.VIDEO.id)
 
 	// if (!selectedItem) {
 	// 	return html`<div class="placeholder">Select an item to inspect its properties.</div>`

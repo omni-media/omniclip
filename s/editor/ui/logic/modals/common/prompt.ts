@@ -1,6 +1,6 @@
 
 import {html} from 'lit'
-import {view} from '@e280/sly'
+import {light} from '@e280/sly'
 import {createRef, ref} from 'lit/directives/ref.js'
 
 import {ModalDefinition} from '../../../../context/parts/modal/types.js'
@@ -26,7 +26,7 @@ export const promptModal = ({
 
 	return {
 		label: 'prompt',
-		render: (_, controls) => view(use => {
+		render: (_, controls) => light(() => {
 			const submit = () => controls.resolve(input.value?.value ?? '')
 
 			return () => html`
@@ -58,4 +58,3 @@ export const promptModal = ({
 		})()
 	}
 }
-

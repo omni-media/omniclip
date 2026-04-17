@@ -1,14 +1,14 @@
 
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss} from "@e280/sly"
 import {repeat} from "lit/directives/repeat.js"
 
 import styleCss from "./style.css.js"
 import {TabManager} from "../../../../logic/parts/tab-manager.js"
 import themeCss from "../../../../../theme.css.js"
 
-export const TabBar = view(use => (manager: TabManager) => {
-	use.styles(themeCss, styleCss)
+export const TabBar = shadow((manager: TabManager) => {
+	useCss(themeCss, styleCss)
 
 	return html`
 		<nav>
@@ -22,4 +22,3 @@ export const TabBar = view(use => (manager: TabManager) => {
 		</nav>
 	`
 })
-

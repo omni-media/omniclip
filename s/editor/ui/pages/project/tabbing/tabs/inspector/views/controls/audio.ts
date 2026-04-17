@@ -1,12 +1,12 @@
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss} from "@e280/sly"
 import {Item} from "@omnimedia/omnitool"
 
 import {sectionStyles} from "./styles.css.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
-export const AudioControls = view(use => (context: EditorContext, item: Item.Any) => {
-	use.styles(sectionStyles)
+export const AudioControls = shadow((context: EditorContext, item: Item.Any) => {
+	useCss(sectionStyles)
 
 	return html`
 		<div class="controls-group">

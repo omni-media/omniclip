@@ -1,6 +1,6 @@
 
 import {html} from 'lit'
-import {view} from '@e280/sly'
+import {shadow, useCss, useSignal} from '@e280/sly'
 
 import styleCss from './style.css.js'
 import modalCss from '../../../../context/parts/modal/modal.css.js'
@@ -22,10 +22,10 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 		</div>
 	`,
 
-	render: (ctx, modal) => view(use => {
-		use.styles(modalCss, styleCss)
+	render: (ctx, modal) => shadow(() => {
+		useCss(modalCss, styleCss)
 
-		const selected = use.signal<Settings>({...ctx.strata.settings.state})
+		const selected = useSignal<Settings>({...ctx.strata.settings.state})
 
 		const set = (key: keyof Settings, value: string) => {
 			const next = {...selected.value, [key]: value}
@@ -114,4 +114,3 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 		`
 	})()
 })
-

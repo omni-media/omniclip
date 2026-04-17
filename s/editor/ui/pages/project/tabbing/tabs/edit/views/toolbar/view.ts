@@ -1,5 +1,5 @@
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss, useMount, useSignal} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../../../../../../theme.css.js"
@@ -13,15 +13,15 @@ import undoSvg from "../../../../../../../icons/material-design-icons/undo.svg.j
 import zoomInSvg from "../../../../../../../icons/material-design-icons/zoom-in.svg.js"
 import zoomOutSvg from "../../../../../../../icons/material-design-icons/zoom-out.svg.js"
 
-export const Toolbar = view(use => (context: EditorContext) => {
-	use.styles(themeCss, styleCss)
+export const Toolbar = shadow((context: EditorContext) => {
+	useCss(themeCss, styleCss)
 	const session = context.session
-	const isPlaying = use.signal(false)
+	const isPlaying = useSignal(false)
 	const canUndo = false
 	const canRedo = false
 	const player = context.controllers.player
 
-	use.mount(() => {
+	useMount(() => {
 		const dispose = isPlaying.on(async (v) => {
 			if(v)
 				await player.play()

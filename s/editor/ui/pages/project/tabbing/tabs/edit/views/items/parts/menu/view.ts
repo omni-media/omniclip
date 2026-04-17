@@ -1,5 +1,5 @@
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss} from "@e280/sly"
 import {Item, Kind} from "@omnimedia/omnitool"
 import {repeat} from "lit/directives/repeat.js"
 
@@ -9,8 +9,8 @@ import eyeSvg from "../../../../../../../../../icons/gravity-ui/eye.svg.js"
 import {EditorContext} from "../../../../../../../../../../context/context.js"
 import lockSvg from "../../../../../../../../../icons/gravity-ui/lock.svg.js"
 
-const itemMenu = view(use => (context: EditorContext, item: Item.Any) => {
-	use.styles(themeCss, styleCss)
+const itemMenu = shadow((context: EditorContext, item: Item.Any) => {
+	useCss(themeCss, styleCss)
 
 	return html`
 		<div class="track-header">
@@ -22,6 +22,7 @@ const itemMenu = view(use => (context: EditorContext, item: Item.Any) => {
 		</div>
 	`
 })
+
 
 export function renderItemMenu(context: EditorContext) {
 	const viewedItemId = context.session.$viewedItemId.value

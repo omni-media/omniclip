@@ -1,5 +1,5 @@
 import {html} from 'lit'
-import {view} from '@e280/sly'
+import {shadow, useCss} from '@e280/sly'
 import {Item} from '@omnimedia/omnitool'
 import {Transform} from '@omnimedia/omnitool/x/timeline/types.js'
 
@@ -13,8 +13,8 @@ const DEFAULT_TRANSFORM: Transform = [
 	0
 ]
 
-export const TransformControls = view(use => (context: EditorContext, item: Item.Text | Item.Video) => {
-	use.styles(styleCss)
+export const TransformControls = shadow((context: EditorContext, item: Item.Text | Item.Video) => {
+	useCss(styleCss)
 
 	const tool = context.omni
 	const spatial = tool.require<Item.Spatial>(item.spatialId)

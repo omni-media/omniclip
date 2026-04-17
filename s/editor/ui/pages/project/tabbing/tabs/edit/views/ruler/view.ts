@@ -1,20 +1,20 @@
 
 import {html} from "lit"
-import {dom, view} from "@e280/sly"
+import {dom, shadow, useCss, useMount, useOnce, useRendered, useShadow, useWake} from "@e280/sly"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import styleCss from "./style.css.js"
 import {drawRuler} from "./parts/draw/ruler.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
-export const Ruler = view(use => (context: EditorContext) => {
-	use.styles(styleCss)
+export const Ruler = shadow((context: EditorContext) => {
+	useCss(styleCss)
 	const session = context.session
 
 	const {settings} = context.strata
 	const player = context.controllers.player
 
-	const drag = use.once(() => ({
+	const drag = useOnce(() => ({
 		leftOffset: 0
 	}))
 
@@ -55,13 +55,13 @@ export const Ruler = view(use => (context: EditorContext) => {
 			)
 	}
 
-	const canvasPromise = use.wake(() => use.rendered.then(() => {
-		const canvas = use.shadow.querySelector(".ruler") as HTMLCanvasElement
+	const canvasPromise = useWake(() => useRendered().then(() => {
+		const canvas = useShadow().querySelector(".ruler") as HTMLCanvasElement
 		const ctx = canvas?.getContext("2d")
 		return {canvas, ctx}
 	}))
 
-	use.mount(() => {
+	useMount(() => {
 		const unScroll = session.viewport.$scrollLeft.on(scheduleDraw)
 		const unWidth = session.viewport.$width.on(scheduleDraw)
 		const unZoom = session.viewport.$zoom.on(scheduleDraw)
@@ -73,7 +73,7 @@ export const Ruler = view(use => (context: EditorContext) => {
 			{passive: true}
 		)
 
-		use.rendered.then(draw)
+		useRendered().then(draw)
 
 		return () => {
 			unScroll()
@@ -88,4 +88,3 @@ export const Ruler = view(use => (context: EditorContext) => {
 		<canvas class="ruler" @pointerdown=${startDrag}></canvas>
 	`
 })
-

@@ -1,7 +1,7 @@
 
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
-import {makeRouter} from "../ui/pages/router.js"
+import {makeRouter, type AppRouter} from "../ui/pages/router.js"
 import {prepareViews} from "../ui/views/views.js"
 import {ModalManager} from "./parts/modal/modal.js"
 import {Requirements, setupRequirements} from "./parts/requirements.js"
@@ -12,7 +12,7 @@ export class EditorContext {
 		return new this(requirements)
 	}
 
-	router = makeRouter(this)
+	router: AppRouter = makeRouter(this)
 	views = prepareViews(this)
 	modals = new ModalManager(this)
 
@@ -35,4 +35,3 @@ export class EditorContext {
 		this.requirements.keybindings.dispose()
 	}
 }
-

@@ -1,11 +1,11 @@
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../editor/theme.css.js"
 
-export const Developers = view(use => () => {
-  use.styles(themeCss, styleCss)
+export const Developers = shadow(() => {
+  useCss(themeCss, styleCss)
 
   return html`
     <header class="dev-head">
@@ -153,4 +153,3 @@ $ omnitool batch-render ./projects/* --output-dir ./exports
     </a>
   `
 })
-

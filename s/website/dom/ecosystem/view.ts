@@ -1,11 +1,11 @@
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../editor/theme.css.js"
 
-export const Ecosystem = view(use => () => {
-	use.styles(themeCss, styleCss)
+export const Ecosystem = shadow(() => {
+	useCss(themeCss, styleCss)
 
 	return html`
 		<h2>The Omniclip Ecosystem</h2>
@@ -103,5 +103,5 @@ export const Ecosystem = view(use => () => {
 				</div>
 			</div>
 		</div>
-`
+	`
 })

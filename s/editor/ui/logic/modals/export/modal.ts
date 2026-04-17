@@ -1,6 +1,6 @@
 
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss, useSignal} from "@e280/sly"
 import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import styleCss from "./style.css.js"
@@ -22,17 +22,17 @@ export const exportModal = (): ModalDefinition<ExportResult> => ({
 		</div>
 	`,
 
-	render: (ctx, modal) => view(use => {
-		use.styles(modalCss, styleCss)
+	render: (ctx, modal) => shadow(() => {
+		useCss(modalCss, styleCss)
 
 		const state = ctx.strata.settings.state
 
-		const selectedCodec = use.signal<ExportCodec>("h264")
-		const selectedFormat = use.signal<ExportFormat>("mp4")
-		const selectedQuality = use.signal<ExportBitrate>("high")
+		const selectedCodec = useSignal<ExportCodec>("h264")
+		const selectedFormat = useSignal<ExportFormat>("mp4")
+		const selectedQuality = useSignal<ExportBitrate>("high")
 
 		const initialBitrate = qualityOptions.find(o => o.value === "high")?.kbps ?? 8000
-		const bitrate = use.signal<number>(initialBitrate)
+		const bitrate = useSignal<number>(initialBitrate)
 
 		const setQuality = (e: Event) => {
 			const target = e.target as HTMLSelectElement
@@ -191,4 +191,3 @@ export const exportModal = (): ModalDefinition<ExportResult> => ({
 		`
 	})()
 })
-

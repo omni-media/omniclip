@@ -1,16 +1,16 @@
 
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss, useName, useOnce} from "@e280/sly"
 import styleCss from "./style.css.js"
 import themeCss from "../../../theme.css.js"
 import {EditorContext} from "../../../context/context.js"
 import {getMetaVersion} from "../../../../tools/get-meta-version.js"
 
-export const AboutPage = (context: EditorContext) => view(use => () => {
-	use.name("about")
-	use.styles(themeCss, styleCss)
+export const AboutPage = (context: EditorContext) => shadow(() => {
+	useName("about")
+	useCss(themeCss, styleCss)
 
-	const version = use.once(() => getMetaVersion())
+	const version = useOnce(() => getMetaVersion())
 
 	return html`
 		<header theme=topper></header>
@@ -24,4 +24,3 @@ export const AboutPage = (context: EditorContext) => view(use => () => {
 		<section>
 	`
 })
-

@@ -1,12 +1,12 @@
 import {html} from "lit"
-import {view, dom} from "@e280/sly"
+import {shadow, useCss, useShadow, dom} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../editor/theme.css.js"
 import arrowRightSvg from "../../../editor/ui/icons/gravity-ui/arrow-right.svg.js"
 
-export const Nav = view(use => (getSection: (id: string) => HTMLElement | undefined) => {
-	use.styles(themeCss, styleCss)
+export const Nav = shadow((getSection: (id: string) => HTMLElement | undefined) => {
+	useCss(themeCss, styleCss)
 
 	const scrollIntoElementView = async (e: Event) => {
 		const target = e.target as HTMLAnchorElement
@@ -35,7 +35,7 @@ export const Nav = view(use => (getSection: (id: string) => HTMLElement | undefi
 		</sl-drawer>`
 
 	function getDrawer() {
-		const drawer = dom("sl-drawer", use.shadow) as any
+		const drawer = dom("sl-drawer", useShadow()) as any
 		const closeBtn = dom('sl-button[variant="primary"]', drawer)
  		closeBtn?.addEventListener("click", () => drawer.hide())
  		return drawer
@@ -57,4 +57,3 @@ export const Nav = view(use => (getSection: (id: string) => HTMLElement | undefi
 		</nav>
 	`
 })
-

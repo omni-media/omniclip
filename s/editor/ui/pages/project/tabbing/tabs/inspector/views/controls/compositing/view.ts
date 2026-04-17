@@ -1,5 +1,5 @@
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss} from "@e280/sly"
 import {Item} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
@@ -11,8 +11,8 @@ const BLEND_MODES = [
 	"Exclusion", "Hue", "Saturation", "Color", "Luminosity"
 ]
 
-export const CompositingControls = view(use => (context: EditorContext, item: Item.Video | Item.Text) => {
-	use.styles(styleCss)
+export const CompositingControls = shadow((context: EditorContext, item: Item.Video | Item.Text) => {
+	useCss(styleCss)
 	const timeline = context.strata.timeline.state.items
 
 	const spatialItem = "spatialId" in item && item.spatialId !== undefined

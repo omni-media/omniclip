@@ -1,5 +1,5 @@
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss, useMount, useShadow} from "@e280/sly"
 import {repeat} from "lit/directives/repeat.js"
 
 import styleCss from "./style.css.js"
@@ -128,13 +128,13 @@ const features = [
   }
 ]
 
-export const Features = view(use => () => {
-  use.styles(themeCss, styleCss)
-  use.mount(() => {
+export const Features = shadow(() => {
+  useCss(themeCss, styleCss)
+  useMount(() => {
     const animations = ['fade-in-down','slide-in-up','bounce-in','zoom-in','tada','blur-in','pulse']
     let currentIndex = 0
     const cycle = () => {
-      const el = use.shadow.querySelector('#animation-skeleton')
+      const el = useShadow().querySelector('#animation-skeleton')
       if (!el) return
       el.classList.remove(...animations)
       setTimeout(() => {
@@ -184,6 +184,5 @@ export const Features = view(use => () => {
         </li>
       `)}
     </ul>
-  `
+	`
 })
-

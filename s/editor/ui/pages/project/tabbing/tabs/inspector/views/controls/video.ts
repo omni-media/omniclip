@@ -1,6 +1,6 @@
 
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss} from "@e280/sly"
 import {Item} from "@omnimedia/omnitool"
 
 import {CropControls} from "./crop/view.js"
@@ -9,8 +9,8 @@ import {TransformControls} from "./transform/view.js"
 import {CompositingControls} from "./compositing/view.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
-export const VideoControls = view(use => (context: EditorContext, item: Item.Video) => {
-	use.styles(sectionStyles)
+export const VideoControls = shadow((context: EditorContext, item: Item.Video) => {
+	useCss(sectionStyles)
 
 	return html`
 		<div class="controls-group">

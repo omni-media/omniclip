@@ -1,6 +1,6 @@
 
 import {html} from 'lit'
-import {view} from '@e280/sly'
+import {light} from '@e280/sly'
 
 import {ModalDefinition} from '../../../../context/parts/modal/types.js'
 
@@ -19,8 +19,7 @@ export const confirmModal = ({
 	confirmVariant = 'brand',
 }: ConfirmModalOptions): ModalDefinition<true> => ({
 	label: 'confirm',
-	render: (_, controls) => view(use => {
-		return () => html`
+	render: (_, controls) => light(() => html`
 			<div class="modal">
 				<div class="modal-body">
 					${content}
@@ -39,7 +38,5 @@ export const confirmModal = ({
 					</wa-button>
 				</div>
 			</div>
-		`
-	})()
+		`)()
 })
-

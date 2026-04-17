@@ -1,4 +1,4 @@
-import {view} from "@e280/sly"
+import {shadow, useCss} from "@e280/sly"
 import {html, TemplateResult} from "lit"
 import {Item} from "@omnimedia/omnitool"
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
@@ -9,13 +9,13 @@ import themeCss from "../../../../../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../../../../../context/context.js"
 
 
-export const TimelineItem = view(use => (
+export const TimelineItem = shadow((
 	context: EditorContext,
 	item: Item.Video | Item.Text | Item.Audio,
 	content: TemplateResult | DirectiveResult,
 	ancestors: Item.Any[]
 ) => {
-	use.styles(themeCss, styleCss)
+	useCss(themeCss, styleCss)
 	const session = context.session
 
 	const visualWidth = session.viewport.durationToWidth(ms(item.duration ?? 0))
@@ -37,4 +37,3 @@ export const TimelineItem = view(use => (
 		</div>
 	`
 })
-

@@ -1,5 +1,5 @@
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss, useSignal} from "@e280/sly"
 import {Kind} from "@omnimedia/omnitool"
 import {repeat} from "lit/directives/repeat.js"
 
@@ -8,8 +8,8 @@ import themeCss from "../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../context/context.js"
 import exportSvg from "../../../../../icons/gravity-ui/export.svg.js"
 
-export const ExportTab = view(use => (context: EditorContext) => {
-	use.styles(themeCss, styleCss)
+export const ExportTab = shadow((context: EditorContext) => {
+	useCss(themeCss, styleCss)
 
 	const {timeline, outliner} = context.strata
 
@@ -17,7 +17,7 @@ export const ExportTab = view(use => (context: EditorContext) => {
 	// const {isExporting, progress} = exportState.state
 
 	const starredItems = outliner.state.items.filter(item => item.starred)
-	const selectedItemId = use.signal(outliner.state.items[0]?.itemId ?? null)
+	const selectedItemId = useSignal(outliner.state.items[0]?.itemId ?? null)
 	const itemLabels = ["example.mp4"]
 
 	const itemsMap = new Map(timeline.state.items.map(i => [i.id, i]))

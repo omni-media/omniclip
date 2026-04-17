@@ -1,4 +1,4 @@
-import {view} from '@e280/sly'
+import {shadow, useCss} from '@e280/sly'
 import {html, TemplateResult} from 'lit'
 import {Item} from '@omnimedia/omnitool'
 import {TextStyleOptions} from 'pixi.js'
@@ -24,8 +24,8 @@ export type TextDetailsProps = {
 	update: (v: TextStyleOptions) => void
 }
 
-export const TextControls = view(use => (context: EditorContext, item: Item.Text | null) => {
-	use.styles(themeCss, sectionStyles, styleCss)
+export const TextControls = shadow((context: EditorContext, item: Item.Text | null) => {
+	useCss(themeCss, sectionStyles, styleCss)
 
 	const tool = context.omni
 	const options = TEXT_STYLE_OPTIONS

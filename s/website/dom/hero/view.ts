@@ -1,11 +1,11 @@
 import {html} from "lit"
-import {view} from "@e280/sly"
+import {shadow, useCss} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../editor/theme.css.js"
 
-export const Hero = view(use => () => {
-	use.styles(themeCss, styleCss)
+export const Hero = shadow(() => {
+	useCss(themeCss, styleCss)
 
 	return html`
 		<section class="hero" id="hero">
@@ -34,4 +34,3 @@ export const Hero = view(use => () => {
 		</section>
 	`
 })
-

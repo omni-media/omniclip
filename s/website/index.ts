@@ -1,5 +1,5 @@
 import {html, css} from "lit"
-import {dom, view} from "@e280/sly"
+import {dom, shadowElement, useCss, useShadow} from "@e280/sly"
 
 import {Nav} from "./dom/nav/view.js"
 import {Hero} from "./dom/hero/view.js"
@@ -9,15 +9,17 @@ import {Ecosystem} from "./dom/ecosystem/view.js"
 import {Developers} from "./dom/developers/view.js"
 import {OpenSource} from "./dom/open-source/view.js"
 
-export const landingPage = view.component(use => {
-	use.styles(css`:host {
+export const landingPage = shadowElement(() => {
+	useCss(css`:host {
 		background: #141110;
 		width: 100%;
 	}`)
 
+	const shadow = useShadow()
+
    function getNavSection(id: string) {
    	try {
-    	return dom(`[id="${id}"]`, use.shadow) as HTMLElement
+    	return dom(`[id="${id}"]`, shadow) as HTMLElement
    	}
    	catch(e) {}
   }
