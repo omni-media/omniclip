@@ -38,7 +38,7 @@ section {
 	height: 100%;
 	background: #fff1;
 
-	> sly-view {
+	> sly-shadow {
 		display: flex;
 		flex-direction: column;
 		height: 100%;

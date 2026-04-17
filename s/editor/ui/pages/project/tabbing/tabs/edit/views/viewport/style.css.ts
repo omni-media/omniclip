@@ -14,7 +14,6 @@ export default css`@layer view {
 }
 
 canvas {
-	height: 100%;
 	overflow: auto;
 	background: var(--bg);
 }
