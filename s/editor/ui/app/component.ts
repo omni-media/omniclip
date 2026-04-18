@@ -27,7 +27,7 @@ export const EditorApp = (context: EditorContext) => shadowElement(() => {
 	}
 
 	return ShinyDrawer.with({
-		props: [{button: true, control: drawer}],
+		props: [{button: true}],
 		children: html`
 			<nav>
 				<h2>Omniclip</h2>
