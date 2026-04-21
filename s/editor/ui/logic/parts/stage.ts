@@ -22,6 +22,9 @@ export class Stage {
 		const timeline = session.timeline
 
 		const kimura = this.kimura
+		kimura.stageWidth = this.compositor.pixi.renderer.width
+		kimura.stageHeight = this.compositor.pixi.renderer.height
+
 		const ticker = new Ticker()
 
 		ticker.add(() => this.compositor.pixi.renderer.render(this.compositor.pixi.stage))
@@ -32,6 +35,7 @@ export class Stage {
 
 			const {id: itemId, object} = this.#active
 			const transform = mat6ToTransform(object.localTransform)
+			const crop = kimura.crop
 
 			timeline.mutate(state => {
 				const item = session.index.getItem<Item.Video | Item.Text>(itemId)
@@ -40,8 +44,8 @@ export class Stage {
 				const existing = state.items.find(i => i.id === spatialId) as Item.Spatial | undefined
 
 				existing
-					? update(state, spatialId, {...existing, transform, enabled: true})
-					: add(state, {id: spatialId, kind: Kind.Spatial, transform, enabled: true})
+					? update(state, spatialId, {...existing, transform, crop, enabled: true})
+					: add(state, {id: spatialId, kind: Kind.Spatial, transform, crop, enabled: true})
 
 				if (!item.spatialId)
 					update(state, itemId, {...item, spatialId})
@@ -52,8 +56,16 @@ export class Stage {
 
 		const activate = ({id, object, event}: {id: Id, object: Container, event?: FederatedPointerEvent}) => {
 			this.#active = {id, object}
+
+			const item = session.index.getItem<Item.Video | Item.Text>(id)
+			const spatial = item.spatialId
+				? session.index.getItem<Item.Spatial>(item.spatialId)
+				: null
+
 			compositor.pixi.stage.addChild(kimura)
 			kimura.group = [object]
+
+			kimura.crop = spatial?.crop ?? [0, 0, 0, 0]
 			if (event)
 				kimura.emit('pointerdown', event)
 		}
@@ -74,6 +86,7 @@ export class Stage {
 
 		compositor.onDispose.on(({object}) => {
 			if (kimura.group[0] === object) {
+				kimura.group = []
 				compositor.pixi.stage.removeChild(kimura)
 				this.#active = null
 			}
@@ -91,6 +104,16 @@ export class Stage {
 		const selected = this.session.$selectedItem()
 		if (selected)
 			return this.compositor.getActiveObject(selected)
+	}
+
+	set width(width: number) {
+		this.compositor.pixi.stage.width = width
+		this.kimura.stageWidth = width
+	}
+
+	set height(height: number) {
+		this.compositor.pixi.stage.height = height
+		this.kimura.stageHeight = height
 	}
 }
 
