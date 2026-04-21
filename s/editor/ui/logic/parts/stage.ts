@@ -51,6 +51,7 @@ export class Stage {
 					update(state, itemId, {...item, spatialId})
 			})
 
+			this.compositor.pixi.renderer.render(this.compositor.pixi.stage)
 			ticker.stop()
 		}
 
