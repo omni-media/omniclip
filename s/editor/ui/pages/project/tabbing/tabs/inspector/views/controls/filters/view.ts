@@ -2,7 +2,7 @@
 import {html} from "lit"
 import {deep} from "@e280/stz"
 import {shadow, useCss, useSignal} from "@e280/sly"
-import {FilterableItem, Item, filters} from "@omnimedia/omnitool"
+import {FilterableItem, Item, Kind, filters} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
 import {sectionStyles} from "../styles.css.js"
@@ -11,6 +11,7 @@ import {renderFilterList} from "./renderers/list.js"
 import {renderFilterToolbar} from "./renderers/toolbar.js"
 import {renderFilterAdjustments} from "./renderers/adjustments.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
+import {add, remove, update} from "../../../../../../../../logic/parts/mutate.js"
 
 import "@awesome.me/webawesome/dist/components/input/input.js"
 import "@awesome.me/webawesome/dist/components/button/button.js"
@@ -24,7 +25,6 @@ import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 export const FiltersControls = shadow((context: EditorContext, item: FilterableItem) => {
 	useCss(sectionStyles, styleCss)
 
-	const tool = context.omni
 	const index = context.session.index
 
 	const attachedFilters = (item.filterIds ?? [])
@@ -49,25 +49,50 @@ export const FiltersControls = shadow((context: EditorContext, item: FilterableI
 
 		cursor[path[path.length - 1]] = value
 
-		tool.set(filter.id, {params: next})
+		context.strata.timeline.mutate(state => {
+			update(state, filter.id, {params: next})
+		})
 	}
 
-	const addFilter = (key: FilterKey) => {
-		const action = tool.filter[key] as any
+	const addFilter = async (key: FilterKey) => {
 		const def = filters[key]
-		const filter = action.make(Schema.defaultParams(def.schema))
-		tool.set(item.id, {filterIds: [...(item.filterIds ?? []), filter.id]})
+		const filter: Item.Filter = {
+			id: context.omni.getId(),
+			kind: Kind.Filter,
+			type: def.type,
+			params: Schema.defaultParams(def.schema),
+			enabled: true,
+		}
+
+		await context.strata.timeline.mutate(state => {
+			add(state, filter)
+			update(state, item.id, {
+				filterIds: [...(item.filterIds ?? []), filter.id]
+			})
+		})
+
 		selectedFilterId.value = filter.id
 	}
 
-	const removeFilter = (filterId: number) => {
+	const removeFilter = async (filterId: number) => {
 		const remaining = attachedFilters.filter(f => f.id !== filterId)
-		tool.set(item.id, {filterIds: (item.filterIds ?? []).filter(id => id !== filterId)})
+
+		await context.strata.timeline.mutate(state => {
+			update(state, item.id, {
+				filterIds: (item.filterIds ?? []).filter(id => id !== filterId)
+			})
+			remove(state, filterId)
+		})
+
 		if (selectedFilterId.value === filterId)
 			selectedFilterId.value = remaining[0]?.id ?? null
 	}
 
-	const setEnabled = (filter: Item.Filter, enabled: boolean) => tool.set(filter.id, {enabled})
+	const setEnabled = (filter: Item.Filter, enabled: boolean) => {
+		context.strata.timeline.mutate(state => {
+			update(state, filter.id, {enabled})
+		})
+	}
 
 	return html`
 		<wa-details summary="FILTERS" icon-placement="start" class="effects-panel">
