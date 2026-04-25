@@ -1,13 +1,14 @@
 
 import {html} from "lit"
+import {deep} from "@e280/stz"
 import {shadow, useCss, useSignal} from "@e280/sly"
 import {FilterableItem, Item, filters} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
 import {sectionStyles} from "../styles.css.js"
+import {FilterKey, Path, Schema} from "./utils.js"
 import {renderFilterList} from "./renderers/list.js"
 import {renderFilterToolbar} from "./renderers/toolbar.js"
-import {FilterKey, Path, updateAtPath, Schema} from "./utils.js"
 import {renderFilterAdjustments} from "./renderers/adjustments.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 
@@ -39,9 +40,17 @@ export const FiltersControls = shadow((context: EditorContext, item: FilterableI
 
 	const selectFilter = (id: number) => selectedFilterId.value = id
 
-	const setFilterParams = (filter: Item.Filter, path: Path, value: any) => tool.set(filter.id, {
-		params: updateAtPath(filter.params ?? {}, path, value)
-	})
+	const setFilterParams = (filter: Item.Filter, path: Path, value: any) => {
+		const next = deep.clone(filter.params ?? Schema.meta(filter).defaultParams)
+		let cursor: any = next
+
+		for (let i = 0; i < path.length - 1; i++)
+			cursor = cursor[path[i]]
+
+		cursor[path[path.length - 1]] = value
+
+		tool.set(filter.id, {params: next})
+	}
 
 	const addFilter = (key: FilterKey) => {
 		const action = tool.filter[key] as any

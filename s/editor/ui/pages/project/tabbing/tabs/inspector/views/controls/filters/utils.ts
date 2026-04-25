@@ -57,14 +57,3 @@ export const Schema = {
 	}
 }
 
-export const updateAtPath = (source: any, path: Path, value: any): any => {
-	if (!path.length) return value
-
-	const [head, ...tail] = path
-	const current = source ?? (typeof head === 'number' ? [] : {})
-	const next = Array.isArray(current) ? [...current] : {...current}
-
-	next[head] = updateAtPath(next[head], tail, value)
-	return next
-}
-
