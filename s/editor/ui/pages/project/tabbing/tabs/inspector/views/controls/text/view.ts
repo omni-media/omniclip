@@ -1,3 +1,4 @@
+
 import {shadow, useCss} from '@e280/sly'
 import {html, TemplateResult} from 'lit'
 import {Item} from '@omnimedia/omnitool'
@@ -5,6 +6,8 @@ import {TextStyleOptions} from 'pixi.js'
 
 import styleCss from './style.css.js'
 import {sectionStyles} from '../styles.css.js'
+import {ItemControlTabs} from '../control-tabs.js'
+import {FiltersControls} from '../filters/view.js'
 import {renderFontDetails} from './details/font.js'
 import {renderFillDetails} from './details/fill.js'
 import {TransformControls} from '../transform/view.js'
@@ -79,25 +82,30 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text | nu
 		`
 	}
 
-	const controls = renderOtherControls()
+	const otherControls = renderOtherControls()
 	const styleItem = tool.require<Item.TextStyle>(item.styleId)
 
 	if(!styleItem) {
 		const textControls = renderTextControls({style: defaults, options, update: () => {}})
 		return html`
-			<div>
-				<button
-					@click=${() => {
-						const style = tool.textStyle({})
-						tool.set<Item.Text>(item.id, {styleId: style.id})
-					}}
-					class=create-styles
-				>
-					create styles ${addSvg}
-				</button>
-				<div class=disabled>${textControls}</div>
-				<div>${controls}</div>
-			</div>
+			${ItemControlTabs({
+				properties: html`
+					<div>
+						<button
+							@click=${() => {
+								const style = tool.textStyle({})
+								tool.set<Item.Text>(item.id, {styleId: style.id})
+							}}
+							class=create-styles
+						>
+							create styles ${addSvg}
+						</button>
+						<div class=disabled>${textControls}</div>
+						<div>${otherControls}</div>
+					</div>
+				`,
+				effects: FiltersControls(context, item),
+			})}
 		`
 	}
 
@@ -110,7 +118,12 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text | nu
 	})
 
 	return html`
-		${textControls}
-		${controls}
+		${ItemControlTabs({
+			properties: html`
+				${textControls}
+				${otherControls}
+			`,
+			effects: FiltersControls(context, item),
+		})}
 	`
 })
