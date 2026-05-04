@@ -1,3 +1,4 @@
+
 import {css} from "lit"
 
 export default css`
@@ -17,6 +18,7 @@ export default css`
 	display: flex;
 	align-items: center;
 	gap: 1em;
+	flex-wrap: wrap;
 }
 
 label {
@@ -83,4 +85,37 @@ input[type="number"]::-webkit-inner-spin-button {
 .prefix {
 	border-right: 1px solid #333;
 }
+
+.keyframe-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.8rem;
+	height: 1.8rem;
+	padding: 0;
+	border: 1px solid #333;
+	border-radius: 6px;
+	background: #161a22;
+	color: #7d8595;
+	cursor: pointer;
+	transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+
+	&:hover {
+		border-color: #5d6471;
+		color: #d7dde8;
+	}
+
+	&[data-active] {
+		color: #fbbf24;
+		border-color: #8a6108;
+		background: #2b2311;
+	}
+}
+
+.keyframe-toggle svg {
+	width: 0.95rem;
+	height: 0.95rem;
+	fill: currentColor;
+}
 `
+

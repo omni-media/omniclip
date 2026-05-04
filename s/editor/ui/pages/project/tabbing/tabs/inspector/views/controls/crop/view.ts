@@ -11,7 +11,7 @@ export const CropControls = shadow((context: EditorContext, item: Item.Any) => {
 	const itemsMap = new Map(context.strata.timeline.state.items.map(i => [i.id, i]))
 
 	const spatialItem = "spatialId" in item && item.spatialId !== undefined
-		? itemsMap.get(item.spatialId) as Item.Spatial
+		? itemsMap.get(item.spatialId) as Item.Spatial | Item.AnimatedSpatial
 		: null
 
 	// const crop = spatialItem?.crop ?? [0, 0, 0, 0]

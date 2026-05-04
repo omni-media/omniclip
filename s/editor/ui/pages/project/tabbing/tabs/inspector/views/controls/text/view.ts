@@ -11,6 +11,7 @@ import {FiltersControls} from '../filters/view.js'
 import {renderFontDetails} from './details/font.js'
 import {renderFillDetails} from './details/fill.js'
 import {TransformControls} from '../transform/view.js'
+import {AnimationsControls} from '../animations/view.js'
 import {renderLayoutDetails} from './details/layout.js'
 import {renderStrokeDetails} from './details/stroke.js'
 import {CompositingControls} from '../compositing/view.js'
@@ -73,6 +74,10 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text | nu
 			<div class="controls-group">
 				<h4 class="heading">Transform</h4>
 				${TransformControls(context, item)}
+			</div>
+
+			<div class="controls-group">
+				${AnimationsControls(context, item)}
 			</div>
 
 			<div class="controls-group">

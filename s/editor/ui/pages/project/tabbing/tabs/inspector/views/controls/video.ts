@@ -8,6 +8,7 @@ import {FiltersControls} from "./filters/view.js"
 import {CropControls} from "./crop/view.js"
 import {sectionStyles} from "./styles.css.js"
 import {TransformControls} from "./transform/view.js"
+import {AnimationsControls} from "./animations/view.js"
 import {CompositingControls} from "./compositing/view.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
@@ -18,6 +19,9 @@ export const VideoControls = shadow((context: EditorContext, item: Item.Video) =
 		<div class="controls-group">
 			<h4 class="heading">Transform</h4>
 			${TransformControls(context, item)}
+		</div>
+		<div class="controls-group">
+			${AnimationsControls(context, item)}
 		</div>
 		<div class="controls-group">
 			<h4 class="heading">Crop</h4>

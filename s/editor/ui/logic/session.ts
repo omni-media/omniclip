@@ -2,6 +2,8 @@
 import {is} from "@e280/stz"
 import {signal} from "@e280/strata"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {spatialAnimations} from "@omnimedia/omnitool/x/timeline/parts/animations.js"
+import type {Transform, TransformAnimation} from "@omnimedia/omnitool/x/timeline/types.js"
 import {Driver, Id, Item, Kind, O, Resource, TimelineFile, VideoPlayer} from "@omnimedia/omnitool"
 
 import {Stage} from "./parts/stage.js"
@@ -18,6 +20,11 @@ import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.j
 import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 import {TimelineClipBox} from "../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
 import {replaceChild, splitClip, wrapChildInSequence} from "./parts/operations/operations.js"
+import {
+	cloneAnimation,
+	hasAnyKeyframes,
+	type SpatialLike,
+} from "../pages/project/tabbing/tabs/inspector/views/controls/animations/utils.js"
 
 export class OmniSession {
 	#index
@@ -119,6 +126,34 @@ export class OmniSession {
 
 	clearGhostPlayhead() {
 		this.$ghostPlayhead.set(null)
+	}
+
+	updateTransformAnimation(
+		spatial: SpatialLike,
+		transform: Transform,
+		update: (draft: TransformAnimation) => void,
+	) {
+		const draft = spatial.kind === Kind.AnimatedSpatial
+			? cloneAnimation(spatial.anim)
+			: this.deps.omnitool.anim.transform(spatialAnimations.transform.defaultTerp, [])
+
+		update(draft)
+
+		this.timeline.mutate(state => {
+			const index = state.items.findIndex(entry => entry.id === spatial.id)
+			if (index === -1)
+				return
+
+			const base = {
+				id: spatial.id,
+				crop: spatial.crop,
+				enabled: spatial.enabled,
+			}
+
+			state.items[index] = hasAnyKeyframes(draft)
+				? {...base, kind: Kind.AnimatedSpatial, anim: draft}
+				: {...base, kind: Kind.Spatial, transform}
+		})
 	}
 
 	stepPlayheadFrame(direction: -1 | 1) {
