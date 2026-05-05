@@ -6,6 +6,7 @@ import type {Transform} from '@omnimedia/omnitool/x/timeline/types.js'
 import {resolveTransform} from '@omnimedia/omnitool/x/timeline/utils/anim.js'
 
 import styleCss from './style.css.js'
+import {add, update} from '../../../../../../../../logic/parts/mutate.js'
 import keyframesSvg from '../../../../../../../../icons/keyframes.svg.js'
 import {EditorContext} from '../../../../../../../../../context/context.js'
 import rotateSvg from '../../../../../../../../icons/material-design-icons/rotate.svg.js'
@@ -15,6 +16,7 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 	useCss(styleCss)
 
 	const tool = context.omni
+	const timeline = context.session.timeline
 	const spatial = tool.require<SpatialLike>(item.spatialId)
 	const laneStart = context.session.index.getItemLaneStart(item.id, context.session.$viewedItemId.value)
 	const playhead = context.session.$playhead.value
@@ -56,8 +58,16 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 		const target = e.target as HTMLInputElement
 		if(target.checked) {
 			if(!spatial) {
-				const created = tool.spatial()
-				tool.set(item.id, {spatialId: created.id})
+				timeline.mutate(state => {
+					const spatialId = tool.getId()
+					add(state, {
+						id: spatialId,
+						kind: Kind.Spatial,
+						transform: tool.transform(),
+						enabled: true,
+					})
+					update(state, item.id, {spatialId})
+				})
 			} else tool.set(spatial.id, {enabled: true})
 		} else if(spatial) {
 			tool.set(spatial.id, {enabled: false})
