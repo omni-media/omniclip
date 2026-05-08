@@ -24,7 +24,9 @@ export async function setupRequirements() {
 			return strata.timeline.state as TimelineFile
 		},
 		set timeline(p: TimelineFile) {
-			strata.timeline.mutate(state => Object.assign(state, p))
+			// Omnitool may build `p` from Strata's frozen snapshot.
+			// Clone before assigning so frozen item references don't enter the mutable draft.
+			strata.timeline.mutate(state => Object.assign(state, structuredClone(p)))
 		}
 	})
 	const session = new OmniSession({
@@ -49,7 +51,7 @@ async function demo(strata: Strata, omni: Omni) {
 		omni.timeline(o =>
 			o.sequence(
 				o.stack(
-					o.text("text123"),
+					o.text("text123", {styles: {fill: "red"}}),
 					o.video(videoA, {duration: 5000}),
 					o.audio(videoA, {duration: 8000}),
 				),
