@@ -3,38 +3,43 @@ import {html} from 'lit'
 import {shadow, useCss} from '@e280/sly'
 import {Item, Kind} from '@omnimedia/omnitool'
 import type {Transform} from '@omnimedia/omnitool/x/timeline/types.js'
-import {resolveTransform} from '@omnimedia/omnitool/x/timeline/utils/anim.js'
+import {resolveTransformAnimation} from '@omnimedia/omnitool/x/timeline/utils/anim.js'
 
 import styleCss from './style.css.js'
 import {add, update} from '../../../../../../../../logic/parts/mutate.js'
 import keyframesSvg from '../../../../../../../../icons/keyframes.svg.js'
 import {EditorContext} from '../../../../../../../../../context/context.js'
 import rotateSvg from '../../../../../../../../icons/material-design-icons/rotate.svg.js'
-import {ANIMATION_CHANNELS, getTrack, getSpatialAnimation, setAnimationKeyframe, SpatialLike, clamp, type AnimatableProperty} from '../animations/utils.js'
+import {ANIMATION_CHANNELS, getTrack, setAnimationKeyframe, SpatialLike, clamp, type AnimatableProperty} from '../keyframes/utils.js'
 
 export const TransformControls = shadow((context: EditorContext, item: Item.Text | Item.Video) => {
 	useCss(styleCss)
 
 	const tool = context.omni
+	const index = context.session.index
 	const timeline = context.session.timeline
-	const spatial = tool.require<SpatialLike>(item.spatialId)
-	const laneStart = context.session.index.getItemLaneStart(item.id, context.session.$viewedItemId.value)
+	const spatial = index.getItemMaybe<SpatialLike>(item.spatialId)
+
+	const animationItem = (item.animationIds ?? [])
+		.map(id => index.getItemMaybe<Item.Animation>(id))
+		.find(animation => animation?.anims.transform)
+
 	const playhead = context.session.$playhead.value
+	const laneStart = context.session.index.getItemLaneStart(item.id, context.session.$viewedItemId.value)
 	const localTime = clamp(playhead - laneStart, 0, item.duration)
-	const animation = getSpatialAnimation(spatial)
+
+	const animation = animationItem?.anims.transform
+
 	const [position, scale, rotation] = spatial
-		? resolveTransform(spatial, localTime)
+		? animation ? resolveTransformAnimation(localTime, animation) : spatial.transform
 		: tool.transform()
 
 	const hasKeyframeAtTime = (property: AnimatableProperty) =>
 		!!animation && getTrack(animation, property).some(([time]) => time === localTime)
 
 	const toggleKeyframe = (property: AnimatableProperty) => {
-		if (!spatial)
-			return
-
 		const transform: Transform = [position, scale, rotation]
-		context.session.updateTransformAnimation(spatial, transform, draft => {
+		context.session.updateTransformAnimation(item, transform, draft => {
 			setAnimationKeyframe(draft, property, transform, localTime, !hasKeyframeAtTime(property))
 		})
 	}
@@ -43,12 +48,12 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 		if (!spatial)
 			return
 
-		if (spatial.kind === Kind.Spatial) {
+		if (!animation) {
 			tool.set<Item.Spatial>(spatial.id, {transform: next})
 			return
 		}
 
-		context.session.updateTransformAnimation(spatial, next, draft => {
+		context.session.updateTransformAnimation(item, next, draft => {
 			for (const {path} of ANIMATION_CHANNELS)
 				setAnimationKeyframe(draft, path, next, localTime)
 		})
@@ -167,3 +172,4 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 		</div>
 	`
 })
+

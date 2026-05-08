@@ -1,82 +1,82 @@
 
-import {css} from 'lit'
+import {css} from "lit"
 
 export default css`
-.animations-panel {
+.animation-mode {
 	display: flex;
 	flex-direction: column;
-	gap: 0.85rem;
+	gap: 0.65rem;
 }
 
-.keyframes-summary,
-.keyframes-hint {
-	font-size: 0.8rem;
-	color: #727b8d;
-}
-
-.keyframe-list {
+.mode-heading {
 	display: flex;
-	flex-direction: column;
-	gap: 0.4rem;
-}
-
-.keyframe-property {
-	display: grid;
-	grid-template-columns: auto 1fr auto auto;
 	align-items: center;
-	gap: 0.6rem;
-	padding: 0.45rem 0.55rem;
-	border: 1px solid #2b313d;
-	border-radius: 8px;
-	background: #171b23;
-	color: #e9eef9;
-	text-align: left;
+	gap: 0.45rem;
+	font-size: var(--font-size-xs);
+	color: #8e96a6;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+
+	&::before {
+		content: "";
+		width: 0;
+		height: 0;
+		border-top: 0.32rem solid transparent;
+		border-bottom: 0.32rem solid transparent;
+		border-left: 0.45rem solid var(--prime);
+	}
+
+	&.exit::before {
+		border-left: 0;
+		border-right: 0.45rem solid var(--prime);
+	}
+}
+
+.preset-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.35rem;
+}
+
+.preset-button {
+	min-width: 0;
+	padding: 0.55rem 0.5rem;
+	border: 1px solid transparent;
+	border-radius: 5px;
+	background: #1b2029;
+	color: #7f8899;
+	font-size: var(--font-size-xs);
+	line-height: 1;
 	cursor: pointer;
-	transition: border-color 0.15s ease, background 0.15s ease;
+	transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 
 	&:hover {
-		border-color: #4d5c74;
-		background: #1b212c;
+		color: #c7d0df;
+		background: #202736;
 	}
 
 	&[data-active] {
-		border-color: #8a6108;
-		background: #2b2311;
+		color: #39b5e8;
+		background: #0d2d3f;
+		border-color: #1f6f91;
 	}
 }
 
-.property-icon {
-	display: inline-flex;
+.duration-row {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	gap: 0.65rem;
 	align-items: center;
-	justify-content: center;
-	color: #fbbf24;
+
+	.duration-label,
+	.duration-unit {
+		color: #8e96a6;
+		font-size: var(--font-size-s);
+	}
 }
 
-.property-icon svg {
-	width: 0.95rem;
-	height: 0.95rem;
-	fill: currentColor;
-}
-
-.property-name {
-	font-size: 0.88rem;
-}
-
-.property-meta {
-	font-size: 0.78rem;
-	color: #8a93a5;
-}
-
-.keyframe-actions {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 0.75rem;
-}
-
-.nav-buttons {
-	display: flex;
-	gap: 0.4rem;
+.duration-input {
+	width: 100%;
 }
 `
 

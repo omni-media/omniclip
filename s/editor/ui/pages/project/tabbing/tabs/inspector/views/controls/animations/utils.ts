@@ -1,76 +1,23 @@
 
-import {Item, Kind} from '@omnimedia/omnitool'
-import {spatialAnimations} from '@omnimedia/omnitool/x/timeline/parts/animations.js'
-import type {Keyframes, Transform, TransformAnimation} from '@omnimedia/omnitool/x/timeline/types.js'
+import {AnimationPreset, animationPresets, Item} from "@omnimedia/omnitool"
 
-export type SpatialLike = Item.Spatial | Item.AnimatedSpatial
-type TransformChannel = Extract<typeof spatialAnimations.transform.channels[number], {readonly path: string}>
+export type PresetChoice = AnimationPreset | "none"
+export type PresetDirection = "enter" | "exit"
+export type PresetItem = Item.Text | Item.Video
 
-export const ANIMATION_CHANNELS = spatialAnimations.transform.channels.filter(
-	(channel): channel is TransformChannel => !!channel.path,
-)
-export type AnimatableProperty = TransformChannel['path']
+const ORDER = ["fade", "slide", "zoom", "spin", "bounce"]
 
-const titleCase = (text: string) =>
-	text.replaceAll('.', ' ').replace(/\b\w/g, letter => letter.toUpperCase())
-
-const getByPath = <T>(source: unknown, path: string) =>
-	path.split('.').reduce<any>((value, key) => value?.[key], source) as T
-
-export const transformValues = ([position, scale, rotation]: Transform) =>
-	({position: {x: position[0], y: position[1]}, scale: {x: scale[0], y: scale[1]}, rotation})
-
-export const cloneAnimation = (animation: TransformAnimation) =>
-	structuredClone(animation)
-
-export const getTrack = (animation: TransformAnimation, property: AnimatableProperty) =>
-	getByPath<Keyframes>(animation.track, property)
-
-export const hasAnyKeyframes = (animation: TransformAnimation) =>
-	ANIMATION_CHANNELS.some(({path}) => getTrack(animation, path).length)
-
-export const getSpatialAnimation = (spatial?: SpatialLike) =>
-	spatial?.kind === Kind.AnimatedSpatial ? spatial.anim : undefined
-
-export const clamp = (value: number, min: number, max: number) =>
-	Math.min(max, Math.max(min, value))
-
-export const getTransformValue = (transform: Transform, property: AnimatableProperty) =>
-	getByPath<number>(transformValues(transform), property)
-
-export const getAnimationRows = (animation: TransformAnimation | undefined, time: number) =>
-	ANIMATION_CHANNELS.map(channel => {
-		const keyframes = animation ? getTrack(animation, channel.path) : []
-		return {
-			channel,
-			keyframes,
-			label: titleCase(channel.path),
-			active: keyframes.some(([keyframeTime]) => keyframeTime === time),
-		}
-	})
-
-export const getKeyframeNav = (rows: readonly {keyframes: Keyframes}[], time: number) => {
-	const times = [...new Set(rows.flatMap(({keyframes}) => keyframes.map(([keyframeTime]) => keyframeTime)))]
-		.sort((a, b) => a - b)
-	return {
-		previousTime: times.findLast(keyframeTime => keyframeTime < time),
-		nextTime: times.find(keyframeTime => keyframeTime > time),
-		animatedCount: rows.filter(({keyframes}) => keyframes.length).length,
-	}
+const presetOrder = (name: string) => {
+	const i = ORDER.findIndex(prefix => name.toLowerCase().startsWith(prefix))
+	return i === -1 ? ORDER.length : i
 }
 
-export const setTrackKeyframe = (keyframes: Keyframes, time: number, value: number, enabled = true) => {
-	const index = keyframes.findIndex(([keyframeTime]) => keyframeTime === time)
-	if (!enabled) {
-		if (index >= 0) keyframes.splice(index, 1)
-		return
-	}
-
-	if (index >= 0) keyframes[index] = [time, value]
-	else keyframes.push([time, value])
-	keyframes.sort((a, b) => a[0] - b[0])
+export const getPresetEntries = (direction: PresetDirection) => {
+	const suffix = direction === "enter" ? "In" : "Out"
+	return (Object.entries(animationPresets) as [AnimationPreset, typeof animationPresets[AnimationPreset]][])
+		.filter(([name]) => name.endsWith(suffix))
+		.sort(([a], [b]) => presetOrder(a) - presetOrder(b))
 }
 
-export const setAnimationKeyframe = (
-	animation: TransformAnimation, property: AnimatableProperty, transform: Transform, time: number, enabled = true,
-) => setTrackKeyframe(getTrack(animation, property), time, getTransformValue(transform, property), enabled)
+export const seconds = (ms: number) =>
+	Number((ms / 1000).toFixed(2))

@@ -1,8 +1,8 @@
 
 import {is} from "@e280/stz"
 import {signal} from "@e280/strata"
+import {visualAnimations} from "@omnimedia/omnitool"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
-import {spatialAnimations} from "@omnimedia/omnitool/x/timeline/parts/animations.js"
 import type {Transform, TransformAnimation} from "@omnimedia/omnitool/x/timeline/types.js"
 import {Driver, Id, Item, Kind, O, Resource, TimelineFile, VideoPlayer} from "@omnimedia/omnitool"
 
@@ -24,7 +24,7 @@ import {
 	cloneAnimation,
 	hasAnyKeyframes,
 	type SpatialLike,
-} from "../pages/project/tabbing/tabs/inspector/views/controls/animations/utils.js"
+} from "../pages/project/tabbing/tabs/inspector/views/controls/keyframes/utils.js"
 
 export class OmniSession {
 	#index
@@ -129,30 +129,60 @@ export class OmniSession {
 	}
 
 	updateTransformAnimation(
-		spatial: SpatialLike,
+		item: Item.Text | Item.Video,
 		transform: Transform,
-		update: (draft: TransformAnimation) => void,
+		mutateAnimation: (draft: TransformAnimation) => void,
 	) {
-		const draft = spatial.kind === Kind.AnimatedSpatial
-			? cloneAnimation(spatial.anim)
-			: this.deps.omnitool.anim.transform(spatialAnimations.transform.defaultTerp, [])
+		const spatial = this.index.getItemMaybe<SpatialLike>(item.spatialId) ?? this.deps.omnitool.spatial()
+		const animation = (item.animationIds ?? [])
+			.map(id => this.index.getItemMaybe<Item.Animation>(id))
+			.find(animation => animation?.anims.transform)
+		const draft = animation?.anims.transform
+			? cloneAnimation(animation.anims.transform)
+			: this.deps.omnitool.anim.transform(visualAnimations.transform.defaultTerp, [])
 
-		update(draft)
+		mutateAnimation(draft)
 
 		this.timeline.mutate(state => {
-			const index = state.items.findIndex(entry => entry.id === spatial.id)
-			if (index === -1)
-				return
+			if (item.spatialId !== spatial.id)
+				update(state, item.id, {spatialId: spatial.id})
 
-			const base = {
-				id: spatial.id,
-				crop: spatial.crop,
-				enabled: spatial.enabled,
+			if (hasAnyKeyframes(draft)) {
+				if (animation) {
+					update(state, animation.id, {
+						anims: {...animation.anims, transform: draft},
+						enabled: true
+					})
+				}
+				else {
+					const animationId = this.deps.omnitool.getId()
+					add(state, {
+						id: animationId,
+						kind: Kind.Animation,
+						anims: {transform: draft},
+						enabled: true,
+					})
+					update(state, item.id, {
+						animationIds: [...(item.animationIds ?? []), animationId],
+					})
+				}
+				update(state, spatial.id, {transform: this.deps.omnitool.transform()})
+				return
 			}
 
-			state.items[index] = hasAnyKeyframes(draft)
-				? {...base, kind: Kind.AnimatedSpatial, anim: draft}
-				: {...base, kind: Kind.Spatial, transform}
+			if (animation) {
+				const {transform: _removed, ...anims} = animation.anims
+				if (Object.keys(anims).length)
+					update(state, animation.id, {anims})
+				else {
+					remove(state, animation.id)
+					update(state, item.id, {
+						animationIds: (item.animationIds ?? []).filter(id => id !== animation.id),
+					})
+				}
+			}
+
+			update(state, spatial.id, {transform})
 		})
 	}
 

@@ -11,9 +11,10 @@ import {FiltersControls} from '../filters/view.js'
 import {renderFontDetails} from './details/font.js'
 import {renderFillDetails} from './details/fill.js'
 import {TransformControls} from '../transform/view.js'
-import {AnimationsControls} from '../animations/view.js'
+import {KeyframesControls} from '../keyframes/view.js'
 import {renderLayoutDetails} from './details/layout.js'
 import {renderStrokeDetails} from './details/stroke.js'
+import {AnimationsControls} from '../animations/view.js'
 import {CompositingControls} from '../compositing/view.js'
 import themeCss from '../../../../../../../../../theme.css.js'
 import {renderMultilineDetails} from './details/multiline.js'
@@ -77,7 +78,7 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text | nu
 			</div>
 
 			<div class="controls-group">
-				${AnimationsControls(context, item)}
+				${KeyframesControls(context, item)}
 			</div>
 
 			<div class="controls-group">
@@ -109,7 +110,10 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text | nu
 						<div>${otherControls}</div>
 					</div>
 				`,
-				effects: FiltersControls(context, item),
+				effects: html`
+					${FiltersControls(context, item)}
+					${AnimationsControls(context, item)}
+				`,
 			})}
 		`
 	}
@@ -128,7 +132,10 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text | nu
 				${textControls}
 				${otherControls}
 			`,
-			effects: FiltersControls(context, item),
+			effects: html`
+				${FiltersControls(context, item)}
+				${AnimationsControls(context, item)}
+			`,
 		})}
 	`
 })

@@ -16,7 +16,7 @@ export const CompositingControls = shadow((context: EditorContext, item: Item.Vi
 	const timeline = context.strata.timeline.state.items
 
 	const spatialItem = "spatialId" in item && item.spatialId !== undefined
-		? timeline.find(i => i.id === item.spatialId) as Item.Spatial | Item.AnimatedSpatial
+		? timeline.find(i => i.id === item.spatialId) as Item.Spatial
 		: null
 
 	const opacity = 1

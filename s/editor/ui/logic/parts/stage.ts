@@ -2,8 +2,8 @@
 import {Kimura} from "@omnimedia/kimura"
 import {Id, Item, Kind, TimelineFile} from "@omnimedia/omnitool"
 import {Container, FederatedPointerEvent, Ticker} from "pixi.js"
-import type {Transform} from "@omnimedia/omnitool/x/timeline/types.js"
 import {mat6ToTransform} from "@omnimedia/omnitool/x/timeline/utils/matrix.js"
+import type {Transform, TransformAnimation} from "@omnimedia/omnitool/x/timeline/types.js"
 
 import {OmniSession} from "../session.js"
 import {add, update} from "./mutate.js"
@@ -11,10 +11,9 @@ import {
 	ANIMATION_CHANNELS,
 	cloneAnimation,
 	setAnimationKeyframe,
-} from "../../pages/project/tabbing/tabs/inspector/views/controls/animations/utils.js"
+} from "../../pages/project/tabbing/tabs/inspector/views/controls/keyframes/utils.js"
 
 type StageItem = Item.Video | Item.Text
-type SpatialItem = Item.Spatial | Item.AnimatedSpatial
 
 export class Stage {
 	kimura
@@ -88,9 +87,7 @@ export class Stage {
 		this.#active = {id, object}
 
 		const item = this.session.index.getItem<StageItem>(id)
-		const spatial = item.spatialId
-			? this.session.index.getItem<SpatialItem>(item.spatialId)
-			: null
+		const spatial = this.session.index.getItemMaybe<Item.Spatial>(item.spatialId)
 
 		this.compositor.pixi.stage.addChild(this.kimura)
 		this.kimura.group = [object]
@@ -122,14 +119,20 @@ export class Stage {
 	#saveTransform(state: TimelineFile, itemId: Id, transform: Transform, crop: Item.Spatial["crop"]) {
 		const item = this.session.index.getItem<StageItem>(itemId)
 		const spatialId = item.spatialId ?? this.session.deps.omnitool.getId()
-		const spatial = state.items.find(i => i.id === spatialId) as SpatialItem | undefined
+		const spatial = this.session.index.getItemMaybe<Item.Spatial>(spatialId)
+		const animation = (item.animationIds ?? [])
+			.map(id => this.session.index.getItemMaybe<Item.Animation>(id))
+			.find(entry => entry?.anims.transform)
 
 		if (!spatial)
-			add(state, {id: spatialId, kind: Kind.Spatial, transform, crop, enabled: true})
-		else if (spatial.kind === Kind.AnimatedSpatial)
-			this.#saveAnimatedTransform(state, spatial, item, transform, crop)
+			add(state, {id: spatialId, kind: Kind.Spatial, transform: animation ? this.session.deps.omnitool.transform() : transform, crop, enabled: true})
+		else if (animation)
+			update(state, spatialId, {crop, enabled: true})
 		else
 			update(state, spatialId, {transform, crop, enabled: true})
+
+		if (animation)
+			this.#saveAnimatedTransform(state, animation, item, transform)
 
 		if (!item.spatialId)
 			update(state, itemId, {spatialId})
@@ -137,19 +140,21 @@ export class Stage {
 
 	#saveAnimatedTransform(
 		state: TimelineFile,
-		spatial: Item.AnimatedSpatial,
+		animation: Item.Animation,
 		item: StageItem,
 		transform: Transform,
-		crop: Item.Spatial["crop"],
 	) {
-		const nextAnimation = cloneAnimation(spatial.anim)
+		const nextAnimation = cloneAnimation(animation.anims.transform as TransformAnimation)
 		const laneStart = this.session.index.getItemLaneStart(item.id, this.session.$viewedItemId.value)
 		const localTime = Math.min(item.duration, Math.max(0, this.session.$playhead.value - laneStart))
 
 		for (const {path} of ANIMATION_CHANNELS)
 			setAnimationKeyframe(nextAnimation, path, transform, localTime)
 
-		update(state, spatial.id, {anim: nextAnimation, crop, enabled: true} as Partial<Item.AnimatedSpatial>)
+		update(state, animation.id, {
+			anims: {...animation.anims, transform: nextAnimation},
+			enabled: true,
+		} as Partial<Item.Animation>)
 	}
 }
 

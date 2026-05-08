@@ -3,11 +3,12 @@ import {html} from "lit"
 import {shadow, useCss} from "@e280/sly"
 import {Item} from "@omnimedia/omnitool"
 
-import {ItemControlTabs} from "./control-tabs.js"
-import {FiltersControls} from "./filters/view.js"
 import {CropControls} from "./crop/view.js"
 import {sectionStyles} from "./styles.css.js"
+import {ItemControlTabs} from "./control-tabs.js"
+import {FiltersControls} from "./filters/view.js"
 import {TransformControls} from "./transform/view.js"
+import {KeyframesControls} from "./keyframes/view.js"
 import {AnimationsControls} from "./animations/view.js"
 import {CompositingControls} from "./compositing/view.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
@@ -21,7 +22,7 @@ export const VideoControls = shadow((context: EditorContext, item: Item.Video) =
 			${TransformControls(context, item)}
 		</div>
 		<div class="controls-group">
-			${AnimationsControls(context, item)}
+			${KeyframesControls(context, item)}
 		</div>
 		<div class="controls-group">
 			<h4 class="heading">Crop</h4>
@@ -36,7 +37,10 @@ export const VideoControls = shadow((context: EditorContext, item: Item.Video) =
 	return html`
 		${ItemControlTabs({
 			properties,
-			effects: FiltersControls(context, item),
+			effects: html`
+				${FiltersControls(context, item)}
+				${AnimationsControls(context, item)}
+			`,
 		})}
 	`
 })
