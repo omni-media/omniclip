@@ -40,6 +40,10 @@ export class Index {
 		return this.items.require(id) as T
 	}
 
+	getItemMaybe<T extends Idx.AnyItem>(id?: Id | null) {
+		return id == null ? undefined : this.items.get(id) as T | undefined
+	}
+
 	getParent(childId: Id) {
 		return this.parents.get(childId)
 	}
