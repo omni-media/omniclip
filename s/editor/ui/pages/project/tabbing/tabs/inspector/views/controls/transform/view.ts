@@ -135,6 +135,7 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 						<input
 							type="number"
 							step="0.01"
+							min="0"
 							.value=${scale[0]}
 							@input=${(e: InputEvent) =>
 								updateTransform([position, [Number((e.target as HTMLInputElement).value), scale[1]], rotation])}
@@ -145,6 +146,7 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 						<input
 							type="number"
 							step="0.01"
+							min="0"
 							.value=${scale[1]}
 							@input=${(e: InputEvent) =>
 								updateTransform([position, [scale[0], Number((e.target as HTMLInputElement).value)], rotation])}
