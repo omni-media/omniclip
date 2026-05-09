@@ -36,10 +36,35 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text | nu
 	const options = TEXT_STYLE_OPTIONS
 	const defaults = TEXT_STYLE_DEFAULTS
 
+	const addText = () => {
+		const viewed = context.session.index.getItemMaybe<Item.Any>(context.session.$viewedItemId.value)
+		const parent = viewed && "childrenIds" in viewed
+			? viewed
+			: viewed && context.session.index.getParent(viewed.id)
+
+		if (!parent)
+			return
+
+		const text = tool.text("Text", {
+			styles: {fill: "white", fontSize: 64},
+		})
+
+		tool.set<typeof parent>(parent.id, {
+			childrenIds: [...parent.childrenIds, text.id],
+		})
+
+		context.strata.outliner.mutate(state => {
+			state.items.push({itemId: text.id, starred: false, tagIds: [], roleIds: []})
+		})
+
+		context.session.$selectedItem.value = text.id
+		void context.controllers.player.seek(context.session.$playhead.value)
+	}
+
 	if (!item) {
 		return html`
 			<div class="add-text-container">
-				<button @click=${() => console.log('add text')}>
+				<button @click=${addText}>
 					${addSvg}
 					<span>Add Text</span>
 				</button>

@@ -18,14 +18,14 @@ type Tab = {
 	id: string
 	icon: any
 	label: string
-	component: (context: EditorContext, item: Item.Any) => any
+	component: (context: EditorContext, item?: Item.Any) => any
 }
 
 const TABS: {[key: string]: Tab} = {
-	INFO: {id: "info", icon: circleInfoSvg, label: "Info", component: InfoControls},
-	VIDEO: {id: "video", icon: videoPlayerSvg, label: "Video", component: (c, i) => VideoControls(c, i as Item.Video)},
-	AUDIO: {id: "audio", icon: audioWaveSvg, label: "Audio", component: AudioControls},
-	TEXT: {id: "text", icon: textSvg, label: "Text", component: (c, i) => TextControls(c, i as Item.Text)},
+	INFO: {id: "info", icon: circleInfoSvg, label: "Info", component: (c, i) => i && InfoControls(c, i)},
+	VIDEO: {id: "video", icon: videoPlayerSvg, label: "Video", component: (c, i) => i && VideoControls(c, i as Item.Video)},
+	AUDIO: {id: "audio", icon: audioWaveSvg, label: "Audio", component: (c, i) => i && AudioControls(c, i)},
+	TEXT: {id: "text", icon: textSvg, label: "Text", component: (c, i) => TextControls(c, i?.kind === Kind.Text ? i as Item.Text : null)},
 }
 
 export const InspectorTab = shadow((context: EditorContext) => {
@@ -72,7 +72,7 @@ export const InspectorTab = shadow((context: EditorContext) => {
 				`)}
 			</div>
 			<div class="panel-content">
-				${activeTab.component(context, selectedItem as Item.Any)}
+				${activeTab.component(context, selectedItem as Item.Any | undefined)}
 			</div>
 		</div>
 	`
