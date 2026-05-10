@@ -17,8 +17,6 @@ export const Toolbar = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
 	const session = context.session
 	const isPlaying = useSignal(false)
-	const canUndo = false
-	const canRedo = false
 	const player = context.controllers.player
 
 	useMount(() => {
@@ -50,10 +48,10 @@ export const Toolbar = shadow((context: EditorContext) => {
 		<div class="toolbar">
 			<div class="toolbar-section left">
 				<div class="button-group">
-					<button @click=${() => console.log("undo")} ?disabled=${!canUndo}>
+					<button @click=${context.undo} ?disabled=${context.strata.timeline.undoable === 0}>
 						${undoSvg}
 					</button>
-					<button @click=${() => console.log("redo")} ?disabled=${!canRedo}>
+					<button @click=${context.redo} ?disabled=${context.strata.timeline.redoable === 0}>
 						${redoSvg}
 					</button>
 				</div>

@@ -10,7 +10,7 @@ import {Index} from "../../../../../../../logic/parts/index.js"
 import {LayoutContext, LayoutResult, TimelineNode} from "./types.js"
 
 export function buildLayout(index: Index, canvas: TimelineCanvas): LayoutResult {
-	const root = index.getItem(canvas.viewedItemId())
+	const root = index.getItemMaybe(canvas.viewedItemId())
 	if (!root)
 		return {clips: [], rows: 1, duration: ms(0)}
 

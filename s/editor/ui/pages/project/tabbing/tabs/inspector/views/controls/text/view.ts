@@ -53,10 +53,6 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text | nu
 			childrenIds: [...parent.childrenIds, text.id],
 		})
 
-		context.strata.outliner.mutate(state => {
-			state.items.push({itemId: text.id, starred: false, tagIds: [], roleIds: []})
-		})
-
 		context.session.$selectedItem.value = text.id
 		void context.controllers.player.seek(context.session.$playhead.value)
 	}

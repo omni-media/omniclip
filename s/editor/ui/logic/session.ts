@@ -62,7 +62,6 @@ export class OmniSession {
 		})
 		this.stage = new Stage(this)
 		this.#index = new Index(deps.strata.timeline.state as TimelineFile)
-		deps.strata.timeline.lens(s => s).on(s => this.#index.reindex(s as TimelineFile))
 		this.$viewedItemId.value = deps.strata.timeline.state.rootId
 
 		this.$ghostPlayhead.on(time => {
@@ -73,6 +72,22 @@ export class OmniSession {
 					this.deps.player.seek(this.$playhead())
 			}
 		})
+	}
+
+	// TODO: refactor this by moving it to new selector class instead
+	reconcile(timeline: TimelineFile) {
+		this.#index.reindex(timeline)
+
+		if (!this.#index.getItemMaybe(this.$viewedItemId.value))
+			this.$viewedItemId.value = timeline.rootId
+
+		const selectedItemId = this.$selectedItem.value
+		if (selectedItemId !== null && !this.#index.getItemMaybe(selectedItemId))
+			this.$selectedItem.value = null
+
+		this.clearProposal()
+		this.canvas.clearPreviews()
+		this.canvas.scheduleDraw()
 	}
 
 	get timeline() {

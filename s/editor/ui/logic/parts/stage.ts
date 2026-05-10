@@ -55,6 +55,21 @@ export class Stage {
 		this.compositor.pixi.renderer.render(this.compositor.pixi.stage)
 	}
 
+	/**
+	 * Recalculates kimura bounds and redraws its wireframe
+	 **/
+	refresh() {
+		const id = this.session.$selectedItem.value
+		const object = id && this.compositor.getActiveObject(id)
+
+		if (object)
+			this.#activate({id, object})
+		else
+			this.#deactivate()
+
+		this.#render()
+	}
+
 	#wireSelection() {
 		this.session.$selectedItem.on(id => {
 			if (!id)
@@ -125,7 +140,13 @@ export class Stage {
 			.find(entry => entry?.anims.transform)
 
 		if (!spatial)
-			add(state, {id: spatialId, kind: Kind.Spatial, transform: animation ? this.session.deps.omnitool.transform() : transform, crop, enabled: true})
+			add(state, {
+				crop,
+				id: spatialId,
+				enabled: true,
+				kind: Kind.Spatial,
+				transform: animation ? this.session.deps.omnitool.transform() : transform
+			})
 		else if (animation)
 			update(state, spatialId, {crop, enabled: true})
 		else

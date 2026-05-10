@@ -1,5 +1,6 @@
 
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
+import type {TimelineFile} from "@omnimedia/omnitool"
 
 import {makeRouter, type AppRouter} from "../ui/pages/router.js"
 import {prepareViews} from "../ui/views/views.js"
@@ -21,6 +22,28 @@ export class EditorContext {
 		requirements.controllers.player.playback.onTick.on(() =>
 			this.session.setPlayhead(ms(requirements.controllers.player.currentTime))
 		)
+		// reconcile
+		this.strata.timeline.lens(s => s).on(async state => {
+			const timeline = state as TimelineFile
+			// TODO: fix index being reindexed after views already re rendered
+			// thus they get stale index with old state so eg insepctor ui is stale until eg re-selecting item
+			this.session.reconcile(timeline)
+			await this.player.update(timeline)
+			this.session.stage.refresh()
+
+			// sync outliner with timeline
+			this.strata.outliner.mutate(state => {
+				const existing = new Map(state.items.map(item => [item.itemId, item]))
+				state.items = timeline.items.map(item =>
+					existing.get(item.id) ?? {
+						itemId: item.id,
+						starred: false,
+						tagIds: [],
+						roleIds: [],
+					}
+				)
+			})
+		})
 	}
 
 	get session() { return this.requirements.session }
@@ -30,8 +53,17 @@ export class EditorContext {
 	get project() { return this.requirements.project }
 	get driver() { return this.requirements.driver }
 	get tabs() {return this.requirements.tabs}
+	get player() {return this.controllers.player}
 
 	dispose = () => {
 		this.requirements.keybindings.dispose()
+	}
+
+	redo = async() => {
+		await this.strata.timeline.redo()
+	}
+
+	undo = async() => {
+		await this.strata.timeline.undo()
 	}
 }

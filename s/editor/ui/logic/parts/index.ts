@@ -71,7 +71,9 @@ export class Index {
 	}
 
 	#indexLaneStarts(id: Id, start: Ms) {
-		const item = this.getItem(id)
+		const item = this.getItemMaybe(id)
+		if (!item)
+			return
 
 		this.laneStarts.set(id, start)
 
@@ -84,7 +86,9 @@ export class Index {
 				let cursor = start
 
 				for (const childId of item.childrenIds) {
-					const child = this.getItem(childId)
+					const child = this.getItemMaybe(childId)
+					if (!child)
+						continue
 
 					this.#indexLaneStarts(childId, cursor)
 
