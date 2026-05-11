@@ -9,13 +9,16 @@ import {TabManager} from "../../ui/logic/parts/tab-manager.js"
 export type Requirements = Awaited<ReturnType<typeof setupRequirements>>
 
 export async function setupRequirements() {
-	const strata = new Strata()
+	const strata = await Strata.setup()
 	const tabs = new TabManager()
 	const forklift = await OpfsForklift.setup("files")
 	const cellar = new Cellar(forklift)
 	const driver = await Driver.setup()
 	const project = new Omni(driver)
-	await demo(strata, project)
+
+	if (strata.timeline.state.items.length === 0)
+		await demo(strata, project)
+
 	const player = await project.playback(strata.timeline.state as TimelineFile)
 	const controllers = {cargo: new CargoController(strata, cellar), player}
 	const omni = new O({

@@ -1,6 +1,6 @@
 
 import {TimelineFile, Id} from "@omnimedia/omnitool"
-import {Chronicle, chronicle, Prism, Chrono} from "@e280/strata"
+import {Chronicle, chronicle, Prism, Chrono, Vault, LocalStore} from "@e280/strata"
 
 export type RoleScope = "video" | "audio" | "text" | "global"
 
@@ -51,6 +51,25 @@ export type State = {
 }
 
 export class Strata {
+	static storageKey = "omniclip:editor"
+	static storageVersion = 1
+
+	static async setup() {
+		const strata = new Strata()
+		const store = new LocalStore(Strata.storageKey)
+		const vault = new Vault<State>({
+			store,
+			prism: strata.trunk,
+			version: Strata.storageVersion
+		})
+
+		await vault.load()
+
+		store.onStorageEvent(vault.load)
+		strata.trunk.on(vault.save)
+		return strata
+	}
+
 	trunk = new Prism<State>({
 		files: {
 			hashes: [],
