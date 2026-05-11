@@ -3,6 +3,16 @@ import * as tact from "@benev/tact"
 // TODO: FIX TACT, MUTIPLE TIMING BINDS DONT WORK, NO EVENTS HAPPEN
 export const bindings = tact.asBindings({
 	timeline: {
+		undo: [
+			"or",
+			["mods", "KeyZ", {ctrl: true}],
+			["mods", "KeyZ", {meta: true}],
+		],
+		redo: [
+			"or",
+			["mods", "KeyZ", {ctrl: true, shift: true}],
+			["mods", "KeyZ", {meta: true, shift: true}],
+		],
 		play_pause: "Space",
 		step_backward: "ArrowLeft",
 		step_forward: "ArrowRight",
@@ -26,12 +36,12 @@ export const bindings = tact.asBindings({
 			["mods", "NumpadSubtract", {ctrl: true}],
 			["mods", "NumpadSubtract", {meta: true}]
 		],
-		zoom_tool: "KeyZ",
-		zoom_tool_temp: ["code", "KeyZ", {timing: ["hold", 500]}],
-		blade_tool: "KeyB",
-		blade_tool_temp: ["code", "KeyB", {timing: ["hold", 500]}],
-		position_tool: "KeyH",
-		position_tool_temp: ["code", "KeyH", {timing: ["hold", 500]}],
-		select_tool: ["or", "Escape", "KeyA"]
+		zoom_tool: ["mods", "KeyZ", {}],
+		zoom_tool_temp: ["mods", ["code", "KeyZ", {timing: ["hold", 500]}], {}],
+		blade_tool: ["mods", "KeyB", {}],
+		blade_tool_temp: ["mods", ["code", "KeyB", {timing: ["hold", 500]}], {}],
+		position_tool: ["mods", "KeyH", {}],
+		position_tool_temp: ["mods", ["code", "KeyH", {timing: ["hold", 500]}], {}],
+		select_tool: ["or", "Escape", ["mods", "KeyA", {}]]
 	},
 })

@@ -54,12 +54,10 @@ export class EditorContext {
 	}
 
 	redo = async() => {
-		await this.strata.timeline.redo()
-		this.session.reconcile()
+		await this.session.redo()
 	}
 
 	undo = async() => {
-		await this.strata.timeline.undo()
-		this.session.reconcile()
+		await this.session.undo()
 	}
 }

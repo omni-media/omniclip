@@ -46,6 +46,8 @@ export class Keybindings {
 
 		if (port) {
 			const {timeline} = port.actions
+			if (timeline.undo.down) this.session.undo()
+			if (timeline.redo.down) this.session.redo()
 			if (timeline.play_pause.down) {
 				const player = this.session.deps.player
 				if(!player.isPlaying)

@@ -99,6 +99,17 @@ export class OmniSession {
 		return this.$proposal.value?.index ?? this.#index()
 	}
 
+	async redo() {
+		await this.timeline.redo()
+		this.reconcile()
+	}
+
+	async undo() {
+		//TODO: undo does not undo rotation correctly
+		await this.timeline.undo()
+		this.reconcile()
+	}
+
 	setProposal(proposal: Proposal | null) {
 		this.$proposal.value = proposal
 	}

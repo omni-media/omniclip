@@ -84,6 +84,8 @@ export const prevent_default_browser_behavior = (deck: tact.Deck<typeof bindings
 
 			const timeline = deck.hub.portByIndex(0).bindings.timeline
 			if (
+				matchesBinding(event, pressed, timeline.undo) ||
+				matchesBinding(event, pressed, timeline.redo) ||
 				matchesBinding(event, pressed, timeline.zoom_in) ||
 				matchesBinding(event, pressed, timeline.zoom_out) ||
 				matchesBinding(event, pressed, timeline.step_backward) ||
