@@ -1,5 +1,5 @@
 import {Cellar, OpfsForklift} from "@e280/quay"
-import {Datafile, Driver, Kind, O, Omni, TimelineFile} from "@omnimedia/omnitool"
+import {Datafile, Driver, Kind, Media, O, Omni, TimelineFile} from "@omnimedia/omnitool"
 
 import {Strata} from "./strata.js"
 import {OmniSession} from "../../ui/logic/session.js"
@@ -15,9 +15,10 @@ export async function setupRequirements() {
 	const cellar = new Cellar(forklift)
 	const driver = await Driver.setup()
 	const project = new Omni(driver)
+	const videoA = await loadDemoFiles(project)
 
 	if (strata.timeline.state.items.length === 0)
-		await demo(strata, project)
+		await demo(strata, project, videoA)
 
 	const player = await project.playback(strata.timeline.state as TimelineFile)
 	const controllers = {cargo: new CargoController(strata, cellar), player}
@@ -44,11 +45,14 @@ export async function setupRequirements() {
 	return {strata, controllers, tabs, keybindings, omni, project, driver, session}
 }
 
-
-async function demo(strata: Strata, omni: Omni) {
+async function loadDemoFiles(omni: Omni) {
 	const demoVideo = await fetch("/assets/temp/gl.mp4")
 	const blob = await demoVideo.blob()
 	const {videoA} = await omni.load({videoA: Datafile.make(blob)})
+	return videoA
+}
+
+async function demo(strata: Strata, omni: Omni, videoA: Media) {
 	await strata.timeline.mutate(state => Object.assign(state,
 		omni.timeline(o =>
 			o.stack(
