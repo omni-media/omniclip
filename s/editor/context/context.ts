@@ -18,19 +18,13 @@ export class EditorContext {
 	modals = new ModalManager(this)
 
 	constructor(private requirements: Requirements) {
-
 		requirements.controllers.player.playback.onTick.on(() =>
 			this.session.setPlayhead(ms(requirements.controllers.player.currentTime))
 		)
-		// reconcile
 		this.strata.timeline.lens(s => s).on(async state => {
 			const timeline = state as TimelineFile
-			// TODO: fix index being reindexed after views already re rendered
-			// thus they get stale index with old state so eg insepctor ui is stale until eg re-selecting item
-			this.session.reconcile(timeline)
-			await this.player.update(timeline)
+			await this.controllers.player.update(timeline)
 			this.session.stage.refresh()
-
 			// sync outliner with timeline
 			this.strata.outliner.mutate(state => {
 				const existing = new Map(state.items.map(item => [item.itemId, item]))
@@ -61,9 +55,11 @@ export class EditorContext {
 
 	redo = async() => {
 		await this.strata.timeline.redo()
+		this.session.reconcile()
 	}
 
 	undo = async() => {
 		await this.strata.timeline.undo()
+		this.session.reconcile()
 	}
 }

@@ -32,10 +32,9 @@ export const InspectorTab = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
 	const session = context.session
 
-	const selectedItemId = session.$selectedItem.value
-	const timeline = context.strata.timeline.state
-	const selectedItem = timeline.items.find(item => item.id === selectedItemId)
 	const activeTabId = useSignal(TABS.VIDEO.id)
+	const selectedItemId = session.$selectedItem.value
+	const selectedItem = session.index.getItemMaybe(selectedItemId)
 
 	// if (!selectedItem) {
 	// 	return html`<div class="placeholder">Select an item to inspect its properties.</div>`

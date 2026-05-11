@@ -17,10 +17,10 @@ export class Index {
 	laneStarts = new GMap<Id, Ms>()
 
 	constructor(source: TimelineFile) {
-		this.reindex(source)
+		this.#reindex(source)
 	}
 
-	reindex(state: TimelineFile) {
+	#reindex(state: TimelineFile) {
 		this.items.clear()
 		this.parents.clear()
 		this.laneStarts.clear()

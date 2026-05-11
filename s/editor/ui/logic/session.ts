@@ -1,6 +1,6 @@
 
 import {is} from "@e280/stz"
-import {signal} from "@e280/strata"
+import {derived, signal} from "@e280/strata"
 import {visualAnimations} from "@omnimedia/omnitool"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 import type {Transform, TransformAnimation} from "@omnimedia/omnitool/x/timeline/types.js"
@@ -61,7 +61,7 @@ export class OmniSession {
 			resolveMedia: this.deps.resolveMedia,
 		})
 		this.stage = new Stage(this)
-		this.#index = new Index(deps.strata.timeline.state as TimelineFile)
+		this.#index = derived(() => new Index(deps.strata.timeline.state as TimelineFile))
 		this.$viewedItemId.value = deps.strata.timeline.state.rootId
 
 		this.$ghostPlayhead.on(time => {
@@ -74,15 +74,16 @@ export class OmniSession {
 		})
 	}
 
-	// TODO: refactor this by moving it to new selector class instead
-	reconcile(timeline: TimelineFile) {
-		this.#index.reindex(timeline)
+	/**
+	 * After undo/redo reconcile session state
+	 * */
+	reconcile() {
+		const index = this.#index()
 
-		if (!this.#index.getItemMaybe(this.$viewedItemId.value))
-			this.$viewedItemId.value = timeline.rootId
+		if (!index.getItemMaybe(this.$viewedItemId.value))
+			this.$viewedItemId.value = this.timeline.state.rootId
 
-		const selectedItemId = this.$selectedItem.value
-		if (selectedItemId !== null && !this.#index.getItemMaybe(selectedItemId))
+		if (!index.getItemMaybe(this.$selectedItem.value))
 			this.$selectedItem.value = null
 
 		this.clearProposal()
@@ -95,7 +96,7 @@ export class OmniSession {
 	}
 
 	get index() {
-		return this.$proposal.value?.index ?? this.#index
+		return this.$proposal.value?.index ?? this.#index()
 	}
 
 	setProposal(proposal: Proposal | null) {
