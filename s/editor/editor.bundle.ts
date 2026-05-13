@@ -1,9 +1,8 @@
 
 import {dom} from "@e280/sly"
 import {EditorApp} from "./ui/app/component.js"
-import {EditorContext} from "./context/context.js"
+import {makeRouter} from "./ui/pages/router.js"
 
-const context = await EditorContext.setup()
+const router = makeRouter()
 
-dom.register({EditorApp: EditorApp(context)})
-
+dom.register({EditorApp: EditorApp(router)})

@@ -1,105 +1,95 @@
 
-import {TimelineFile, Id} from "@omnimedia/omnitool"
-import {Chronicle, chronicle, Prism, Chrono, Vault, LocalStore} from "@e280/strata"
+import {Kv, StorageDriver} from '@e280/kv'
+import {Prism, Chrono, Vault, LocalStore} from '@e280/strata'
 
-export type RoleScope = "video" | "audio" | "text" | "global"
-
-export type Role = {
-	id: Id
-	key: string
-	name: string
-	scope: RoleScope
-	color: string
-	parentRoleId?: Id
-	enabled: boolean
-}
-
-export type Tag = {
-	id: Id
-	name: string
-	color: string
-}
-
-export type OutlinerItem = {
-	itemId: Id
-	roleIds: Id[]
-	tagIds: Id[]
-	starred: boolean
-}
-
-export type Settings = {
-	resolution: string
-	timebase: number
-	dropFrame: boolean
-	aspectRatio: "16:9" | "9:16" | "1:1" | "3:2" | "4:3" | "21:9"
-	colorSpace: "rec709" | "displayp3" | "rec2020"
-	sampleRate: "48000" | "44100" | "96000"
-	channels: "stereo" | "mono" | "5.1 Surround"
-}
-
-export type State = {
-	files: {
-		hashes: string[]
-	}
-	timeline: Chronicle<TimelineFile>
-	settings: Settings
-	outliner: {
-		roles: Role[]
-		tags: Tag[]
-		items: OutlinerItem[]
-	}
-}
+import {makeDefaultState, State} from './state.js'
 
 export class Strata {
-	static storageKey = "omniclip:editor"
+	static storageScope = 'omniclip:project'
+	static defaultProjectId = 'default'
 	static storageVersion = 1
 
-	static async setup() {
-		const strata = new Strata()
-		const store = new LocalStore(Strata.storageKey)
-		const vault = new Vault<State>({
-			store,
-			prism: strata.trunk,
-			version: Strata.storageVersion
-		})
+	static #projects(storage: Storage = window.localStorage) {
+		return new Kv<{version: number, state: State}>(new StorageDriver(storage))
+			.scope(this.storageScope)
+	}
 
-		await vault.load()
+	static storageKey(projectId: string) {
+		return `${this.storageScope}:${projectId}`
+	}
 
-		store.onStorageEvent(vault.load)
-		strata.trunk.on(vault.save)
+	static async listProjectIds(storage: Storage = window.localStorage) {
+		const ids: string[] = []
+		for await (const id of this.#projects(storage).keys())
+			ids.push(id)
+		return ids.sort()
+	}
+
+	static async loadProject(projectId: string, storage: Storage = window.localStorage) {
+		const strata = new Strata(projectId, storage)
+		await strata.vault.load()
+		return strata.trunk.get()
+	}
+
+	static async loadProjects(storage: Storage = window.localStorage) {
+		const projects: {id: string, state: State}[] = []
+		for (const id of await this.listProjectIds(storage)) {
+			const state = await this.loadProject(id, storage)
+			if (state)
+				projects.push({id, state})
+		}
+		return projects.sort((a, b) => a.id.localeCompare(b.id))
+	}
+
+	static async setup(projectId = Strata.defaultProjectId) {
+		const strata = new Strata(projectId)
+		await strata.vault.load()
+		strata.listen()
 		return strata
 	}
 
-	trunk = new Prism<State>({
-		files: {
-			hashes: [],
-		},
-		timeline: chronicle({
-			info: "https://omniclip.app/",
-			format: "timeline",
-			version: 0,
-			rootId: 1,
-			items: []
-		}),
-		outliner: {
-			roles: [],
-			tags: [],
-			items: []
-		},
-		settings: {
-			dropFrame: true,
-			timebase: 30,
-			resolution: "1920x1080",
-			channels: "stereo",
-			colorSpace: "rec709",
-			aspectRatio: "16:9",
-			sampleRate: "48000",
-		},
-	})
+	static async createProject(projectId: string) {
+		const strata = new Strata(projectId)
+		await strata.trunk.set(makeDefaultState(true))
+		await strata.vault.save()
+		return projectId
+	}
+
+	store
+	vault
+	#stopChanges = () => {}
+	#stopStorage = () => {}
+	trunk = new Prism<State>(makeDefaultState())
 
 	settings = this.trunk.lens(s => s.settings)
 	files = this.trunk.lens(s => s.files)
 	timeline = new Chrono(64, this.trunk.lens(state => state.timeline))
 	outliner = this.trunk.lens(s => s.outliner)
+
+	constructor(
+		public projectId = Strata.defaultProjectId,
+		storage: Storage = window.localStorage
+	) {
+		this.store = new LocalStore(Strata.storageKey(projectId), storage)
+		this.vault = this.makeVault()
+	}
+
+	makeVault() {
+		return new Vault<State>({
+			store: this.store,
+			prism: this.trunk,
+			version: Strata.storageVersion
+		})
+	}
+
+	listen() {
+		this.#stopChanges = this.trunk.on(() => this.vault.save())
+		this.#stopStorage = this.store.onStorageEvent(() => this.vault.load())
+	}
+
+	dispose() {
+		this.#stopStorage()
+		this.#stopChanges()
+	}
 }
 

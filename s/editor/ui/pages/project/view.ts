@@ -1,9 +1,10 @@
 
 import {html} from "lit"
-import {shadow, useCss, useMount} from "@e280/sly"
 import {TimelineFile} from "@omnimedia/omnitool"
+import {shadow, spinner, useCss, useMount, useWait} from "@e280/sly"
 
 import styleCss from "./style.css.js"
+import type {AppRouter} from "../router.js"
 import {TabBar} from "./tabbing/bar/view.js"
 import themeCss from "../../../theme.css.js"
 import {EditTab} from "./tabbing/tabs/edit/view.js"
@@ -17,103 +18,110 @@ import {TimelineViewport} from "./tabbing/tabs/edit/views/viewport/view.js"
 
 import "@awesome.me/webawesome/dist/components/button/button.js"
 
-export const ProjectPage = (context: EditorContext) => shadow((projectId: string) => {
+export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 	useCss(themeCss, styleCss)
-	useMount(() => () => context.dispose())
 
-	const manager = context.tabs
+	const context = useWait(() => EditorContext.setup(projectId))
 
-	const isEditTabActive = manager.activeTabId.value === "edit"
-	const isOutlinerTabActive = manager.activeTabId.value === "outliner"
-	const isInspectorTabActive = manager.activeTabId.value === "inspector"
-	const isExportTabActive = manager.activeTabId.value === "export"
+	return spinner(context(), context => {
+		useMount(() => () => context.dispose())
 
-	const openSettings = async () => {
-		const settings = await context.modals.openModal(settingsModal())
-		if(settings)
-			context.strata.settings.mutate(s => s = settings)
-	}
+		const manager = context.tabs
 
-	const openExport = async () => {
-		const settings = await context.modals.openModal(exportModal())
-		if(settings) {
-			const {readable} = await context.project.render(
-				context.strata.timeline.state as TimelineFile,
-				context.strata.settings.state.timebase
-			)
-			const handle = await window.showSaveFilePicker()
-			const writable = await handle.createWritable()
-			readable.pipeTo(writable)
+		const isEditTabActive = manager.activeTabId.value === "edit"
+		const isOutlinerTabActive = manager.activeTabId.value === "outliner"
+		const isInspectorTabActive = manager.activeTabId.value === "inspector"
+		const isExportTabActive = manager.activeTabId.value === "export"
+
+		const openSettings = async () => {
+			const settings = await context.modals.openModal(settingsModal())
+			if(settings)
+				context.strata.settings.mutate(s => s = settings)
 		}
-	}
 
-	return html`
-		<div class="project-page">
-			<header theme=topper>
-				<div class=tab-bar>
-					${TabBar(manager)}
-				</div>
+		const openExport = async () => {
+			const settings = await context.modals.openModal(exportModal())
+			if(settings) {
+				const {readable} = await context.project.render(
+					context.strata.timeline.state as TimelineFile,
+					context.strata.settings.state.timebase
+				)
+				const handle = await window.showSaveFilePicker()
+				const writable = await handle.createWritable()
+				readable.pipeTo(writable)
+			}
+		}
 
-				<p>editing project: ${projectId}</p>
+		return html`
+			<div class="project-page">
+				<header theme=topper>
+					<div class=tab-bar>
+						${TabBar(manager)}
+					</div>
 
-				<div class=right>
-   				<wa-button
-     				@click=${openSettings}
-						class=settings size="small" with-caret>
-      			<wa-icon slot="start" name="gear"></wa-icon>
-      			Settings
-    			</wa-button>
+					<p>editing project: ${projectId}</p>
 
-					<div class=spacer></div>
+					<div class=right>
+   					<wa-button
+     					@click=${openSettings}
+							class=settings size="small" with-caret>
+      				<wa-icon slot="start" name="gear"></wa-icon>
+      				Settings
+    				</wa-button>
 
-   				<wa-button
-						@click=${openExport}
-						class=export
-						size="small"
+						<div class=spacer></div>
+
+   					<wa-button
+							@click=${openExport}
+							class=export
+							size="small"
+						>
+      				<wa-icon slot="start" name="download"></wa-icon>
+      				Export
+    				</wa-button>
+					</div>
+
+				</header>
+
+				<div class="layout-grid">
+					<div
+						class="panel outliner-panel"
+						?data-active=${isOutlinerTabActive}
 					>
-      			<wa-icon slot="start" name="download"></wa-icon>
-      			Export
-    			</wa-button>
+						${OutlinerTab(context)}
+					</div>
+
+					<div
+						class="panel viewport-panel"
+						?data-active=${isEditTabActive}
+					>
+						${TimelineViewport(context)}
+					</div>
+
+					<div
+						class="panel inspector-panel"
+						?data-active=${isInspectorTabActive}
+					>
+						${InspectorTab(context)}
+					</div>
+
+					<div
+						class="panel timeline-panel"
+						?data-active=${isEditTabActive}
+					>
+						${EditTab(context)}
+					</div>
+
+					<div
+						class="panel export-panel"
+						?data-active=${isExportTabActive}
+					>
+						${ExportTab(context)}
+					</div>
 				</div>
 
-			</header>
-
-			<div class="layout-grid">
-				<div
-					class="panel outliner-panel"
-					?data-active=${isOutlinerTabActive}
-				>
-					${OutlinerTab(context)}
-				</div>
-
-				<div
-					class="panel viewport-panel"
-					?data-active=${isEditTabActive}
-				>
-					${TimelineViewport(context)}
-				</div>
-
-				<div
-					class="panel inspector-panel"
-					?data-active=${isInspectorTabActive}
-				>
-					${InspectorTab(context)}
-				</div>
-
-				<div
-					class="panel timeline-panel"
-					?data-active=${isEditTabActive}
-				>
-					${EditTab(context)}
-				</div>
-
-				<div
-					class="panel export-panel"
-					?data-active=${isExportTabActive}
-				>
-					${ExportTab(context)}
-				</div>
+				${context.modals.render()}
 			</div>
-		</div>
-	`
+	`})
 })
+

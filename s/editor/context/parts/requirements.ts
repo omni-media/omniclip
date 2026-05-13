@@ -8,8 +8,8 @@ import {Keybindings} from "../controllers/input/keybindings.js"
 import {TabManager} from "../../ui/logic/parts/tab-manager.js"
 export type Requirements = Awaited<ReturnType<typeof setupRequirements>>
 
-export async function setupRequirements() {
-	const strata = await Strata.setup()
+export async function setupRequirements(projectId = Strata.defaultProjectId) {
+	const strata = await Strata.setup(projectId)
 	const tabs = new TabManager()
 	const forklift = await OpfsForklift.setup("files")
 	const cellar = new Cellar(forklift)

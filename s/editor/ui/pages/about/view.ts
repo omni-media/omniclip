@@ -1,12 +1,12 @@
 
 import {html} from "lit"
 import {shadow, useCss, useName, useOnce} from "@e280/sly"
+
 import styleCss from "./style.css.js"
 import themeCss from "../../../theme.css.js"
-import {EditorContext} from "../../../context/context.js"
 import {getMetaVersion} from "../../../../tools/get-meta-version.js"
 
-export const AboutPage = (context: EditorContext) => shadow(() => {
+export const AboutPage = shadow(() => {
 	useName("about")
 	useCss(themeCss, styleCss)
 

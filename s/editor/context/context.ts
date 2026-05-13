@@ -2,26 +2,28 @@
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 import type {TimelineFile} from "@omnimedia/omnitool"
 
-import {makeRouter, type AppRouter} from "../ui/pages/router.js"
 import {prepareViews} from "../ui/views/views.js"
 import {ModalManager} from "./parts/modal/modal.js"
 import {Requirements, setupRequirements} from "./parts/requirements.js"
 
 export class EditorContext {
-	static async setup() {
-		const requirements = await setupRequirements()
+	static async setup(projectId: string) {
+		const requirements = await setupRequirements(projectId)
 		return new this(requirements)
 	}
 
-	router: AppRouter = makeRouter(this)
 	views = prepareViews(this)
 	modals = new ModalManager(this)
 
+	#stopPlaybackTick
+	#stopTimelineSync
+
 	constructor(private requirements: Requirements) {
-		requirements.controllers.player.playback.onTick.on(() =>
+		this.#stopPlaybackTick = requirements.controllers.player.playback.onTick.on(() =>
 			this.session.setPlayhead(ms(requirements.controllers.player.currentTime))
 		)
-		this.strata.timeline.lens(s => s).on(async state => {
+
+		this.#stopTimelineSync = this.strata.timeline.lens(s => s).on(async state => {
 			const timeline = state as TimelineFile
 			await this.controllers.player.update(timeline)
 			this.session.stage.refresh()
@@ -50,6 +52,9 @@ export class EditorContext {
 	get player() {return this.controllers.player}
 
 	dispose = () => {
+		this.#stopPlaybackTick()
+		this.#stopTimelineSync()
+		this.strata.dispose()
 		this.requirements.keybindings.dispose()
 	}
 

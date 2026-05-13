@@ -6,7 +6,7 @@ import {tickSteps} from "../constants.js"
 import {drawMajorTick} from "./major-tick.js"
 import {drawMinorTick} from "./minor-tick.js"
 import {Viewport} from "../../../../../../../../../logic/parts/viewport.js"
-import {Settings} from '../../../../../../../../../../context/parts/strata.js'
+import {Settings} from '../../../../../../../../../../context/parts/state.js'
 
 export function drawRuler (
 	ctx: CanvasRenderingContext2D,

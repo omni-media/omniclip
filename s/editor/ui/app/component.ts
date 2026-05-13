@@ -1,17 +1,18 @@
 import {html} from "lit"
 import {ShinyDrawer, DrawerControl} from "@e280/shiny"
 import {shadowElement, useCss, useName, useOnce} from "@e280/sly"
+
 import styleCss from "./style.css.js"
 import themeCss from "../../theme.css.js"
-import {EditorContext} from "../../context/context.js"
+import type {AppRouter} from "../pages/router.js"
 
 import "@awesome.me/webawesome/dist/components/dialog/dialog.js"
 import "@awesome.me/webawesome/dist/components/button/button.js"
 
-export const EditorApp = (context: EditorContext) => shadowElement(() => {
+export const EditorApp = (router: AppRouter) => shadowElement(() => {
 	useName("editor-app")
 	useCss(themeCss, styleCss)
-	const {router} = context
+
 	const drawer = useOnce(() => new DrawerControl())
 
 	function renderLink(label: string, href: string, active: boolean) {
@@ -40,8 +41,6 @@ export const EditorApp = (context: EditorContext) => shadowElement(() => {
 			<section slot=plate>
 				${router.$content()}
 			</section>
-
-			${context.modals.render()}
 		`,
 	})
 })

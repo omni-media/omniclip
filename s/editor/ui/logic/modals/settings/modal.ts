@@ -9,7 +9,7 @@ import {settings} from './constants.js'
 import {ModalDefinition} from '../../../../context/parts/modal/types.js'
 import {aspectRatioOptions, getResolutions, resolutionToAspectRatio} from './utils.js'
 
-import {Settings} from '../../../../context/parts/strata.js'
+import {Settings} from '../../../../context/parts/state.js'
 import '@awesome.me/webawesome/dist/components/icon/icon.js'
 import '@awesome.me/webawesome/dist/components/option/option.js'
 import '@awesome.me/webawesome/dist/components/select/select.js'
