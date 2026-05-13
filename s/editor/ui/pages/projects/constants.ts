@@ -7,7 +7,7 @@ export type SortMode = 'recent' | 'name' | 'duration'
 export type ViewMode = 'grid' | 'list'
 
 export const sortLabels: Record<SortMode, string> = {
-	recent: 'Recent',
+	recent: 'Last Modified',
 	name: 'Name',
 	duration: 'Duration'
 }
@@ -62,13 +62,34 @@ function deriveProjectPreview(
 		resolution: state.settings.resolution,
 		aspectRatio: state.settings.aspectRatio,
 		fps: `${state.settings.timebase}fps`,
-		edited: 'Stored locally',
-		editedRank: index,
+		edited: formatRelativeEdit(state.updatedAt),
+		editedRank: state.updatedAt ?? 0,
 		favorite: state.outliner.items.some(item => item.starred),
 		timeline: deriveTimelineStrip(timeline.items.length),
 		tags,
 		description: `${timeline.items.length} timeline items in a local Omniclip project.`
 	}
+}
+
+function formatRelativeEdit(updatedAt: number) {
+	const elapsedSeconds = Math.max(0, Math.floor((Date.now() - updatedAt) / 1000))
+	const minute = 60
+	const hour = minute * 60
+	const day = hour * 24
+	const week = day * 7
+
+	if (elapsedSeconds < minute)
+		return 'Edited just now'
+	if (elapsedSeconds < hour)
+		return `Edited ${Math.floor(elapsedSeconds / minute)} minutes ago`
+	if (elapsedSeconds < day)
+		return `Edited ${Math.floor(elapsedSeconds / hour)} hours ago`
+	if (elapsedSeconds < day * 2)
+		return 'Edited yesterday'
+	if (elapsedSeconds < week)
+		return `Edited ${Math.floor(elapsedSeconds / day)} days ago`
+
+	return `Edited ${Math.floor(elapsedSeconds / week)} weeks ago`
 }
 
 function deriveTimelineStrip(count: number) {

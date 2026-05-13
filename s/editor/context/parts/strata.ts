@@ -51,7 +51,7 @@ export class Strata {
 	static async createProject(projectId: string) {
 		const strata = new Strata(projectId)
 		await strata.trunk.set(makeDefaultState(true))
-		await strata.vault.save()
+		await strata.save()
 		return projectId
 	}
 
@@ -82,8 +82,13 @@ export class Strata {
 		})
 	}
 
+	save = async() => {
+		this.trunk.get().updatedAt = Date.now()
+		await this.vault.save()
+	}
+
 	listen() {
-		this.#stopChanges = this.trunk.on(() => this.vault.save())
+		this.#stopChanges = this.trunk.on(this.save)
 		this.#stopStorage = this.store.onStorageEvent(() => this.vault.load())
 	}
 

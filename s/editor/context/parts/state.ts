@@ -38,6 +38,7 @@ export type Settings = {
 }
 
 export type State = {
+	updatedAt: number
 	files: {
 		hashes: string[]
 	}
@@ -64,6 +65,7 @@ const makeDefaultTimeline = (withRoot = false): TimelineFile => ({
 })
 
 export const makeDefaultState = (withRoot = false): State => ({
+	updatedAt: Date.now(),
 	files: {
 		hashes: [],
 	},

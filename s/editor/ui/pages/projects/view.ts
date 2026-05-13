@@ -3,17 +3,15 @@ import {html} from 'lit'
 import {shadow, spinner, useCss, useName, useSignal, useWait} from '@e280/sly'
 
 import styleCss from './style.css.js'
+import type {AppRouter} from '../router.js'
 import themeCss from '../../../theme.css.js'
 import {ProjectGrid} from './renderers/grid.js'
 import addSvg from '../../icons/gravity-ui/add.svg.js'
-import folderSvg from '../../icons/gravity-ui/folder.svg.js'
-import exportSvg from '../../icons/gravity-ui/export.svg.js'
 import {Strata} from '../../../context/parts/strata.js'
-import type {AppRouter} from '../router.js'
-import {ProjectActionCard} from './renderers/actioncard.js'
-import slidersSvg from '../../icons/gravity-ui/sliders.svg.js'
 import {ProjectLocalStatus} from './renderers/status.js'
 import {ProjectDetailsDrawer} from './renderers/drawer.js'
+import exportSvg from '../../icons/gravity-ui/export.svg.js'
+import slidersSvg from '../../icons/gravity-ui/sliders.svg.js'
 import {loadProjectPreviews, sortLabels, SortMode, ViewMode} from './constants.js'
 
 export const ProjectsPage = (router: AppRouter) => shadow(() => {
@@ -47,7 +45,7 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 					case 'duration':
 						return b.durationSeconds - a.durationSeconds
 					default:
-						return a.editedRank - b.editedRank
+						return b.editedRank - a.editedRank
 				}
 			})
 
@@ -58,8 +56,10 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 				<header class="topbar">
 					<a class="brand" href=${router.href.home()}>
 						<div class="logo-mark"></div>
-						<strong>omniclip</strong>
-						<span>LOCAL-FIRST VIDEO EDITOR</span>
+						<span class="brand-copy">
+							<strong>omniclip</strong>
+							<span>LOCAL-FIRST VIDEO EDITOR</span>
+						</span>
 					</a>
 
 					<label class="search">
@@ -102,11 +102,21 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 				</header>
 
 				<main class="hub-content">
-					<section class="actions" aria-label="Project actions">
-						${ProjectActionCard('primary', addSvg, 'New Project', 'Create a blank project', createProject)}
-						${ProjectActionCard('blue', exportSvg, 'Import Project', 'From file or folder')}
-						${ProjectActionCard('purple', folderSvg, 'Open Local Project', 'Open an existing file')}
-					</section>
+					<header class="section-header">
+						<h1>Your Projects</h1>
+
+						<div class="project-commands">
+							<button class="command-button" type="button">
+								${exportSvg}
+								<span>Import Project</span>
+							</button>
+
+							<button class="command-button primary" type="button" @click=${createProject}>
+								${addSvg}
+								<span>New Project</span>
+							</button>
+						</div>
+					</header>
 
 					${filteredProjects.length
 						? ProjectGrid(filteredProjects, openProject, openDetails)
