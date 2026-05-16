@@ -44,6 +44,11 @@ export default css`@layer view {
 	display: flex;
 }
 
+.transport-controls {
+	align-items: center;
+	gap: 0.2em;
+}
+
 button {
 	display: flex;
 	align-items: center;
@@ -73,6 +78,32 @@ button:disabled {
 button svg {
 	width: 1.2em;
 	height: 1.2em;
+}
+
+.transport-button {
+	position: relative;
+}
+
+.transport-button.reverse svg {
+	transform: scaleX(-1);
+}
+
+.transport-button span {
+	position: absolute;
+	inset-inline-end: -0.15em;
+	inset-block-end: -0.15em;
+	min-width: 1.8em;
+	font-size: 0.58em;
+	font-weight: 700;
+	line-height: 1;
+	color: #ddd;
+	text-align: center;
+	pointer-events: none;
+}
+
+.transport-button[data-active] {
+	color: white;
+	background: #2f2f2f;
 }
 
 .play-pause {

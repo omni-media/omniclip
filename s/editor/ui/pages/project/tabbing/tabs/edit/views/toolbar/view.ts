@@ -1,5 +1,5 @@
 import {html} from "lit"
-import {shadow, useCss, useMount, useSignal} from "@e280/sly"
+import {shadow, useCss} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../../../../../../theme.css.js"
@@ -16,17 +16,20 @@ import zoomOutSvg from "../../../../../../../icons/material-design-icons/zoom-ou
 export const Toolbar = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
 	const session = context.session
-	const isPlaying = useSignal(false)
-	const player = context.controllers.player
+	const isPlaying = session.playback.$isPlaying()
+	const rate = session.playback.$rate()
 
-	useMount(() => {
-		const dispose = isPlaying.on(async (v) => {
-			if(v)
-				await player.play()
-			else player.pause()
-		})
-		return () => dispose()
-	})
+	const handleReverse = () => {
+		session.playback.shuttle(-1)
+	}
+
+	const handlePlayPause = () => {
+		session.playback.toggle()
+	}
+
+	const handleForward = () => {
+		session.playback.shuttle(1)
+	}
 
 	const handleSplit = () => {
 		session.splitAtPlayhead()
@@ -74,11 +77,32 @@ export const Toolbar = shadow((context: EditorContext) => {
 			</div>
 
 			<div class="toolbar-section center">
-				<div class="button-group">
+				<div class="button-group transport-controls">
+					<button
+						class="transport-button reverse"
+						@click=${handleReverse}
+						title="Play Reverse (J)"
+						?data-active=${isPlaying && rate < 0}
+					>
+						${playSvg}
+						<span>${isPlaying && rate < 0 ? `${Math.abs(rate)}x` : ""}</span>
+					</button>
 					<button
 						class="play-pause"
-						@click=${() => isPlaying.value = !isPlaying.value}>
-						${isPlaying.value ? pauseSvg : playSvg}
+						@click=${handlePlayPause}
+						title="Play/Pause (Space)"
+					>
+						${isPlaying ? pauseSvg : playSvg}
+					</button>
+					<button
+						class="transport-button"
+						@click=${handleForward}
+						title="Play Forward (L)"
+						?data-active=${isPlaying && rate > 0}
+					>
+						${playSvg}
+						<span>${isPlaying && rate > 0 ? `${rate}x` : ""}
+						</span>
 					</button>
 				</div>
 			</div>

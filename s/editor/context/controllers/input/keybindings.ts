@@ -48,12 +48,10 @@ export class Keybindings {
 			const {timeline} = port.actions
 			if (timeline.undo.down) this.session.undo()
 			if (timeline.redo.down) this.session.redo()
-			if (timeline.play_pause.down) {
-				const player = this.session.deps.player
-				if(!player.isPlaying)
-					player.play()
-				else player.pause()
-			}
+			if (timeline.play_reverse.down) this.session.playback.shuttle(-1)
+			if (timeline.pause.down) this.session.playback.pause()
+			if (timeline.play_pause.down) this.session.playback.toggle()
+			if (timeline.play_forward.down) this.session.playback.shuttle(1)
 			if (timeline.step_backward.down) this.session.stepPlayheadFrame(-1)
 			if (timeline.step_forward.down) {this.session.stepPlayheadFrame(1)}
 			if (timeline.delete_clip.down) this.session.deleteClip(this.session.$selectedItem.value)

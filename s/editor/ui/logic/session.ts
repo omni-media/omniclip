@@ -10,6 +10,7 @@ import {Stage} from "./parts/stage.js"
 import {Tool} from "./parts/modes/tool.js"
 import {Idx, Index} from "./parts/index.js"
 import {Viewport} from "./parts/viewport.js"
+import {Playback} from "./parts/playback.js"
 import {selectTool} from "./parts/modes/select.js"
 import {Strata} from "../../context/parts/strata.js"
 import {add, remove, update} from "./parts/mutate.js"
@@ -43,6 +44,7 @@ export class OmniSession {
 
 	canvas
 	stage
+	playback
 	activeMode = signal(selectTool(this))
 
 	constructor(public deps: {
@@ -61,11 +63,12 @@ export class OmniSession {
 			resolveMedia: this.deps.resolveMedia,
 		})
 		this.stage = new Stage(this)
+		this.playback = new Playback(this.deps.player)
 		this.#index = derived(() => new Index(deps.strata.timeline.state as TimelineFile))
 		this.$viewedItemId.value = deps.strata.timeline.state.rootId
 
 		this.$ghostPlayhead.on(time => {
-			if(!this.deps.player.isPlaying) {
+			if(!this.playback.$isPlaying.value) {
 				if(is.happy(time))
 					this.deps.player.seek(time)
 				else
