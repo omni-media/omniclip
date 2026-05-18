@@ -11,6 +11,11 @@
 :root {
 	color-scheme: dark;
 	--link: cyan;
+	--font-size-xs: 0.75rem;
+	--font-size-s: 0.875rem;
+	--font-size-m: 1rem;
+	--font-size-l: 1.125rem;
+	--font-size-xl: 1.25rem;
 }
 
 ::-webkit-scrollbar { width: 4px; }
@@ -93,5 +98,4 @@ section.lead {
 		}
 	}
 }
-
 

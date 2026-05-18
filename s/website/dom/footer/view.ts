@@ -1,42 +1,22 @@
-import {html, shadowView} from "@benev/slate"
+
+import {html} from "lit"
+import {shadow, useCss} from "@e280/sly"
 
 import styleCss from "./style.css.js"
-import themeCss from "../../../editor/theme.css.js"
 
-export const Footer = shadowView(use => () => {
-  use.styles(themeCss, styleCss)
+export const Footer = shadow(() => {
+	useCss(styleCss)
 
-  return html`
-    <footer class="footer">
-      <div class="glow"></div>
-
-      <div class="creator-credit">
-        <span class="name">Made by</span>
-        <div class="github-links">
-          <a
-            class="github-link"
-            href="https://github.com/zenkyuv"
-            target="_blank"
-            rel="noopener"
-            aria-label="Przemek on GitHub"
-          >
-            <sl-icon name="github"></sl-icon>
-            <span>@zenkyu</span>
-          </a>
-          <a
-            class="github-link"
-            href="https://github.com/chase-moskal"
-            target="_blank"
-            rel="noopener"
-            aria-label="Chase on GitHub"
-          >
-            <sl-icon name="github"></sl-icon>
-            <span>@chase-moskal</span>
-          </a>
-        </div>
-      </div>
-
-      <span class="logo">OMNICLIP</span>
-    </footer>
-  `
+	return html`
+		<footer>
+			<span>2026 omniclip</span>
+			<div class="f-links">
+				<a href="https://github.com/omni-media/omniclip" target="_blank" rel="noreferrer">GitHub</a>
+				<a href="https://www.npmjs.com/org/omnimedia" target="_blank" rel="noreferrer">npm</a>
+				<a href="https://github.com/omni-media/omniclip/commits" target="_blank" rel="noreferrer">Changelog</a>
+				<a href="https://discord.gg/Nr8t9s5wSM" target="_blank" rel="noreferrer">Discord</a>
+			</div>
+		</footer>
+	`
 })
+

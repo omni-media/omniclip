@@ -2,202 +2,230 @@
 import {css} from "lit"
 
 export default css`
-
-:host, .hero {
-  --bg: #141110;           /* espresso */
-  --surface: #1B1816;      /* cards/surfaces if needed */
-  --grid: rgba(233,228,222,0.05); /* warm grid lines */
-  --text: #E9E4DE;         /* warm off-white */
-  --text-muted: #CFC9C2;   /* secondary copy */
-  --text-dim: rgba(233,228,222,0.65);
-  --accent: #E0B26E;       /* gold */
-  --accent-ink: #1a1613;   /* dark text on gold */
-  --ring: rgba(224,178,110,0.35);
-}
-
-.hero {
-  position: relative;
-  min-height: 100vh;
-  height: 600px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-
-  color: var(--text);
-  background-color: var(--bg);
-
-  background-image:
-    linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
-    linear-gradient(to right,  var(--grid) 1px, transparent 1px);
-  background-size: 64px 64px, 64px 64px;
-  background-position: 0 0, 0 0;
-  z-index: 0;
-}
-
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(60% 60% at 50% 45%,
-      rgba(255,255,255,0.05) 0%,
-      rgba(255,255,255,0.00) 55%),
-    linear-gradient(to bottom, rgba(0,0,0,0) 75%, var(--bg) 100%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-  max-width: 800px;
-  width: 100%;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
-}
-
-.omniclip-title {
-  display: inline-flex;
+:host {
+	display: flex;
+	height: 100vh;
+	justify-content: center;
 	flex-direction: column;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
-  font-weight: 800;
-  font-size: 4.25rem;
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  color: var(--text);
-  margin: 0 0 0.6rem 0;
 }
 
-.omniclip-title img {
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+.top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 5em;
 }
 
-.version-tag {
-  position: absolute;
-  top: -1.6em;
-  right: 7.5em;
-
-  background: rgba(233,228,222,0.06);
-  border: 1px solid rgba(233,228,222,0.14);
-  color: var(--text-dim);
-
-  border-radius: 6px;
-  padding: 0.22em 0.5em;
-  font-family: Inter, system-ui, sans-serif;
-  font-weight: 600;
-  font-size: 0.66rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  backdrop-filter: blur(6px);
-  pointer-events: none;
+.site-name {
+	font-family: "IBM Plex Mono", ui-monospace, monospace;
+	font-size: var(--font-size-s);
+	color: #555;
+	letter-spacing: 0.05em;
 }
 
-/* copy */
-.hero-content .tagline {
-  font-size: 1rem;
-  letter-spacing: 0.03em;
-  color: var(--text-dim);
-  margin-bottom: 0.25rem;
+.site-name span {
+	color: #e8a020;
 }
 
-.subheadline {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: var(--text-muted);
-  margin-bottom: 3.8em;
-  position: relative;
+.top-links {
+	display: flex;
+	align-items: center;
+	gap: 1.5em;
+	font-family: "IBM Plex Mono", ui-monospace, monospace;
+	font-size: var(--font-size-xs);
 }
 
-/* warm divider */
-.subheadline::after {
-  content: "";
-  position: absolute;
-  bottom: -1.8rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 64px;
-  height: 3px;
-  background: var(--accent);
-  border-radius: 999px;
-  box-shadow: 0 0 0 4px rgba(224,178,110,0.12);
+.top-links a {
+	color: #555;
+	text-decoration: none;
+	transition: color 0.2s;
 }
 
-/* ===== Buttons ===== */
-.buttons {
-  display: flex;
-  gap: 0.9em;
-  justify-content: center;
-  flex-wrap: wrap;
+.top-links a:hover {
+	color: #ccc;
+	text-decoration: none;
+}
+
+.menu-button {
+	display: none;
+	width: 1.8em;
+	height: 1.8em;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	opacity: 0.75;
+	transition: opacity 0.2s;
+}
+
+.menu-button:hover {
+	opacity: 1;
+}
+
+.menu-button img {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+sl-drawer::part(base) {
+	z-index: 100;
+}
+
+sl-drawer::part(overlay) {
+	background: rgb(0 0 0 / 0.55);
+	backdrop-filter: blur(0.5em);
+}
+
+sl-drawer::part(panel) {
+	border-bottom: 1px solid #1d1d1d;
+	background: #111;
+	color: #ccc;
+}
+
+sl-drawer::part(header) {
+	border-bottom: 1px solid #1d1d1d;
+	padding: 1em;
+}
+
+sl-drawer::part(title) {
+	color: #777;
+	font-family: "IBM Plex Mono", ui-monospace, monospace;
+	font-size: var(--font-size-xs);
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+sl-drawer::part(close-button) {
+	color: #777;
+}
+
+sl-drawer::part(body) {
+	padding: 0.75em;
+}
+
+sl-drawer::part(footer) {
+	border-top: 1px solid #1d1d1d;
+	padding: 0.75em;
+}
+
+.drawer-links {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4em;
+}
+
+.drawer-links a {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border: 1px solid #1d1d1d;
+	background: #161616;
+	padding: 1em 1.2em;
+	color: #ccc;
+	font-family: "IBM Plex Mono", ui-monospace, monospace;
+	font-size: var(--font-size-xs);
+	text-decoration: none;
+	transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.drawer-links a::after {
+	content: "->";
+	color: #555;
+}
+
+.drawer-links a:hover {
+	border-color: #2a2a2a;
+	background: #181818;
+	color: #e8a020;
+	text-decoration: none;
+}
+
+.drawer-primary::part(base) {
+	border: 0;
+	background: #e8a020;
+	color: #111;
+	font-family: "IBM Plex Mono", ui-monospace, monospace;
+	font-size: var(--font-size-xs);
+}
+
+h1 {
+	margin-bottom: 0.5em;
+	color: #eee;
+	font-family: "IBM Plex Mono", ui-monospace, monospace;
+	font-size: clamp(1.6em, 5.5vw, 2.5em);
+	font-weight: 400;
+	line-height: 1.2;
+	letter-spacing: 0;
+}
+
+.intro {
+	max-width: 32em;
+	margin-bottom: 2em;
+	color: #777;
+	font-size: calc(var(--font-size-m) - 1px);
+}
+
+.cta-row {
+	display: flex;
+	align-items: center;
+	gap: 1.3em;
+	margin-bottom: 5em;
 }
 
 .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65em;
-
-  padding: 0.8em 1.4em;
-  border-radius: 10px;
-  text-decoration: none;
-
-  font-family: Inter, system-ui, sans-serif;
-  font-weight: 600;
-  font-size: 1rem;
-
-  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease, color 120ms ease, border-color 120ms ease;
-  will-change: transform;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: #e8a020;
+	color: #111;
+	padding: 0.6em 1.4em;
+	font-family: "IBM Plex Mono", ui-monospace, monospace;
+	font-size: calc(var(--font-size-s) - 1px);
+	line-height: 1.2;
+	text-decoration: none;
+	white-space: nowrap;
+	transition: opacity 0.15s;
 }
 
-/* Primary */
-.btn.editor {
-  background: var(--accent);
-  color: var(--accent-ink);
-  box-shadow: 0 8px 20px rgba(224,178,110,0.18);
-}
-.btn.editor:hover {
-  background: #d7a761;
-  box-shadow: 0 10px 22px rgba(224,178,110,0.24);
-  transform: translateY(-1px);
+.btn:hover {
+	opacity: 0.85;
+	text-decoration: none;
 }
 
-/* Secondary */
-.btn.discord {
-  background: transparent;
-  color: var(--text);
-  border: 1px solid rgba(233,228,222,0.18);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.25) inset;
-}
-.btn.discord:hover {
-  background: rgba(233,228,222,0.06);
-  border-color: rgba(233,228,222,0.28);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.18) inset, 0 0 0 3px var(--ring);
-  transform: translateY(-1px);
-}
-.btn.discord sl-icon {
-  font-size: 20px;
-  margin-top: 1px;
+.btn-plain {
+	color: #444;
+	font-family: "IBM Plex Mono", ui-monospace, monospace;
+	font-size: calc(var(--font-size-s) - 1px);
+	text-decoration: none;
+	transition: color 0.2s;
 }
 
-@media (max-width: 768px) {
-	.omniclip-title img {
-		width: 440px;
+.btn-plain:hover {
+	color: #999;
+	text-decoration: none;
+}
+
+@media (max-width: 500px) {
+	.top {
+		align-items: center;
+		flex-direction: row;
+		margin-bottom: 3.5em;
 	}
-	.omniclip-title .version-tag {
-		right: auto;
-		top: -4em;
-	}
-}
 
-@media (max-width: 480px) {
-	.omniclip-title img {
-		width: 90%;
+	.top-links {
+		display: none;
 	}
-	.subheadline {
-		font-size: 1rem;
+
+	.menu-button {
+		display: block;
+	}
+
+	.cta-row {
+		align-items: flex-start;
+		flex-direction: column;
+		gap: 0.9em;
 	}
 }
 `
+
