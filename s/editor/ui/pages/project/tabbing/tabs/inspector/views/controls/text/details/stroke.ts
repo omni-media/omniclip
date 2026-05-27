@@ -1,7 +1,7 @@
 import {html} from "lit"
 import {StrokeStyle} from "pixi.js"
 
-import {TextDetailsProps} from "../view.js"
+import type {TextDetailsProps} from "../view.js"
 
 export const renderStrokeDetails = ({style, update}: TextDetailsProps) => {
 	const stroke = style.stroke

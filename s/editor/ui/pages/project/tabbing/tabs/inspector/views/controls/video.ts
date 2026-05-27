@@ -5,16 +5,17 @@ import {Item} from "@omnimedia/omnitool"
 
 import {CropControls} from "./crop/view.js"
 import {sectionStyles} from "./styles.css.js"
-import {ItemControlTabs} from "./control-tabs.js"
 import {FiltersControls} from "./filters/view.js"
+import {CaptionsControls} from "./captions/view.js"
 import {TransformControls} from "./transform/view.js"
 import {KeyframesControls} from "./keyframes/view.js"
 import {AnimationsControls} from "./animations/view.js"
 import {CompositingControls} from "./compositing/view.js"
+import {ItemControlTabs, itemControlTabsCss} from "./control-tabs.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
 export const VideoControls = shadow((context: EditorContext, item: Item.Video) => {
-	useCss(sectionStyles)
+	useCss(sectionStyles, itemControlTabsCss)
 
 	const properties = html`
 		<div class="controls-group">
@@ -40,6 +41,9 @@ export const VideoControls = shadow((context: EditorContext, item: Item.Video) =
 			effects: html`
 				${FiltersControls(context, item)}
 				${AnimationsControls(context, item)}
+			`,
+			ai: html`
+				${CaptionsControls(context, item)}
 			`,
 		})}
 	`

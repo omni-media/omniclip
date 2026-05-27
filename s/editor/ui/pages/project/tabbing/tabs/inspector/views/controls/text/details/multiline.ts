@@ -1,6 +1,6 @@
 import {html} from "lit"
 
-import {TextDetailsProps} from "../view.js"
+import type {TextDetailsProps} from "../view.js"
 
 export const renderMultilineDetails = ({style, options, update}: TextDetailsProps) => html`
 	<details>

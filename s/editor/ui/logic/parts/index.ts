@@ -48,14 +48,21 @@ export class Index {
 		return this.parents.get(childId)
 	}
 
-	*queryItems<T extends Idx.AnyItem = Idx.AnyItem>(
-    	predicate: (node: Idx.AnyItem) => boolean
+	queryItem<T extends Idx.AnyItem = Idx.AnyItem>(
+		predicate: (node: Idx.AnyItem) => boolean
 	) {
-    for (const item of this.items.values()) {
-      if (predicate(item)) {
-        yield item as T
-      }
-    }
+		for (const item of this.queryItems<T>(predicate))
+			return item
+	}
+
+	*queryItems<T extends Idx.AnyItem = Idx.AnyItem>(
+		predicate: (node: Idx.AnyItem) => boolean
+	) {
+		for (const item of this.items.values()) {
+			if (predicate(item)) {
+				yield item as T
+			}
+		}
 	}
 
 	getItemLaneStart(id: Id, relativeToId?: Id) {

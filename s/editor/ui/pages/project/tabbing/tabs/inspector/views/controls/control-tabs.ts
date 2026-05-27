@@ -1,12 +1,12 @@
 
 import {css, html} from "lit"
-import {Content, shadow, useCss} from "@e280/sly"
+import {Content, light} from "@e280/sly"
 
 import "@awesome.me/webawesome/dist/components/tab/tab.js"
 import "@awesome.me/webawesome/dist/components/tab-group/tab-group.js"
 import "@awesome.me/webawesome/dist/components/tab-panel/tab-panel.js"
 
-const styleCss = css`
+export const itemControlTabsCss = css`
 wa-tab-group::part(body) {
 	padding-top: 1rem;
 }
@@ -32,18 +32,16 @@ wa-tab[active]::part(base) {
 }
 `
 
-export const ItemControlTabs = shadow((props: {
+export const ItemControlTabs = light((props: {
 	properties: Content
 	effects: Content
 	ai?: Content
 }) => {
-	useCss(styleCss)
-
 	return html`
 		<wa-tab-group>
 			<wa-tab panel="properties">Properties</wa-tab>
 			<wa-tab panel="effects">Effects</wa-tab>
-			<wa-tab panel="ai">AI</wa-tab>
+			${props.ai ? html`<wa-tab panel="ai">AI</wa-tab>` : null}
 
 			<wa-tab-panel name="properties">
 				${props.properties}
@@ -51,13 +49,11 @@ export const ItemControlTabs = shadow((props: {
 			<wa-tab-panel name="effects">
 				${props.effects}
 			</wa-tab-panel>
-			<wa-tab-panel name="ai">
-				${props.ai ?? html`
-					<div class="controls-group">
-						<p class="muted">AI controls are not wired yet.</p>
-					</div>
-				`}
-			</wa-tab-panel>
+			${props.ai ? html`
+				<wa-tab-panel name="ai">
+					${props.ai}
+				</wa-tab-panel>
+			` : null}
 		</wa-tab-group>
 	`
 })

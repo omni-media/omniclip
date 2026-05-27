@@ -6,7 +6,6 @@ import {TextStyleOptions} from 'pixi.js'
 
 import styleCss from './style.css.js'
 import {sectionStyles} from '../styles.css.js'
-import {ItemControlTabs} from '../control-tabs.js'
 import {FiltersControls} from '../filters/view.js'
 import {renderFontDetails} from './details/font.js'
 import {renderFillDetails} from './details/fill.js'
@@ -19,6 +18,7 @@ import {CompositingControls} from '../compositing/view.js'
 import themeCss from '../../../../../../../../../theme.css.js'
 import {renderMultilineDetails} from './details/multiline.js'
 import {renderDropShadowDetails} from './details/dropshadow.js'
+import {ItemControlTabs, itemControlTabsCss} from '../control-tabs.js'
 import addSvg from '../../../../../../../../icons/gravity-ui/add.svg.js'
 import {EditorContext} from '../../../../../../../../../context/context.js'
 import {TEXT_STYLE_DEFAULTS, TEXT_STYLE_OPTIONS} from '../../../../edit/constants.js'
@@ -30,7 +30,7 @@ export type TextDetailsProps = {
 }
 
 export const TextControls = shadow((context: EditorContext, item: Item.Text | null) => {
-	useCss(themeCss, sectionStyles, styleCss)
+	useCss(themeCss, sectionStyles, itemControlTabsCss, styleCss)
 
 	const tool = context.omni
 	const options = TEXT_STYLE_OPTIONS

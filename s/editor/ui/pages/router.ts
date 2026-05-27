@@ -1,5 +1,5 @@
 
-import {derived, type DerivedFn, type SignalFn} from "@e280/strata"
+import {derived, type Derived, type Signal} from "@e280/strata"
 import {router, hashNav, hashSignal, type Content} from "@e280/sly"
 
 import {AboutPage} from "./about/view.js"
@@ -9,7 +9,7 @@ import {ProjectPage} from "./project/view.js"
 import {ProjectsPage} from "./projects/view.js"
 
 export type AppRouter = {
-	$hash: SignalFn<string>
+	$hash: Signal<string>
 	go: {
 		home: () => void
 		account: () => void
@@ -22,7 +22,7 @@ export type AppRouter = {
 		projects: () => string
 		project: (projectId: string) => string
 	}
-	$content: DerivedFn<Content>
+	$content: Derived<Content>
 }
 
 export const makeRouter = (): AppRouter => {
@@ -33,7 +33,7 @@ export const makeRouter = (): AppRouter => {
 		project: (projectId: string) => `project/${projectId}`,
 	}
 
-	const $hash = hashSignal() as unknown as SignalFn<string>
+	const $hash = hashSignal() as unknown as Signal<string>
 
 	const appRouter = {
 		$hash,

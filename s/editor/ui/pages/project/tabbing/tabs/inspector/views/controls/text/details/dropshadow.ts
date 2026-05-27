@@ -1,5 +1,5 @@
 import {html} from "lit"
-import {TextDetailsProps} from "../view.js"
+import type {TextDetailsProps} from "../view.js"
 
 export const renderDropShadowDetails = ({style, update}: TextDetailsProps) => {
 	const value = style.dropShadow
