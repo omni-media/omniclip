@@ -3,7 +3,7 @@ import {AnimationPreset, animationPresets, Item} from "@omnimedia/omnitool"
 
 export type PresetChoice = AnimationPreset | "none"
 export type PresetDirection = "enter" | "exit"
-export type PresetItem = Item.Text | Item.Video
+export type PresetItem = Item.Text | Item.Video | Item.Image
 
 const ORDER = ["fade", "slide", "zoom", "spin", "bounce"]
 

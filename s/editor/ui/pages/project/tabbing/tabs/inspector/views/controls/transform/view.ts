@@ -12,7 +12,7 @@ import {EditorContext} from '../../../../../../../../../context/context.js'
 import rotateSvg from '../../../../../../../../icons/material-design-icons/rotate.svg.js'
 import {ANIMATION_CHANNELS, getTrack, setAnimationKeyframe, SpatialLike, clamp, type AnimatableProperty} from '../keyframes/utils.js'
 
-export const TransformControls = shadow((context: EditorContext, item: Item.Text | Item.Video) => {
+export const TransformControls = shadow((context: EditorContext, item: Item.Text | Item.Video | Item.Image) => {
 	useCss(styleCss)
 
 	const tool = context.omni

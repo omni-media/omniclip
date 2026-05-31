@@ -11,7 +11,7 @@ const BLEND_MODES = [
 	"Exclusion", "Hue", "Saturation", "Color", "Luminosity"
 ]
 
-export const CompositingControls = shadow((context: EditorContext, item: Item.Video | Item.Text) => {
+export const CompositingControls = shadow((context: EditorContext, item: Item.Video | Item.Image | Item.Text) => {
 	useCss(styleCss)
 	const timeline = context.strata.timeline.state.items
 

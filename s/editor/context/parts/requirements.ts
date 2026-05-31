@@ -15,10 +15,12 @@ export async function setupRequirements(projectId = Strata.defaultProjectId) {
 	const cellar = new Cellar(forklift)
 	const driver = await Driver.setup()
 	const project = new Omni(driver)
-	const videoA = await loadDemoFiles(project)
+	const {videoA, imageA} = await loadDemoFiles(project)
 
 	if (strata.timeline.state.items.length === 1)
-		await demo(strata, project, videoA)
+		await demo(strata, project, videoA, imageA)
+
+	await hydrateMetadata(strata, cellar, project)
 
 	const player = await project.playback(strata.timeline.state as TimelineFile)
 	const controllers = {cargo: new CargoController(strata, cellar), player}
@@ -45,15 +47,19 @@ export async function setupRequirements(projectId = Strata.defaultProjectId) {
 
 async function loadDemoFiles(omni: Omni) {
 	const demoVideo = await fetch("/assets/temp/gl.mp4")
-	const blob = await demoVideo.blob()
-	const {videoA} = await omni.load({videoA: Datafile.make(blob)})
-	return videoA
+	const demoImage = await fetch("/assets/temp/person.jpg")
+	const blobVid = await demoVideo.blob()
+	const blobImg = await demoImage.blob()
+	const {videoA} = await omni.load({videoA: Datafile.make(blobVid)})
+	const {imageA} = await omni.load({imageA: Datafile.make(blobImg)})
+	return {videoA, imageA}
 }
 
-async function demo(strata: Strata, omni: Omni, videoA: Media) {
+async function demo(strata: Strata, omni: Omni, videoA: Media, image: Media) {
 	await strata.timeline.mutate(state => Object.assign(state,
 		omni.timeline(o =>
 			o.stack(
+				o.image(image, {duration: 2000}),
 				o.text("text123", {styles: {fill: "red"}}),
 				o.video(videoA, {duration: 5000}),
 				o.audio(videoA, {duration: 8000}),
@@ -63,3 +69,19 @@ async function demo(strata: Strata, omni: Omni, videoA: Media) {
 	const stack = strata.timeline.state.items.find(item => item.kind === Kind.Stack)
 	await strata.timeline.mutate(state => state.rootId = stack!.id)
 }
+
+async function hydrateMetadata(strata: Strata, cellar: Cellar, omni: Omni) {
+	// for now just images with backgrounds removed from opfs (bg remove ai feature)
+	for (const meta of strata.trunk.get().metadata.items.filter(item => item.bgRemoved)) {
+		const image = strata.timeline.state.items.find(item => item.id === meta.itemId)
+		if (image?.kind !== Kind.Image) continue
+		const cask = await cellar.load(image.mediaHash)
+		const buffer = cask.bytes.buffer.slice(
+			cask.bytes.byteOffset,
+			cask.bytes.byteOffset + cask.bytes.byteLength
+		) as ArrayBuffer
+		const blob = new Blob([buffer], {type: "image/png"})
+		await omni.load({[image.mediaHash]: Datafile.make(blob, `${image.mediaHash}.png`)})
+	}
+}
+

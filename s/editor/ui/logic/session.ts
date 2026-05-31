@@ -159,7 +159,7 @@ export class OmniSession {
 	}
 
 	updateTransformAnimation(
-		item: Item.Text | Item.Video,
+		item: Item.Text | Item.Video | Item.Image,
 		transform: Transform,
 		mutateAnimation: (draft: TransformAnimation) => void,
 	) {

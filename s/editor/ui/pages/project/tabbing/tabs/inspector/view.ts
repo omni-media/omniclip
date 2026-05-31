@@ -6,12 +6,14 @@ import styleCss from "./style.css.js"
 import {InfoControls} from "./views/controls/info.js"
 import {VideoControls} from "./views/controls/video.js"
 import {AudioControls} from "./views/controls/audio.js"
+import {ImageControls} from "./views/controls/image.js"
 import {TextControls} from "./views/controls/text/view.js"
 import themeCss from "./../../../../../../theme.css.js"
 import textSvg from "./../../../../../icons/gravity-ui/text.svg.js"
 import {EditorContext} from "./../../../../../../context/context.js"
 import circleInfoSvg from "./../../../../../icons/gravity-ui/circle-info.svg.js"
 import videoPlayerSvg from "./../../../../../icons/carbon-icons/video-player.svg.js"
+import documentImportSvg from "./../../../../../icons/carbon-icons/document-import.svg.js"
 import audioWaveSvg from "./../../../../../icons/material-design-icons/audio-wave.svg.js"
 
 type Tab = {
@@ -24,6 +26,7 @@ type Tab = {
 const TABS: {[key: string]: Tab} = {
 	INFO: {id: "info", icon: circleInfoSvg, label: "Info", component: (c, i) => i && InfoControls(c, i)},
 	VIDEO: {id: "video", icon: videoPlayerSvg, label: "Video", component: (c, i) => i && VideoControls(c, i as Item.Video)},
+	IMAGE: {id: "image", icon: documentImportSvg, label: "Image", component: (c, i) => i && ImageControls(c, i as Item.Image)},
 	AUDIO: {id: "audio", icon: audioWaveSvg, label: "Audio", component: (c, i) => i && AudioControls(c, i as Item.Audio)},
 	TEXT: {id: "text", icon: textSvg, label: "Text", component: (c, i) => TextControls(c, i?.kind === Kind.Text ? i as Item.Text : null)},
 }
@@ -45,6 +48,8 @@ export const InspectorTab = shadow((context: EditorContext) => {
 		switch(selectedItem?.kind as Kind) {
 			case Kind.Video:
 				return [...tabs, TABS.VIDEO, TABS.AUDIO]
+			case Kind.Image:
+				return [...tabs, TABS.IMAGE]
 			case Kind.Audio:
 				return [...tabs, TABS.AUDIO]
 			case Kind.Text:

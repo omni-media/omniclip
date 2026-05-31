@@ -21,7 +21,7 @@ import {
 import '@awesome.me/webawesome/dist/components/details/details.js'
 import '@awesome.me/webawesome/dist/components/button/button.js'
 
-export const KeyframesControls = shadow((context: EditorContext, item: Item.Text | Item.Video) => {
+export const KeyframesControls = shadow((context: EditorContext, item: Item.Text | Item.Video | Item.Image) => {
 	useCss(styleCss)
 
 	const index = context.session.index

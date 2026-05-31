@@ -37,11 +37,21 @@ export type Settings = {
 	channels: "stereo" | "mono" | "5.1 Surround"
 }
 
+export type ItemMetadata = {
+	itemId: Id
+	bgRemoved?: boolean
+}
+
+export type Metadata = {
+	items: ItemMetadata[]
+}
+
 export type State = {
 	updatedAt: number
 	files: {
 		hashes: string[]
 	}
+	metadata: Metadata
 	timeline: Chronicle<TimelineFile>
 	settings: Settings
 	outliner: {
@@ -68,6 +78,9 @@ export const makeDefaultState = (withRoot = false): State => ({
 	updatedAt: Date.now(),
 	files: {
 		hashes: [],
+	},
+	metadata: {
+		items: []
 	},
 	timeline: chronicle(makeDefaultTimeline(withRoot)),
 	outliner: {
