@@ -17,19 +17,17 @@ export async function setupRequirements(projectId = Strata.defaultProjectId) {
 	const project = new Omni(driver)
 	const videoA = await loadDemoFiles(project)
 
-	if (strata.timeline.state.items.length === 0)
+	if (strata.timeline.state.items.length === 1)
 		await demo(strata, project, videoA)
 
 	const player = await project.playback(strata.timeline.state as TimelineFile)
 	const controllers = {cargo: new CargoController(strata, cellar), player}
 	const omni = new O({
 		get timeline() {
-			return strata.timeline.state as TimelineFile
+			return strata.timeline.state
 		},
 		set timeline(p: TimelineFile) {
-			// Omnitool may build `p` from Strata's frozen snapshot.
-			// Clone before assigning so frozen item references don't enter the mutable draft.
-			strata.timeline.mutate(state => Object.assign(state, structuredClone(p)))
+			strata.timeline.mutate(state => Object.assign(state, p))
 		}
 	})
 	const session = new OmniSession({
