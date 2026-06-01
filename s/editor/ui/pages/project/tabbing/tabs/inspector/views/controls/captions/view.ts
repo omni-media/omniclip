@@ -12,14 +12,15 @@ import {
 
 import styleCss from "./style.css.js"
 import {valueOf} from "../filters/utils.js"
-import {sectionStyles} from "../styles.css.js"
 import textStyleCss from "../text/style.css.js"
+import {aiControlStyles, sectionStyles} from "../styles.css.js"
 import binSvg from "../../../../../../../../icons/gravity-ui/bin.svg.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 import speechToTextSvg from "../../../../../../../../icons/speech-to-text.svg.js"
 import {renderCaptionStyleControls, renderTranscriptPreview} from "./renderers.js"
 import {replaceChild} from "../../../../../../../../logic/parts/operations/operations.js"
-import {CaptionConfigKey, formatProgress, LANGUAGES, Transcriber, TRANSCRIBER_MODELS, transcriberWorkerPath} from "./constants.js"
+import {AI_DEVICES, AI_DTYPES, AiDevice, AiDtype, formatProgress} from "../../../constants.js"
+import {CaptionConfigKey, LANGUAGES, Transcriber, TranscriberModel, TRANSCRIBER_MODELS, transcriberWorkerPath} from "./constants.js"
 
 import "@awesome.me/webawesome/dist/components/button/button.js"
 import "@awesome.me/webawesome/dist/components/option/option.js"
@@ -29,7 +30,7 @@ import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 
 
 export const CaptionsControls = shadow((context: EditorContext, item: Item.Video | Item.Audio) => {
-	useCss(sectionStyles, textStyleCss, styleCss)
+	useCss(sectionStyles, textStyleCss, aiControlStyles, styleCss)
 
 	const tool = context.omni
 	const index = context.session.index
@@ -43,7 +44,9 @@ export const CaptionsControls = shadow((context: EditorContext, item: Item.Video
 	const language = useSignal("")
 	const generating = useSignal(false)
 	const transcriber = useSignal<Transcriber | null>(null)
-	const model = useSignal<string>(TRANSCRIBER_MODELS[0][0])
+	const model = useSignal<TranscriberModel>(TRANSCRIBER_MODELS[0][0])
+	const device = useSignal<AiDevice>("webgpu")
+	const dtype = useSignal<AiDtype>("auto")
 	const maxChars = useSignal(existingCaption?.maxChars ?? 42)
 	const maxDuration = useSignal(existingCaption?.maxDuration ?? 3500)
 	const maxSilence = useSignal(existingCaption?.maxSilence ?? 750)
@@ -54,18 +57,26 @@ export const CaptionsControls = shadow((context: EditorContext, item: Item.Video
 		transcriber(null)
 	}
 
+	useMount(() => disposeTranscriber)
 	useMount(() => {
-		const dispose = model.on(() => disposeTranscriber())
-		return () => {
-			disposeTranscriber()
-			dispose()
-		}
+		const disposers = [model, device, dtype]
+			.map(item => item.on(disposeTranscriber))
+		return () => disposers.forEach(dispose => dispose())
 	})
 
-	const setModel = (next: string) => {
-		if (next !== model.value) {
-			model.value = next
-		}
+	const setModel = (value: TranscriberModel) => {
+		if (value !== model())
+			model(value)
+	}
+
+	const setDevice = (value: AiDevice) => {
+		if (value !== device())
+			device(value)
+	}
+
+	const setDtype = (value: AiDtype) => {
+		if (value !== dtype())
+			dtype(value)
 	}
 
 	const updateCaption = (patch: Partial<Item.Caption>) => {
@@ -89,7 +100,12 @@ export const CaptionsControls = shadow((context: EditorContext, item: Item.Video
 		transcriber.value = await makeTranscriber({
 			driver: context.driver,
 			workerUrl: transcriberWorkerPath,
-			spec: {...defaultTranscriberSpec(), model: model.value},
+			spec: {
+				...defaultTranscriberSpec(),
+				model: model.value,
+				device: device.value,
+				dtype: dtype.value,
+			},
 			onLoading: ({progress}) => status(formatProgress(Math.round(progress), "Loading speech model"))
 		})
 
@@ -171,11 +187,11 @@ export const CaptionsControls = shadow((context: EditorContext, item: Item.Video
 	`
 
 	return html`
-		<wa-details summary="SUBTITLES" icon-placement="start" class="captions-panel">
-			<div class="transcribe section">
-				<div class="caption-hero">
-					<div class="caption-icon">${speechToTextSvg}</div>
-					<p class="caption-description">Transcribe audio using AI</p>
+		<wa-details summary="SUBTITLES" icon-placement="start" class="ai-panel">
+			<div class="ai-section">
+				<div class="ai-hero">
+					<div class="ai-icon">${speechToTextSvg}</div>
+					<p class="ai-description">Transcribe audio using AI</p>
 				</div>
 
 				<label class="field-grid">
@@ -190,7 +206,7 @@ export const CaptionsControls = shadow((context: EditorContext, item: Item.Video
 					<span class="field-label">Model</span>
 					<wa-select size="small" .value=${model()}
 						?disabled=${generating()}
-						@change=${(e: Event) => setModel(valueOf(e))}>
+						@change=${(e: Event) => setModel(valueOf(e) as TranscriberModel)}>
 						${TRANSCRIBER_MODELS.map(([value, label]) => html`<wa-option value=${value}>${label}</wa-option>`)}
 					</wa-select>
 				</label>
@@ -204,6 +220,24 @@ export const CaptionsControls = shadow((context: EditorContext, item: Item.Video
 
 				<wa-details summary="Advanced" icon-placement="start" class="advanced-panel">
 					<div class="advanced-fields">
+						<label class="field-grid">
+							<span class="field-label">Device</span>
+							<wa-select size="small" .value=${device()}
+								?disabled=${generating()}
+								@change=${(e: Event) => setDevice(valueOf(e) as AiDevice)}>
+								${AI_DEVICES.map(([value, label]) => html`<wa-option value=${value}>${label}</wa-option>`)}
+							</wa-select>
+						</label>
+
+						<label class="field-grid">
+							<span class="field-label">DType</span>
+							<wa-select size="small" .value=${dtype()}
+								?disabled=${generating()}
+								@change=${(e: Event) => setDtype(valueOf(e) as AiDtype)}>
+								${AI_DTYPES.map(([value, label]) => html`<wa-option value=${value}>${label}</wa-option>`)}
+							</wa-select>
+						</label>
+
 						${numField("Max Chars", "maxChars", 1, 160)}
 						${numField("Max Duration", "maxDuration", 100)}
 						${numField("Max Silence", "maxSilence", 50)}
@@ -230,12 +264,12 @@ export const CaptionsControls = shadow((context: EditorContext, item: Item.Video
 				${error() ? html`<div class="status" data-error>${error()}</div>` : null}
 			</div>
 
-			<div class="preview section">
+			<div class="preview ai-section">
 				<div class="section-label">Preview</div>
 				${renderTranscriptPreview(transcript(), maxChars())}
 			</div>
 
-			<div class="text-styles section">
+			<div class="text-styles ai-section">
 				<div class="section-label">Style</div>
 				${renderCaptionStyleControls(styleItem, updateStyle)}
 			</div>

@@ -23,7 +23,5 @@ export const transcriberWorkerPath = new URL(
 )
 
 export type CaptionConfigKey = "maxChars" | "maxDuration" | "maxSilence"
+export type TranscriberModel = typeof TRANSCRIBER_MODELS[number][0]
 export type Transcriber = Awaited<ReturnType<typeof makeTranscriber>>
-
-export const formatProgress = (n: number, label: string) =>
-	Number.isFinite(n) ? `${label} ${n}%` : `${label}...`
