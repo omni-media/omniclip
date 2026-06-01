@@ -81,7 +81,10 @@ export const BackgroundRemoverControls = shadow((context: EditorContext, item: I
 				device: device.value,
 				dtype: dtype.value,
 			},
-			onLoading: ({progress}) => status(formatProgress(Math.round(progress), "Loading background model"))
+			onLoading: ({progress}) => {
+				if (!error.value)
+					status(formatProgress(Math.round(progress), "Loading background model"))
+			}
 		})
 
 		return remover.value

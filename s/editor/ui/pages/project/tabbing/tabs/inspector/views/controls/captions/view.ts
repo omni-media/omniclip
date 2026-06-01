@@ -106,7 +106,10 @@ export const CaptionsControls = shadow((context: EditorContext, item: Item.Video
 				device: device.value,
 				dtype: dtype.value,
 			},
-			onLoading: ({progress}) => status(formatProgress(Math.round(progress), "Loading speech model"))
+			onLoading: ({progress}) => {
+				if (!error.value)
+					status(formatProgress(Math.round(progress), "Loading speech model"))
+			}
 		})
 
 		return transcriber.value
@@ -143,8 +146,14 @@ export const CaptionsControls = shadow((context: EditorContext, item: Item.Video
     	const nextTranscript = await transcriber.transcribe({
       	source: media.blob,
       	language: language.value,
-      	onTranscription: text => {if (text.trim()) status(text)},
-      	onReport: ({progress}) => status(formatProgress(Math.round(progress), "Transcribing"))
+      	onTranscription: text => {
+      		if (!error.value && text.trim())
+      			status(text)
+      	},
+      	onReport: ({progress}) => {
+      		if (!error.value)
+      			status(formatProgress(Math.round(progress), "Transcribing"))
+      	}
     	})
     	const caption = context.omni.captions.make(nextTranscript, {
       	itemId: item.id,
