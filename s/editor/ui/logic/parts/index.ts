@@ -2,6 +2,7 @@
 import {GMap} from '@e280/stz'
 import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
 import {Id, Item, Kind, TimelineFile} from '@omnimedia/omnitool'
+import {computeItemDuration} from '@omnimedia/omnitool/x/timeline/renderers/parts/handy.js'
 
 export namespace Idx {
 	export type Text = Item.Text & {start?: number}
@@ -16,7 +17,7 @@ export class Index {
 	parents = new GMap<Id, Idx.Struct>()
 	laneStarts = new GMap<Id, Ms>()
 
-	constructor(source: TimelineFile) {
+	constructor(private source: TimelineFile) {
 		this.#reindex(source)
 	}
 
@@ -98,9 +99,7 @@ export class Index {
 						continue
 
 					this.#indexLaneStarts(childId, cursor)
-
-					if ('duration' in child)
-						cursor = ms(cursor + child.duration)
+					cursor = ms(cursor + computeItemDuration(child.id, this.source))
 				}
 
 				break

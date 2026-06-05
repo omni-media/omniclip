@@ -22,10 +22,16 @@ function clipFill(kind: Kind) {
 			return styles.stackFill
 		case Kind.Video:
 			return styles.videoFill
+		case Kind.Image:
+			return styles.imageFill
 		case Kind.Audio:
 			return styles.audioFill
 		case Kind.Text:
 			return styles.textFill
+		case Kind.Caption:
+			return styles.captionFill
+		case Kind.Transition:
+			return styles.transitionFill
 		default:
 			return styles.unknownFill
 	}

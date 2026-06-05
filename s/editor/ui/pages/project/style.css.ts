@@ -78,6 +78,9 @@ export default css`@layer view {
 .viewport-panel {
 	display: none;
 }
+.browser-panel {
+	display: none;
+}
 .panel[data-active="edit"] .viewport-panel {
 	display: flex;
 }
@@ -113,6 +116,11 @@ export default css`@layer view {
 
 	.outliner-panel {
 		grid-area: outliner;
+		border-right: 1px solid #1a1a1a;
+	}
+
+	.browser-panel {
+		grid-area: mediabin;
 		border-right: 1px solid #1a1a1a;
 	}
 

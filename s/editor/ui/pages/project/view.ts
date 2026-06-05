@@ -12,6 +12,7 @@ import {ExportTab} from "./tabbing/tabs/export/view.js"
 import {EditorContext} from "../../../context/context.js"
 import {OutlinerTab} from "./tabbing/tabs/outliner/view.js"
 import {InspectorTab} from "./tabbing/tabs/inspector/view.js"
+import {BrowserTabPanel} from "./tabbing/tabs/browser/view.js"
 import {exportModal} from "../../logic/modals/export/modal.js"
 import {settingsModal} from "../../logic/modals/settings/modal.js"
 import {TimelineViewport} from "./tabbing/tabs/edit/views/viewport/view.js"
@@ -84,6 +85,10 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 				</header>
 
 				<div class="layout-grid">
+					<div class="panel browser-panel">
+						${BrowserTabPanel(context)}
+					</div>
+
 					<div
 						class="panel outliner-panel"
 						?data-active=${isOutlinerTabActive}

@@ -4,7 +4,7 @@ import {derived, signal} from "@e280/strata"
 import {visualAnimations} from "@omnimedia/omnitool"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 import type {Transform, TransformAnimation} from "@omnimedia/omnitool/x/timeline/types.js"
-import {Driver, Id, Item, Kind, O, Resource, TimelineFile, VideoPlayer} from "@omnimedia/omnitool"
+import {Driver, Id, Item, Kind, O, Resource, TimelineFile, TransitionName, VideoPlayer} from "@omnimedia/omnitool"
 
 import {Stage} from "./parts/stage.js"
 import {Tool} from "./parts/modes/tool.js"
@@ -119,6 +119,55 @@ export class OmniSession {
 
 	clearProposal() {
 		this.$proposal.value = null
+	}
+
+	applyTransitionToSelection(name: TransitionName, duration: number) {
+		const selected = this.index.getItemMaybe(this.$selectedItem.value)
+		if (!selected)
+			return false
+
+		const parent = this.index.getParent(selected.id)
+		if (parent?.kind !== Kind.Sequence)
+			return false
+
+		if (selected.kind === Kind.Transition)
+			return this.#updateTransition(selected.id, name, duration)
+
+		const childIndex = parent.childrenIds.indexOf(selected.id)
+		if (!this.#isVisualItem(selected) || childIndex === -1)
+			return false
+
+		const [prev, next] = [-1, 1].map(d => this.index.getItemMaybe(parent.childrenIds[childIndex + d]))
+		const transition = [prev, next].find(s => s?.kind === Kind.Transition)
+		if (transition)
+			return this.#updateTransition(transition.id, name, duration)
+
+		const index = this.#isVisualItem(next) ? childIndex + 1 : this.#isVisualItem(prev) ? childIndex : -1
+		if (index === -1)
+			return false
+
+		const created = this.deps.omnitool.transition[name](duration)
+		this.timeline.mutate(s => {
+			const childrenIds = [...parent.childrenIds]
+			childrenIds.splice(index, 0, created.id)
+			add(s, created)
+			update(s, parent.id, {childrenIds})
+		})
+
+		this.$selectedItem.value = created.id
+		this.canvas.scheduleDraw()
+		return true
+	}
+
+	#updateTransition(id: Id, name: TransitionName, duration: number) {
+		this.timeline.mutate(s => update(s, id, {name, duration}))
+		this.$selectedItem.value = id
+		this.canvas.scheduleDraw()
+		return true
+	}
+
+	#isVisualItem(item: Item.Any | undefined): item is Item.Video | Item.Image | Item.Text | Item.Caption {
+		return [Kind.Video, Kind.Image, Kind.Text, Kind.Caption].includes(item?.kind as Kind)
 	}
 
 	setDropIntent(dropIntent: {movingId: Id, intent: DropIntent} | null) {
@@ -312,5 +361,6 @@ export class OmniSession {
 
 		if (this.$selectedItem.value === clipId)
 			this.$selectedItem.value = null
+		this.canvas.scheduleDraw()
 	}
 }

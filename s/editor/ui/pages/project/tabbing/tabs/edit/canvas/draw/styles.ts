@@ -15,8 +15,11 @@ export const styles = {
 	selectedStroke: "#f5f5f5",
 	stackFill: "#3a3a3a",
 	videoFill: "#2563eb",
+	imageFill: "#8b5cf6",
 	audioFill: "#0f766e",
 	textFill: "#7c3aed",
+	captionFill: "#c026d3",
+	transitionFill: "#d97706",
 	unknownFill: "#525252",
 } as const
 

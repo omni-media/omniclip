@@ -1,5 +1,5 @@
 
-import {Kind} from "@omnimedia/omnitool"
+import {Kind, TimelineFile} from "@omnimedia/omnitool"
 import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {TimelineClipBox} from "../draw/clip.js"
@@ -7,6 +7,7 @@ import {TimelineClipBox} from "../draw/clip.js"
 export type TimelineNode = {
 	id: number
 	kind: Kind
+	name?: string
 	duration?: number
 	start?: number
 	childrenIds?: readonly number[]
@@ -19,6 +20,7 @@ export type LayoutResult = {
 }
 
 export type LayoutContext = {
+	timeline: TimelineFile
 	items: Map<number, TimelineNode>
 	pxPerMs: number
 	selectedItemId: number | null

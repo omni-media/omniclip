@@ -1,29 +1,9 @@
 
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {computeItemDuration} from "@omnimedia/omnitool/x/timeline/renderers/parts/handy.js"
 
 import {layoutLeaf} from "./leaf.js"
 import {LayoutContext, LayoutResult, TimelineNode} from "./types.js"
-
-function resolveDuration(
-	context: LayoutContext,
-	walk: (item: TimelineNode, row: number, time: Ms, rootStack?: boolean) => LayoutResult,
-	item: TimelineNode
-) {
-	let duration = ms(item.duration ?? 0)
-
-	if (item.childrenIds?.length) {
-		for (const id of item.childrenIds) {
-			const child = context.items.get(id)
-			if (!child)
-				continue
-
-			const childLayout = walk(child, 0, ms(0))
-			duration = ms(Math.max(duration, childLayout.duration))
-		}
-	}
-
-	return duration
-}
 
 export function layoutStack(
 	context: LayoutContext,
@@ -34,7 +14,7 @@ export function layoutStack(
 	rootStack = false
 ): LayoutResult {
 	if (!rootStack) {
-		const duration = resolveDuration(context, walk, item)
+		const duration = computeItemDuration(item.id, context.timeline)
 		return layoutLeaf(context, item, row, time, duration, true)
 	}
 
