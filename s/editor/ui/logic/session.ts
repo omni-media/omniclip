@@ -151,7 +151,6 @@ export class OmniSession {
 		this.timeline.mutate(s => {
 			const childrenIds = [...parent.childrenIds]
 			childrenIds.splice(index, 0, created.id)
-			add(s, created)
 			this.#applyTransitionResize(s, {...created, duration: 0}, duration, childrenIds, index)
 			update(s, parent.id, {childrenIds})
 		})
