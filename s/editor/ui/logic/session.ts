@@ -17,6 +17,7 @@ import {add, remove, update} from "./parts/mutate.js"
 import {Proposal} from "./parts/proposal/proposal.js"
 import {trim} from "./parts/interactions/trim/parts/action.js"
 import {DropIntent} from "./parts/interactions/drag/parts/intent.js"
+import {resizeTransition} from "./parts/interactions/trim/parts/transition.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
 import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 import {TimelineClipBox} from "../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
@@ -151,12 +152,22 @@ export class OmniSession {
 			const childrenIds = [...parent.childrenIds]
 			childrenIds.splice(index, 0, created.id)
 			add(s, created)
+			this.#applyTransitionResize(s, {...created, duration: 0}, duration, childrenIds, index)
 			update(s, parent.id, {childrenIds})
 		})
 
 		this.$selectedItem.value = created.id
 		this.canvas.scheduleDraw()
 		return true
+	}
+
+	#applyTransitionResize(state: TimelineFile, transition: Item.Transition, duration: number, childrenIds: readonly Id[], index: number) {
+		const prev = this.index.getItemMaybe<Idx.Clip>(childrenIds[index - 1])
+		const next = this.index.getItemMaybe<Idx.Clip>(childrenIds[index + 1])
+		const overlay = resizeTransition(transition, duration, prev, next, this.deps.resolveMedia)
+
+		for (const [id, item] of overlay)
+			update(state, id, item)
 	}
 
 	#updateTransition(id: Id, name: TransitionName, duration: number) {
@@ -352,6 +363,10 @@ export class OmniSession {
 			const parent = this.index.getParent(clipId)
 			if (!parent)
 				return
+
+			const item = this.index.getItemMaybe<Item.Any>(clipId)
+			if (item?.kind === Kind.Transition)
+				this.#applyTransitionResize(state, item, 0, parent.childrenIds, parent.childrenIds.indexOf(clipId))
 
 			remove(state, clipId)
 			update(state, parent.id, {

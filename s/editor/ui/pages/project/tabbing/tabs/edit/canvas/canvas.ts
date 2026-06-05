@@ -204,6 +204,9 @@ export class TimelineCanvas {
 	}
 
 	rollEdgeAt(clip: TimelineClipBox, canvasX: number) {
+		if (clip.kind === Kind.Transition)
+			return null
+
 		const parent = this.deps.session.index.getParent(clip.itemId)
 		if (!parent || parent.kind !== Kind.Sequence)
 			return null
@@ -214,10 +217,12 @@ export class TimelineCanvas {
 
 		const inStartZone = canvasX - clip.x <= 6
 		const inEndZone = clip.x + clip.width - canvasX <= 6
+		const prev = this.deps.session.index.getItemMaybe(parent.childrenIds[index - 1])
+		const next = this.deps.session.index.getItemMaybe(parent.childrenIds[index + 1])
 
-		if (inStartZone && index > 0)
+		if (inStartZone && index > 0 && prev?.kind !== Kind.Transition)
 			return "start"
-		if (inEndZone && index < parent.childrenIds.length - 1)
+		if (inEndZone && index < parent.childrenIds.length - 1 && next?.kind !== Kind.Transition)
 			return "end"
 		return null
 	}

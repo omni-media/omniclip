@@ -1,5 +1,6 @@
 
 import {tool} from "./tool.js"
+import {Kind} from "@omnimedia/omnitool"
 import {Dragger} from "../interactions/drag/dragger.js"
 import {Roller, cursorForRoll} from "../interactions/roll/roller.js"
 import {Trimmer, cursorForTrimEdge} from "../interactions/trim/trimmer.js"
@@ -44,7 +45,7 @@ export const selectTool = tool("select", (session) => {
 			session.$selectedItem.value = clip?.itemId ?? null
 			session.canvas.scheduleDraw()
 
-			if (clip) dragger.start(clip, point, session)
+			if (clip && clip.kind !== Kind.Transition) dragger.start(clip, point, session)
 			else dragger.cancel(session)
 		},
 
