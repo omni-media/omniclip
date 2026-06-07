@@ -1,12 +1,16 @@
 import * as tact from "@benev/tact"
+import type {Atom} from "@benev/tact"
 
 import {bindings} from "./bindings.js"
+import {TimelineAction} from "./meta.js"
 import {OmniSession} from "../../../ui/logic/session.js"
 import {bladeTool} from "../../../ui/logic/parts/modes/blade.js"
 import {positionTool} from "../../../ui/logic/parts/modes/position.js"
 import {selectTool} from "../../../ui/logic/parts/modes/select.js"
 import {zoomTool} from "../../../ui/logic/parts/modes/zoom.js"
 import {prevent_default_browser_behavior} from "./prevent-default-hack.js"
+
+const CUSTOM_PROFILE_LABEL = "Omniclip Custom"
 
 export class Keybindings {
 	#running = false
@@ -38,6 +42,60 @@ export class Keybindings {
 			cancelAnimationFrame(this.#request)
 	}
 
+	getBinding(action: TimelineAction) {
+		return this.deck.hub.ports[0].bindings.timeline[action]
+	}
+
+	getDefaultBinding(action: TimelineAction) {
+		return this.deck.baseBindings.timeline[action]
+	}
+
+	async setBinding(action: TimelineAction, atom: Atom) {
+		const next = structuredClone(this.deck.hub.ports[0].bindings)
+		;(next.timeline as Record<TimelineAction, Atom>)[action] = atom
+		this.#replaceBindings(next)
+		await this.#persistBindings(next)
+	}
+
+	async resetBinding(action: TimelineAction) {
+		await this.setBinding(action, structuredClone(this.deck.baseBindings.timeline[action]))
+	}
+
+	async resetAll() {
+		const next = structuredClone(this.deck.baseBindings)
+		const profile = this.#profile
+		this.#replaceBindings(next)
+		await this.deck.db.assignPortProfile(0, null)
+		if (profile)
+			await this.deck.db.deleteProfile(profile.id)
+	}
+
+	#replaceBindings(next: typeof bindings) {
+		const previous = this.deck.hub.ports[0]
+		const port = new tact.Port(next)
+		port.devices.adds(...previous.devices)
+		port.modes.adds(...previous.modes)
+		this.deck.hub.ports[0] = port
+	}
+
+	async #persistBindings(next: typeof bindings) {
+		const profile = this.#profile
+		if (!profile) {
+			const profile = await this.deck.db.createProfile(CUSTOM_PROFILE_LABEL, next)
+			await this.deck.db.assignPortProfile(0, profile.id)
+			return
+		}
+
+		const catalog = this.deck.catalog.clone()
+		catalog.profiles.set(profile.id, {...profile, bindings: next})
+		catalog.portProfiles[0] = profile.id
+		await this.deck.db.save(catalog)
+	}
+
+	get #profile() {
+		return [...this.deck.catalog.profiles.values()]
+			.find(profile => profile.label === CUSTOM_PROFILE_LABEL)
+	}
 
 	#loop = () => {
 		if (!this.#running) return

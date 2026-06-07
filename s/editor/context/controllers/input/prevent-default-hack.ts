@@ -1,19 +1,9 @@
 
 import {dom} from "@e280/sly"
 import * as tact from "@benev/tact"
+import type {Atom, Mods} from "@benev/tact"
 
 import {bindings} from "./bindings.js"
-
-type BindingAtom =
-	| string
-	| ["code", string, unknown?]
-	| ["and", ...BindingAtom[]]
-	| ["or", ...BindingAtom[]]
-	| ["not", BindingAtom]
-	| ["cond", BindingAtom, BindingAtom]
-	| ["mods", BindingAtom, Partial<{ctrl: boolean, alt: boolean, shift: boolean, meta: boolean}>]
-
-type ModsBinding = ["mods", BindingAtom, Partial<{ctrl: boolean, alt: boolean, shift: boolean, meta: boolean}>]
 
 function codePressed(event: KeyboardEvent, pressed: Set<string>, code: string) {
 	switch (code) {
@@ -34,7 +24,7 @@ function codePressed(event: KeyboardEvent, pressed: Set<string>, code: string) {
 	}
 }
 
-function matchesBinding(event: KeyboardEvent, pressed: Set<string>, binding: BindingAtom): boolean {
+function matchesBinding(event: KeyboardEvent, pressed: Set<string>, binding: Atom): boolean {
 	if (typeof binding === 'string')
 		return codePressed(event, pressed, binding)
 
@@ -56,9 +46,9 @@ function matchesBinding(event: KeyboardEvent, pressed: Set<string>, binding: Bin
 	}
 }
 
-function matchesMods(event: KeyboardEvent, pressed: Set<string>, binding: ModsBinding) {
+function matchesMods(event: KeyboardEvent, pressed: Set<string>, binding: Mods) {
 	const [, subject, mods] = binding
-	const maybe = (value: boolean, ...codes: string[]): BindingAtom =>
+	const maybe = (value: boolean, ...codes: string[]): Atom =>
 		value
 			? ["or", ...codes]
 			: ["not", ["or", ...codes]]

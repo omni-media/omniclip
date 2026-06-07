@@ -15,6 +15,7 @@ import {InspectorTab} from "./tabbing/tabs/inspector/view.js"
 import {BrowserTabPanel} from "./tabbing/tabs/browser/view.js"
 import {exportModal} from "../../logic/modals/export/modal.js"
 import {settingsModal} from "../../logic/modals/settings/modal.js"
+import {shortcutsModal} from "../../logic/modals/shortcuts/modal.js"
 import {TimelineViewport} from "./tabbing/tabs/edit/views/viewport/view.js"
 
 import "@awesome.me/webawesome/dist/components/button/button.js"
@@ -39,6 +40,8 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 			if(settings)
 				context.strata.settings.mutate(s => s = settings)
 		}
+
+		const openShortcuts = () => context.modals.openModal(shortcutsModal())
 
 		const openExport = async () => {
 			const settings = await context.modals.openModal(exportModal())
@@ -68,6 +71,13 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 							class=settings size="small" with-caret>
       				<wa-icon slot="start" name="gear"></wa-icon>
       				Settings
+    				</wa-button>
+
+   					<wa-button
+     					@click=${openShortcuts}
+							class=shortcuts size="small">
+      				<wa-icon slot="start" name="keyboard"></wa-icon>
+      				Shortcuts
     				</wa-button>
 
 						<div class=spacer></div>

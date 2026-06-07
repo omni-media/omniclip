@@ -52,6 +52,7 @@ export class ModalManager {
 		return html`
 			<wa-dialog
 				open
+				style="--width: fit-content"
 				@wa-after-hide=${(e: Event) => {
 					if(e.target === e.currentTarget) {
 						active.cancel()

@@ -50,6 +50,7 @@ export class EditorContext {
 	get driver() { return this.requirements.driver }
 	get tabs() {return this.requirements.tabs}
 	get player() {return this.controllers.player}
+	get keybindings() {return this.requirements.keybindings}
 
 	dispose = () => {
 		this.#stopPlaybackTick()

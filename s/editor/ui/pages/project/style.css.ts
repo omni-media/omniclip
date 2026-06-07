@@ -28,7 +28,7 @@ export default css`@layer view {
 		background: gray;
 	}
 
-	.settings, .export {
+	.settings, .shortcuts, .export {
 
 		&::part(base) {
 			height: 20px;
