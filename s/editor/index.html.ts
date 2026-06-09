@@ -16,6 +16,9 @@ export default ssg.page(import.meta.url, async orb => {
 		head: html`
 			<meta data-version="${await orb.packageVersion("$/package.json")}"/>
 			<script>document.documentElement.classList.add("wa-dark")</script>
+			<script>document.documentElement.classList.add("sl-theme-dark")</script>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/dark.css">
+			<script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace.js"></script>
 		`,
 		body: html`
 			<editor-app></editor-app>
