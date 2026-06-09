@@ -47,7 +47,7 @@ export const InspectorTab = shadow((context: EditorContext) => {
 		const tabs = [TABS.TEXT]
 		switch(selectedItem?.kind as Kind) {
 			case Kind.Video:
-				return [...tabs, TABS.VIDEO, TABS.AUDIO]
+				return [...tabs, TABS.VIDEO]
 			case Kind.Image:
 				return [...tabs, TABS.IMAGE]
 			case Kind.Audio:
