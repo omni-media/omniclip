@@ -45,9 +45,10 @@
 	},
 	"dependencies": {
 		"@awesome.me/webawesome": "^3.4.0",
+		"@benev/slate": "^0.3.10",
 		"@benev/tact": "^0.1.1",
 		"@e280/kv": "^0.1.2",
-		"@e280/quay": "^0.0.0-2",
+		"@e280/quay": "^0.0.0-12",
 		"@e280/shiny": "^0.1.0-21",
 		"@e280/sly": "^0.3.12",
 		"@e280/strata": "^0.3.5",

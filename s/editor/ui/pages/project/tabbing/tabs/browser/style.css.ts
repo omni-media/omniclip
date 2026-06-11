@@ -77,6 +77,32 @@ export default css`@layer view {
 	align-items: center;
 }
 
+.media-bin {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	gap: 0.7em;
+}
+
+.media-toolbar {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto auto;
+	gap: 0.5em;
+	align-items: center;
+}
+
+quay-dropzone {
+	min-height: 5em;
+}
+
+quay-browser {
+	min-height: 0;
+	overflow: auto;
+	border: 1px solid #252a2f;
+	border-radius: 6px;
+	background: #181c20;
+}
+
 .search {
 	display: flex;
 	align-items: center;

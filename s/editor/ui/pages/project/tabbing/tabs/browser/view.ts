@@ -1,7 +1,8 @@
 
 import {html} from "lit"
-import {shadow, useCss, useSignal} from "@e280/sly"
 import {Item, transitions, type TransitionName} from "@omnimedia/omnitool"
+import {brain, components as quayComponents, dom, MediaLibrary} from "@e280/quay"
+import {shadow, spinner, useCss, useMount, useOnce, useSignal, useWait} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../../../../theme.css.js"
@@ -12,13 +13,20 @@ import folderSvg from "../../../../../icons/gravity-ui/folder.svg.js"
 type BrowserTab = "media" | "transitions"
 
 const DEFAULT_TRANSITION_DURATION = 700
+const MEDIA_GROUP = "omniclip-media"
 
 const TRANSITIONS = Object
 	.values(transitions)
 	.sort((a, b) => a.label.localeCompare(b.label))
 
+dom.register(quayComponents, {soft: true})
+
 export const BrowserTabPanel = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
+
+	const mediaLibrary = useOnce(() => setupMediaLibrary(context))
+	const mediaReady = useWait(mediaLibrary)
+	useMount(() => () => void mediaLibrary.then(library => library.dispose()))
 
 	const query = useSignal("")
 	const activeTab = useSignal<BrowserTab>("media")
@@ -61,10 +69,20 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 	`
 
 	const renderMedia = () => html`
-		<div class="search">
-			<input type="search" placeholder="Search media..." />
-		</div>
-		<p class="placeholder">Media browser will live here.</p>
+		${spinner(mediaReady(), () => html`
+			<div class="media-bin" group=${MEDIA_GROUP}>
+				<div class="media-toolbar">
+					<quay-searchbar></quay-searchbar>
+					<quay-filter></quay-filter>
+					<quay-sort></quay-sort>
+				</div>
+				<quay-dropzone></quay-dropzone>
+				<div class="media-path">
+					<quay-breadcrumb></quay-breadcrumb>
+				</div>
+				<quay-browser></quay-browser>
+			</div>
+		`)}
 	`
 
 	const renderTransitions = () => html`
@@ -129,4 +147,9 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 		</div>
 	`
 })
+
+async function setupMediaLibrary(context: EditorContext) {
+	const library = await MediaLibrary.open(`omniclip:${context.strata.projectId}`)
+	return brain.setGroup(MEDIA_GROUP, library)
+}
 
