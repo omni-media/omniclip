@@ -57,6 +57,14 @@ export default css`@layer view {
 	min-height: 0;
 }
 
+wa-split-panel {
+	display: contents;
+}
+
+wa-split-panel::part(divider) {
+	display: none;
+}
+
 .panel {
 	display: none;
 	height: 100%;
@@ -99,12 +107,24 @@ export default css`@layer view {
 	}
 
 	.layout-grid {
-		grid-template-columns: 300px 1fr 300px;
-		grid-template-rows: 1fr 1fr;
-		grid-template-areas:
-			"mediabin viewport inspector"
-			"outliner timeline inspector";
+		display: flex;
+		flex-direction: column;
 		overflow: hidden;
+		height: 100%;
+		width: 100%;
+	}
+
+	wa-split-panel {
+		--divider-width: 1px;
+		--min: 200px;
+		--max: calc(100% - 200px);
+		height: 100%;
+		width: 100%;
+		display: grid;
+	}
+
+	wa-split-panel::part(divider) {
+		display: flex;
 	}
 
 	.panel {
@@ -114,29 +134,8 @@ export default css`@layer view {
 		position: relative;
 	}
 
-	.outliner-panel {
-		grid-area: outliner;
-		border-right: 1px solid #1a1a1a;
-	}
-
-	.browser-panel {
-		grid-area: mediabin;
-		border-right: 1px solid #1a1a1a;
-	}
-
-	.viewport-panel {
-		grid-area: viewport;
-		display: flex;
-	}
-
-	.inspector-panel {
-		grid-area: inspector;
-		border-left: 1px solid #1a1a1a;
-	}
-
 	.timeline-panel {
-		grid-area: timeline;
-		border-top: 1px solid #1a1a1a;
+		grid-row: auto;
 	}
 
 	.export-panel {

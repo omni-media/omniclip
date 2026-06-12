@@ -19,6 +19,7 @@ import {shortcutsModal} from "../../logic/modals/shortcuts/modal.js"
 import {TimelineViewport} from "./tabbing/tabs/edit/views/viewport/view.js"
 
 import "@awesome.me/webawesome/dist/components/button/button.js"
+import "@awesome.me/webawesome/dist/components/split-panel/split-panel.js"
 
 export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 	useCss(themeCss, styleCss)
@@ -95,37 +96,49 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 				</header>
 
 				<div class="layout-grid">
-					<div class="panel browser-panel">
-						${BrowserTabPanel(context)}
-					</div>
+					<wa-split-panel class="main-split" primary="start" position-in-pixels="300">
+						<wa-split-panel slot="start" orientation="vertical" class="left-split">
+							<div slot="start" class="panel browser-panel">
+								${BrowserTabPanel(context)}
+							</div>
 
-					<div
-						class="panel outliner-panel"
-						?data-active=${isOutlinerTabActive}
-					>
-						${OutlinerTab(context)}
-					</div>
+							<div
+								slot="end"
+								class="panel outliner-panel"
+								?data-active=${isOutlinerTabActive}
+							>
+								${OutlinerTab(context)}
+							</div>
+						</wa-split-panel>
 
-					<div
-						class="panel viewport-panel"
-						?data-active=${isEditTabActive}
-					>
-						${TimelineViewport(context)}
-					</div>
+						<wa-split-panel slot="end" class="right-split" primary="end" position-in-pixels="300">
+							<wa-split-panel slot="start" orientation="vertical" class="center-split">
+								<div
+									slot="start"
+									class="panel viewport-panel"
+									?data-active=${isEditTabActive}
+								>
+									${TimelineViewport(context)}
+								</div>
 
-					<div
-						class="panel inspector-panel"
-						?data-active=${isInspectorTabActive}
-					>
-						${InspectorTab(context)}
-					</div>
+								<div
+									slot="end"
+									class="panel timeline-panel"
+									?data-active=${isEditTabActive}
+								>
+									${EditTab(context)}
+								</div>
+							</wa-split-panel>
 
-					<div
-						class="panel timeline-panel"
-						?data-active=${isEditTabActive}
-					>
-						${EditTab(context)}
-					</div>
+							<div
+								slot="end"
+								class="panel inspector-panel"
+								?data-active=${isInspectorTabActive}
+							>
+								${InspectorTab(context)}
+							</div>
+						</wa-split-panel>
+					</wa-split-panel>
 
 					<div
 						class="panel export-panel"
