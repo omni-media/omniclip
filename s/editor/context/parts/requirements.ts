@@ -8,7 +8,7 @@ import {Keybindings} from "../controllers/input/keybindings.js"
 import {TabManager} from "../../ui/logic/parts/tab-manager.js"
 export type Requirements = Awaited<ReturnType<typeof setupRequirements>>
 
-export async function setupRequirements(projectId = Strata.defaultProjectId) {
+export async function setupRequirements(projectId: string) {
 	const strata = await Strata.setup(projectId)
 	const tabs = new TabManager()
 	const forklift = await OpfsForklift.setup("files")
@@ -46,7 +46,7 @@ export async function setupRequirements(projectId = Strata.defaultProjectId) {
 }
 
 async function loadDemoFiles(omni: Omni) {
-	const demoVideo = await fetch("/assets/temp/gl.mp4")
+	const demoVideo = await fetch("/assets/temp/talk.mp4")
 	const demoImage = await fetch("/assets/temp/person.jpg")
 	const blobVid = await demoVideo.blob()
 	const blobImg = await demoImage.blob()

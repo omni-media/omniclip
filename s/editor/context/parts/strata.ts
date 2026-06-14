@@ -6,7 +6,6 @@ import {makeDefaultState, State} from './state.js'
 
 export class Strata {
 	static storageScope = 'omniclip:project'
-	static defaultProjectId = 'default'
 	static storageVersion = 1
 
 	static #projects(storage: Storage = window.localStorage) {
@@ -31,6 +30,10 @@ export class Strata {
 		return strata.trunk.get()
 	}
 
+	static async hasProject(projectId: string, storage: Storage = window.localStorage) {
+		return this.#projects(storage).has(projectId)
+	}
+
 	static async loadProjects(storage: Storage = window.localStorage) {
 		const projects: {id: string, state: State}[] = []
 		for (const id of await this.listProjectIds(storage)) {
@@ -41,7 +44,7 @@ export class Strata {
 		return projects.sort((a, b) => a.id.localeCompare(b.id))
 	}
 
-	static async setup(projectId = Strata.defaultProjectId) {
+	static async setup(projectId: string) {
 		const strata = new Strata(projectId)
 		await strata.vault.load()
 		strata.listen()
@@ -68,7 +71,7 @@ export class Strata {
 	outliner = this.trunk.lens(s => s.outliner)
 
 	constructor(
-		public projectId = Strata.defaultProjectId,
+		public projectId: string,
 		storage: Storage = window.localStorage
 	) {
 		this.store = new LocalStore(Strata.storageKey(projectId), storage)

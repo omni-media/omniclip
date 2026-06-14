@@ -9,6 +9,8 @@ import {TabBar} from "./tabbing/bar/view.js"
 import themeCss from "../../../theme.css.js"
 import {EditTab} from "./tabbing/tabs/edit/view.js"
 import {ExportTab} from "./tabbing/tabs/export/view.js"
+import {ProjectNotFoundPage} from "./not-found/view.js"
+import {Strata} from "../../../context/parts/strata.js"
 import {EditorContext} from "../../../context/context.js"
 import {OutlinerTab} from "./tabbing/tabs/outliner/view.js"
 import {InspectorTab} from "./tabbing/tabs/inspector/view.js"
@@ -24,9 +26,16 @@ import "@awesome.me/webawesome/dist/components/split-panel/split-panel.js"
 export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 	useCss(themeCss, styleCss)
 
-	const context = useWait(() => EditorContext.setup(projectId))
+	const context = useWait(async() =>
+		await Strata.hasProject(projectId)
+			? EditorContext.setup(projectId)
+			: null
+	)
 
 	return spinner(context(), context => {
+		if (!context)
+			return ProjectNotFoundPage(router, projectId)
+
 		useMount(() => () => context.dispose())
 
 		const manager = context.tabs
