@@ -44,7 +44,7 @@ export class TimelineFilmstrips {
 
 		ctx.save()
 		ctx.beginPath()
-		ctx.roundRect(box.x, box.y, box.width, box.height, metrics.clipRadius)
+		ctx.rect(box.x, box.y, box.width, box.height)
 		ctx.clip()
 
 		for (const tile of entry.tiles) {

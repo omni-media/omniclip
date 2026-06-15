@@ -38,7 +38,7 @@ export class TimelineWaveforms {
 
 		ctx.save()
 		ctx.beginPath()
-		ctx.roundRect(box.x, box.y, box.width, box.height, metrics.clipRadius)
+		ctx.rect(box.x, box.y, box.width, box.height)
 		ctx.clip()
 
 		for (const tile of entry.tiles) {
@@ -70,7 +70,7 @@ export class TimelineWaveforms {
 			media.url,
 			{
 				tileHeight: metrics.trackHeight,
-				color: "rgb(196, 80, 115)",
+				color: styles.waveformFill,
 				onChange: (tiles: WaveformTileData[]) => {
 					entry.tiles = tiles
 					this.canvas.scheduleDraw()

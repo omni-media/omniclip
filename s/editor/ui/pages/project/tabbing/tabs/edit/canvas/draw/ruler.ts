@@ -6,6 +6,12 @@ import type {TimelineCanvas} from "../canvas.js"
 import {formatTime} from "../../../../utils/format-time.js"
 import {tickSteps} from "../../views/ruler/parts/constants.js"
 
+const labelY = 12
+const labelInsetX = 12
+const majorTick = {y: 14, height: 14}
+const mediumTick = {y: 22, height: 6}
+const minorTick = {y: 24, height: 4}
+
 export function drawRuler(canvas: TimelineCanvas) {
 	const pxPerMs = canvas.viewport.durationToWidth(ms(1))
 	const trimOffsetPx = canvas.trimPreviewOffsetPx()
@@ -17,6 +23,7 @@ export function drawRuler(canvas: TimelineCanvas) {
 	const endMs = ms(Math.max(startMs, canvas.viewport.visibleEnd()))
 	const startStep = Math.floor(startMs / scale.minor)
 	const endStep = Math.ceil(endMs / scale.minor)
+	const hasMinorTicks = scale.major === 1000 && (pps / timebase) > 4
 
 	canvas.ctx.fillStyle = styles.rulerBackground
 	canvas.ctx.fillRect(0, 0, canvas.width, metrics.rulerHeight)
@@ -26,8 +33,8 @@ export function drawRuler(canvas: TimelineCanvas) {
 	canvas.ctx.lineTo(canvas.width, metrics.rulerHeight - 0.5)
 	canvas.ctx.stroke()
 
-	canvas.ctx.font = "12px sans-serif"
-	canvas.ctx.textBaseline = "top"
+	canvas.ctx.font = "11px sans-serif"
+	canvas.ctx.textBaseline = "middle"
 
 	for (let step = startStep; step <= endStep; step += 1) {
 		const time = ms(step * scale.minor)
@@ -36,24 +43,26 @@ export function drawRuler(canvas: TimelineCanvas) {
 
 		if (isMajor) {
 			canvas.ctx.fillStyle = styles.rulerTick
-			canvas.ctx.fillRect(x, 0, 1, metrics.rulerHeight)
+			canvas.ctx.fillRect(x, majorTick.y, 1, majorTick.height)
 			canvas.ctx.fillStyle = styles.rulerLabel
-			canvas.ctx.fillText(formatTime(time), x + 4, 6)
+			canvas.ctx.fillText(formatTime(time), x + labelInsetX, labelY)
 		}
 		else if (scale.major === 1000) {
 			const frameNum = Math.round(time / (1000 / timebase))
 			if (frameNum % 10 === 0 && (pps * (10 / timebase)) > 10) {
-				canvas.ctx.fillStyle = styles.rulerTick
-				canvas.ctx.fillRect(x, 16, 1, 16)
+				canvas.ctx.fillStyle = hasMinorTicks
+					? styles.rulerTick
+					: styles.rulerMinorTick
+				canvas.ctx.fillRect(x, mediumTick.y, 1, mediumTick.height)
 			}
-			else if ((pps / timebase) > 4) {
+			else if (hasMinorTicks) {
 				canvas.ctx.fillStyle = styles.rulerMinorTick
-				canvas.ctx.fillRect(x, 24, 1, 8)
+				canvas.ctx.fillRect(x, minorTick.y, 1, minorTick.height)
 			}
 		}
 		else {
-			canvas.ctx.fillStyle = styles.rulerTick
-			canvas.ctx.fillRect(x, 16, 1, 16)
+			canvas.ctx.fillStyle = styles.rulerMinorTick
+			canvas.ctx.fillRect(x, mediumTick.y, 1, mediumTick.height)
 		}
 	}
 }
