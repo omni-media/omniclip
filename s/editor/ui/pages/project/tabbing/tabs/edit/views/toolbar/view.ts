@@ -39,12 +39,12 @@ export const Toolbar = shadow((context: EditorContext) => {
 		session.deleteClip(session.$selectedItem.value)
 	}
 
-	const setZoomAtPlayhead = (zoom: number) => {
-		session.viewport.setZoomAt(session.playheadViewportX(), zoom)
+	const setZoom = (zoom: number) => {
+		session.viewport.setZoomAt(session.zoomAnchor(), zoom)
 	}
 
-	const adjustZoomAtPlayhead = (delta: number) => {
-		session.viewport.adjustZoomAt(session.playheadViewportX(), delta)
+	const adjustZoom = (delta: number) => {
+		session.viewport.adjustZoomAt(session.zoomAnchor(), delta)
 	}
 
 	return html`
@@ -109,7 +109,7 @@ export const Toolbar = shadow((context: EditorContext) => {
 
 			<div class="toolbar-section right">
 				<div class="zoom-controls">
-					<button class="zoom-button" @click=${() => adjustZoomAtPlayhead(-0.1)}>
+					<button class="zoom-button" @click=${() => adjustZoom(-0.1)}>
 						${zoomOutSvg}
 					</button>
 					<input
@@ -119,9 +119,9 @@ export const Toolbar = shadow((context: EditorContext) => {
 						max="10"
 						step="0.1"
 						.value=${session.viewport.zoom}
-						@input=${(e: Event) => setZoomAtPlayhead(+(e.currentTarget as HTMLInputElement).value)}
+						@input=${(e: Event) => setZoom(+(e.currentTarget as HTMLInputElement).value)}
 					>
-					<button class="zoom-button" @click=${() => adjustZoomAtPlayhead(0.1)}>
+					<button class="zoom-button" @click=${() => adjustZoom(0.1)}>
 						${zoomInSvg}
 					</button>
 				</div>

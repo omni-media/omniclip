@@ -296,6 +296,13 @@ export class OmniSession {
 		return this.viewport.timeToViewportX(this.$playhead.value)
 	}
 
+	zoomAnchor() {
+		const x = this.playheadViewportX()
+		return x >= 0 && x <= this.viewport.width
+			? x
+			: this.viewport.width / 2
+	}
+
 	splitAtPlayhead() {
 		return this.splitSelectedItemAtTime(this.getPlayheadInMs())
 	}
