@@ -50,17 +50,22 @@ export const TimelineArea = shadow((context: EditorContext) => {
 
 			ignoreProgrammaticScroll = true
 			element.scrollLeft = scrollLeft
-			timelineCanvas.whenDrawn().then(() =>
-				element.scrollLeft = scrollLeft
-			)
 
 			requestAnimationFrame(() => {
 				ignoreProgrammaticScroll = false
 			})
 		}
 
+		const afterDraw = async () => {
+			const element = await timeline
+			if (element.scrollLeft !== session.viewport.scrollLeft)
+				element.scrollLeft = session.viewport.scrollLeft
+
+			updateScrollbar()
+		}
+
 		const unsubs = [
-			timelineCanvas.drawn.on(updateScrollbar),
+			timelineCanvas.drawn.on(afterDraw),
 			session.viewport.$scrollLeft.on(scrollLeft),
 			session.viewport.$scrollLeft.on(timelineCanvas.scheduleDraw),
 			session.viewport.$zoom.on(timelineCanvas.scheduleDraw),

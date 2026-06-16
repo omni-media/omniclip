@@ -114,8 +114,8 @@ export class Keybindings {
 			if (timeline.step_forward.down) {this.session.stepPlayheadFrame(1)}
 			if (timeline.delete_clip.down) this.session.deleteClip(this.session.$selectedItem.value)
 			if (timeline.split_clip.down) this.session.splitAtPlayhead()
-			if (timeline.zoom_in.down) this.session.viewport.adjustZoomAt(this.session.zoomAnchor(), 0.1)
-			if (timeline.zoom_out.down) this.session.viewport.adjustZoomAt(this.session.zoomAnchor(), -0.1)
+			if (timeline.zoom_in.down) this.session.viewport.adjustZoomAt(this.session.playheadViewportX(), 0.1)
+			if (timeline.zoom_out.down) this.session.viewport.adjustZoomAt(this.session.playheadViewportX(), -0.1)
 			if (timeline.zoom_tool.down) this.session.setMode(zoomTool)
 			if (timeline.zoom_tool_temp.up) this.session.setMode(selectTool)
 			if (timeline.blade_tool.down) this.session.setMode(bladeTool)

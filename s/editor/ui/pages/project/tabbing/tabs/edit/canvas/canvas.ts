@@ -46,8 +46,6 @@ export class TimelineCanvas {
 	#lastZoom = 0
 
 	#raf = 0
-	#drawn = Promise.resolve()
-	#resolveDrawn: (() => void) | null = null
 
 	$previews = {
 		blade: signal<{time: Ms, clipId: Id} | null>(null)
@@ -94,26 +92,15 @@ export class TimelineCanvas {
 	}
 
 	scheduleDraw = () => {
-		if (!this.#resolveDrawn) {
-			this.#drawn = new Promise(resolve => {
-				this.#resolveDrawn = resolve
-			})
-		}
-
 		if (!this.#raf) {
 			this.#raf = requestAnimationFrame(this.#flushDraw)
 		}
 	}
 
-	whenDrawn = () => this.#drawn
-
 	#flushDraw = () => {
 		this.#raf = 0
-		const resolve = this.#resolveDrawn
-		this.#resolveDrawn = null
 		this.draw()
 		this.drawn()
-		resolve?.()
 	}
 
 	get contentWidth() {
