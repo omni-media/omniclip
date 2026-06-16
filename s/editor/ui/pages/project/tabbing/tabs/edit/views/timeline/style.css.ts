@@ -10,6 +10,7 @@ export default css`@layer view {
 .timeline {
 	position: relative;
 	overflow: auto;
+	scrollbar-width: none;
 	background: #111;
 	border-top: 1px solid #1c1c1c;
 }
@@ -19,17 +20,7 @@ export default css`@layer view {
 }
 
 .timeline::-webkit-scrollbar {
-	height: 10px;
-	width: 10px;
-}
-
-.timeline::-webkit-scrollbar-thumb {
-	background: #2a2a2a;
-	border-radius: 999px;
-}
-
-.timeline::-webkit-scrollbar-track {
-	background: #161616;
+	display: none;
 }
 
 canvas {

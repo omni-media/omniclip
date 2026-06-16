@@ -1,8 +1,10 @@
 
 import {html} from "lit"
+import {pub} from "@e280/stz"
 import {dom, shadow, useCss, useMount, useRendered, useShadow} from "@e280/sly"
 
 import styleCss from "./style.css.js"
+import {TimelineScrollbar} from "./scrollbar/view.js"
 import themeCss from "../../../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
@@ -10,8 +12,11 @@ export const TimelineArea = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
 	const session = context.session
 	const timelineCanvas = context.session.canvas
+	const updateScrollbar = pub()
 
 	const shadow = useShadow()
+	const timelineElement = () => useRendered()
+		.then(() => dom.in(shadow).require(".timeline"))
 
 	let ignoreProgrammaticScroll = false
 
@@ -31,7 +36,7 @@ export const TimelineArea = shadow((context: EditorContext) => {
 			}
 		})
 
-		const timeline = useRendered().then(() => dom.in(shadow).require(".timeline"))
+		const timeline = timelineElement()
 
 		useRendered().then(async () => {
 			timelineCanvas.resize((await timeline).clientWidth)
@@ -44,8 +49,10 @@ export const TimelineArea = shadow((context: EditorContext) => {
 				return
 
 			ignoreProgrammaticScroll = true
-			await timelineCanvas.whenDrawn()
 			element.scrollLeft = scrollLeft
+			timelineCanvas.whenDrawn().then(() =>
+				element.scrollLeft = scrollLeft
+			)
 
 			requestAnimationFrame(() => {
 				ignoreProgrammaticScroll = false
@@ -53,6 +60,7 @@ export const TimelineArea = shadow((context: EditorContext) => {
 		}
 
 		const unsubs = [
+			timelineCanvas.drawn.on(updateScrollbar),
 			session.viewport.$scrollLeft.on(scrollLeft),
 			session.viewport.$scrollLeft.on(timelineCanvas.scheduleDraw),
 			session.viewport.$zoom.on(timelineCanvas.scheduleDraw),
@@ -85,5 +93,8 @@ export const TimelineArea = shadow((context: EditorContext) => {
 			${timelineCanvas.canvas}
 			${timelineCanvas.spacer}
 		</div>
+		${TimelineScrollbar(updateScrollbar, timelineElement(), scrollLeft =>
+			session.viewport.setScrollLeft(scrollLeft)
+		)}
 	`
 })

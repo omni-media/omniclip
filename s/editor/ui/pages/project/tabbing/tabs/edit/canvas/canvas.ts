@@ -1,5 +1,6 @@
 
 import {dom} from '@e280/sly'
+import {pub} from '@e280/stz'
 import {signal} from '@e280/strata'
 import {Driver, Id, Item, Kind, Resource, VideoPlayer} from '@omnimedia/omnitool'
 import {fps, Fps} from '@omnimedia/omnitool/x/units/fps.js'
@@ -36,6 +37,7 @@ type CursorIcon = ToolName
 export class TimelineCanvas {
 	canvas = document.createElement('canvas')
 	ctx = this.canvas.getContext('2d')!
+	drawn = pub()
 
 	spacer = dom.elmer("div").attr("className", "spacer").done()
 
@@ -110,6 +112,7 @@ export class TimelineCanvas {
 		const resolve = this.#resolveDrawn
 		this.#resolveDrawn = null
 		this.draw()
+		this.drawn()
 		resolve?.()
 	}
 
