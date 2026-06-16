@@ -69,6 +69,9 @@ export class OmniSession {
 		this.#index = derived(() => new Index(deps.strata.timeline.state as TimelineFile))
 		this.$viewedItemId.value = deps.strata.timeline.state.rootId
 
+		this.viewport.$width.on(this.#updateMinZoom)
+		this.deps.strata.timeline.lens(s => s).on(this.#updateMinZoom)
+
 		this.$ghostPlayhead.on(time => {
 			if(!this.playback.$isPlaying.value) {
 				if(is.happy(time))
@@ -220,6 +223,21 @@ export class OmniSession {
 
 	viewedDuration() {
 		return computeItemDuration(this.$viewedItemId.value, this.deps.strata.timeline.state)
+	}
+
+	#computeMinZoom() {
+		const duration = this.viewedDuration()
+		const width = this.viewport.width
+		const timelineFill = 0.5
+		const zoom = duration && width
+			? width * timelineFill / (duration * this.viewport.pixelsPerMillisecond)
+			: 0.2
+
+		return Math.min(1, zoom)
+	}
+
+	#updateMinZoom = () => {
+		this.viewport.setMinZoom(this.#computeMinZoom())
 	}
 
 	updateTransformAnimation(

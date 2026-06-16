@@ -115,9 +115,9 @@ export const Toolbar = shadow((context: EditorContext) => {
 					<input
 						type="range"
 						class="zoom-slider"
-						min="0.2"
+						min=${session.viewport.minZoom}
 						max="10"
-						step="0.1"
+						step="0.01"
 						.value=${session.viewport.zoom}
 						@input=${(e: Event) => setZoom(+(e.currentTarget as HTMLInputElement).value)}
 					>

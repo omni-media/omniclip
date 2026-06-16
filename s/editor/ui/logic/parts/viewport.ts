@@ -6,6 +6,7 @@ export class Viewport {
 	$zoom = signal(1)
 	$scrollLeft = signal(0)
 	$width = signal(0)
+	$minZoom = signal(0.2)
 
 	constructor(readonly pixelsPerMillisecond: number) {}
 
@@ -19,6 +20,10 @@ export class Viewport {
 
 	get width() {
 		return this.$width.value
+	}
+
+	get minZoom() {
+		return this.$minZoom.value
 	}
 
 	timeToX(time: Ms) {
@@ -49,13 +54,19 @@ export class Viewport {
 		this.$width.value = width
 	}
 
+	setMinZoom(minZoom: number) {
+		this.$minZoom.value = minZoom
+		if (this.zoom < minZoom)
+			this.setZoom(minZoom)
+	}
+
 	setScrollLeft(scrollLeft: number) {
 		this.$scrollLeft.value = Math.max(0, scrollLeft)
 	}
 
 	setZoom(zoom: number) {
-		const clamped = Math.max(0.2, Math.min(10, zoom))
-		this.$zoom.value = Math.round(clamped * 10) / 10
+		const clamped = Math.max(this.minZoom, Math.min(10, zoom))
+		this.$zoom.value = Math.round(clamped * 1000) / 1000
 	}
 
 	adjustZoom(delta: number) {
