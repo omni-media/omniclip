@@ -4,6 +4,7 @@ import {derived, signal} from "@e280/strata"
 import {visualAnimations} from "@omnimedia/omnitool"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 import type {Transform, TransformAnimation} from "@omnimedia/omnitool/x/timeline/types.js"
+import {computeItemDuration} from "@omnimedia/omnitool/x/timeline/renderers/parts/handy.js"
 import {Driver, Id, Item, Kind, O, Resource, TimelineFile, TransitionName, VideoPlayer} from "@omnimedia/omnitool"
 
 import {Stage} from "./parts/stage.js"
@@ -206,7 +207,7 @@ export class OmniSession {
 	}
 
 	setPlayhead(time: Ms) {
-		this.$playhead.set(time)
+		this.$playhead.set(ms(Math.min(Math.max(0, time), this.viewedDuration())))
 	}
 
 	setGhostPlayhead(time: Ms | null) {
@@ -215,6 +216,10 @@ export class OmniSession {
 
 	clearGhostPlayhead() {
 		this.$ghostPlayhead.set(null)
+	}
+
+	viewedDuration() {
+		return computeItemDuration(this.$viewedItemId.value, this.deps.strata.timeline.state)
 	}
 
 	updateTransformAnimation(
