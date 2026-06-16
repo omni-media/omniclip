@@ -4,6 +4,7 @@ import type {Pub} from "@e280/stz"
 import {dom, shadow, useCss, useMount, useRendered, useShadow, useSignal} from "@e280/sly"
 
 import styleCss from "./style.css.js"
+import {clamp} from "../../../../../utils/math.js"
 import themeCss from "../../../../../../../../../theme.css.js"
 
 const minThumbWidth = 32
@@ -52,7 +53,8 @@ export const TimelineScrollbar = shadow((
 			}
 
 			const setScroll = (scrollLeft: number) => {
-				onScroll(scrollLeft)
+				const {maxScroll} = scrollMetrics()
+				onScroll(clamp(scrollLeft, 0, maxScroll))
 				redraw()
 			}
 

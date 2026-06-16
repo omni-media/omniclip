@@ -2,6 +2,8 @@
 import {Item, visualAnimations} from '@omnimedia/omnitool'
 import type {Keyframes, Transform, TransformAnimation} from '@omnimedia/omnitool/x/timeline/types.js'
 
+export {clamp} from '../../../../../utils/math.js'
+
 export type SpatialLike = Item.Spatial
 type TransformChannel = Extract<typeof visualAnimations.transform.channels[number], {readonly path: string}>
 
@@ -27,9 +29,6 @@ export const getTrack = (animation: TransformAnimation, property: AnimatableProp
 
 export const hasAnyKeyframes = (animation: TransformAnimation) =>
 	ANIMATION_CHANNELS.some(({path}) => getTrack(animation, path).length)
-
-export const clamp = (value: number, min: number, max: number) =>
-	Math.min(max, Math.max(min, value))
 
 export const getTransformValue = (transform: Transform, property: AnimatableProperty) =>
 	getByPath<number>(transformValues(transform), property)
