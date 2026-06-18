@@ -7,8 +7,8 @@ export default css`@layer view {
 	flex-direction: column;
 	min-height: 0;
 	height: 100%;
-	background: #151819;
-	color: #c9d0d8;
+	background: #151515;
+	color: #cfcfcf;
 }
 
 .browser {
@@ -21,8 +21,10 @@ export default css`@layer view {
 .browser-tabs {
 	display: flex;
 	height: 36px;
-	border-bottom: 1px solid #252a2f;
-	background: #1b1f22;
+	gap: 0.2em;
+	padding: 0.2em;
+	border-bottom: 1px solid #101010;
+	background: #1d1d1d;
 }
 
 .browser-tab {
@@ -31,18 +33,14 @@ export default css`@layer view {
 	align-items: center;
 	justify-content: center;
 	gap: 0.45em;
-	padding: 0 1em;
-	color: #8e96a6;
+	padding: 0 0.7em;
+	color: #aaa;
 	background: transparent;
 	border: 0;
-	border-right: 1px solid #252a2f;
+	border-radius: 0.25em;
 	font-size: var(--font-size-xs);
-	text-transform: uppercase;
 	cursor: pointer;
-}
-
-.browser-tab:last-child {
-	border-right: 0;
+	transition: background 0.12s ease, color 0.12s ease;
 }
 
 .browser-tab svg {
@@ -50,24 +48,31 @@ export default css`@layer view {
 	height: 1em;
 }
 
-.browser-tab:hover,
-.browser-tab[data-active] {
-	color: #eef7ff;
+.browser-tab span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.browser-tab:hover {
+	color: #e8e8e8;
+	background: #333;
 }
 
 .browser-tab[data-active] {
-	background: #151819;
-	box-shadow: inset 0 -2px 0 var(--prime);
+	color: #e8e8e8;
+	background: #3f3f3f;
 }
 
 .browser-body {
 	display: flex;
 	flex-direction: column;
-	gap: 0.8em;
+	gap: 0.7em;
 	min-height: 0;
 	flex: 1;
-	padding: 0.8em;
+	padding: 0.75em;
 	overflow: auto;
+	background: #151515;
 }
 
 .browser-controls {
@@ -80,14 +85,13 @@ export default css`@layer view {
 .media-bin {
 	display: flex;
 	flex-direction: column;
-	min-height: 0;
-	gap: 0.7em;
+	gap: 0.65em;
 }
 
 .media-toolbar {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto auto;
-	gap: 0.5em;
+	gap: 0.4em;
 	align-items: center;
 }
 
@@ -109,20 +113,20 @@ quay-browser {
 	gap: 0.5em;
 	height: 32px;
 	padding: 0 0.65em;
-	border: 1px solid #2a3036;
-	border-radius: 6px;
-	background: #20252a;
-	color: #7f8999;
+	border: 1px solid #2b2b2b;
+	border-radius: 3px;
+	background: #1f1f1f;
+	color: #8f8f8f;
 }
 
 .search input {
 	min-width: 0;
 	width: 100%;
-	color: #d7dde6;
+	color: #d3d3d3;
 	background: transparent;
 	border: 0;
 	outline: 0;
-	font-size: var(--font-size-s);
+	font-size: var(--font-size-xs);
 }
 
 .duration-control {
@@ -131,7 +135,7 @@ quay-browser {
 	align-items: center;
 	gap: 0.45em;
 	height: 32px;
-	color: #7f8999;
+	color: #8f8f8f;
 	font-size: var(--font-size-xs);
 }
 
@@ -139,36 +143,37 @@ quay-browser {
 	min-width: 0;
 	height: 100%;
 	padding: 0 0.55em;
-	color: #d7dde6;
-	background: #20252a;
-	border: 1px solid #2a3036;
-	border-radius: 6px;
-	font-size: var(--font-size-s);
+	color: #d3d3d3;
+	background: #1f1f1f;
+	border: 1px solid #2b2b2b;
+	border-radius: 3px;
+	font-size: var(--font-size-xs);
 }
 
 .section-label {
 	font-size: var(--font-size-xs);
-	color: #7f8999;
+	color: #8f8f8f;
 	text-transform: uppercase;
 }
 
 .transition-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-	gap: 0.65em;
+	grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+	gap: 0.5em;
 }
 
 .transition-card {
 	display: flex;
 	flex-direction: column;
-	gap: 0.55em;
-	padding: 0.6em;
-	color: #c9d0d8;
-	background: #20252a;
-	border: 1px solid #2a3036;
-	border-radius: 8px;
+	gap: 0.45em;
+	padding: 0.45em;
+	color: #cfcfcf;
+	background: #1d1d1d;
+	border: 1px solid #292929;
+	border-radius: 4px;
 	cursor: pointer;
 	text-align: left;
+	transition: background 0.12s ease, border-color 0.12s ease;
 }
 
 .remove-transition {
@@ -188,16 +193,20 @@ quay-browser {
 
 .transition-card:hover,
 .transition-card[data-active] {
-	border-color: color-mix(in srgb, var(--prime) 65%, #2a3036);
-	background: #242b31;
+	border-color: #4a4a4a;
+	background: #242424;
+}
+
+.transition-card[data-active] {
+	border-color: color-mix(in srgb, var(--prime) 55%, #4a4a4a);
 }
 
 .transition-preview {
 	position: relative;
-	height: 56px;
+	height: 50px;
 	overflow: hidden;
-	border-radius: 6px;
-	background: #111;
+	border-radius: 3px;
+	background: #0b0b0b;
 }
 
 .transition-preview::before,
@@ -218,15 +227,18 @@ quay-browser {
 }
 
 .transition-name {
-	color: #eef2f7;
-	font-size: var(--font-size-s);
-	font-weight: 600;
+	color: #d8d8d8;
+	font-size: var(--font-size-xs);
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .transition-meta,
 .placeholder,
 .status {
-	color: #7f8999;
+	color: #8f8f8f;
 	font-size: var(--font-size-xs);
 }
 
