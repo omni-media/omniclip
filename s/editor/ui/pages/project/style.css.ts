@@ -15,34 +15,64 @@ export default css`@layer view {
 	height: 100%;
 }
 
+.project-page > header {
+	display: flex;
+	align-items: center;
+	min-height: 36px;
+	background: #1d1d1d;
+	border-bottom: 1px solid #101010;
+}
+
 .right {
 	display: flex;
 	flex: 1;
 	justify-content: end;
 	align-items: center;
+	gap: 0.2em;
 
 	.spacer {
 		width: 1px;
-		height: 20px;
-		margin: 0 1em;
-		background: gray;
+		height: 18px;
+		margin: 0 0.45em;
+		background: #333;
 	}
 
 	.settings, .shortcuts, .export {
 
 		&::part(base) {
-			height: 20px;
-			padding: 0 0.5em;
+			height: 2em;
+			padding: 0 0.65em;
+			color: #aaa;
+			background: transparent;
+			border: none;
+			border-radius: 0.18em;
 			font-size: var(--font-size-xs);
 		}
 
-		wa-icon {
-			margin-right: 0.5em;
+		&:hover::part(base) {
+			color: #e8e8e8;
+			background: #333;
 		}
 
-		&::part(caret) {
-			margin-left: 0.5em;
+		&::part(label),
+		&::part(start) {
+			line-height: 1;
 		}
+
+		wa-icon {
+			margin-right: 0.35em;
+			font-size: 0.95em;
+		}
+
+	}
+
+	.export::part(base) {
+		color: #d3d3d3;
+		background: #2b2b2b;
+	}
+
+	.export:hover::part(base) {
+		background: #3a3a3a;
 	}
 }
 
@@ -95,6 +125,10 @@ wa-split-panel::part(divider) {
 
 .timeline-panel {
 	grid-row: 2;
+}
+
+.tab-bar {
+	height: 100%;
 }
 
 

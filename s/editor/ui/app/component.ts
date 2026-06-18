@@ -31,7 +31,10 @@ export const EditorApp = (router: AppRouter) => shadowElement(() => {
 		props: [{button: true}],
 		children: html`
 			<nav>
-				<h2>Omniclip</h2>
+				<h2>
+					<span>Omniclip</span>
+					<button class="drawer-close" title="Close navigation" @click=${drawer.close}>×</button>
+				</h2>
 				${renderLink("About", router.href.home(), router.$hash() === "")}
 				${renderLink("Account", router.href.account(), router.$hash() === "account")}
 				${renderLink("Project List", router.href.projects(), router.$hash() === "projects")}

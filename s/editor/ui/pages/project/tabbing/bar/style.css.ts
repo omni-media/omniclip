@@ -4,28 +4,31 @@ export default css`@layer view {
 
 nav {
 	display: flex;
-	border-bottom: 1px solid #333;
-	background: #222;
+	gap: 0.2em;
+	height: 100%;
+	background: transparent;
 }
 
 button {
 	background: transparent;
 	border: none;
 	color: #aaa;
-	padding: 0.8em 1.2em;
+	padding: 0 0.7em;
 	cursor: pointer;
-	border-bottom: 2px solid transparent;
-	font-size: 1em;
+	border-radius: 0.25em;
+	font-size: var(--font-size-xs);
+	text-transform: capitalize;
+	transition: background 0.12s ease, color 0.12s ease;
 }
 
 button:hover {
-	background: #2a2a2a;
-	color: white;
+	background: #333;
+	color: #e8e8e8;
 }
 
 button[data-active] {
-	color: white;
-	border-bottom-color: cyan;
+	color: #e8e8e8;
+	background: #3f3f3f;
 }
 
 }`

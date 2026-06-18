@@ -76,7 +76,7 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 					<div class=right>
    					<wa-button
      					@click=${openSettings}
-							class=settings size="small" with-caret>
+							class=settings size="small">
       				<wa-icon slot="start" name="gear"></wa-icon>
       				Settings
     				</wa-button>
