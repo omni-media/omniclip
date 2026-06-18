@@ -1,7 +1,9 @@
+
 import {html} from "lit"
 import {shadow, useCss} from "@e280/sly"
 
 import styleCss from "./style.css.js"
+import {formatTime} from "../../../../utils/format-time.js"
 import themeCss from "../../../../../../../../theme.css.js"
 import binSvg from "../../../../../../../icons/gravity-ui/bin.svg.js"
 import playSvg from "../../../../../../../icons/gravity-ui/play.svg.js"
@@ -13,11 +15,23 @@ import undoSvg from "../../../../../../../icons/material-design-icons/undo.svg.j
 import zoomInSvg from "../../../../../../../icons/material-design-icons/zoom-in.svg.js"
 import zoomOutSvg from "../../../../../../../icons/material-design-icons/zoom-out.svg.js"
 
+import "@awesome.me/webawesome/dist/components/slider/slider.js"
+
 export const Toolbar = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
+
 	const session = context.session
 	const isPlaying = session.playback.$isPlaying()
+
 	const rate = session.playback.$rate()
+	const zoom = session.viewport.$zoom()
+
+	const minZoom = session.viewport.minZoom
+	const maxZoom = session.viewport.maxZoom
+	const zoomPercent = Math.round(zoom * 100)
+
+	const canZoomOut = zoom > minZoom
+	const canZoomIn = zoom < maxZoom
 
 	const handleReverse = () => {
 		session.playback.shuttle(-1)
@@ -39,7 +53,9 @@ export const Toolbar = shadow((context: EditorContext) => {
 		session.deleteClip(session.$selectedItem.value)
 	}
 
-	const setZoom = (zoom: number) => {
+	const setZoom = (event: Event) => {
+		const target = event.target as HTMLInputElement
+		const zoom = +target.value
 		session.viewport.setZoomAt(session.zoomAnchor(), zoom)
 	}
 
@@ -77,6 +93,9 @@ export const Toolbar = shadow((context: EditorContext) => {
 			</div>
 
 			<div class="toolbar-section center">
+				<div class="timecode">
+					${formatTime(session.$playhead.value, {milliseconds: true})}
+				</div>
 				<div class="button-group transport-controls">
 					<button
 						class="transport-button reverse"
@@ -101,31 +120,39 @@ export const Toolbar = shadow((context: EditorContext) => {
 						?data-active=${isPlaying && rate > 0}
 					>
 						${playSvg}
-						<span>${isPlaying && rate > 0 ? `${rate}x` : ""}
-						</span>
+						<span>${isPlaying && rate > 0 ? `${rate}x` : ""}</span>
 					</button>
 				</div>
 			</div>
 
 			<div class="toolbar-section right">
 				<div class="zoom-controls">
-					<button class="zoom-button" @click=${() => adjustZoom(-0.1)}>
+					<button
+						class="zoom-button"
+						@click=${() => adjustZoom(-0.1)}
+						?disabled=${!canZoomOut}
+					>
 						${zoomOutSvg}
 					</button>
-					<input
-						type="range"
+					<wa-slider
 						class="zoom-slider"
-						min=${session.viewport.minZoom}
-						max="10"
+						min=${minZoom}
+						max=${maxZoom}
 						step="0.01"
-						.value=${session.viewport.zoom}
-						@input=${(e: Event) => setZoom(+(e.currentTarget as HTMLInputElement).value)}
+						.value=${zoom}
+						@input=${setZoom}
+					></wa-slider>
+					<button
+						class="zoom-button"
+						@click=${() => adjustZoom(0.1)}
+						?disabled=${!canZoomIn}
 					>
-					<button class="zoom-button" @click=${() => adjustZoom(0.1)}>
 						${zoomInSvg}
 					</button>
+					<span class="zoom-readout">${zoomPercent}%</span>
 				</div>
 			</div>
 		</div>
 	`
 })
+

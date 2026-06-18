@@ -8,8 +8,17 @@ export const getResolutions = (aspectRatio: string) =>
 		.map(r => ({
 			value: r.value,
 			label: `${r.value.replace('x', ' × ')} (${r.label.match(/\((.+)\)/)?.[1] ?? r.label})`
-		}))
+	}))
 	?? []
+
+export const getResolutionLabel = (aspectRatio: string, resolution: string) =>
+	settings.format.options
+		.find(f => f.value === aspectRatio)
+		?.resolutions
+		.find(r => r.value === resolution)
+		?.label
+		.replace(/\s*\(.+\)$/, '')
+	?? resolution
 
 export const resolutionToAspectRatio = (res: string) => {
 	const [w, h] = res.split('x').map(Number)

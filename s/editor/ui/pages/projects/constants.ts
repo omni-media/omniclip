@@ -99,7 +99,7 @@ function deriveTimelineStrip(count: number) {
 	})
 }
 
-function titleFromId(id: string) {
+export function titleFromId(id: string) {
 	return id
 		.split(/[-_ ]+/)
 		.filter(Boolean)

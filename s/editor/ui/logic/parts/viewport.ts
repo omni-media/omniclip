@@ -26,6 +26,10 @@ export class Viewport {
 		return this.$minZoom.value
 	}
 
+	get maxZoom() {
+		return 10
+	}
+
 	timeToX(time: Ms) {
 		return time * this.pxPerMs()
 	}
@@ -65,7 +69,7 @@ export class Viewport {
 	}
 
 	setZoom(zoom: number) {
-		const clamped = Math.max(this.minZoom, Math.min(10, zoom))
+		const clamped = Math.max(this.minZoom, Math.min(this.maxZoom, zoom))
 		this.$zoom.value = Math.round(clamped * 1000) / 1000
 	}
 

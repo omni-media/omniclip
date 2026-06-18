@@ -25,18 +25,19 @@ export default css`@layer view {
 .tab-bar {
 	display: flex;
 	flex-shrink: 0;
+	height: 36px;
 	background: #222;
 	border-bottom: 1px solid #1a1a1a;
-	padding: 0.3em;
-	gap: 0.3em;
+	padding: 0.2em;
+	gap: 0.2em;
 }
 
 .tab-button {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 2.5em;
-	height: 2.5em;
+	width: 2em;
+	height: 100%;
 	background: transparent;
 	border: none;
 	color: #aaa;
@@ -56,8 +57,8 @@ export default css`@layer view {
 }
 
 .tab-button svg {
-	width: 1.2em;
-	height: 1.2em;
+	width: 1.05em;
+	height: 1.05em;
 }
 
 .panel-content {

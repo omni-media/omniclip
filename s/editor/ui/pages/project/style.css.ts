@@ -125,6 +125,7 @@ wa-split-panel::part(divider) {
 
 	wa-split-panel::part(divider) {
 		display: flex;
+		background: #101010;
 	}
 
 	.panel {

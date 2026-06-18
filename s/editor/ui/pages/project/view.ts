@@ -73,8 +73,6 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 						${TabBar(manager)}
 					</div>
 
-					<p>editing project: ${projectId}</p>
-
 					<div class=right>
    					<wa-button
      					@click=${openSettings}
