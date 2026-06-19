@@ -176,7 +176,7 @@ export const exportModal = (): ModalDefinition<ExportResult> => ({
 
 						<wa-button
 							class="export-button"
-							variant="brand"
+							variant="neutral"
 							@click=${() => modal.resolve({
 								codec: selectedCodec.value,
 								bitrate: bitrate.value,

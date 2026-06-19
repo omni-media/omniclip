@@ -3,6 +3,7 @@ import {html} from "lit"
 import {dom, shadow, useCss, useMount, useSignal} from "@e280/sly"
 
 import styleCss from "./style.css.js"
+import modalCss from "../../../../context/parts/modal/modal.css.js"
 import {ModalDefinition} from "../../../../context/parts/modal/types.js"
 import {
 	shortcutCommands,
@@ -39,7 +40,7 @@ export const shortcutsModal = (): ModalDefinition<void> => ({
 	`,
 
 	render: (ctx, modal) => shadow(() => {
-		useCss(styleCss)
+		useCss(modalCss, styleCss)
 
 		const query = useSignal("")
 		const activeTab = useSignal<TabId>("all")
@@ -85,7 +86,7 @@ export const shortcutsModal = (): ModalDefinition<void> => ({
 			if (event.key === "Enter" && pending.value && !conflict.value) {
 				event.preventDefault()
 				event.stopPropagation()
-				void commitEdit(editingId.value, pending.value)
+				commitEdit(editingId.value, pending.value)
 				return
 			}
 
@@ -110,7 +111,7 @@ export const shortcutsModal = (): ModalDefinition<void> => ({
 			)
 		}
 
-		revision.value // reactive dependency — tracks keybinding mutations
+		revision.value
 		const commands = filteredCommands()
 
 		return html`
@@ -187,8 +188,8 @@ export const shortcutsModal = (): ModalDefinition<void> => ({
 						`}
 				</div>
 
-				<div class="footer">
-					<wa-button size="small" variant="brand" @click=${modal.cancel}>Done</wa-button>
+				<div class="modal-footer">
+					<wa-button size="small" variant="neutral" @click=${modal.cancel}>Done</wa-button>
 				</div>
 			</div>
 		`

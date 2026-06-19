@@ -7,15 +7,16 @@ export default css`
 		height: min(39em, calc(100vh - 7em));
 	}
 
-	.toolbar, .tabs, .footer {
+	.toolbar, .tabs {
 		display: flex;
 		align-items: center;
-		border-bottom: 1px solid #ffffff14;
+		border-bottom: 1px solid #292929;
 	}
 
 	.toolbar {
-		gap: 0.75em;
-		padding: 0.75em;
+		gap: 0.65em;
+		padding: 0.65em 0.75em;
+		background: #1b1b1b;
 	}
 
 	.search {
@@ -25,6 +26,10 @@ export default css`
 
 	.search wa-input {
 		width: 100%;
+	}
+
+	.search wa-input::part(base) {
+		font-size: var(--font-size-xs);
 	}
 
 	wa-button::part(base) {
@@ -45,13 +50,13 @@ export default css`
 
 	.tabs {
 		display: block;
-		background: #1b1b1b;
-		--track-color: #ffffff14;
-		--indicator-color: #7fb1ff;
+		background: #202020;
+		--track-color: #303030;
+		--indicator-color: #888;
 	}
 
 	.tabs::part(base) {
-		border-bottom: 1px solid #ffffff14;
+		border-bottom: 1px solid #292929;
 	}
 
 	.tabs::part(body) {
@@ -59,13 +64,19 @@ export default css`
 	}
 
 	wa-tab::part(base) {
+		color: #9a9a9a;
 		font-size: var(--font-size-xs);
+	}
+
+	wa-tab[active]::part(base) {
+		color: #e0e0e0;
 	}
 
 	.list {
 		flex: 1;
 		overflow: auto;
 		padding: 0.5em;
+		background: #181818;
 	}
 
 	.group {
@@ -96,17 +107,17 @@ export default css`
 		align-items: center;
 		min-height: 2.6em;
 		padding: 0.45em 0.5em;
-		border-top: 1px solid #ffffff0d;
+		border-top: 1px solid #272727;
 		border-radius: 4px;
 	}
 
 	.row:hover {
-		background: #ffffff08;
+		background: #202020;
 	}
 
 	.row[data-editing] {
-		background: #1c2940;
-		outline: 1px solid #6aa6ff80;
+		background: #252525;
+		outline: 1px solid #555;
 	}
 
 	.command {
@@ -203,10 +214,10 @@ export default css`
 	}
 
 	.recording {
-		border: 1px dashed #6aa6ff99;
+		border: 1px dashed #777;
 		border-radius: 3px;
 		padding: 0.2em 0.5em;
-		color: #8ebdff;
+		color: #d8d8d8;
 		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 		font-size: calc(var(--font-size-xs) - 1px);
 	}
@@ -236,13 +247,4 @@ export default css`
 		font-size: var(--font-size-xs);
 	}
 
-	.footer {
-		justify-content: space-between;
-		gap: 1em;
-		padding: 0.65em 0.75em;
-		border-top: 1px solid #ffffff14;
-		border-bottom: 0;
-		color: #888;
-		font-size: calc(var(--font-size-xs) - 1px);
-	}
 `

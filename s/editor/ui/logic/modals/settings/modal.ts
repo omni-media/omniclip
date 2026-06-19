@@ -6,11 +6,12 @@ import styleCss from './style.css.js'
 import modalCss from '../../../../context/parts/modal/modal.css.js'
 
 import {settings} from './constants.js'
+import {aspectRatioOptions, getResolutions} from './utils.js'
 import {ModalDefinition} from '../../../../context/parts/modal/types.js'
-import {aspectRatioOptions, getResolutions, resolutionToAspectRatio} from './utils.js'
 
 import {Settings} from '../../../../context/parts/state.js'
 import '@awesome.me/webawesome/dist/components/icon/icon.js'
+import '@awesome.me/webawesome/dist/components/button/button.js'
 import '@awesome.me/webawesome/dist/components/option/option.js'
 import '@awesome.me/webawesome/dist/components/select/select.js'
 
@@ -39,8 +40,8 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 			key: keyof Settings,
 			options: readonly {value: string | number | boolean, label: string}[],
 		) => html`
-			<div class="field">
-				<label>${label}</label>
+			<label class="field">
+				<span>${label}</span>
 				<wa-select
 					size=small
 					value=${selected.value[key]}
@@ -56,7 +57,7 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 						</wa-option>
 					`)}
 				</wa-select>
-			</div>
+			</label>
 		`
 
 		return html`
@@ -78,23 +79,6 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 							${renderSelect('Sample Rate', 'sampleRate', settings.sampleRate.options)}
 							${renderSelect('Channels', 'channels', settings.channels.options)}
 						</section>
-
-						<section class="preview">
-							<div class="preview-label">PREVIEW</div>
-							<div class="preview-box">
-								<span
-									class=res
-									style="aspect-ratio: ${resolutionToAspectRatio(selected.value.resolution)}"
-								>
-									${selected.value.resolution}
-								</span>
-								<span>
-									${selected.value.timebase} fps ·
-									${selected.value.dropFrame} ·
-									${selected.value.colorSpace}
-								</span>
-							</div>
-						</section>
 					</div>
 				</div>
 
@@ -104,7 +88,7 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 					</wa-button>
 
 					<wa-button
-						variant="brand"
+						variant="neutral"
 						@click=${() => modal.resolve(selected.value)}
 					>
 						Apply

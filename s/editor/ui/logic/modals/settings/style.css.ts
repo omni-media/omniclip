@@ -4,55 +4,35 @@ export default css`
 	.settings-modal {
 		display: flex;
 		flex-direction: column;
-		gap: 1.25rem;
-		min-width: 27rem;
+		gap: 0.65em;
 	}
 
 	.video, .audio {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5em;
+		gap: 0.25em;
+		padding: 0.35em 0;
+	}
+
+	.section-label {
+		margin-bottom: 0.35em;
+		color: #8a8a8a;
+		font-size: calc(var(--font-size-xs) - 1px);
+		font-weight: 600;
+		text-transform: uppercase;
 	}
 
 	.field {
-		display: flex;
+		display: grid;
+		grid-template-columns: 7.8em minmax(0, 1fr);
+		gap: 0.65em;
 		align-items: center;
-		justify-content: space-between;
+		color: #b7b7b7;
+		font-size: var(--font-size-xs);
 	}
 
-	.preview {
-		position: relative;
-		padding: 1em;
-		justify-content: center;
-		background: #18193b;
+	.field wa-option {
+		font-size: var(--font-size-xs);
 	}
-
-	.preview-label {
-		position: absolute;
-		top: 1em;
-		left: 1em;
-	}
-
-	.preview, .preview-box {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.preview-box {
-		justify-content: center;
-		align-items: center;
-		gap: 0.5em;
-
-		.res {
-			display: flex;
-			font-size: var(--font-size-xs);
-			align-items: center;
-			justify-content: center;
-			background: #1b1d26;
-			padding: 1em;
-			border: 1px solid;
-			box-sizing: border-box;
-		}
-	}
-
 `
+

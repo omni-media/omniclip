@@ -2,28 +2,22 @@
 import {css} from "lit"
 
 export default css`
-	.export-modal {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-		min-width: 24rem;
-	}
-
 	.grid {
 		display: grid;
-		grid-template-columns: 5.5rem minmax(0, 1fr);
-		gap: 0.7rem 0.8rem;
+		grid-template-columns: 7em minmax(0, 1fr);
+		gap: 0.55em 0.75em;
 		align-items: center;
+		padding: 0.35em 0;
 	}
 
 	.label {
-		color: #747e92;
-		font-size: var(--font-size-s);
+		color: #9a9a9a;
+		font-size: var(--font-size-xs);
 	}
 
 	.value {
-		color: #d8deea;
-		font-size: 0.95rem;
+		color: #ddd;
+		font-size: var(--font-size-xs);
 	}
 
 	.custom {
@@ -31,37 +25,34 @@ export default css`
 		flex-direction: row;
 		align-items: center;
 		gap: 1em;
-    font-size: var(--font-size-s);
 
 		&::part(label) {
-			color: #747e92;
+			color: #9a9a9a;
 			margin: 0;
 		}
 	}
 
 	.export {
-		margin-top: 2em;
-		align-items: end;
 		justify-content: space-between;
-		font-size: var(--font-size-xs);
 
 		.info {
 			display: flex;
 			align-items: center;
-			color: #d8deea;
+			color: #aaa;
 		}
 
 		.spacer {
 			display: inline-block;
 			height: 15px;
 			width: 1px;
-			background: #747e92;
+			background: #383838;
 			margin: 0.4em;
 		}
 	}
 
-	.export-button, .cancel {
-		margin-top: 0.35rem;
-		font-size: var(--font-size-xs);
+	.export > div:last-child {
+		display: flex;
+		gap: 0.5em;
 	}
 `
+
