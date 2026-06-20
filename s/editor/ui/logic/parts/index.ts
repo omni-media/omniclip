@@ -49,6 +49,10 @@ export class Index {
 		return this.parents.get(childId)
 	}
 
+	getParentMaybe(childId?: Id | null) {
+		return childId == null ? undefined : this.getParent(childId)
+	}
+
 	queryItem<T extends Idx.AnyItem = Idx.AnyItem>(
 		predicate: (node: Idx.AnyItem) => boolean
 	) {

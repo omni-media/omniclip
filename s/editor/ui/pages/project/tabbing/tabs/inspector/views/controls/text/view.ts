@@ -29,44 +29,12 @@ export type TextDetailsProps = {
 	update: (v: TextStyleOptions) => void
 }
 
-export const TextControls = shadow((context: EditorContext, item: Item.Text | null) => {
+export const TextControls = shadow((context: EditorContext, item: Item.Text) => {
 	useCss(themeCss, sectionStyles, itemControlTabsCss, styleCss)
 
 	const tool = context.omni
 	const options = TEXT_STYLE_OPTIONS
 	const defaults = TEXT_STYLE_DEFAULTS
-
-	const addText = () => {
-		const viewed = context.session.index.getItemMaybe<Item.Any>(context.session.$viewedItemId.value)
-		const parent = viewed && "childrenIds" in viewed
-			? viewed
-			: viewed && context.session.index.getParent(viewed.id)
-
-		if (!parent)
-			return
-
-		const text = tool.text("Text", {
-			styles: {fill: "white", fontSize: 64},
-		})
-
-		tool.set<typeof parent>(parent.id, {
-			childrenIds: [...parent.childrenIds, text.id],
-		})
-
-		context.session.$selectedItem.value = text.id
-		void context.controllers.player.seek(context.session.$playhead.value)
-	}
-
-	if (!item) {
-		return html`
-			<div class="add-text-container">
-				<button @click=${addText}>
-					${addSvg}
-					<span>Add Text</span>
-				</button>
-			</div>
-		`
-	}
 
 	const renderTextControls = (props: TextDetailsProps): TemplateResult => {
 		return html`

@@ -156,13 +156,15 @@ quay-browser {
 	text-transform: uppercase;
 }
 
-.transition-grid {
+.transition-grid,
+.preset-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
 	gap: 0.5em;
 }
 
-.transition-card {
+.transition-card,
+.preset-card {
 	display: flex;
 	flex-direction: column;
 	gap: 0.45em;
@@ -192,7 +194,8 @@ quay-browser {
 }
 
 .transition-card:hover,
-.transition-card[data-active] {
+.transition-card[data-active],
+.preset-card:hover {
 	border-color: #4a4a4a;
 	background: #242424;
 }
@@ -224,6 +227,18 @@ quay-browser {
 .transition-preview::after {
 	clip-path: polygon(68% 0, 100% 0, 100% 100%, 36% 100%);
 	background: linear-gradient(135deg, #ffb12e, #ff4d6d);
+}
+
+.text-preview {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 50px;
+	overflow: hidden;
+	border-radius: 3px;
+	background: #0b0b0b;
+	color: #f0f0f0;
+	text-align: center;
 }
 
 .transition-name {

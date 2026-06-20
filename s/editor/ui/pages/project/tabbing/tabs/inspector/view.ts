@@ -1,82 +1,41 @@
 import {html} from "lit"
-import {shadow, useCss, useSignal} from "@e280/sly"
+import {shadow, useCss} from "@e280/sly"
 import {Item, Kind} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
-import {InfoControls} from "./views/controls/info.js"
 import {VideoControls} from "./views/controls/video.js"
 import {AudioControls} from "./views/controls/audio.js"
 import {ImageControls} from "./views/controls/image.js"
 import {TextControls} from "./views/controls/text/view.js"
 import themeCss from "./../../../../../../theme.css.js"
-import textSvg from "./../../../../../icons/gravity-ui/text.svg.js"
 import {EditorContext} from "./../../../../../../context/context.js"
-import circleInfoSvg from "./../../../../../icons/gravity-ui/circle-info.svg.js"
-import videoPlayerSvg from "./../../../../../icons/carbon-icons/video-player.svg.js"
-import documentImportSvg from "./../../../../../icons/carbon-icons/document-import.svg.js"
-import audioWaveSvg from "./../../../../../icons/material-design-icons/audio-wave.svg.js"
-
-type Tab = {
-	id: string
-	icon: any
-	label: string
-	component: (context: EditorContext, item?: Item.Any) => any
-}
-
-const TABS: {[key: string]: Tab} = {
-	INFO: {id: "info", icon: circleInfoSvg, label: "Info", component: (c, i) => i && InfoControls(c, i)},
-	VIDEO: {id: "video", icon: videoPlayerSvg, label: "Video", component: (c, i) => i && VideoControls(c, i as Item.Video)},
-	IMAGE: {id: "image", icon: documentImportSvg, label: "Image", component: (c, i) => i && ImageControls(c, i as Item.Image)},
-	AUDIO: {id: "audio", icon: audioWaveSvg, label: "Audio", component: (c, i) => i && AudioControls(c, i as Item.Audio)},
-	TEXT: {id: "text", icon: textSvg, label: "Text", component: (c, i) => TextControls(c, i?.kind === Kind.Text ? i as Item.Text : null)},
-}
 
 export const InspectorTab = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
 	const session = context.session
 
-	const activeTabId = useSignal(TABS.VIDEO.id)
 	const selectedItemId = session.$selectedItem.value
 	const selectedItem = session.index.getItemMaybe(selectedItemId)
 
-	// if (!selectedItem) {
-	// 	return html`<div class="placeholder">Select an item to inspect its properties.</div>`
-	// }
-
-	const availableTabs = (() => {
-		const tabs = [TABS.TEXT]
-		switch(selectedItem?.kind as Kind) {
+	const controls = (() => {
+		switch(selectedItem?.kind) {
 			case Kind.Video:
-				return [...tabs, TABS.VIDEO]
+				return VideoControls(context, selectedItem as Item.Video)
 			case Kind.Image:
-				return [...tabs, TABS.IMAGE]
+				return ImageControls(context, selectedItem as Item.Image)
 			case Kind.Audio:
-				return [...tabs, TABS.AUDIO]
+				return AudioControls(context, selectedItem as Item.Audio)
 			case Kind.Text:
-				return tabs
+				return TextControls(context, selectedItem as Item.Text)
 			default:
-				return tabs
+				return html`<div class="placeholder">Select an item to inspect its properties.</div>`
 		}
 	})()
 
-	const activeTab = availableTabs.find(t => t.id === activeTabId.value) ?? availableTabs[0]
-
 	return html`
 		<div class="inspector">
-			<div class="tab-bar">
-				${availableTabs.map(tab => html`
-					<button
-						class="tab-button"
-						?data-active=${tab.id === activeTab.id}
-						@click=${() => activeTabId.value = tab.id}
-						title=${tab.label}
-					>
-						${tab.icon}
-					</button>
-				`)}
-			</div>
 			<div class="panel-content">
-				${activeTab.component(context, selectedItem as Item.Any | undefined)}
+				${controls}
 			</div>
 		</div>
 	`

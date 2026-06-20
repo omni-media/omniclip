@@ -1,23 +1,16 @@
 
 import {html} from "lit"
-import {Item, transitions, type TransitionName} from "@omnimedia/omnitool"
+import {Item, type TransitionName} from "@omnimedia/omnitool"
 import {brain, components as quayComponents, dom, MediaLibrary} from "@e280/quay"
 import {shadow, spinner, useCss, useMount, useOnce, useSignal, useWait} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../../../../theme.css.js"
-import type {EditorContext} from "../../../../../../context/context.js"
+import textSvg from "../../../../../icons/gravity-ui/text.svg.js"
 import transitionSvg from "../../../../../icons/transition.svg.js"
 import folderSvg from "../../../../../icons/gravity-ui/folder.svg.js"
-
-type BrowserTab = "media" | "transitions"
-
-const DEFAULT_TRANSITION_DURATION = 700
-const MEDIA_GROUP = "omniclip-media"
-
-const TRANSITIONS = Object
-	.values(transitions)
-	.sort((a, b) => a.label.localeCompare(b.label))
+import type {EditorContext} from "../../../../../../context/context.js"
+import {BrowserTab, DEFAULT_TEXT_DURATION, DEFAULT_TRANSITION_DURATION, MEDIA_GROUP, TEXT_PRESETS, TextPreset, TRANSITIONS} from "./constants.js"
 
 dom.register(quayComponents, {soft: true})
 
@@ -58,6 +51,26 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			return
 
 		context.session.deleteClip(transition.id)
+	}
+
+	const addTextPreset = (preset: TextPreset) => {
+		const viewed = context.session.index.getItemMaybe(context.session.$viewedItemId())
+		const parent = context.session.index.getParentMaybe(viewed?.id)
+
+		if (!parent)
+			return
+
+		const text = context.omni.text(preset.content, {
+			duration: DEFAULT_TEXT_DURATION,
+			styles: preset.styles,
+		})
+
+		context.omni.set<typeof parent>(parent.id, {
+			childrenIds: [...parent.childrenIds, text.id],
+		})
+
+		context.session.$selectedItem.value = text.id
+		context.controllers.player.seek(context.session.$playhead())
 	}
 
 	const renderTabButton = (id: BrowserTab, label: string, icon: unknown) => html`
@@ -127,10 +140,34 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 		</div>
 	`
 
+	const renderText = () => html`
+		<div class="section-label">Text presets</div>
+
+		<div class="preset-grid">
+			${TEXT_PRESETS.map(preset => html`
+				<button class="preset-card"
+					title=${preset.label}
+					@click=${() => addTextPreset(preset)}>
+					<div class="text-preview"
+						style="
+							font-size: ${Number(preset.styles.fontSize ?? 48) / 3}px;
+							font-weight: ${preset.styles.fontWeight ?? "600"};
+						"
+					>
+						${preset.content}
+					</div>
+					<div class="transition-name">${preset.label}</div>
+					<div class="transition-meta">${DEFAULT_TEXT_DURATION / 1000}s text</div>
+				</button>
+			`)}
+		</div>
+	`
+
 	const renderBody = () => {
 		switch (activeTab()) {
 			case "media": return renderMedia()
 			case "transitions": return renderTransitions()
+			case "text": return renderText()
 		}
 	}
 
@@ -139,6 +176,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			<nav class="browser-tabs">
 				${renderTabButton("media", "Media", folderSvg)}
 				${renderTabButton("transitions", "Transitions", transitionSvg)}
+				${renderTabButton("text", "Text", textSvg)}
 			</nav>
 
 			<div class="browser-body">
