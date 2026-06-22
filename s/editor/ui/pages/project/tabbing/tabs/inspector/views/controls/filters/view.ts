@@ -5,7 +5,7 @@ import {shadow, useCss, useSignal} from "@e280/sly"
 import {FilterableItem, Item, Kind, filters} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
-import {sectionStyles} from "../styles.css.js"
+import {controlsStyles} from "../styles.css.js"
 import {FilterKey, Path, Schema} from "./utils.js"
 import {renderFilterList} from "./renderers/list.js"
 import {renderFilterToolbar} from "./renderers/toolbar.js"
@@ -23,7 +23,7 @@ import "@awesome.me/webawesome/dist/components/details/details.js"
 import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 
 export const FiltersControls = shadow((context: EditorContext, item: FilterableItem) => {
-	useCss(sectionStyles, styleCss)
+	useCss(controlsStyles, styleCss)
 
 	const index = context.session.index
 
@@ -95,7 +95,7 @@ export const FiltersControls = shadow((context: EditorContext, item: FilterableI
 	}
 
 	return html`
-		<wa-details summary="FILTERS" icon-placement="start" class="effects-panel">
+		<wa-details open summary="FILTERS" icon-placement="start" class="effects-panel">
 			<div class="controls-group section">
 				${renderFilterToolbar(addFilter)}
 

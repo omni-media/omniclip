@@ -5,64 +5,63 @@ export default css`
 .effects-panel {
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: 0.75em;
 }
 
 .filter-toolbar {
 	display: grid;
 	grid-template-columns: 1fr auto;
-	gap: 0.75rem;
+	gap: 0.65em;
 	align-items: end;
 }
 
 .field {
 	display: flex;
 	flex-direction: column;
-	gap: 0.35rem;
+	gap: 0.35em;
 }
 
 .field-label,
 .section-label,
 .group-title {
 	font-size: var(--font-size-xs);
-	color: #8e96a6;
+	color: #8f8f8f;
 	text-transform: uppercase;
-	letter-spacing: 0.06em;
 }
 
 .section {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
+	gap: 0.65em;
 }
 
 .filter-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 0.6rem;
+	gap: 0.5em;
 }
 
 .filter-card {
 	display: flex;
 	flex-direction: column;
-	gap: 0.45rem;
-	padding: 0.75rem;
-	border: 1px solid #2e3746;
-	border-radius: 8px;
-	background: #181c24;
-	color: #dce3f1;
+	gap: 0.45em;
+	padding: 0.55em;
+	border: 1px solid #292929;
+	border-radius: 4px;
+	background: #1d1d1d;
+	color: #d8d8d8;
 	text-align: left;
 	cursor: pointer;
 	transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 
 	&:hover {
-		border-color: #46627e;
-		background: #1b2230;
+		border-color: #4a4a4a;
+		background: #242424;
 	}
 
 	&[data-active] {
-		border-color: var(--prime);
-		background: #122838;
+		border-color: #555;
+		background: #252525;
 	}
 }
 
@@ -70,7 +69,7 @@ export default css`
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 0.5rem;
+	gap: 0.5em;
 }
 
 .filter-name {
@@ -80,22 +79,22 @@ export default css`
 
 .filter-tag {
 	font-size: var(--font-size-xs);
-	color: #8e96a6;
+	color: #8f8f8f;
 }
 
 .filter-card-actions {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 0.75rem;
+	gap: 0.75em;
 }
 
 .toggle {
 	display: flex;
 	align-items: center;
-	gap: 0.45rem;
-	font-size: var(--font-size-s);
-	color: #b8c0d0;
+	gap: 0.45em;
+	font-size: var(--font-size-xs);
+	color: #aaa;
 }
 
 .ghost-button,
@@ -104,10 +103,10 @@ export default css`
 select,
 input[type="number"],
 input[type="text"] {
-	background: #161a22;
-	color: #edf2ff;
-	border: 1px solid #2d3442;
-	border-radius: 6px;
+	background: #1f1f1f;
+	color: #e0e0e0;
+	border: 1px solid #303030;
+	border-radius: 3px;
 }
 
 .ghost-button,
@@ -117,38 +116,38 @@ input[type="text"] {
 }
 
 .ghost-button {
-	padding: 0.35rem 0.6rem;
+	padding: 0.35em 0.6em;
 	font-size: var(--font-size-xs);
 }
 
 .action-button {
-	padding: 0.55rem 0.8rem;
-	font-size: var(--font-size-s);
+	padding: 0.5em 0.75em;
+	font-size: var(--font-size-xs);
 	font-weight: 600;
 }
 
 .param-grid {
 	display: flex;
 	flex-direction: column;
-	gap: 0.8rem;
+	gap: 0.65em;
 }
 
 .param-row {
 	display: flex;
 	flex-direction: column;
-	gap: 0.4rem;
+	gap: 0.4em;
 }
 
 .param-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 0.75rem;
+	gap: 0.65em;
 }
 
 .param-name {
-	font-size: var(--font-size-s);
-	color: #d2d9e7;
+	font-size: var(--font-size-xs);
+	color: #cfcfcf;
 }
 
 .range-row,
@@ -157,7 +156,7 @@ input[type="text"] {
 .color-row {
 	display: flex;
 	align-items: center;
-	gap: 0.6rem;
+	gap: 0.55em;
 }
 
 .range-row {
@@ -176,7 +175,7 @@ wa-slider {
 .choice-select,
 .text-input {
 	width: 100%;
-	padding: 0.45rem 0.55rem;
+	padding: 0.45em 0.55em;
 }
 
 wa-number-input {
@@ -198,33 +197,33 @@ wa-input {
 }
 
 .number-input {
-	width: 5.75rem;
+	width: 5.75em;
 	text-align: right;
 }
 
 .color-input {
-	width: 2.5rem;
-	height: 2.2rem;
-	padding: 0.18rem;
-	background: #161a22;
-	border: 1px solid #2d3442;
-	border-radius: 6px;
+	width: 2.5em;
+	height: 2.2em;
+	padding: 0.18em;
+	background: #1f1f1f;
+	border: 1px solid #303030;
+	border-radius: 3px;
 }
 
 .nested-group {
 	display: flex;
 	flex-direction: column;
-	gap: 0.65rem;
-	padding: 0.8rem;
-	background: #131720;
-	border: 1px solid #252c39;
-	border-radius: 8px;
+	gap: 0.65em;
+	padding: 0.65em;
+	background: #1b1b1b;
+	border: 1px solid #292929;
+	border-radius: 4px;
 }
 
 .empty-state,
 .muted {
-	color: #8e96a6;
-	font-size: var(--font-size-s);
+	color: #8f8f8f;
+	font-size: var(--font-size-xs);
 }
 `
 

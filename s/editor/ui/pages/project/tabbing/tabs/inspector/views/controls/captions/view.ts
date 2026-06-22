@@ -13,7 +13,7 @@ import {
 import styleCss from "./style.css.js"
 import {valueOf} from "../filters/utils.js"
 import textStyleCss from "../text/style.css.js"
-import {aiControlStyles, sectionStyles} from "../styles.css.js"
+import {aiControlStyles, controlsStyles} from "../styles.css.js"
 import binSvg from "../../../../../../../../icons/gravity-ui/bin.svg.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 import speechToTextSvg from "../../../../../../../../icons/speech-to-text.svg.js"
@@ -30,7 +30,7 @@ import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 
 
 export const CaptionsControls = shadow((context: EditorContext, item: Item.Video | Item.Audio) => {
-	useCss(sectionStyles, textStyleCss, aiControlStyles, styleCss)
+	useCss(controlsStyles, textStyleCss, aiControlStyles, styleCss)
 
 	const tool = context.omni
 	const index = context.session.index
@@ -196,7 +196,7 @@ export const CaptionsControls = shadow((context: EditorContext, item: Item.Video
 	`
 
 	return html`
-		<wa-details summary="SUBTITLES" icon-placement="start" class="ai-panel">
+		<wa-details open summary="SUBTITLES" icon-placement="start" class="ai-panel">
 			<div class="ai-section">
 				<div class="ai-hero">
 					<div class="ai-icon">${speechToTextSvg}</div>

@@ -8,7 +8,7 @@ import {
 
 import styleCss from "./style.css.js"
 import {valueOf} from "../filters/utils.js"
-import {sectionStyles} from "../styles.css.js"
+import {controlsStyles} from "../styles.css.js"
 import filterStyleCss from "../filters/style.css.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 import {remove} from "../../../../../../../../logic/parts/mutate.js"
@@ -18,7 +18,7 @@ import "@awesome.me/webawesome/dist/components/details/details.js"
 import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 
 export const AnimationsControls = shadow((context: EditorContext, item: PresetItem) => {
-	useCss(sectionStyles, filterStyleCss, styleCss)
+	useCss(controlsStyles, filterStyleCss, styleCss)
 
 	const tool = context.omni
 	const defaultDuration = animationPresets.fadeIn.defaults.duration
@@ -119,7 +119,7 @@ export const AnimationsControls = shadow((context: EditorContext, item: PresetIt
 	}
 
 	return html`
-		<wa-details summary="ANIMATIONS" icon-placement="start" class="effects-panel">
+		<wa-details open summary="ANIMATIONS" icon-placement="start" class="effects-panel">
 			<div class="controls-group section">
 				${renderMode("enter")}
 				${renderMode("exit")}

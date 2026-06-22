@@ -1,23 +1,96 @@
 import {css} from "lit"
 
-export const sectionStyles = css`
+export const controlsStyles = css`
 
 .controls-group {
-	margin-bottom: 1.5em;
-	padding: 1em;
-	background: #2a2a2a;
-	border-radius: 8px;
-	border: 1px solid #333;
+	padding: 0.65em;
+	border-bottom: 1px solid #252525;
 }
 
 .heading {
-	font-size: 0.9em;
-	color: #ccc;
-	margin: 0 0 1em 0;
-	padding-bottom: 0.5em;
-	border-bottom: 1px solid #3a3a3a;
+	margin: 0 0 0.65em;
+	color: #8f8f8f;
+	font-size: calc(var(--font-size-xs) - 1px);
+	font-weight: 600;
 	text-transform: uppercase;
-	letter-spacing: 0.05em;
+}
+
+wa-select,
+wa-input,
+wa-number-input {
+	--wa-form-control-background-color: #1f1f1f;
+	--wa-form-control-border-color: #303030;
+	--wa-form-control-border-color-hover: #444;
+	--wa-form-control-border-color-focus: #575757;
+	--wa-form-control-border-radius: 3px;
+	--wa-form-control-value-color: #e0e0e0;
+	--wa-form-control-label-color: #aaa;
+	--wa-form-control-placeholder-color: #777;
+}
+
+wa-select::part(base),
+wa-input::part(base),
+wa-number-input::part(base) {
+	min-height: 2.15em;
+	font-size: var(--font-size-xs);
+}
+
+wa-select::part(display-input),
+wa-input::part(input),
+wa-number-input::part(input) {
+	font-size: var(--font-size-xs);
+}
+
+wa-details {
+	--spacing: 0.65em;
+}
+
+wa-details::part(base) {
+	border: 1px solid #292929;
+	border-radius: 4px;
+	background: #1b1b1b;
+}
+
+wa-details::part(header) {
+	min-height: 2.4em;
+	padding: 0 0.65em;
+	border-bottom: 1px solid transparent;
+	background: #202020;
+	color: #cfcfcf;
+}
+
+wa-details::part(summary) {
+	color: #cfcfcf;
+	font-size: calc(var(--font-size-xs) - 1px);
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+wa-details[open]::part(header) {
+	border-bottom-color: #292929;
+}
+
+wa-details::part(icon) {
+	color: #8f8f8f;
+}
+
+wa-details::part(content) {
+	background: #181818;
+	color: #cfcfcf;
+	font-size: var(--font-size-xs);
+}
+
+.action-row {
+	display: flex;
+	gap: 0.5em;
+}
+
+.advanced-panel::part(base) {
+	background: #181818;
+}
+
+.advanced-panel::part(header) {
+	min-height: 2.2em;
 }
 
 `
@@ -31,8 +104,8 @@ export const aiControlStyles = css`
 .ai-section {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75em;
-	margin-bottom: 1.5em;
+	gap: 0.65em;
+	margin-bottom: 0.85em;
 }
 
 .ai-hero {
@@ -49,8 +122,8 @@ export const aiControlStyles = css`
 .ai-description,
 .muted {
 	margin: 0;
-	color: #8e96a6;
-	font-size: var(--font-size-s);
+	color: #8f8f8f;
+	font-size: var(--font-size-xs);
 }
 
 .field-grid {
@@ -59,31 +132,12 @@ export const aiControlStyles = css`
 
 .field-label,
 .section-label {
-	font-size: var(--font-size-s);
-	color: #8e96a6;
+	color: #8f8f8f;
+	font-size: var(--font-size-xs);
 }
 
 wa-button::part(base) {
-	background: var(--prime);
-	border-color: var(--prime);
-	color: #07131d;
-}
-
-.action-row {
-	display: flex;
-	gap: 0.5em;
-}
-
-.advanced-panel::part(base) {
-	background: #161a22;
-	border: 1px solid #252d3b;
-	border-radius: 6px;
-}
-
-.advanced-panel::part(header) {
-	color: #c5ccda;
-	font-size: var(--font-size-s);
-	padding: 0.5em;
+	font-size: var(--font-size-xs);
 }
 
 .advanced-fields {
@@ -97,10 +151,10 @@ wa-button::part(base) {
 	align-items: center;
 	justify-content: center;
 	width: 100%;
-	color: #c5ccda;
-	background: #161a22;
-	border: 1px solid #2d3442;
-	border-radius: 6px;
+	color: #cfcfcf;
+	background: #1f1f1f;
+	border: 1px solid #303030;
+	border-radius: 4px;
 	cursor: pointer;
 }
 
@@ -111,7 +165,7 @@ wa-button::part(base) {
 
 .status {
 	min-height: 1.1em;
-	color: #9ba5b6;
+	color: #8f8f8f;
 	font-size: var(--font-size-xs);
 }
 

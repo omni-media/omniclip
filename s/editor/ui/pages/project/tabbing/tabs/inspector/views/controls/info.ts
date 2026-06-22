@@ -3,11 +3,11 @@ import {html} from "lit"
 import {shadow, useCss} from "@e280/sly"
 import {Item} from "@omnimedia/omnitool"
 
-import {sectionStyles} from "./styles.css.js"
+import {controlsStyles} from "./styles.css.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
 export const InfoControls = shadow((context: EditorContext, item: Item.Any) => {
-	useCss(sectionStyles)
+	useCss(controlsStyles)
 
 	return html`
 		<div class="controls-group">

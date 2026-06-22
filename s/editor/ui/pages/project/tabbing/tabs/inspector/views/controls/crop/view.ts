@@ -3,10 +3,11 @@ import {shadow, useCss} from "@e280/sly"
 import {Item} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
+import {controlsStyles} from "../styles.css.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 
 export const CropControls = shadow((context: EditorContext, item: Item.Any) => {
-	useCss(styleCss)
+	useCss(controlsStyles, styleCss)
 
 	const itemsMap = new Map(context.strata.timeline.state.items.map(i => [i.id, i]))
 

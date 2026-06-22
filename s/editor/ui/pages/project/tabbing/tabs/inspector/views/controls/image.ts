@@ -4,7 +4,7 @@ import {shadow, useCss} from "@e280/sly"
 import {Item} from "@omnimedia/omnitool"
 
 import {CropControls} from "./crop/view.js"
-import {sectionStyles} from "./styles.css.js"
+import {controlsStyles} from "./styles.css.js"
 import {FiltersControls} from "./filters/view.js"
 import {TransformControls} from "./transform/view.js"
 import {KeyframesControls} from "./keyframes/view.js"
@@ -15,7 +15,7 @@ import {BackgroundRemoverControls} from "./background-remover/view.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
 export const ImageControls = shadow((context: EditorContext, item: Item.Image) => {
-	useCss(sectionStyles, itemControlTabsCss)
+	useCss(controlsStyles, itemControlTabsCss)
 
 	const properties = html`
 		<div class="controls-group">

@@ -149,6 +149,7 @@ wa-split-panel::part(divider) {
 	}
 
 	wa-split-panel {
+		overflow: auto;
 		--divider-width: 1px;
 		--min: 200px;
 		--max: calc(100% - 200px);

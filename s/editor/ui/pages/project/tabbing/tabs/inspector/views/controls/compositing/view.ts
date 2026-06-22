@@ -3,6 +3,7 @@ import {shadow, useCss} from "@e280/sly"
 import {Item} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
+import {controlsStyles} from "../styles.css.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 
 const BLEND_MODES = [
@@ -12,7 +13,7 @@ const BLEND_MODES = [
 ]
 
 export const CompositingControls = shadow((context: EditorContext, item: Item.Video | Item.Image | Item.Text) => {
-	useCss(styleCss)
+	useCss(controlsStyles, styleCss)
 	const timeline = context.strata.timeline.state.items
 
 	const spatialItem = "spatialId" in item && item.spatialId !== undefined

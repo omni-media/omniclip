@@ -1,60 +1,92 @@
 
 import {css, html} from "lit"
-import {Content, light} from "@e280/sly"
-
-import "@awesome.me/webawesome/dist/components/tab/tab.js"
-import "@awesome.me/webawesome/dist/components/tab-group/tab-group.js"
-import "@awesome.me/webawesome/dist/components/tab-panel/tab-panel.js"
+import {Content, light, useSignal} from "@e280/sly"
 
 export const itemControlTabsCss = css`
-wa-tab-group::part(body) {
-	padding-top: 1rem;
+.control-tabs {
+	display: flex;
+	flex-direction: column;
 }
 
-wa-tab-group::part(nav) {
-	border-bottom: 1px solid #222935;
+.control-tab-bar {
+	display: flex;
+	height: 36px;
+	gap: 0.2em;
+	padding: 0.2em;
+	border-bottom: 1px solid #101010;
+	background: #1d1d1d;
+	box-sizing: border-box;
 }
 
-wa-tab::part(base) {
+.control-tab {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	justify-content: center;
+	padding: 0 0.7em;
+	color: #9a9a9a;
+	background: transparent;
+	border: 0;
+	border-radius: 0.25em;
 	font-size: var(--font-size-xs);
-	text-transform: uppercase;
-	letter-spacing: 0.06em;
-	color: #8e96a6;
+	cursor: pointer;
+	transition: background 0.12s ease, color 0.12s ease;
 }
 
-wa-tab[active]::part(base) {
-	color: #eef7ff;
+.control-tab:hover {
+	color: #e8e8e8;
+	background: #333;
+}
+
+.control-tab[data-active] {
+	color: #e8e8e8;
+	background: #3f3f3f;
+}
+
+.control-tab-panel {
+	display: flex;
+	flex-direction: column;
 }
 
 .muted {
-	color: #8e96a6;
-	font-size: var(--font-size-s);
+	color: #8f8f8f;
+	font-size: var(--font-size-xs);
 }
 `
+
+type TabId = "properties" | "effects" | "ai"
 
 export const ItemControlTabs = light((props: {
 	properties: Content
 	effects: Content
 	ai?: Content
 }) => {
-	return html`
-		<wa-tab-group>
-			<wa-tab panel="properties">Properties</wa-tab>
-			<wa-tab panel="effects">Effects</wa-tab>
-			${props.ai ? html`<wa-tab panel="ai">AI</wa-tab>` : null}
+	const activeTab = useSignal<TabId>("properties")
+	const tabs = [
+		{id: "properties" as const, label: "Properties", content: props.properties},
+		{id: "effects" as const, label: "Effects", content: props.effects},
+		...(props.ai ? [{id: "ai" as const, label: "AI", content: props.ai}] : []),
+	]
+	const active = tabs.find(tab => tab.id === activeTab.value) ?? tabs[0]
 
-			<wa-tab-panel name="properties">
-				${props.properties}
-			</wa-tab-panel>
-			<wa-tab-panel name="effects">
-				${props.effects}
-			</wa-tab-panel>
-			${props.ai ? html`
-				<wa-tab-panel name="ai">
-					${props.ai}
-				</wa-tab-panel>
-			` : null}
-		</wa-tab-group>
+	return html`
+		<div class="control-tabs">
+			<nav class="control-tab-bar">
+				${tabs.map(tab => html`
+					<button
+						class="control-tab"
+						?data-active=${tab.id === active.id}
+						@click=${() => activeTab.value = tab.id}
+					>
+						${tab.label}
+					</button>
+				`)}
+			</nav>
+
+			<div class="control-tab-panel">
+				${active.content}
+			</div>
+		</div>
 	`
 })
 

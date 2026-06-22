@@ -6,7 +6,7 @@ export default css`
 .transform-controls {
 	display: flex;
 	flex-direction: column;
-	gap: 0.8em;
+	gap: 0.65em;
 
 	&[data-disabled] {
 		opacity: 0.5;
@@ -24,8 +24,8 @@ export default css`
 label {
 	flex-basis: 55px;
 	flex-shrink: 0;
-	font-size: 0.9em;
-	color: #ccc;
+	font-size: var(--font-size-xs);
+	color: #aaa;
 	text-align: left;
 }
 
@@ -39,8 +39,8 @@ label {
 	display: flex;
 	align-items: center;
 	background: #1f1f1f;
-	border: 1px solid #333;
-	border-radius: 5px;
+	border: 1px solid #303030;
+	border-radius: 3px;
 	overflow: hidden;
 	flex: 1;
 }
@@ -49,9 +49,10 @@ input[type="number"] {
 	width: 100%;
 	background: transparent;
 	border: none;
-	color: white;
-	padding: 0.5em;
+	color: #e0e0e0;
+	padding: 0.45em;
 	text-align: center;
+	font-size: var(--font-size-xs);
 	-moz-appearance: textfield; /* Firefox */
 }
 
@@ -63,9 +64,7 @@ input[type="number"]::-webkit-inner-spin-button {
 
 .prefix, .suffix {
 	padding: 0 0.6em;
-	background: #2a2a2a;
 	color: #888;
-	font-weight: bold;
 	font-size: 0.8em;
 	display: flex;
 	align-items: center;
@@ -78,43 +77,35 @@ input[type="number"]::-webkit-inner-spin-button {
 	fill: currentColor;
 }
 
-.suffix {
-	border-left: 1px solid #333;
-}
-
-.prefix {
-	border-right: 1px solid #333;
-}
-
 .keyframe-toggle {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 1.8rem;
-	height: 1.8rem;
+	width: 1.8em;
+	height: 1.8em;
 	padding: 0;
 	border: 1px solid #333;
-	border-radius: 6px;
-	background: #161a22;
+	border-radius: 3px;
+	background: #1f1f1f;
 	color: #7d8595;
 	cursor: pointer;
 	transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
 
 	&:hover {
-		border-color: #5d6471;
-		color: #d7dde8;
+		border-color: #555;
+		color: #ddd;
 	}
 
 	&[data-active] {
-		color: #fbbf24;
-		border-color: #8a6108;
-		background: #2b2311;
+		color: #f0f0f0;
+		border-color: #555;
+		background: #252525;
 	}
 }
 
 .keyframe-toggle svg {
-	width: 0.95rem;
-	height: 0.95rem;
+	width: 0.95em;
+	height: 0.95em;
 	fill: currentColor;
 }
 `

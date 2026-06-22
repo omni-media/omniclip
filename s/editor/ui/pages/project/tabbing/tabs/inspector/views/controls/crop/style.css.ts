@@ -8,7 +8,6 @@ export default css`
 	justify-content: center;
 	align-items: center;
 	max-width: 240px;
-	margin: 0 auto;
 	row-gap: 0.5em;
 	column-gap: 0.5em;
 }
@@ -47,11 +46,8 @@ input[type="number"]::-webkit-inner-spin-button {
 
 .prefix {
 	padding: 0 0.6em;
-	background: #2a2a2a;
 	color: #888;
-	font-weight: bold;
-	font-size: 0.8em;
-	border-right: 1px solid #333;
+	font-size: 0.6em;
 }
 `
 

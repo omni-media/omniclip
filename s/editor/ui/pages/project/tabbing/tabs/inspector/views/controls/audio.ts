@@ -4,7 +4,7 @@ import {shadow, useCss} from "@e280/sly"
 import {Item} from "@omnimedia/omnitool"
 
 import {valueOf} from "./filters/utils.js"
-import {sectionStyles} from "./styles.css.js"
+import {controlsStyles} from "./styles.css.js"
 import {CaptionsControls} from "./captions/view.js"
 import {ItemControlTabs, itemControlTabsCss} from "./control-tabs.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
@@ -24,8 +24,8 @@ const audioStyles = css`
 }
 
 .audio-row label {
-	color: #8e96a6;
-	font-size: var(--font-size-s);
+	color: #aaa;
+	font-size: var(--font-size-xs);
 }
 
 .audio-row wa-slider {
@@ -43,7 +43,7 @@ const audioStyles = css`
 `
 
 export const AudioControls = shadow((context: EditorContext, item: Item.Audio) => {
-	useCss(sectionStyles, itemControlTabsCss, audioStyles)
+	useCss(controlsStyles, itemControlTabsCss, audioStyles)
 
 	const gain = item.gain ?? 1
 	const volume = Math.round(gain * 100)

@@ -5,9 +5,8 @@ export default css`
 .panel {
 	display: flex;
 	flex-direction: column;
-	gap: 0.6rem;
+	gap: 0.6em;
 	width: 100%;
-	max-width: 600px;
 }
 
 .create-styles {
@@ -28,18 +27,19 @@ export default css`
 }
 
 details {
-	background: #1a1a1a;
-	border-radius: 8px;
-	box-shadow: 0 0 5px #0008;
+	background: #1b1b1b;
+	border: 1px solid #292929;
+	border-radius: 4px;
 	overflow: hidden;
 }
 
 summary {
 	cursor: pointer;
-	background: #232323;
-	color: #9cf;
-	padding: 0.6rem 0.9rem;
-	font-weight: 600;
+	background: #202020;
+	color: #cfcfcf;
+	padding: 0.5em 0.7em;
+	font-size: var(--font-size-xs);
+	font-weight: 500;
 	user-select: none;
 	outline: none;
 }
@@ -53,10 +53,10 @@ details[open] summary {
 }
 
 .cnt {
-	padding: 0.8rem 1rem;
+	padding: 0.65em 0.7em;
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
+	gap: 0.5em;
 }
 
 [data-enabled=false] {
@@ -64,7 +64,7 @@ details[open] summary {
 }
 
 label {
-	font-size: 0.9rem;
+	font-size: var(--font-size-xs);
 	opacity: 0.8;
 }
 
@@ -74,9 +74,9 @@ button {
 	background: #222;
 	color: #eee;
 	border: 1px solid #444;
-	padding: 0.3rem 0.4rem;
-	border-radius: 4px;
-	font-size: 0.9rem;
+	padding: 0.35em 0.45em;
+	border-radius: 3px;
+	font-size: var(--font-size-xs);
 }
 
 button {
@@ -91,7 +91,7 @@ button:hover {
 .flex {
 	display: flex;
 	align-items: center;
-	gap: 0.3rem;
+	gap: 0.3em;
 }
 `
 

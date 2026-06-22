@@ -6,6 +6,7 @@ import type {Transform} from '@omnimedia/omnitool/x/timeline/types.js'
 import {resolveTransformAnimation} from '@omnimedia/omnitool/x/timeline/utils/anim.js'
 
 import styleCss from './style.css.js'
+import {controlsStyles} from '../styles.css.js'
 import {add, update} from '../../../../../../../../logic/parts/mutate.js'
 import keyframesSvg from '../../../../../../../../icons/keyframes.svg.js'
 import {EditorContext} from '../../../../../../../../../context/context.js'
@@ -13,7 +14,7 @@ import rotateSvg from '../../../../../../../../icons/material-design-icons/rotat
 import {ANIMATION_CHANNELS, getTrack, setAnimationKeyframe, SpatialLike, clamp, type AnimatableProperty} from '../keyframes/utils.js'
 
 export const TransformControls = shadow((context: EditorContext, item: Item.Text | Item.Video | Item.Image) => {
-	useCss(styleCss)
+	useCss(controlsStyles, styleCss)
 
 	const tool = context.omni
 	const index = context.session.index

@@ -6,6 +6,7 @@ import {ms} from '@omnimedia/omnitool/x/units/ms.js'
 import {resolveTransformAnimation} from '@omnimedia/omnitool/x/timeline/utils/anim.js'
 
 import styleCss from './style.css.js'
+import {controlsStyles} from '../styles.css.js'
 import keyframesSvg from '../../../../../../../../icons/keyframes.svg.js'
 import {EditorContext} from '../../../../../../../../../context/context.js'
 import {
@@ -22,7 +23,7 @@ import '@awesome.me/webawesome/dist/components/details/details.js'
 import '@awesome.me/webawesome/dist/components/button/button.js'
 
 export const KeyframesControls = shadow((context: EditorContext, item: Item.Text | Item.Video | Item.Image) => {
-	useCss(styleCss)
+	useCss(controlsStyles, styleCss)
 
 	const index = context.session.index
 	const spatial = index.getItemMaybe<SpatialLike>(item.spatialId)

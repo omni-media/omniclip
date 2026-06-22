@@ -6,14 +6,19 @@ export default css`@layer view {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	background: #151515;
+	color: #cfcfcf;
 }
 
 .placeholder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
 	padding: 1em;
-	color: #888;
-	font-style: italic;
+	color: #8f8f8f;
+	font-size: var(--font-size-xs);
 	text-align: center;
-	margin-top: 2em;
 }
 
 .inspector {
@@ -25,7 +30,6 @@ export default css`@layer view {
 .panel-content {
 	flex: 1;
 	overflow-y: auto;
-	padding: 1em;
 }
 
 }`

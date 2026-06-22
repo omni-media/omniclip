@@ -5,7 +5,7 @@ import {Item} from '@omnimedia/omnitool'
 import {TextStyleOptions} from 'pixi.js'
 
 import styleCss from './style.css.js'
-import {sectionStyles} from '../styles.css.js'
+import {controlsStyles} from '../styles.css.js'
 import {FiltersControls} from '../filters/view.js'
 import {renderFontDetails} from './details/font.js'
 import {renderFillDetails} from './details/fill.js'
@@ -30,7 +30,7 @@ export type TextDetailsProps = {
 }
 
 export const TextControls = shadow((context: EditorContext, item: Item.Text) => {
-	useCss(themeCss, sectionStyles, itemControlTabsCss, styleCss)
+	useCss(themeCss, controlsStyles, itemControlTabsCss, styleCss)
 
 	const tool = context.omni
 	const options = TEXT_STYLE_OPTIONS

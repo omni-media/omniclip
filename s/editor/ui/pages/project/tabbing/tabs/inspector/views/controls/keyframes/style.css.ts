@@ -5,43 +5,43 @@ export default css`
 .animations-panel {
 	display: flex;
 	flex-direction: column;
-	gap: 0.85rem;
+	gap: 0.75em;
 }
 
 .keyframes-summary,
 .keyframes-hint {
-	font-size: 0.8rem;
-	color: #727b8d;
+	font-size: var(--font-size-xs);
+	color: #8f8f8f;
 }
 
 .keyframe-list {
 	display: flex;
 	flex-direction: column;
-	gap: 0.4rem;
+	gap: 0.4em;
 }
 
 .keyframe-property {
 	display: grid;
 	grid-template-columns: auto 1fr auto auto;
 	align-items: center;
-	gap: 0.6rem;
-	padding: 0.45rem 0.55rem;
-	border: 1px solid #2b313d;
-	border-radius: 8px;
-	background: #171b23;
-	color: #e9eef9;
+	gap: 0.55em;
+	padding: 0.45em 0.55em;
+	border: 1px solid #292929;
+	border-radius: 4px;
+	background: #1d1d1d;
+	color: #d8d8d8;
 	text-align: left;
 	cursor: pointer;
 	transition: border-color 0.15s ease, background 0.15s ease;
 
 	&:hover {
-		border-color: #4d5c74;
-		background: #1b212c;
+		border-color: #4a4a4a;
+		background: #242424;
 	}
 
 	&[data-active] {
-		border-color: #8a6108;
-		background: #2b2311;
+		border-color: #555;
+		background: #252525;
 	}
 }
 
@@ -49,34 +49,34 @@ export default css`
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	color: #fbbf24;
+	color: #b8b8b8;
 }
 
 .property-icon svg {
-	width: 0.95rem;
-	height: 0.95rem;
+	width: 0.95em;
+	height: 0.95em;
 	fill: currentColor;
 }
 
 .property-name {
-	font-size: 0.88rem;
+	font-size: var(--font-size-xs);
 }
 
 .property-meta {
-	font-size: 0.78rem;
-	color: #8a93a5;
+	font-size: calc(var(--font-size-xs) - 1px);
+	color: #8f8f8f;
 }
 
 .keyframe-actions {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 0.75rem;
+	gap: 0.65em;
 }
 
 .nav-buttons {
 	display: flex;
-	gap: 0.4rem;
+	gap: 0.4em;
 }
 `
 

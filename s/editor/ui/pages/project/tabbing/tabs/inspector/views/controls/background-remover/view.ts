@@ -10,7 +10,7 @@ import {
 
 import {valueOf} from "../filters/utils.js"
 import {blobToFrame, frameToPng} from "./utils.js"
-import {aiControlStyles, sectionStyles} from "../styles.css.js"
+import {aiControlStyles, controlsStyles} from "../styles.css.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 import {
 	BG_REMOVER_MODELS,
@@ -27,7 +27,7 @@ import "@awesome.me/webawesome/dist/components/select/select.js"
 import "@awesome.me/webawesome/dist/components/details/details.js"
 
 export const BackgroundRemoverControls = shadow((context: EditorContext, item: Item.Image) => {
-	useCss(sectionStyles, aiControlStyles)
+	useCss(controlsStyles, aiControlStyles)
 
 	const canvas = useOnce(() => document.createElement("canvas"))
 
