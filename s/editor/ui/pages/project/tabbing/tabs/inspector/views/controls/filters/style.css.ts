@@ -157,12 +157,12 @@ input[type="text"] {
 	display: flex;
 	align-items: center;
 	gap: 0.55em;
+	min-width: 0;
 }
 
 .range-row {
 	& input[type="range"] {
 		flex: 1;
-		min-width: 0;
 	}
 }
 
@@ -174,40 +174,14 @@ wa-slider {
 .number-input,
 .choice-select,
 .text-input {
+	flex: 1;
+	min-width: 0;
 	width: 100%;
-	padding: 0.45em 0.55em;
-}
-
-wa-number-input {
-	&.number-input {
-		width: 100%;
-	}
-}
-
-wa-select {
-	&.choice-select {
-		width: 100%;
-	}
-}
-
-wa-input {
-	&.text-input {
-		width: 100%;
-	}
 }
 
 .number-input {
 	width: 5.75em;
 	text-align: right;
-}
-
-.color-input {
-	width: 2.5em;
-	height: 2.2em;
-	padding: 0.18em;
-	background: #1f1f1f;
-	border: 1px solid #303030;
-	border-radius: 3px;
 }
 
 .nested-group {

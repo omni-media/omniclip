@@ -10,6 +10,7 @@ export const renderFilterToolbar = (addFilter: (key: FilterKey) => void) => html
 			<wa-select
 				size="small"
 				class="choice-select"
+				placeholder="Choose filter"
 				@change=${(event: Event) => {
 					const value = valueOf(event)
 
@@ -19,8 +20,6 @@ export const renderFilterToolbar = (addFilter: (key: FilterKey) => void) => html
 					(event.target as any).value = ""
 				}}
 			>
-				<wa-option value="">Choose filter</wa-option>
-
 				${Filters.options.map(([key]) => html`
 					<wa-option value=${key}>${titleize(key)}</wa-option>
 				`)}

@@ -71,12 +71,14 @@ export const createPropertyRenderer = (
 			case 'color':
 				return paramRow(label, html`
 					<div class="color-row">
-						<input
+						<wa-color-picker
 							class="color-input"
-							type="color"
+							size="small"
+							format="hex"
+							without-format-toggle
 							.value=${String(val)}
-							@input=${(e: InputEvent) => set(valueOf(e))}
-						>
+							@input=${(e: Event) => set(valueOf(e))}
+						></wa-color-picker>
 
 						<wa-input
 							size="small"

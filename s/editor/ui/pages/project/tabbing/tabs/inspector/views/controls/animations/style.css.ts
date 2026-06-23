@@ -76,6 +76,14 @@ export default css`
 
 .duration-input {
 	width: 100%;
+
+	&::part(input) {
+		padding: 0;
+	}
+
+	&::part(start), &::part(end) {
+		margin: 0;
+	}
 }
 `
 

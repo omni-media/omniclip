@@ -2,7 +2,7 @@
 import {css} from 'lit'
 
 export default css`
-.animations-panel {
+.animations-panel::part(content) {
 	display: flex;
 	flex-direction: column;
 	gap: 0.75em;
@@ -72,6 +72,10 @@ export default css`
 	align-items: center;
 	justify-content: space-between;
 	gap: 0.65em;
+
+	& wa-button {
+		font-size: var(--font-size-xs);
+	}
 }
 
 .nav-buttons {

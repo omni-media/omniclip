@@ -13,6 +13,8 @@ import {EditorContext} from '../../../../../../../../../context/context.js'
 import rotateSvg from '../../../../../../../../icons/material-design-icons/rotate.svg.js'
 import {ANIMATION_CHANNELS, getTrack, setAnimationKeyframe, SpatialLike, clamp, type AnimatableProperty} from '../keyframes/utils.js'
 
+import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
+
 export const TransformControls = shadow((context: EditorContext, item: Item.Text | Item.Video | Item.Image) => {
 	useCss(controlsStyles, styleCss)
 
@@ -82,6 +84,7 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 
 	const renderKeyframeToggle = (property: AnimatableProperty) => html`
 		<button
+			slot="end"
 			type="button"
 			class="keyframe-toggle"
 			?data-active=${hasKeyframeAtTime(property)}
@@ -94,6 +97,8 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 		</button>
 	`
 
+	const numberValue = (e: Event) => Number((e.target as HTMLInputElement).value)
+
 	return html`
 		<div>
 			<input @change=${onEnableTransform} id="transform" type="checkbox" .checked=${!!spatial?.enabled} />
@@ -102,73 +107,87 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 		<div class="transform-controls" ?data-disabled=${!spatial?.enabled}>
 			<div class="control-row">
 				<label>Position</label>
-				${renderKeyframeToggle('position.x')}
-				${renderKeyframeToggle('position.y')}
 				<div class="inputs">
 					<div class="input-group">
-						<span class="prefix">X</span>
-						<input
-							type="number"
-							.value=${position[0]}
-							@input=${(e: InputEvent) =>
-								updateTransform([[Number((e.target as HTMLInputElement).value), position[1]], scale, rotation])}
+						<wa-number-input
+							class="transform-input"
+							size="small"
+							without-steppers
+							.value=${position[0].toFixed(2)}
+							@input=${(e: Event) =>
+								updateTransform([[numberValue(e), position[1]], scale, rotation])}
 						>
+							<span slot="start" class="prefix">X</span>
+							${renderKeyframeToggle('position.x')}
+						</wa-number-input>
 					</div>
 					<div class="input-group">
-						<span class="prefix">Y</span>
-						<input
-							type="number"
-							.value=${position[1]}
-							@input=${(e: InputEvent) =>
-								updateTransform([[position[0], Number((e.target as HTMLInputElement).value)], scale, rotation])}
+						<wa-number-input
+							class="transform-input"
+							size="small"
+							without-steppers
+							.value=${position[1].toFixed(2)}
+							@input=${(e: Event) =>
+								updateTransform([[position[0], numberValue(e)], scale, rotation])}
 						>
+							<span slot="start" class="prefix">Y</span>
+							${renderKeyframeToggle('position.y')}
+						</wa-number-input>
 					</div>
 				</div>
 			</div>
 
 			<div class="control-row">
 				<label>Scale</label>
-				${renderKeyframeToggle('scale.x')}
-				${renderKeyframeToggle('scale.y')}
 				<div class="inputs">
 					<div class="input-group">
-						<span class="prefix">X</span>
-						<input
-							type="number"
+						<wa-number-input
+							class="transform-input"
+							size="small"
+							without-steppers
 							step="0.01"
 							min="0"
-							.value=${scale[0]}
-							@input=${(e: InputEvent) =>
-								updateTransform([position, [Number((e.target as HTMLInputElement).value), scale[1]], rotation])}
+							.value=${String(scale[0])}
+							@input=${(e: Event) =>
+								updateTransform([position, [numberValue(e), scale[1]], rotation])}
 						>
+							<span slot="start" class="prefix">X</span>
+							${renderKeyframeToggle('scale.x')}
+						</wa-number-input>
 					</div>
 					<div class="input-group">
-						<span class="prefix">Y</span>
-						<input
-							type="number"
+						<wa-number-input
+							class="transform-input"
+							size="small"
+							without-steppers
 							step="0.01"
 							min="0"
-							.value=${scale[1]}
-							@input=${(e: InputEvent) =>
-								updateTransform([position, [scale[0], Number((e.target as HTMLInputElement).value)], rotation])}
+							.value=${String(scale[1])}
+							@input=${(e: Event) =>
+								updateTransform([position, [scale[0], numberValue(e)], rotation])}
 						>
+							<span slot="start" class="prefix">Y</span>
+							${renderKeyframeToggle('scale.y')}
+						</wa-number-input>
 					</div>
 				</div>
 			</div>
 
 			<div class="control-row">
 				<label>Rotation</label>
-				${renderKeyframeToggle('rotation')}
 				<div class="inputs">
 					<div class="input-group">
-						<span class="prefix">${rotateSvg}</span>
-						<input
-							type="number"
-							.value=${rotation}
-							@input=${(e: InputEvent) =>
-								updateTransform([position, scale, Number((e.target as HTMLInputElement).value)])}
+						<wa-number-input
+							class="transform-input"
+							size="small"
+							without-steppers
+							.value=${String(rotation)}
+							@input=${(e: Event) =>
+								updateTransform([position, scale, numberValue(e)])}
 						>
-						<span class="suffix">°</span>
+							<span slot="start" class="prefix">${rotateSvg}</span>
+							${renderKeyframeToggle('rotation')}
+						</wa-number-input>
 					</div>
 				</div>
 			</div>

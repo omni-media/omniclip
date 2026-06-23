@@ -144,8 +144,10 @@ export const BackgroundRemoverControls = shadow((context: EditorContext, item: I
 	}
 
 	return html`
-		<wa-details summary="BACKGROUND" icon-placement="start" class="ai-panel">
-			<div class="ai-section">
+		<div class="ai-panel">
+			<div class="controls-group ai-section">
+				<h4 class="heading">Background</h4>
+
 				<div class="ai-hero">
 					<div class="ai-icon">${cleanSvg}</div>
 					<p class="ai-description">
@@ -196,7 +198,6 @@ export const BackgroundRemoverControls = shadow((context: EditorContext, item: I
 				${status() ? html`<div class="status">${status()}</div>` : null}
 				${error() ? html`<div class="status" data-error>${error()}</div>` : null}
 			</div>
-		</wa-details>
+		</div>
 	`
 })
-

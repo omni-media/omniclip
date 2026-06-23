@@ -2,14 +2,14 @@
 import {html} from "lit"
 import type {Item} from "@omnimedia/omnitool"
 
+import {Path, Schema} from "../utils.js"
 import {createPropertyRenderer} from "./property.js"
-import {Path, Schema, titleize} from "../utils.js"
 
 export const renderFilterAdjustments = (props: {
 	filter: Item.Filter | null
 	setFilterParams: (filter: Item.Filter, path: Path, value: any) => void
 }) => {
-	const {key, def, schemaEntries, defaultParams} = Schema.meta(props.filter)
+	const {def, schemaEntries, defaultParams} = Schema.meta(props.filter)
 
 	if (!props.filter || !def)
 		return html`<p class="empty-state">Select a filter to edit its parameters.</p>`
@@ -20,8 +20,6 @@ export const renderFilterAdjustments = (props: {
 	)
 
 	return html`
-		<div class="group-title">${titleize(key ?? props.filter.type)}</div>
-
 		${schemaEntries.length
 			? html`
 				<div class="param-grid">

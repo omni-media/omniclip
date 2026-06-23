@@ -105,7 +105,6 @@ export const aiControlStyles = css`
 	display: flex;
 	flex-direction: column;
 	gap: 0.65em;
-	margin-bottom: 0.85em;
 }
 
 .ai-hero {

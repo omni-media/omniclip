@@ -14,40 +14,21 @@ export default css`
 
 .grid > * {
 	flex-basis: calc(33.333% - 0.66em);
-	display: flex;
-	justify-content: center;
-}
-
-.input-group {
-	display: flex;
-	align-items: center;
-	background: #1f1f1f;
-	border: 1px solid #333;
-	border-radius: 5px;
-	overflow: hidden;
 	width: 100%;
 }
 
-input[type="number"] {
+.crop-input {
 	width: 100%;
-	background: transparent;
-	border: none;
-	color: white;
-	padding: 0.5em;
+}
+
+.crop-input::part(input) {
 	text-align: center;
-	-moz-appearance: textfield;
-}
-
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-	-webkit-appearance: none;
-	margin: 0;
 }
 
 .prefix {
-	padding: 0 0.6em;
 	color: #888;
-	font-size: 0.6em;
+	font-size: calc(var(--font-size-xs) - 1px);
+	text-transform: uppercase;
 }
 `
 

@@ -11,9 +11,8 @@ export default css`@layer view {
 	justify-content: space-between;
 	align-items: center;
 	padding: 0.22em 0.75em;
-	background: #1f1f1f;
-	border-top: 1px solid #292929;
-	border-bottom: 1px solid #151515;
+	background: #181818;
+	border-top: 1px solid #242424;
 }
 
 .toolbar > * {
@@ -53,7 +52,7 @@ button {
 }
 
 button:hover {
-	background: #343434;
+	background: #2b2b2b;
 	color: #e8e8e8;
 }
 
@@ -91,17 +90,17 @@ button svg {
 
 .transport-button[data-active] {
 	color: #f0f0f0;
-	background: #3a3a3a;
+	background: #303030;
 }
 
 .play-pause {
 	width: 2.25em;
 	color: #e0e0e0;
-	background: #292929;
+	background: #242424;
 }
 
 .play-pause:hover {
-	background: #3d3d3d;
+	background: #333;
 }
 
 .timecode {
@@ -133,11 +132,11 @@ button svg {
 }
 
 .zoom-slider::part(track) {
-	background: #3a3a3a;
+	background: #303030;
 }
 
 .zoom-slider::part(indicator) {
-	background: #636b75;
+	background: #555d66;
 }
 
 .zoom-slider::part(thumb) {

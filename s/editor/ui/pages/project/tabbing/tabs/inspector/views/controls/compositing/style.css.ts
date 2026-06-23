@@ -24,7 +24,6 @@ label {
 	display: flex;
 	align-items: center;
 	gap: 0.5em;
-	flex-grow: 1;
 }
 
 .input-group {
@@ -55,25 +54,17 @@ input[type="number"]::-webkit-inner-spin-button {
 
 .suffix {
 	padding: 0 0.6em;
-	background: #2a2a2a;
 	color: #888;
-	font-weight: bold;
 	font-size: 0.8em;
-	border-left: 1px solid #333;
 }
 
-select {
-	flex-grow: 1;
-	background: #1f1f1f;
-	border: 1px solid #333;
-	border-radius: 5px;
-	color: white;
-	padding: 0.5em;
+.blend-select {
+	flex: 1;
 }
 
 input[type="range"] {
 	width: 100%;
-	flex-grow: 1;
+	flex: 1;
 	-webkit-appearance: none;
 	appearance: none;
 	background: transparent;

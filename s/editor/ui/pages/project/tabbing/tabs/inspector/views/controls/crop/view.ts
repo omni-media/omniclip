@@ -6,6 +6,8 @@ import styleCss from "./style.css.js"
 import {controlsStyles} from "../styles.css.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 
+import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
+
 export const CropControls = shadow((context: EditorContext, item: Item.Any) => {
 	useCss(controlsStyles, styleCss)
 
@@ -22,51 +24,26 @@ export const CropControls = shadow((context: EditorContext, item: Item.Any) => {
 		// propertiesController.updateCrop(item.id, {[side]: value})
 	}
 
+	const cropInput = (side: "top" | "right" | "bottom" | "left", value: number) => html`
+		<wa-number-input
+			class="crop-input"
+			size="small"
+			without-steppers
+			placeholder=${side}
+			.value=${String(value)}
+			@input=${(e: Event) => handleCropChange(side, Number((e.target as HTMLInputElement).value))}
+		>
+			<span slot="start" class="prefix">${side}</span>
+		</wa-number-input>
+	`
+
 	return html`
 		<div class="crop-controls">
 			<div class="grid">
-				<div></div>
-				<div class="input-group">
-					<span class="prefix">TOP</span>
-					<input
-						type="number"
-						placeholder="Top"
-						.value=${top.toString()}
-						@input=${(e: InputEvent) => handleCropChange("top", Number((e.target as HTMLInputElement).value))}
-					>
-				</div>
-				<div></div>
-
-				<div class="input-group">
-					<span class="prefix">LEFT</span>
-					<input
-						type="number"
-						placeholder="Left"
-						.value=${left.toString()}
-						@input=${(e: InputEvent) => handleCropChange("left", Number((e.target as HTMLInputElement).value))}
-					>
-				</div>
-				<div class="input-group">
-					<span class="prefix">RIGHT</span>
-					<input
-						type="number"
-						placeholder="Right"
-						.value=${right.toString()}
-						@input=${(e: InputEvent) => handleCropChange("right", Number((e.target as HTMLInputElement).value))}
-					>
-				</div>
-
-				<div></div>
-				<div class="input-group">
-					<span class="prefix">BOTTOM</span>
-					<input
-						type="number"
-						placeholder="Bottom"
-						.value=${bottom.toString()}
-						@input=${(e: InputEvent) => handleCropChange("bottom", Number((e.target as HTMLInputElement).value))}
-					>
-				</div>
-				<div></div>
+				${cropInput("top", top)}
+				${cropInput("left", left)}
+				${cropInput("right", right)}
+				${cropInput("bottom", bottom)}
 			</div>
 		</div>
 	`

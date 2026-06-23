@@ -14,7 +14,6 @@ import {EditorContext} from "../../../../../../../../../context/context.js"
 import {remove} from "../../../../../../../../logic/parts/mutate.js"
 import {getPresetEntries, PresetChoice, PresetDirection, PresetItem, seconds} from "./utils.js"
 
-import "@awesome.me/webawesome/dist/components/details/details.js"
 import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 
 export const AnimationsControls = shadow((context: EditorContext, item: PresetItem) => {
@@ -119,12 +118,13 @@ export const AnimationsControls = shadow((context: EditorContext, item: PresetIt
 	}
 
 	return html`
-		<wa-details open summary="ANIMATIONS" icon-placement="start" class="effects-panel">
+		<div class="effects-panel">
 			<div class="controls-group section">
+				<h4 class="heading">Animations</h4>
 				${renderMode("enter")}
 				${renderMode("exit")}
 			</div>
-		</wa-details>
+		</div>
 	`
 })
 

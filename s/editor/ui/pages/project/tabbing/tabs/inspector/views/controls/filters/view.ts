@@ -19,7 +19,7 @@ import "@awesome.me/webawesome/dist/components/option/option.js"
 import "@awesome.me/webawesome/dist/components/select/select.js"
 import "@awesome.me/webawesome/dist/components/slider/slider.js"
 import "@awesome.me/webawesome/dist/components/switch/switch.js"
-import "@awesome.me/webawesome/dist/components/details/details.js"
+import "@awesome.me/webawesome/dist/components/color-picker/color-picker.js"
 import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 
 export const FiltersControls = shadow((context: EditorContext, item: FilterableItem) => {
@@ -95,8 +95,9 @@ export const FiltersControls = shadow((context: EditorContext, item: FilterableI
 	}
 
 	return html`
-		<wa-details open summary="FILTERS" icon-placement="start" class="effects-panel">
+		<div class="effects-panel">
 			<div class="controls-group section">
+				<h4 class="heading">Filters</h4>
 				${renderFilterToolbar(addFilter)}
 
 				${renderFilterList({
@@ -116,7 +117,7 @@ export const FiltersControls = shadow((context: EditorContext, item: FilterableI
 					setFilterParams
 				})}
 			</div>
-		</wa-details>
+		</div>
 	`
 })
 

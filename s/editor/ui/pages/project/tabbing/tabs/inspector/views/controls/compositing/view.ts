@@ -6,6 +6,9 @@ import styleCss from "./style.css.js"
 import {controlsStyles} from "../styles.css.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 
+import "@awesome.me/webawesome/dist/components/option/option.js"
+import "@awesome.me/webawesome/dist/components/select/select.js"
+
 const BLEND_MODES = [
 	"Normal", "Multiply", "Screen", "Overlay", "Darken", "Lighten",
 	"ColorDodge", "ColorBurn", "HardLight", "SoftLight", "Difference",
@@ -33,13 +36,15 @@ export const CompositingControls = shadow((context: EditorContext, item: Item.Vi
 		<div class="compositing-controls">
 			<div class="control-row">
 				<label for="blend-mode">Blend Mode</label>
-				<select
+				<wa-select
 					id="blend-mode"
+					size="small"
+					class="blend-select"
 					.value=${blendMode}
 					@change=${(e: Event) => handleBlendModeChange((e.target as HTMLSelectElement).value)}
 				>
-					${BLEND_MODES.map(mode => html`<option .value=${mode}>${mode}</option>`)}
-				</select>
+					${BLEND_MODES.map(mode => html`<wa-option value=${mode}>${mode}</wa-option>`)}
+				</wa-select>
 			</div>
 			<div class="control-row">
 				<label for="opacity">Opacity</label>

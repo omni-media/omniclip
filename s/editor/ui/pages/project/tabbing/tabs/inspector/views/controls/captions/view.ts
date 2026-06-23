@@ -196,8 +196,10 @@ export const CaptionsControls = shadow((context: EditorContext, item: Item.Video
 	`
 
 	return html`
-		<wa-details open summary="SUBTITLES" icon-placement="start" class="ai-panel">
-			<div class="ai-section">
+		<div class="ai-panel">
+			<div class="controls-group ai-section">
+				<h4 class="heading">Subtitles</h4>
+
 				<div class="ai-hero">
 					<div class="ai-icon">${speechToTextSvg}</div>
 					<p class="ai-description">Transcribe audio using AI</p>
@@ -273,16 +275,16 @@ export const CaptionsControls = shadow((context: EditorContext, item: Item.Video
 				${error() ? html`<div class="status" data-error>${error()}</div>` : null}
 			</div>
 
-			<div class="preview ai-section">
+			<div class="controls-group preview ai-section">
 				<div class="section-label">Preview</div>
 				${renderTranscriptPreview(transcript(), maxChars())}
 			</div>
 
-			<div class="text-styles ai-section">
+			<div class="controls-group text-styles ai-section">
 				<div class="section-label">Style</div>
 				${renderCaptionStyleControls(styleItem, updateStyle)}
 			</div>
-		</wa-details>
+		</div>
 	`
 })
 
