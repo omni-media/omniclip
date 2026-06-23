@@ -50,9 +50,9 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 		const starred = isStarred(item.id)
 		return html`
 			<div class="item-row" @click=${() => handleItemClick(item.id)}>
-				<span class="color-swatch" style="background-color: ${"color"}"></span>
+				<span class="color-swatch"></span>
 				<span class="icon">${renderIcon(item.kind)}</span>
-				<span class="label">${"label"}</span>
+				<span class="label">${Kind[item.kind] ?? item.kind} ${item.id}</span>
 				<span class="duration">${duration}</span>
 				<button class="star-button" ?data-starred=${starred} @click=${(e: Event) => {e.stopPropagation(); toggleStar(item.id)}}>
 					${starred ? starFillSvg : starSvg}
@@ -66,10 +66,6 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	const otherItemsFiltered = filteredItems.filter(i => !isStarred(i.id))
 
 	return html`
-		<div class="search-bar">
-			<input type="text" placeholder="🔍 Search items..." .value=${searchTerm.value} @input=${(e: any) => searchTerm(e.target.value)}>
-		</div>
-
 		<div class="outliner-tabs">
 			<input type="radio" name="outliner-tab" id="tab-clips" checked />
 			<input type="radio" name="outliner-tab" id="tab-roles" />
@@ -81,11 +77,15 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 				<label for="tab-tags">Tags</label>
 			</nav>
 
+			<div class="search-bar">
+				<input type="text" placeholder="Search items..." .value=${searchTerm.value} @input=${(e: any) => searchTerm(e.target.value)}>
+			</div>
+
 			<div class="tab-panels">
 				<div id="clips-panel" class="tab-panel">
 					${when(starredItemsFiltered.length > 0, () => html`
 						<div class="section">
-							<h4 class="section-title">⭐ Starred Items</h4>
+							<h4 class="section-title">Starred Items</h4>
 							<div class="item-list-header">
 								<span>Name</span>
 								<span>Duration</span>
