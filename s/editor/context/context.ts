@@ -56,6 +56,7 @@ export class EditorContext {
 		this.#stopPlaybackTick()
 		this.#stopTimelineSync()
 		this.strata.dispose()
+		this.controllers.cargo.dispose()
 		this.requirements.keybindings.dispose()
 	}
 

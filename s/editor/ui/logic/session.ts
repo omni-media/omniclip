@@ -5,7 +5,7 @@ import {visualAnimations} from "@omnimedia/omnitool"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 import type {Transform, TransformAnimation} from "@omnimedia/omnitool/x/timeline/types.js"
 import {computeItemDuration} from "@omnimedia/omnitool/x/timeline/renderers/parts/handy.js"
-import {Driver, Id, Item, Kind, O, Resource, TimelineFile, TransitionName, VideoPlayer} from "@omnimedia/omnitool"
+import {ContainerItem, Driver, Id, Item, Kind, O, Resource, TimelineFile, TransitionName, VideoPlayer} from "@omnimedia/omnitool"
 
 import {Stage} from "./parts/stage.js"
 import {Tool} from "./parts/modes/tool.js"
@@ -127,6 +127,18 @@ export class OmniSession {
 
 	clearProposal() {
 		this.$proposal.value = null
+	}
+
+	/** Append to the currently viewed timeline container. */
+	appendItem(item: Item.Any) {
+		const parent = this.index.getItem<ContainerItem>(this.$viewedItemId())
+
+		this.deps.omnitool.set<typeof parent>(parent.id, {
+			childrenIds: [...parent.childrenIds, item.id],
+		})
+
+		this.$selectedItem.value = item.id
+		this.deps.player.seek(this.$playhead())
 	}
 
 	applyTransitionToSelection(name: TransitionName, duration: number) {

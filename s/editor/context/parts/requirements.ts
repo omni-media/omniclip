@@ -2,10 +2,12 @@ import {Cellar, OpfsForklift} from "@e280/quay"
 import {Datafile, Driver, Kind, Media, O, Omni, TimelineFile} from "@omnimedia/omnitool"
 
 import {Strata} from "./strata.js"
+import {hydrateProject} from "./hydration.js"
 import {OmniSession} from "../../ui/logic/session.js"
 import {CargoController} from "../controllers/cargo.js"
 import {Keybindings} from "../controllers/input/keybindings.js"
 import {TabManager} from "../../ui/logic/parts/tab-manager.js"
+
 export type Requirements = Awaited<ReturnType<typeof setupRequirements>>
 
 export async function setupRequirements(projectId: string) {
@@ -20,10 +22,11 @@ export async function setupRequirements(projectId: string) {
 	if (strata.timeline.state.items.length === 1)
 		await demo(strata, project, videoA, imageA)
 
-	await hydrateMetadata(strata, cellar, project)
+	const cargo = await CargoController.setup(strata, cellar, project)
+	await hydrateProject(cargo.mediaLibrary, project, cellar, strata)
 
 	const player = await project.playback(strata.timeline.state as TimelineFile)
-	const controllers = {cargo: new CargoController(strata, cellar), player}
+	const controllers = {cargo, player}
 	const omni = new O({
 		get timeline() {
 			return strata.timeline.state
@@ -68,20 +71,5 @@ async function demo(strata: Strata, omni: Omni, videoA: Media, image: Media) {
 	))
 	const stack = strata.timeline.state.items.find(item => item.kind === Kind.Stack)
 	await strata.timeline.mutate(state => state.rootId = stack!.id)
-}
-
-async function hydrateMetadata(strata: Strata, cellar: Cellar, omni: Omni) {
-	// for now just images with backgrounds removed from opfs (bg remove ai feature)
-	for (const meta of strata.trunk.get().metadata.items.filter(item => item.bgRemoved)) {
-		const image = strata.timeline.state.items.find(item => item.id === meta.itemId)
-		if (image?.kind !== Kind.Image) continue
-		const cask = await cellar.load(image.mediaHash)
-		const buffer = cask.bytes.buffer.slice(
-			cask.bytes.byteOffset,
-			cask.bytes.byteOffset + cask.bytes.byteLength
-		) as ArrayBuffer
-		const blob = new Blob([buffer], {type: "image/png"})
-		await omni.load({[image.mediaHash]: Datafile.make(blob, `${image.mediaHash}.png`)})
-	}
 }
 

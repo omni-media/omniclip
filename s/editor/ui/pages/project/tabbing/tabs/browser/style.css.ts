@@ -1,3 +1,4 @@
+
 import {css} from "lit"
 
 export default css`@layer view {
@@ -86,6 +87,16 @@ export default css`@layer view {
 	display: flex;
 	flex-direction: column;
 	gap: 0.65em;
+	--quay-surface: #181818;
+	--quay-surface-hover: #242424;
+	--quay-surface-selected: #303030;
+	--quay-border: #242424;
+	--quay-text: #cfcfcf;
+	--quay-muted: #8f8f8f;
+	--quay-accent: #777;
+	--quay-radius: 3px;
+	--quay-browser-thumb-width: 112px;
+	--quay-browser-thumb-height: 64px;
 }
 
 .media-toolbar {
@@ -102,9 +113,9 @@ quay-dropzone {
 quay-browser {
 	min-height: 0;
 	overflow: auto;
-	border: 1px solid #252a2f;
-	border-radius: 6px;
-	background: #181c20;
+	border: 1px solid var(--quay-border);
+	border-radius: var(--quay-radius);
+	background: var(--quay-surface);
 }
 
 .search {

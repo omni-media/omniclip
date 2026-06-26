@@ -117,8 +117,7 @@ export const BackgroundRemoverControls = shadow((context: EditorContext, item: I
 			status("Saving image...")
 
 			const blob = await frameToPng(canvas, outputFrame).finally(() => outputFrame.close())
-			const bytes = new Uint8Array(await blob.arrayBuffer())
-			const cask = await context.controllers.cargo.cellar.save(bytes)
+			const cask = await context.controllers.cargo.cellar.save(blob)
 
 			const {removed} = await context.project.load({
 				removed: Datafile.make(blob, `${cask.hash}.png`)
