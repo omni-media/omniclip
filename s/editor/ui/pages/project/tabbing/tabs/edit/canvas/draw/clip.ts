@@ -149,12 +149,12 @@ export function drawClips(canvas: TimelineCanvas) {
 	for (const clip of canvas.layout.clips) {
 		if (clip.kind === Kind.Gap)
 			continue
-		if (clip.itemId === ghostClip?.itemId)
-			continue
 		if (clip.kind === Kind.Video)
 			activeFilmstrips.add(clip.itemId)
 		if (clip.kind === Kind.Audio)
 			activeWaveforms.add(clip.itemId)
+		if (clip.itemId === ghostClip?.itemId)
+			continue
 		drawClip(canvas, clip)
 	}
 
