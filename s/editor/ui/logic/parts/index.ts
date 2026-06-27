@@ -6,7 +6,8 @@ import {computeItemDuration} from '@omnimedia/omnitool/x/timeline/renderers/part
 
 export namespace Idx {
 	export type Text = Item.Text & {start?: number}
-	export type Clip = Item.Audio | Item.Video | Text
+	export type Image = Item.Image & {start?: number}
+	export type Clip = Item.Audio | Item.Video | Image | Text
 	export type Struct = Item.Sequence | Item.Stack
 	export type AnyItem = Item.Any
 }

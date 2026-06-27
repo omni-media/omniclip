@@ -6,12 +6,14 @@ export const getBounds = (
 	item: Idx.Clip,
 	mediaDuration?: number
 ) => {
-	const start = item.kind === Kind.Text ? (item.start ?? 0) : item.start
+	const start = "start" in item ? (item.start ?? 0) : 0
 	const end = start + item.duration
+	const unbounded = item.kind === Kind.Text || item.kind === Kind.Image
+
 	return {
 		start,
 		end,
-		maxEnd: item.kind === Kind.Text ? Infinity : (mediaDuration ?? end)
+		maxEnd: unbounded ? Infinity : (mediaDuration ?? end)
 	}
 }
 
