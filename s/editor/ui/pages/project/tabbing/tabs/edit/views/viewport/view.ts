@@ -52,9 +52,15 @@ export const TimelineViewport = shadow((context: EditorContext) => {
 	}
 
 	useMount(() => {
-		canvas.style.aspectRatio = settings.resolution.split("x").join("/")
+		const resize = (resolution: string) => {
+			const [width, height] = resolution.split("x").map(Number)
+			context.session.stage.resize(width, height)
+			canvas.style.aspectRatio = `${width}/${height}`
+		}
+
+		resize(settings.resolution)
 		const dispose = context.strata.settings
-			.on(s => {canvas.style.aspectRatio = s.resolution.split("x").join("/")})
+			.on(s => resize(s.resolution))
 		return () => dispose()
 	})
 

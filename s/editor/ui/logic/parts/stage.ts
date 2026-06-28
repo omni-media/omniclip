@@ -41,13 +41,9 @@ export class Stage {
 			return this.compositor.getActiveObject(selected)
 	}
 
-	set width(width: number) {
-		this.compositor.pixi.stage.width = width
+	resize(width: number, height: number) {
+		this.session.deps.player.resize(width, height)
 		this.kimura.stageWidth = width
-	}
-
-	set height(height: number) {
-		this.compositor.pixi.stage.height = height
 		this.kimura.stageHeight = height
 	}
 
