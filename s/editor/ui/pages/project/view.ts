@@ -49,7 +49,7 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 		const openSettings = async () => {
 			const settings = await context.modals.openModal(settingsModal())
 			if(settings)
-				context.strata.settings.mutate(s => s = settings)
+				context.strata.settings.mutate(s => Object.assign(s, settings))
 		}
 
 		const openShortcuts = () => context.modals.openModal(shortcutsModal())
