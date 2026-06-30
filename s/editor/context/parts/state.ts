@@ -27,6 +27,31 @@ export type OutlinerItem = {
 	starred: boolean
 }
 
+export const defaultRoles: Role[] = [
+	{id: -1, key: "video", name: "Video", scope: "video", color: "#4c8fd6", enabled: true},
+	{id: -2, key: "titles", name: "Titles", scope: "text", color: "#caa458", enabled: true},
+	{id: -3, key: "dialogue", name: "Dialogue", scope: "audio", color: "#65a66f", enabled: true},
+	{id: -4, key: "music", name: "Music", scope: "audio", color: "#b083d4", enabled: true},
+	{id: -5, key: "effects", name: "Effects", scope: "global", color: "#d67855", enabled: true},
+]
+
+export function defaultRoleKeysFor(kind: Kind) {
+	switch (kind) {
+		case Kind.Video:
+		case Kind.Image:
+			return ["video"]
+		case Kind.Text:
+		case Kind.Caption:
+			return ["titles"]
+		case Kind.Audio:
+			return ["dialogue"]
+		case Kind.Transition:
+			return ["effects"]
+		default:
+			return []
+	}
+}
+
 export type Settings = {
 	resolution: string
 	timebase: number

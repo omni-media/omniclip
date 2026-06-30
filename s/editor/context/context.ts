@@ -4,6 +4,7 @@ import type {TimelineFile} from "@omnimedia/omnitool"
 
 import {prepareViews} from "../ui/views/views.js"
 import {ModalManager} from "./parts/modal/modal.js"
+import {syncOutliner} from "./parts/outliner.js"
 import {Requirements, setupRequirements} from "./parts/requirements.js"
 
 export class EditorContext {
@@ -19,6 +20,10 @@ export class EditorContext {
 	#stopTimelineSync
 
 	constructor(private requirements: Requirements) {
+		this.strata.outliner.mutate(state =>
+			syncOutliner(state, this.strata.timeline.state as TimelineFile)
+		)
+
 		this.#stopPlaybackTick = requirements.controllers.player.playback.onTick.on(() =>
 			this.session.setPlayhead(ms(requirements.controllers.player.currentTime))
 		)
@@ -27,18 +32,7 @@ export class EditorContext {
 			const timeline = state as TimelineFile
 			await this.controllers.player.update(timeline)
 			this.session.stage.refresh()
-			// sync outliner with timeline
-			this.strata.outliner.mutate(state => {
-				const existing = new Map(state.items.map(item => [item.itemId, item]))
-				state.items = timeline.items.map(item =>
-					existing.get(item.id) ?? {
-						itemId: item.id,
-						starred: false,
-						tagIds: [],
-						roleIds: [],
-					}
-				)
-			})
+			this.strata.outliner.mutate(state => syncOutliner(state, timeline))
 		})
 	}
 
