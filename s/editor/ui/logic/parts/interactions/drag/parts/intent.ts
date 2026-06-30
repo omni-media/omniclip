@@ -4,9 +4,9 @@ import {Id, Kind} from "@omnimedia/omnitool"
 import {DragSnapshot} from "./snapshot.js"
 
 export type DropIntent =
-	| {type: "sequence", parentId: Id, index: number}
+	| {type: "sequence-reorder", sequenceId: Id, index: number}
+	| {type: "sequence-insert", sequenceId: Id, index: number}
 	| {type: "stack", parentId: Id, index: number}
-	| {type: "stack-sequence", stackId: Id, sequenceId: Id, index: number}
 	| {type: "stack-wrap-leaf", stackId: Id, targetId: Id, before: boolean}
 
 type GetDropIntentOpts = {
@@ -19,18 +19,21 @@ type GetDropIntentOpts = {
 export function getDropIntent({snapshot, movingId, pointerX, rowIndex}: GetDropIntentOpts): DropIntent | null {
 	const item = snapshot.index.getItem(movingId)
 	const parent = snapshot.index.getParent(movingId)
+	const viewed = snapshot.index.getItem(snapshot.viewedId)
 
-	if (parent?.kind === Kind.Sequence) {
+	if (viewed.kind !== Kind.Stack)
+		return null
+
+	const reorderingOwnSequence = parent?.kind === Kind.Sequence
+		&& viewed.childrenIds[rowIndex] === parent.id
+
+	if (reorderingOwnSequence) {
 		return {
-			type: "sequence",
-			parentId: parent.id,
+			type: "sequence-reorder",
+			sequenceId: parent.id,
 			index: snapshot.getInsertIndex(parent.id, item.id, pointerX),
 		}
 	}
-
-	const viewed = snapshot.index.getItem(snapshot.viewedId)
-	if (viewed.kind !== Kind.Stack || !viewed.childrenIds.includes(item.id))
-		return null
 
 	const targetId = viewed.childrenIds[rowIndex]
 	if (targetId == null || targetId === item.id) {
@@ -44,8 +47,7 @@ export function getDropIntent({snapshot, movingId, pointerX, rowIndex}: GetDropI
 	const target = snapshot.index.getItem(targetId)
 	if (target.kind === Kind.Sequence) {
 		return {
-			type: "stack-sequence",
-			stackId: viewed.id,
+			type: "sequence-insert",
 			sequenceId: target.id,
 			index: snapshot.getInsertIndex(target.id, item.id, pointerX),
 		}
