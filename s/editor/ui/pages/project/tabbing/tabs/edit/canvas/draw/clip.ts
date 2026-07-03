@@ -16,42 +16,6 @@ export type TimelineClipBox = {
 	enterable: boolean
 }
 
-function clipFill(kind: Kind) {
-	switch (kind) {
-		case Kind.Stack:
-			return styles.stackFill
-		case Kind.Video:
-			return styles.videoFill
-		case Kind.Image:
-			return styles.imageFill
-		case Kind.Audio:
-			return styles.audioFill
-		case Kind.Text:
-			return styles.textFill
-		case Kind.Caption:
-			return styles.captionFill
-		case Kind.Transition:
-			return styles.transitionFill
-		default:
-			return styles.unknownFill
-	}
-}
-
-function labelFill(kind: Kind) {
-	switch (kind) {
-		case Kind.Video:
-		case Kind.Image:
-			return styles.videoLabelFill
-		case Kind.Audio:
-			return styles.audioLabelFill
-		case Kind.Text:
-		case Kind.Caption:
-			return styles.textLabelFill
-		default:
-			return clipFill(kind)
-	}
-}
-
 function roundedRect(
 	ctx: CanvasRenderingContext2D,
 	x: number,
@@ -64,8 +28,22 @@ function roundedRect(
 	ctx.roundRect(x, y, width, height, radius)
 }
 
-function drawLabel(ctx: CanvasRenderingContext2D, clip: TimelineClipBox, labelHeight: number) {
-	ctx.fillStyle = labelFill(clip.kind)
+function roleColor(canvas: TimelineCanvas, itemId: number) {
+	const outliner = canvas.deps.session.deps.strata.outliner.state
+	const item = outliner.items.find(item => item.itemId === itemId)
+	return outliner.roles.find(role => role.id === item!.roleId)!.color
+}
+
+function itemDisabled(canvas: TimelineCanvas, itemId: number) {
+	return canvas.deps.session.deps.strata.timeline.state.items
+		.find(item => item.id === itemId)
+		?.enabled === false
+}
+
+function drawLabel(canvas: TimelineCanvas, clip: TimelineClipBox, labelHeight: number) {
+	const ctx = canvas.ctx
+
+	ctx.fillStyle = roleColor(canvas, clip.itemId)
 	ctx.fillRect(clip.x, clip.y, clip.width, labelHeight)
 
 	ctx.fillStyle = styles.clipLabelText
@@ -97,6 +75,19 @@ function drawOutline(ctx: CanvasRenderingContext2D, clip: TimelineClipBox) {
 	ctx.stroke()
 }
 
+function drawDisabledOverlay(ctx: CanvasRenderingContext2D, clip: TimelineClipBox) {
+	roundedRect(
+		ctx,
+		clip.x,
+		clip.y,
+		clip.width,
+		clip.height,
+		metrics.clipRadius
+	)
+	ctx.fillStyle = "rgba(12, 12, 12, 0.56)"
+	ctx.fill()
+}
+
 export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 	const ctx = canvas.ctx
 
@@ -115,7 +106,7 @@ export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 		clip.height,
 		metrics.clipRadius
 	)
-	ctx.fillStyle = clipFill(clip.kind)
+	ctx.fillStyle = roleColor(canvas, clip.itemId)
 	ctx.fill()
 
 	ctx.save()
@@ -135,8 +126,11 @@ export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 	if (clip.kind === Kind.Audio)
 		canvas.waveforms.draw(ctx, contentBox)
 
-	drawLabel(ctx, clip, labelHeight)
+	drawLabel(canvas, clip, labelHeight)
 	ctx.restore()
+
+	if (itemDisabled(canvas, clip.itemId))
+		drawDisabledOverlay(ctx, clip)
 
 	drawOutline(ctx, clip)
 }

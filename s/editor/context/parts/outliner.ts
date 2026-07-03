@@ -1,6 +1,6 @@
 import {TimelineFile} from "@omnimedia/omnitool"
 
-import {defaultRoleKeysFor, defaultRoles, State} from "./state.js"
+import {defaultRoleKeyFor, defaultRoles, State} from "./state.js"
 
 export function syncOutliner(outliner: State["outliner"], timeline: TimelineFile) {
 	const roleByKey = new Map(outliner.roles.map(role => [role.key, role]))
@@ -11,12 +11,16 @@ export function syncOutliner(outliner: State["outliner"], timeline: TimelineFile
 
 	const existing = new Map(outliner.items.map(item => [item.itemId, item]))
 
-	outliner.items = timeline.items.map(item =>
-		existing.get(item.id) ?? {
+	outliner.items = timeline.items.map(item => {
+		const meta = existing.get(item.id)
+		if (meta)
+			return meta
+
+		return {
 			itemId: item.id,
 			starred: false,
 			tagIds: [],
-			roleIds: defaultRoleKeysFor(item.kind).map(roleId),
+			roleId: roleId(defaultRoleKeyFor(item.kind)),
 		}
-	)
+	})
 }

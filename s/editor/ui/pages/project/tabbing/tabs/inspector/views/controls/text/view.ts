@@ -5,6 +5,7 @@ import {Item} from '@omnimedia/omnitool'
 import {TextStyleOptions} from 'pixi.js'
 
 import styleCss from './style.css.js'
+import {RoleControls} from '../role.js'
 import {controlsStyles} from '../styles.css.js'
 import {FiltersControls} from '../filters/view.js'
 import {renderFontDetails} from './details/font.js'
@@ -85,6 +86,7 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text) => 
 		return html`
 			${ItemControlTabs({
 				properties: html`
+					${RoleControls(context, item)}
 					<div>
 						<button
 							@click=${() => {
@@ -118,6 +120,7 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text) => 
 	return html`
 		${ItemControlTabs({
 			properties: html`
+				${RoleControls(context, item)}
 				${textControls}
 				${otherControls}
 			`,
