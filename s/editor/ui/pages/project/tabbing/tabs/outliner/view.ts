@@ -11,10 +11,10 @@ import themeCss from "../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../context/context.js"
 import {rolesModal} from "../../../../../logic/modals/roles/modal.js"
 import {OutlinerItem} from "../../../../../../context/parts/state.js"
+import {roleSections} from "../../../../../logic/parts/roles/constants.js"
 import {renderRoleRow as renderOutlinerRoleRow} from "./renderers/role-row.js"
 import {renderItemRow as renderOutlinerItemRow} from "./renderers/item-row.js"
 import {renderRoleSection as renderOutlinerRoleSection} from "./renderers/role-section.js"
-import {childRoles, roleEnabled, roleFamilyIds, roleSections, topRoles} from "../../../../../logic/roles.js"
 
 export const OutlinerTab = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
@@ -22,6 +22,7 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	const searchTerm = useSignal("")
 	const outliner = context.strata.outliner
 	const items = context.strata.timeline.state.items
+	const lookup = context.session.roles.lookup
 	const selectedRoleId = useSignal<number | null>(null)
 
 	const handleItemClick = (id: number) => {
@@ -39,11 +40,11 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	}
 
 	const itemEnabled = (item: OutlinerItem) =>
-		roleEnabled(outliner.state.roles, item.roleId)
+		lookup.enabled(item.roleId)
 
 	const toggleRole = (id: number) => {
-		const familyIds = roleFamilyIds(outliner.state.roles, id)
-		const enabled = !outliner.state.roles.find(role => role.id === id)!.enabled
+		const familyIds = lookup.familyIds(id)
+		const enabled = !lookup.require(id).enabled
 		const metas = outliner.state.items.filter(item => familyIds.includes(item.roleId))
 
 		outliner.mutate(state => {
@@ -62,7 +63,7 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 
 	const selectRole = (id: number) => {
 		selectedRoleId.value = selectedRoleId.value === id ? null : id
-		const ids = roleFamilyIds(outliner.state.roles, id)
+		const ids = lookup.familyIds(id)
 		const item = outliner.state.items.find(item => ids.includes(item.roleId))
 		if (item)
 			handleItemClick(item.itemId)
@@ -72,7 +73,7 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 
 	const itemMeta = (id: number) => outliner.state.items.find(item => item.itemId === id)
 	const matchesRole = (meta?: OutlinerItem) =>
-		selectedRoleId.value === null || !!meta && roleFamilyIds(outliner.state.roles, selectedRoleId.value!).includes(meta.roleId)
+		selectedRoleId.value === null || !!meta && lookup.familyIds(selectedRoleId.value!).includes(meta.roleId)
 
 	const matchesSearch = (item: Item.Any) => {
 		const term = searchTerm.value.trim().toLowerCase()
@@ -93,13 +94,13 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	}
 
 	const renderRoleRow = (role: typeof outliner.state.roles[number]) => {
-		const familyIds = roleFamilyIds(outliner.state.roles, role.id)
+		const familyIds = lookup.familyIds(role.id)
 		const roleItems = outliner.state.items.filter(item => familyIds.includes(item.roleId))
 		return renderOutlinerRoleRow({
 			role,
 			count: roleItems.length,
 			selected: selectedRoleId.value === role.id,
-			disabled: !roleEnabled(outliner.state.roles, role.id),
+			disabled: !lookup.enabled(role.id),
 			subrole: !!role.parentRoleId,
 			onSelect: role => selectRole(role.id),
 			onToggle: role => toggleRole(role.id),
@@ -107,13 +108,13 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	}
 
 	const renderRoleSection = (section: typeof roleSections[number]) => {
-		const roles = topRoles(outliner.state.roles, section.scope)
+		const topRoles = lookup.top(section.scope)
 		return renderOutlinerRoleSection({
 			section,
-			roles,
+			roles: topRoles,
 			renderRole: role => html`
 				${renderRoleRow(role)}
-				${childRoles(outliner.state.roles, role.id).map(renderRoleRow)}
+				${lookup.children(role.id).map(renderRoleRow)}
 			`,
 		})
 	}

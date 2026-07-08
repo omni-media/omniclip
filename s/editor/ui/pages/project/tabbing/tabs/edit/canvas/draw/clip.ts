@@ -31,7 +31,7 @@ function roundedRect(
 function roleColor(canvas: TimelineCanvas, itemId: number) {
 	const outliner = canvas.deps.session.deps.strata.outliner.state
 	const item = outliner.items.find(item => item.itemId === itemId)
-	return outliner.roles.find(role => role.id === item!.roleId)!.color
+	return canvas.deps.session.roles.lookup.require(item!.roleId).color
 }
 
 function itemDisabled(canvas: TimelineCanvas, itemId: number) {

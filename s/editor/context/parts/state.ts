@@ -2,6 +2,8 @@
 import {chronicle, Chronicle} from "@e280/strata"
 import {Id, Kind, TimelineFile} from "@omnimedia/omnitool"
 
+import {defaultRoles} from "./roles/defaults.js"
+
 export type RoleScope = "video" | "audio" | "text" | "global"
 
 export type Role = {
@@ -25,44 +27,6 @@ export type OutlinerItem = {
 	roleId: Id
 	tagIds: Id[]
 	starred: boolean
-}
-
-export const defaultRoles: Role[] = [
-	{id: -1, key: "video", name: "Video", scope: "video", color: "#34527a", enabled: true},
-	{id: -2, key: "titles", name: "Titles", scope: "text", color: "#5c3b91", enabled: true},
-	{id: -3, key: "dialogue", name: "Dialogue", scope: "audio", color: "#804c08", enabled: true},
-	{id: -4, key: "music", name: "Music", scope: "audio", color: "#1b6937", enabled: true},
-	{id: -5, key: "effects", name: "Effects", scope: "global", color: "#696969", enabled: true},
-]
-
-export function roleScopeFor(kind: Kind): RoleScope {
-	switch (kind) {
-		case Kind.Video:
-		case Kind.Image:
-			return "video"
-		case Kind.Text:
-		case Kind.Caption:
-			return "text"
-		case Kind.Audio:
-			return "audio"
-		case Kind.Transition:
-			return "global"
-		default:
-			return "global"
-	}
-}
-
-export function defaultRoleKeyFor(kind: Kind) {
-	switch (roleScopeFor(kind)) {
-		case "video":
-			return "video"
-		case "text":
-			return "titles"
-		case "audio":
-			return "dialogue"
-		case "global":
-			return "effects"
-	}
 }
 
 export type Settings = {
@@ -122,7 +86,7 @@ export const makeDefaultState = (withRoot = false): State => ({
 	},
 	timeline: chronicle(makeDefaultTimeline(withRoot)),
 	outliner: {
-		roles: [],
+		roles: defaultRoles.map(role => ({...role})),
 		tags: [],
 		items: []
 	},

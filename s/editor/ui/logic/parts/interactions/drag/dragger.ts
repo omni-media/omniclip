@@ -61,14 +61,17 @@ export class Dragger {
 			pointerX,
 			rowIndex: snapshot.rowAt(point.y),
 		})
+		const validIntent = intent && session.roles.canDrop(clip.itemId, intent)
+			? intent
+			: null
 
-		session.setDropIntent(intent ? {movingId: clip.itemId, intent} : null)
+		session.setDropIntent(validIntent ? {movingId: clip.itemId, intent: validIntent} : null)
 
-		if (intent) {
+		if (validIntent) {
 			const overlay = overlayFromIntent({
 				index: snapshot.index,
 				movingId: clip.itemId,
-				intent,
+				intent: validIntent,
 				getId: () => session.deps.omnitool.getId(),
 			})
 			session.setProposal(overlay ? new Proposal(session.timeline, overlay) : null)
@@ -82,8 +85,12 @@ export class Dragger {
 	}
 
 	commit(session: OmniSession) {
-		if (this.isDragging)
+		const drop = session.$dropIntent.value
+		if (this.isDragging) {
 			session.$proposal.value?.commit()
+			if (drop)
+				session.roles.assignFromDrop(drop.movingId, drop.intent)
+		}
 
 		this.cancel(session)
 	}

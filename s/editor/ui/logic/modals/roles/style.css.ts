@@ -33,6 +33,7 @@ export default css`
 
 	.role-row,
 	.subrole-row {
+		position: relative;
 		display: grid;
 		grid-template-columns: 1.4em minmax(0, 1fr) auto auto;
 		align-items: center;
@@ -42,6 +43,37 @@ export default css`
 		border-radius: 3px;
 		background: color-mix(in srgb, var(--role-color), #111 28%);
 		border: 1px solid color-mix(in srgb, var(--role-color), #111 48%);
+		cursor: grab;
+	}
+
+	.role-row:active,
+	.subrole-row:active {
+		cursor: grabbing;
+	}
+
+	.role-row[data-drop-placement="before"]::before,
+	.role-row[data-drop-placement="after"]::after,
+	.subrole-row[data-drop-placement="before"]::before,
+	.subrole-row[data-drop-placement="after"]::after {
+		content: "";
+		position: absolute;
+		left: 0.2em;
+		right: 0.2em;
+		height: 2px;
+		border-radius: 2px;
+		background: color-mix(in srgb, var(--role-color), #fff 48%);
+		box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.28);
+		pointer-events: none;
+	}
+
+	.role-row[data-drop-placement="before"]::before,
+	.subrole-row[data-drop-placement="before"]::before {
+		top: -0.25em;
+	}
+
+	.role-row[data-drop-placement="after"]::after,
+	.subrole-row[data-drop-placement="after"]::after {
+		bottom: -0.25em;
 	}
 
 	.subrole-row {

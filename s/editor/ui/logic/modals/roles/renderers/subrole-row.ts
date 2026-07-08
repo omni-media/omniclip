@@ -1,15 +1,17 @@
 
 import {html} from "lit"
 
+import {RoleDrag} from "./types.js"
 import {Role} from "../../../../../context/parts/state.js"
 
 export function renderSubroleRow(props: {
 	role: Role
 	parent: Role
-	onUpdate: (id: number, patch: Partial<Role>) => void
+	drag: RoleDrag
 	onRemove: (role: Role) => void
+	onUpdate: (id: number, patch: Partial<Role>) => void
 }) {
-	const {role, parent, onUpdate, onRemove} = props
+	const {role, parent, onUpdate, onRemove, drag} = props
 
 	const updateName = (event: Event) =>
 		onUpdate(role.id, {name: (event.target as HTMLInputElement).value})
@@ -20,7 +22,18 @@ export function renderSubroleRow(props: {
 	}
 
 	return html`
-		<div class="subrole-row" style="--role-color: ${parent.color}">
+		<div
+			class="subrole-row"
+			style="--role-color: ${parent.color}"
+			data-drop-placement=${drag.placement ?? ""}
+			draggable=${drag.dragzone.draggable}
+			@dragstart=${drag.dragzone.dragstart}
+			@dragend=${drag.dragzone.dragend}
+			@dragenter=${drag.dropzone.dragenter}
+			@dragleave=${drag.dropzone.dragleave}
+			@dragover=${drag.dropzone.dragover}
+			@drop=${drag.dropzone.drop}
+		>
 			<span></span>
 
 			<input
