@@ -4,7 +4,7 @@ import {Id, Kind, TimelineFile} from "@omnimedia/omnitool"
 
 import {defaultRoles} from "./roles/defaults.js"
 
-export type RoleScope = "video" | "audio" | "text" | "global"
+export type RoleScope = "video" | "audio"
 
 export type Role = {
 	id: Id

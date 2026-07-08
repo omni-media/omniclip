@@ -7,9 +7,7 @@ import {defaultRoleKeyFor} from "./utils.js"
 
 const scopeOrder: Record<RoleScope, number> = {
 	video: 0,
-	text: 1,
-	audio: 2,
-	global: 3,
+	audio: 1,
 }
 
 export class RoleLookup {

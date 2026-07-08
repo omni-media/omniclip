@@ -8,7 +8,6 @@ export type RoleSection = {
 
 export const roleSections: RoleSection[] = [
 	{label: "Video Roles", scope: "video"},
-	{label: "Text Roles", scope: "text"},
 	{label: "Audio Roles", scope: "audio"},
 ]
 

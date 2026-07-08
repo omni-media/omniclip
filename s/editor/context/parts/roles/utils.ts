@@ -23,29 +23,24 @@ export function roleScopeFor(kind: Kind): RoleScope {
 	switch (kind) {
 		case Kind.Video:
 		case Kind.Image:
-			return "video"
 		case Kind.Text:
 		case Kind.Caption:
-			return "text"
+			return "video"
 		case Kind.Audio:
 			return "audio"
-		case Kind.Transition:
-			return "global"
 		default:
-			return "global"
+			return "video"
 	}
 }
 
 export function defaultRoleKeyFor(kind: Kind) {
 	switch (roleScopeFor(kind)) {
 		case "video":
-			return "video"
-		case "text":
-			return "titles"
+			return kind === Kind.Text || kind === Kind.Caption
+				? "titles"
+				: "video"
 		case "audio":
 			return "dialogue"
-		case "global":
-			return "effects"
 	}
 }
 
