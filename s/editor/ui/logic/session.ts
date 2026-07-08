@@ -49,7 +49,7 @@ export class OmniSession {
 	canvas
 	stage
 	playback
-	roles = new Roles(this)
+	roles
 	activeMode = signal(selectTool(this))
 
 	constructor(public deps: {
@@ -69,6 +69,7 @@ export class OmniSession {
 		})
 		this.stage = new Stage(this)
 		this.playback = new Playback(this.deps.player)
+		this.roles = new Roles(this)
 		this.#index = derived(() => new Index(deps.strata.timeline.state as TimelineFile))
 		this.$viewedItemId.value = deps.strata.timeline.state.rootId
 

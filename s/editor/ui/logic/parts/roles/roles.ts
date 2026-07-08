@@ -9,11 +9,13 @@ import {RoleLookup} from "../../../../context/parts/roles/lookup.js"
 import {isRoleableKind, isRoleLane, roleIdFromLaneLabel, roleLaneLabel, roleScopeFor} from "../../../../context/parts/roles/utils.js"
 
 export class Roles {
-	constructor(private session: OmniSession) {}
+	#lookup
 
-	#lookup = derived(() =>
-		new RoleLookup(this.session.deps.strata.outliner.state.roles)
-	)
+	constructor(private session: OmniSession) {
+		this.#lookup = derived(() =>
+			new RoleLookup(this.session.deps.strata.outliner.state.roles)
+		)
+	}
 
 	get lookup() {
 		return this.#lookup()
