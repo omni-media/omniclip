@@ -40,19 +40,19 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	}
 
 	const itemEnabled = (item: OutlinerItem) =>
-		lookup.enabled(item.roleId)
+		context.session.roles.lookup.enabled(item.roleId)
 
-	const toggleRole = (id: number) => {
+	const toggleRole = async(id: number) => {
 		const familyIds = lookup.familyIds(id)
 		const enabled = !lookup.require(id).enabled
 		const metas = outliner.state.items.filter(item => familyIds.includes(item.roleId))
 
-		outliner.mutate(state => {
+		await outliner.mutate(state => {
 			for (const item of state.roles.filter(role => role.id === id || role.parentRoleId === id))
 				item.enabled = enabled
 		})
 
-		context.strata.timeline.mutate(state => {
+		await context.strata.timeline.mutate(state => {
 			for (const meta of metas) {
 				const item = state.items.find(item => item.id === meta.itemId)
 				if (item)
