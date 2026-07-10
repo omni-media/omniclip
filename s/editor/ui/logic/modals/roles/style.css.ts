@@ -35,7 +35,7 @@ export default css`
 	.subrole-row {
 		position: relative;
 		display: grid;
-		grid-template-columns: 1.4em minmax(0, 1fr) auto auto;
+		grid-template-columns: 1.1em 1.4em minmax(0, 1fr) auto auto;
 		align-items: center;
 		gap: 0.5em;
 		min-height: 2.35em;
@@ -43,12 +43,24 @@ export default css`
 		border-radius: 3px;
 		background: color-mix(in srgb, var(--role-color), #111 28%);
 		border: 1px solid color-mix(in srgb, var(--role-color), #111 48%);
+		cursor: default;
+	}
+
+	.drag-handle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: rgba(255, 255, 255, 0.5);
 		cursor: grab;
 	}
 
-	.role-row:active,
-	.subrole-row:active {
+	.drag-handle:active {
 		cursor: grabbing;
+	}
+
+	.drag-handle wa-icon {
+		width: 0.8em;
+		height: 1.1em;
 	}
 
 	.role-row[data-drop-placement="before"]::before,

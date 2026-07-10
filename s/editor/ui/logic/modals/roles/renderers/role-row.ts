@@ -18,6 +18,13 @@ export function renderRoleRow(props: {
 	const updateName = (event: Event) =>
 		onUpdate(role.id, {name: (event.target as HTMLInputElement).value})
 
+	const dragstart = (event: DragEvent) => {
+		const row = (event.currentTarget as HTMLElement).parentElement!
+		const rect = row.getBoundingClientRect()
+		event.dataTransfer?.setDragImage(row, event.clientX - rect.left, event.clientY - rect.top)
+		drag.dragzone.dragstart(event)
+	}
+
 	const addSubrole = (event: Event) => {
 		event.stopPropagation()
 		onAddSubrole(role)
@@ -33,14 +40,21 @@ export function renderRoleRow(props: {
 			class="role-row"
 			style="--role-color: ${role.color}"
 			data-drop-placement=${drag.placement ?? ""}
-			draggable=${drag.dragzone.draggable}
-			@dragstart=${drag.dragzone.dragstart}
-			@dragend=${drag.dragzone.dragend}
 			@dragenter=${drag.dropzone.dragenter}
 			@dragleave=${drag.dropzone.dragleave}
 			@dragover=${drag.dropzone.dragover}
 			@drop=${drag.dropzone.drop}
 		>
+			<span
+				class="drag-handle"
+				title="Drag to reorder"
+				draggable=${drag.dragzone.draggable}
+				@dragstart=${dragstart}
+				@dragend=${drag.dragzone.dragend}
+			>
+				<wa-icon name="grip-vertical"></wa-icon>
+			</span>
+
 			<span class="color"></span>
 
 			<input
