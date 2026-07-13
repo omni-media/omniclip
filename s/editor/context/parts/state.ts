@@ -12,6 +12,7 @@ export type Role = {
 	name: string
 	scope: RoleScope
 	color: string
+	gain: number
 	parentRoleId?: Id
 	enabled: boolean
 }
@@ -54,6 +55,7 @@ export type State = {
 		hashes: string[]
 	}
 	metadata: Metadata
+	masterGain: number
 	timeline: Chronicle<TimelineFile>
 	settings: Settings
 	outliner: {
@@ -84,6 +86,7 @@ export const makeDefaultState = (withRoot = false): State => ({
 	metadata: {
 		items: []
 	},
+	masterGain: 1,
 	timeline: chronicle(makeDefaultTimeline(withRoot)),
 	outliner: {
 		roles: defaultRoles.map(role => ({...role})),

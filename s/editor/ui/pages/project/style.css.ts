@@ -119,6 +119,11 @@ wa-split-panel::part(divider) {
 .browser-panel {
 	display: none;
 }
+
+.mixer-panel {
+	display: none;
+}
+
 .panel[data-active="edit"] .viewport-panel {
 	display: flex;
 }

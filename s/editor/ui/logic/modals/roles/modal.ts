@@ -64,12 +64,13 @@ export const rolesModal = (): ModalDefinition<RolesResult> => ({
 			},
 		}))
 
-		const makeRole = (role: Omit<Role, 'id' | 'key' | 'enabled'>): Role => {
+		const makeRole = (role: Omit<Role, 'id' | 'key' | 'gain' | 'enabled'>): Role => {
 			const id = context.omni.getId()
 
 			return {
 				id,
 				key: `custom-${id}`,
+				gain: 1,
 				enabled: true,
 				...role
 			}

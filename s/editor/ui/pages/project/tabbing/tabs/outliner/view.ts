@@ -39,28 +39,6 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 		})
 	}
 
-	const itemEnabled = (item: OutlinerItem) =>
-		context.session.roles.lookup.enabled(item.roleId)
-
-	const toggleRole = async(id: number) => {
-		const familyIds = lookup.familyIds(id)
-		const enabled = !lookup.require(id).enabled
-		const metas = outliner.state.items.filter(item => familyIds.includes(item.roleId))
-
-		await outliner.mutate(state => {
-			for (const item of state.roles.filter(role => role.id === id || role.parentRoleId === id))
-				item.enabled = enabled
-		})
-
-		await context.strata.timeline.mutate(state => {
-			for (const meta of metas) {
-				const item = state.items.find(item => item.id === meta.itemId)
-				if (item)
-					item.enabled = itemEnabled(meta)
-			}
-		})
-	}
-
 	const selectRole = (id: number) => {
 		selectedRoleId.value = selectedRoleId.value === id ? null : id
 		const ids = lookup.familyIds(id)
@@ -103,7 +81,7 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 			disabled: !lookup.enabled(role.id),
 			subrole: !!role.parentRoleId,
 			onSelect: role => selectRole(role.id),
-			onToggle: role => toggleRole(role.id),
+			onToggle: role => context.session.roles.toggle(role.id),
 		})
 	}
 

@@ -21,6 +21,56 @@ export class Roles {
 		return this.#lookup()
 	}
 
+	gainFactor(roleId: Id): number {
+		const role = this.lookup.require(roleId)
+		return role.gain * (role.parentRoleId !== undefined
+			? this.gainFactor(role.parentRoleId)
+			: 1)
+	}
+
+	setGain(roleId: Id, gain: number) {
+		const previous = this.lookup.require(roleId).gain
+		const ratio = gain / previous
+		const itemIds = new Set(this.session.deps.strata.outliner.state.items
+			.filter(meta => this.#isRoleOrDescendant(meta.roleId, roleId))
+			.map(meta => meta.itemId)
+		)
+		this.session.deps.strata.outliner.mutate(state => {
+			const role = state.roles.find(role => role.id === roleId)
+			if (role)
+				role.gain = gain
+		})
+		this.session.timeline.mutate(state => this.#scaleAudioItems(state, ratio, itemIds))
+	}
+
+	setMasterGain(gain: number) {
+		const previous = this.session.deps.strata.masterGain.state
+		const ratio = gain / previous
+		this.session.deps.strata.masterGain.mutate(() => gain)
+		this.session.timeline.mutate(state => this.#scaleAudioItems(state, ratio))
+	}
+
+	async toggle(id: Id) {
+		const familyIds = this.lookup.familyIds(id)
+		const enabled = !this.lookup.require(id).enabled
+		const metas = this.session.deps.strata.outliner.state.items
+			.filter(item => familyIds.includes(item.roleId))
+
+		await this.session.deps.strata.outliner.mutate(state => {
+			for (const role of state.roles)
+				if (familyIds.includes(role.id))
+					role.enabled = enabled
+		})
+
+		await this.session.timeline.mutate(state => {
+			for (const meta of metas) {
+				const item = state.items.find(item => item.id === meta.itemId)
+				if (item)
+					item.enabled = this.lookup.enabled(meta.roleId)
+			}
+		})
+	}
+
 	placeDefault(item: Item.Any) {
 		this.session.timeline.mutate(state =>
 			this.#placeInRoleLane(state, item.id, this.#defaultRoleId(item.kind))
@@ -28,14 +78,8 @@ export class Roles {
 	}
 
 	assign(itemId: Id, roleId: Id) {
-		this.#setMeta(itemId, roleId)
-
-		this.session.timeline.mutate(state => {
-			this.#setItemEnabled(state, itemId, roleId)
-			const viewed = this.session.index.getItemMaybe(this.session.$viewedItemId.value)
-			if (viewed?.kind === Kind.Stack)
-				this.#placeInRoleLane(state, itemId, roleId)
-		})
+		const viewed = this.session.index.getItemMaybe(this.session.$viewedItemId.value)
+		this.#assign(itemId, roleId, viewed?.kind === Kind.Stack)
 	}
 
 	assignFromDrop(itemId: Id, intent: DropIntent) {
@@ -43,8 +87,7 @@ export class Roles {
 		if (roleId === null)
 			return
 
-		this.#setMeta(itemId, roleId)
-		this.session.timeline.mutate(state => this.#setItemEnabled(state, itemId, roleId))
+		this.#assign(itemId, roleId)
 	}
 
 	canDrop(itemId: Id, intent: DropIntent) {
@@ -92,6 +135,17 @@ export class Roles {
 		return roleIdFromLaneLabel(sequence?.label)
 	}
 
+	#assign(itemId: Id, roleId: Id, placeInLane = false) {
+		const ratio = this.gainFactor(roleId) / this.gainFactor(this.#roleIdFor(itemId))
+		this.#setMeta(itemId, roleId)
+		this.session.timeline.mutate(state => {
+			this.#scaleAudioItem(state, itemId, ratio)
+			this.#setItemEnabled(state, itemId, roleId)
+			if (placeInLane)
+				this.#placeInRoleLane(state, itemId, roleId)
+		})
+	}
+
 	#setMeta(itemId: Id, roleId: Id) {
 		this.session.deps.strata.outliner.mutate(state => {
 			const meta = state.items.find(meta => meta.itemId === itemId)
@@ -104,6 +158,25 @@ export class Roles {
 		const item = state.items.find(item => item.id === itemId)
 		if (item)
 			item.enabled = this.lookup.enabled(roleId)
+	}
+
+	#scaleAudioItem(state: TimelineFile, itemId: Id, ratio: number) {
+		const item = state.items.find(item => item.id === itemId)
+		if (item?.kind === Kind.Audio)
+			item.gain = item.gain! * ratio
+	}
+
+	#scaleAudioItems(state: TimelineFile, ratio: number, itemIds?: Set<Id>) {
+		for (const item of state.items)
+			if (item.kind === Kind.Audio && (!itemIds || itemIds.has(item.id)))
+				item.gain = item.gain! * ratio
+	}
+
+	#isRoleOrDescendant(roleId: Id, ancestorId: Id): boolean {
+		if (roleId === ancestorId)
+			return true
+		const parentId = this.lookup.get(roleId)?.parentRoleId
+		return parentId !== undefined && this.#isRoleOrDescendant(parentId, ancestorId)
 	}
 
 	#defaultRoleId(kind: Kind) {
