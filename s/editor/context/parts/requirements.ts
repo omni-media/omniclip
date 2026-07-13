@@ -1,5 +1,5 @@
 import {Cellar, OpfsForklift} from "@e280/quay"
-import {Datafile, Driver, Kind, Media, O, Omni, TimelineFile} from "@omnimedia/omnitool"
+import {Driver, O, Omni, TimelineFile} from "@omnimedia/omnitool"
 
 import {Strata} from "./strata.js"
 import {hydrateProject} from "./hydration.js"
@@ -17,10 +17,6 @@ export async function setupRequirements(projectId: string) {
 	const cellar = new Cellar(forklift)
 	const driver = await Driver.setup()
 	const project = new Omni(driver)
-	const {videoA, imageA} = await loadDemoFiles(project)
-
-	if (strata.timeline.state.items.length === 1)
-		await demo(strata, project, videoA, imageA)
 
 	const cargo = await CargoController.setup(strata, cellar, project)
 	await hydrateProject(cargo.mediaLibrary, project, cellar, strata)
@@ -47,29 +43,3 @@ export async function setupRequirements(projectId: string) {
 	const keybindings = await Keybindings.setup(session)
 	return {strata, controllers, tabs, keybindings, omni, project, driver, session}
 }
-
-async function loadDemoFiles(omni: Omni) {
-	const demoVideo = await fetch("/assets/temp/talk.mp4")
-	const demoImage = await fetch("/assets/temp/person.jpg")
-	const blobVid = await demoVideo.blob()
-	const blobImg = await demoImage.blob()
-	const {videoA} = await omni.load({videoA: Datafile.make(blobVid)})
-	const {imageA} = await omni.load({imageA: Datafile.make(blobImg)})
-	return {videoA, imageA}
-}
-
-async function demo(strata: Strata, omni: Omni, videoA: Media, image: Media) {
-	await strata.timeline.mutate(state => Object.assign(state,
-		omni.timeline(o =>
-			o.stack(
-				o.image(image, {duration: 2000}),
-				o.text("text123", {styles: {fill: "red"}}),
-				o.video(videoA, {duration: 5000}),
-				o.audio(videoA, {duration: 8000}),
-			)
-		)
-	))
-	const stack = strata.timeline.state.items.find(item => item.kind === Kind.Stack)
-	await strata.timeline.mutate(state => state.rootId = stack!.id)
-}
-
