@@ -7,7 +7,6 @@ export const bladeTool = tool("blade", (session) => ({
 			return
 
 		session.splitClipAt(clip.itemId, time)
-		session.canvas.scheduleDraw()
 	},
 	pointermove: ({clip, inRuler, time}) => {
 		session.canvas.$previews.blade.value = !inRuler && clip

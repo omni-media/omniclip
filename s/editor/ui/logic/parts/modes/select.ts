@@ -43,7 +43,6 @@ export const selectTool = tool("select", (session) => {
 			}
 
 			session.$selectedItem.value = clip?.itemId ?? null
-			session.canvas.scheduleDraw()
 
 			if (clip && clip.kind !== Kind.Transition) dragger.start(clip, point, session)
 			else dragger.cancel(session)
@@ -91,7 +90,6 @@ export const selectTool = tool("select", (session) => {
 			if (!clip?.enterable) return
 			session.$viewedItemId.value = clip.itemId
 			session.$selectedItem.value = clip.itemId
-			session.canvas.scheduleDraw()
 		}
 	}
 })
