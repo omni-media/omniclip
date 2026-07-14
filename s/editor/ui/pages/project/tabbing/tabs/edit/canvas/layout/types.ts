@@ -22,6 +22,7 @@ export type LayoutResult = {
 export type LayoutContext = {
 	timeline: TimelineFile
 	items: Map<number, TimelineNode>
+	roleIdFor: (item: TimelineNode) => number
 	pxPerMs: number
 	selectedItemId: number | null
 	trackY: (row: number) => number

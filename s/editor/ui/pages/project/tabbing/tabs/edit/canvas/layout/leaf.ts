@@ -17,6 +17,7 @@ export function layoutLeaf(
 ): LayoutResult {
 	const clip: TimelineClipBox = {
 		itemId: item.id,
+		roleId: context.roleIdFor(item),
 		kind: item.kind,
 		label: item.name ?? item.id.toString(),
 		x: time * context.pxPerMs + metrics.paddingX,

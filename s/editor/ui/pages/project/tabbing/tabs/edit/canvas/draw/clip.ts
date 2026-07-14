@@ -6,6 +6,7 @@ import type {TimelineCanvas} from "../canvas.js"
 
 export type TimelineClipBox = {
 	itemId: number
+	roleId: number
 	kind: Kind
 	label: string
 	x: number
@@ -28,10 +29,8 @@ function roundedRect(
 	ctx.roundRect(x, y, width, height, radius)
 }
 
-function roleColor(canvas: TimelineCanvas, itemId: number) {
-	const outliner = canvas.deps.session.deps.strata.outliner.state
-	const item = outliner.items.find(item => item.itemId === itemId)
-	return canvas.deps.session.roles.lookup.require(item!.roleId).color
+function roleColor(canvas: TimelineCanvas, roleId: number) {
+	return canvas.deps.session.roles.lookup.require(roleId).color
 }
 
 function itemDisabled(canvas: TimelineCanvas, itemId: number) {
@@ -40,10 +39,10 @@ function itemDisabled(canvas: TimelineCanvas, itemId: number) {
 		?.enabled === false
 }
 
-function drawLabel(canvas: TimelineCanvas, clip: TimelineClipBox, labelHeight: number) {
+function drawLabel(canvas: TimelineCanvas, clip: TimelineClipBox, labelHeight: number, color: string) {
 	const ctx = canvas.ctx
 
-	ctx.fillStyle = roleColor(canvas, clip.itemId)
+	ctx.fillStyle = color
 	ctx.fillRect(clip.x, clip.y, clip.width, labelHeight)
 
 	ctx.fillStyle = styles.clipLabelText
@@ -90,6 +89,7 @@ function drawDisabledOverlay(ctx: CanvasRenderingContext2D, clip: TimelineClipBo
 
 export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 	const ctx = canvas.ctx
+	const color = roleColor(canvas, clip.roleId)
 
 	const labelHeight = Math.min(metrics.labelHeight, clip.height)
 	const contentBox = {
@@ -106,7 +106,7 @@ export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 		clip.height,
 		metrics.clipRadius
 	)
-	ctx.fillStyle = roleColor(canvas, clip.itemId)
+	ctx.fillStyle = color
 	ctx.fill()
 
 	ctx.save()
@@ -126,7 +126,7 @@ export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 	if (clip.kind === Kind.Audio)
 		canvas.waveforms.draw(ctx, contentBox)
 
-	drawLabel(canvas, clip, labelHeight)
+	drawLabel(canvas, clip, labelHeight, color)
 	ctx.restore()
 
 	if (itemDisabled(canvas, clip.itemId))
