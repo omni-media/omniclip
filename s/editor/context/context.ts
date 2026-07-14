@@ -30,9 +30,9 @@ export class EditorContext {
 
 		this.#stopTimelineSync = this.strata.timeline.lens(s => s).on(async state => {
 			const timeline = state as TimelineFile
+			this.strata.outliner.mutate(state => syncOutliner(state, timeline))
 			await this.controllers.player.update(timeline)
 			this.session.stage.refresh()
-			this.strata.outliner.mutate(state => syncOutliner(state, timeline))
 		})
 
 		this.session.roles.organizeLanes()
