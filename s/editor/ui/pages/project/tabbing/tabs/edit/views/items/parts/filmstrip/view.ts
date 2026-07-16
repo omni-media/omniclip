@@ -63,16 +63,19 @@ export const FilmstripView = shadow((
 		const visibleClipEnd = Math.min(clip.start + clip.duration, viewportEnd)
 
 		if (visibleClipStart < visibleClipEnd)
-			(await filmstrip).range = [
-				(visibleClipStart - clip.start) / 1000,
-				(visibleClipEnd - clip.start) / 1000,
-			]
+			(await filmstrip).update({
+				range: [
+					(visibleClipStart - clip.start) / 1000,
+					(visibleClipEnd - clip.start) / 1000,
+				],
+				frequency: getFrequencyInSec(),
+			})
 	}
 
 	useOnce(async () => update())
 
 	useMount(() => {
-		const dispose1 = session.viewport.$zoom.on(async () => {(await filmstrip).frequency = getFrequencyInSec()})
+		const dispose1 = session.viewport.$zoom.on(update)
 		const dispose2 = session.viewport.$scrollLeft.on(async () => update())
 		const dispose3 = session.viewport.$width.on(async () => update())
 		return () => {

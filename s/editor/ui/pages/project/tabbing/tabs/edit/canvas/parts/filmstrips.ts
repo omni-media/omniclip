@@ -12,7 +12,7 @@ type Tile = {
 }
 
 type Entry = {
-	filmstrip: Promise<Filmstrip>
+	filmstrip: Filmstrip | null
 	tiles: Tile[]
 }
 
@@ -70,10 +70,10 @@ export class TimelineFilmstrips {
 
 		const entry: Entry = {
 			tiles: [],
-			filmstrip: Promise.resolve(null as never)
+			filmstrip: null
 		}
 
-		entry.filmstrip = Filmstrip.init(media.url, {
+		Filmstrip.init(media.url, {
 			frequency: this.#frequencyInSeconds(),
 			onPlaceholders: times => {
 				if (entry.tiles.length === 0)
@@ -94,6 +94,9 @@ export class TimelineFilmstrips {
 				height: metrics.trackHeight,
 				fit: "cover",
 			}
+		}).then(filmstrip => {
+			entry.filmstrip = filmstrip
+			this.canvas.scheduleDraw()
 		})
 
 		this.#entries.set(clip.id, entry)
@@ -120,10 +123,7 @@ export class TimelineFilmstrips {
 			return
 
 		const frequency = this.#frequencyInSeconds()
-		void entry.filmstrip.then(filmstrip => {
-			filmstrip.frequency = frequency
-			filmstrip.range = range
-		})
+		entry.filmstrip?.update({range, frequency})
 	}
 
 	#visibleRange(box: TimelineClipBox, clip: Item.Video) {
@@ -145,8 +145,7 @@ export class TimelineFilmstrips {
 
 	#frequencyInSeconds() {
 		const pixelsPerMillisecond = this.canvas.viewport.durationToWidth(ms(1))
-		const frequency = THUMB_WIDTH_PX / (pixelsPerMillisecond * 1000)
-		return Math.round(frequency * 1000) / 1000
+		return THUMB_WIDTH_PX / (pixelsPerMillisecond * 1000)
 	}
 
 	#tileLeft(box: TimelineClipBox, clip: Item.Video, time: number) {
