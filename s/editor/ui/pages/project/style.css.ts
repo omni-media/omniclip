@@ -163,6 +163,10 @@ wa-split-panel::part(divider) {
 		display: grid;
 	}
 
+	.inspector-split {
+		--max: calc(100% - 300px);
+	}
+
 	wa-split-panel::part(divider) {
 		display: flex;
 		background: #101010;

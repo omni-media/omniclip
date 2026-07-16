@@ -110,13 +110,16 @@ wa-button[data-active]::part(base) {
 	align-items: center;
 	justify-items: center;
 	gap: 0.45em;
-	min-height: 8em;
 }
 
 wa-slider {
 	height: 100%;
-	min-height: 7em;
 	--track-color-active: color-mix(in srgb, var(--role-color), #d8d8d8 20%);
+}
+
+wa-slider::part(slider),
+wa-slider::part(track) {
+	height: 100%;
 }
 
 .meter {
@@ -124,7 +127,6 @@ wa-slider {
 	align-items: end;
 	width: 100%;
 	height: 100%;
-	min-height: 7em;
 	padding: 2px;
 	background: #111;
 	border: 1px solid #292929;
