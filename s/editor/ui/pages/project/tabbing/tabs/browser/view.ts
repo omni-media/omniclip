@@ -52,7 +52,27 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			context.session.appendItem(clip)
 	}
 
-	useOnce(() => setupMediaGroup(context, addMedia))
+	const removeMedia = async(event: Event, item: MediaItem) => {
+		event.preventDefault()
+		event.stopPropagation()
+
+		if (!item.isKind("file"))
+			return
+
+		const {hash} = item.specimen
+		const inUse = context.strata.timeline.state.items.some(item =>
+			"mediaHash" in item && item.mediaHash === hash
+		)
+
+		if (inUse) {
+			alert("Remove clips using this media before removing it from the bin.")
+			return
+		}
+
+		await context.controllers.cargo.mediaLibrary.delete(item)
+	}
+
+	useOnce(() => setupMediaGroup(context, addMedia, removeMedia))
 
 	const setQuery = (event: InputEvent) => {
 		query.value = (event.target as HTMLInputElement).value

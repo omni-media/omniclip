@@ -12,13 +12,14 @@ type MediaItemPreviewOptions = {
 	item: MediaItem
 	library: MediaLibrary
 	onAdd: (event: Event) => void
+	onRemove: (event: Event) => void
 }
 
 export const MediaItemPreview = shadow((options: MediaItemPreviewOptions) => {
 	useCss(styleCss)
 
 	const {item} = options
-	const addable = item.isKind("file") && item.specimen.format !== "other"
+	const addable = item.isKind("file") && !!item.specimen.hash && item.specimen.format !== "other"
 
 	const renderPreview = () => {
 		if (!item.isKind("file"))
@@ -50,6 +51,11 @@ export const MediaItemPreview = shadow((options: MediaItemPreviewOptions) => {
 				<div class="overlay" aria-hidden="true">
 					<wa-icon name="plus"></wa-icon>
 				</div>
+			` : null}
+			${item.isKind("file") && item.specimen.hash ? html`
+				<button class="remove" title="Remove from media bin" @click=${options.onRemove}>
+					<wa-icon name="trash"></wa-icon>
+				</button>
 			` : null}
 		</div>
 	`

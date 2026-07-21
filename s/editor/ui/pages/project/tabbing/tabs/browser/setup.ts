@@ -7,7 +7,8 @@ import {MediaItem, MediaItemPreview} from "./views/media-item-preview/view.js"
 
 export function setupMediaGroup(
 	context: EditorContext,
-	addMedia: (event: Event, item: MediaItem) => void
+	addMedia: (event: Event, item: MediaItem) => void,
+	removeMedia: (event: Event, item: MediaItem) => void,
 ) {
 	const library = context.controllers.cargo.mediaLibrary
 
@@ -15,6 +16,7 @@ export function setupMediaGroup(
 		item,
 		library,
 		onAdd: event => addMedia(event, item),
+		onRemove: event => removeMedia(event, item),
 	})
 
 	return brain.setGroup(MEDIA_GROUP, library)

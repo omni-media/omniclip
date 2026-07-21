@@ -43,5 +43,31 @@ img {
 .preview:hover > .overlay {
 	opacity: 1;
 }
-`
 
+.remove {
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	display: grid;
+	place-items: center;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	border: 0;
+	border-radius: 4px;
+	background: rgb(0 0 0 / 54%);
+	color: white;
+	font-size: 11px;
+	opacity: 0;
+	cursor: pointer;
+	transition: opacity 120ms ease;
+}
+
+.remove:hover {
+	background: rgb(190 42 42 / 90%);
+}
+
+.preview:hover > .remove {
+	opacity: 1;
+}
+`
