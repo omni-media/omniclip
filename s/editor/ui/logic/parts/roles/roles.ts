@@ -100,33 +100,6 @@ export class Roles {
 		return !!item && !!role && role.scope === roleScopeFor(item.kind)
 	}
 
-	organizeLanes() {
-		this.session.timeline.mutate(state => {
-			const root = state.items.find(item => item.id === state.rootId)
-			if (root?.kind !== Kind.Stack)
-				return
-
-			for (const id of [...root.childrenIds]) {
-				const child = state.items.find(item => item.id === id)
-				if (!child)
-					continue
-
-				if (isRoleLane(child)) {
-					for (const childId of [...child.childrenIds]) {
-						const item = state.items.find(item => item.id === childId)
-						if (item && isRoleableKind(item.kind))
-							this.#placeInRoleLane(state, childId, this.#roleIdFor(childId, item.kind))
-					}
-				}
-				else if (isRoleableKind(child.kind)) {
-					this.#placeInRoleLane(state, child.id, this.#roleIdFor(child.id, child.kind))
-				}
-			}
-
-			this.#orderLanes(state, root)
-		})
-	}
-
 	#roleIdFromIntent(intent: DropIntent) {
 		const sequenceId = "sequenceId" in intent ? intent.sequenceId : null
 		const sequence = sequenceId === null

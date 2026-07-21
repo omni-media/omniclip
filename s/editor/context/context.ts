@@ -35,7 +35,6 @@ export class EditorContext {
 			this.session.stage.refresh()
 		})
 
-		this.session.roles.organizeLanes()
 	}
 
 	get session() { return this.requirements.session }

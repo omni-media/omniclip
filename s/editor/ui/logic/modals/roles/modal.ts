@@ -187,7 +187,6 @@ export const rolesModal = (): ModalDefinition<RolesResult> => ({
 				}
 			})
 
-			context.session.roles.organizeLanes()
 			context.session.canvas.scheduleDraw()
 			modal.resolve(valid)
 		}
