@@ -2,21 +2,22 @@
 import {dom} from '@e280/sly'
 import {pub} from '@e280/stz'
 import {signal} from '@e280/strata'
-import {Driver, Id, Item, Kind, Resource, VideoPlayer} from '@omnimedia/omnitool'
 import {fps, Fps} from '@omnimedia/omnitool/x/units/fps.js'
 import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
+import {Driver, Id, Item, Kind, Resource, VideoPlayer} from '@omnimedia/omnitool'
 
 import {drawClips} from './draw/clip.js'
 import {drawRuler} from './draw/ruler.js'
 import {drawLanes} from './draw/lanes.js'
 import {buildLayout} from './layout/build.js'
 import {LayoutResult} from './layout/types.js'
+import {TimelineClipBox} from './draw/clip.js'
+import {LaneStrip} from './parts/lane-strip.js'
 import {drawPlayhead} from './draw/playhead.js'
 import {metrics, styles} from './draw/styles.js'
 import {drawBladePreview} from './draw/blade-preview.js'
 import {drawClipPreview} from './draw/clip-preview.js'
 import {drawSnapTargets} from './draw/snap-targets.js'
-import {TimelineClipBox} from './draw/clip.js'
 import {TimelineFilmstrips} from './parts/filmstrips.js'
 import {TimelineWaveforms} from './parts/waveforms.js'
 import {OmniSession} from '../../../../../../logic/session.js'
@@ -46,6 +47,8 @@ export class TimelineCanvas {
 	#lastZoom = 0
 
 	#raf = 0
+
+	#laneStrip = new LaneStrip(this)
 
 	$previews = {
 		blade: signal<{time: Ms, clipId: Id} | null>(null)
@@ -149,6 +152,7 @@ export class TimelineCanvas {
 		drawBladePreview(this)
 		drawPlayhead(this)
 		this.ctx.restore()
+		this.#laneStrip.draw()
 	}
 
 	#resize() {
@@ -317,6 +321,7 @@ export class TimelineCanvas {
 		const clip = inRuler ? null : this.clipAt(point.x, point.y)
 
 		this.deps.session.setGhostPlayhead(time)
+		this.#laneStrip.hover(inRuler ? null : point)
 		this.scheduleDraw()
 
 		this.deps.session.activeMode.value.pointermove?.({
@@ -345,6 +350,7 @@ export class TimelineCanvas {
 		const clip = inRuler ? null : this.clipAt(point.x, point.y)
 
 		this.deps.session.clearGhostPlayhead()
+		this.#laneStrip.hover(null)
 		this.scheduleDraw()
 
 		this.deps.session.activeMode.value.pointerleave?.({
