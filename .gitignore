@@ -2,6 +2,8 @@
 /x
 /notes.md
 /notes
+/bin
+/assets/temp
 
 # Local Netlify folder
 .netlify
