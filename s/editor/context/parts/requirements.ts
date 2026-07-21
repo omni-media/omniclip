@@ -1,4 +1,4 @@
-import {Cellar, OpfsForklift} from "@e280/quay"
+import {Cellar} from "@e280/quay"
 import {Driver, O, Omni, TimelineFile} from "@omnimedia/omnitool"
 
 import {Strata} from "./strata.js"
@@ -13,8 +13,7 @@ export type Requirements = Awaited<ReturnType<typeof setupRequirements>>
 export async function setupRequirements(projectId: string) {
 	const strata = await Strata.setup(projectId)
 	const tabs = new TabManager()
-	const forklift = await OpfsForklift.setup("files")
-	const cellar = new Cellar(forklift)
+	const cellar = await Cellar.opfs("files")
 	const driver = await Driver.setup()
 	const project = new Omni(driver)
 

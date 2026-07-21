@@ -117,10 +117,10 @@ export const BackgroundRemoverControls = shadow((context: EditorContext, item: I
 			status("Saving image...")
 
 			const blob = await frameToPng(canvas, outputFrame).finally(() => outputFrame.close())
-			const cask = await context.controllers.cargo.cellar.save(blob)
+			const hash = await context.controllers.cargo.cellar.write(blob.stream())
 
 			const {removed} = await context.project.load({
-				removed: Datafile.make(blob, `${cask.hash}.png`)
+				removed: Datafile.make(blob, `${hash}.png`)
 			})
 
 			context.omni.set(item.id, {mediaHash: removed.datafile.checksum.hash})
