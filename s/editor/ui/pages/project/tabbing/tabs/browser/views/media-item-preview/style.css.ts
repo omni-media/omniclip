@@ -40,6 +40,19 @@ img {
 	pointer-events: none;
 }
 
+.upload {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(to right, rgb(92 144 220 / 58%) var(--progress), rgb(0 0 0 / 48%) var(--progress));
+	color: white;
+	font-size: var(--font-size-xs);
+	font-variant-numeric: tabular-nums;
+	pointer-events: none;
+}
+
 .preview:hover > .overlay {
 	opacity: 1;
 }
