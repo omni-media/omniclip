@@ -3,8 +3,7 @@ import {html} from "lit"
 import type {TextDetailsProps} from "../view.js"
 
 export const renderLayoutDetails = ({style, options, update}: TextDetailsProps) => html`
-	<details>
-		<summary>Layout</summary>
+	<wa-details summary="Layout" icon-placement="start">
 		<div class="cnt">
 			<label>Letter Spacing</label>
 			<input
@@ -38,5 +37,5 @@ export const renderLayoutDetails = ({style, options, update}: TextDetailsProps) 
 				`)}
 			</select>
 		</div>
-	</details>
+	</wa-details>
 `

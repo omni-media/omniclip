@@ -19,8 +19,7 @@ export const renderStrokeDetails = ({style, update}: TextDetailsProps) => {
 	}
 
 	return html`
-		<details open>
-			<summary>Stroke</summary>
+		<wa-details open summary="Stroke" icon-placement="start">
 			<div class="cnt">
 				<label>Color</label>
 				<input
@@ -56,6 +55,6 @@ export const renderStrokeDetails = ({style, update}: TextDetailsProps) => {
 					@input=${(e: any) => updateStroke({miterLimit: Number(e.target.value)})}
 				>
 			</div>
-		</details>
+		</wa-details>
 	`
 }

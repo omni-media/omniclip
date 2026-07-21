@@ -7,8 +7,7 @@ export const renderDropShadowDetails = ({style, update}: TextDetailsProps) => {
 	const props = (typeof value === 'object' && value) || {}
 
 	return html`
-		<details>
-			<summary>Drop Shadow</summary>
+		<wa-details summary="Drop Shadow" icon-placement="start">
 			<div class="cnt">
 				<label>
 					<input
@@ -63,6 +62,6 @@ export const renderDropShadowDetails = ({style, update}: TextDetailsProps) => {
 					>
 				</div>
 			</div>
-		</details>
+		</wa-details>
 	`
 }

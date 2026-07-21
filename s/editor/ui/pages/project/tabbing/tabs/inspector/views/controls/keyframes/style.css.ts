@@ -2,6 +2,10 @@
 import {css} from 'lit'
 
 export default css`
+.animations-panel {
+	--wa-panel-border-radius: 4px;
+}
+
 .animations-panel::part(content) {
 	display: flex;
 	flex-direction: column;

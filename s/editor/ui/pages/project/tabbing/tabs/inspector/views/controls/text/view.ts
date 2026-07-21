@@ -24,6 +24,8 @@ import addSvg from '../../../../../../../../icons/gravity-ui/add.svg.js'
 import {EditorContext} from '../../../../../../../../../context/context.js'
 import {TEXT_STYLE_DEFAULTS, TEXT_STYLE_OPTIONS} from '../../../../edit/constants.js'
 
+import '@awesome.me/webawesome/dist/components/details/details.js'
+
 export type TextDetailsProps = {
 	style: TextStyleOptions
 	options: typeof TEXT_STYLE_OPTIONS
@@ -49,7 +51,7 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text) => 
 				></textarea>
 			</div>
 
-			<div>
+			<div class="text-style-controls">
 				${renderFontDetails(props)}
 				${renderFillDetails(props)}
 				${renderMultilineDetails(props)}

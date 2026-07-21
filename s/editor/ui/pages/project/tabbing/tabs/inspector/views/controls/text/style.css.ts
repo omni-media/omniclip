@@ -26,30 +26,42 @@ export default css`
 	}
 }
 
-details {
-	background: #1b1b1b;
-	border: 1px solid #292929;
-	border-radius: 4px;
-	overflow: hidden;
+.text-style-controls {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
 }
 
-summary {
-	cursor: pointer;
-	background: #202020;
-	color: #cfcfcf;
-	padding: 0.5em 0.7em;
+.text-style-controls wa-details::part(header) {
+	border-radius: 0;
+}
+
+.text-style-controls wa-details::part(base) {
+	border-radius: 0;
+}
+
+.text-input {
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 5.5em;
+	padding: 0.55em 0.65em;
+	resize: vertical;
+	background: #1f1f1f;
+	border: 1px solid #303030;
+	border-radius: 3px;
+	color: #e0e0e0;
+	font: inherit;
 	font-size: var(--font-size-xs);
-	font-weight: 500;
-	user-select: none;
+	line-height: 1.45;
+}
+
+.text-input:hover {
+	border-color: #444;
+}
+
+.text-input:focus {
+	border-color: #575757;
 	outline: none;
-}
-
-summary::marker {
-	color: #888;
-}
-
-details[open] summary {
-	border-bottom: 1px solid #333;
 }
 
 .cnt {

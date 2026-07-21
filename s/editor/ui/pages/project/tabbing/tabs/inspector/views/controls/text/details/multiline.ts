@@ -3,14 +3,13 @@ import {html} from "lit"
 import type {TextDetailsProps} from "../view.js"
 
 export const renderMultilineDetails = ({style, options, update}: TextDetailsProps) => html`
-	<details>
-		<summary>Multiline</summary>
+	<wa-details summary="Multiline" icon-placement="start">
 		<div class="cnt">
 			<label><input
 				type="checkbox"
 				?checked=${style.wordWrap}
 				@change=${(e: any) => update({wordWrap: e.target.checked})}
-			>Enable</label>
+			> Enable</label>
 
 			<label><input
 				type="checkbox"
@@ -43,5 +42,5 @@ export const renderMultilineDetails = ({style, options, update}: TextDetailsProp
 				@input=${(e: any) => update({wordWrapWidth: Number(e.target.value)})}
 			>
 		</div>
-	</details>
+	</wa-details>
 `

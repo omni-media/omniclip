@@ -3,8 +3,7 @@ import {html} from "lit"
 import type {TextDetailsProps} from "../view.js"
 
 export const renderFontDetails = ({style, options, update}: TextDetailsProps) => html`
-	<details open>
-		<summary>Font</summary>
+	<wa-details open summary="Font" icon-placement="start">
 		<div class="cnt">
 			<label>Size</label>
 			<input
@@ -47,5 +46,5 @@ export const renderFontDetails = ({style, options, update}: TextDetailsProps) =>
 				`)}
 			</select>
 		</div>
-	</details>
+	</wa-details>
 `
