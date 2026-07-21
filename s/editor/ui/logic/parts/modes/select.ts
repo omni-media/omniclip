@@ -13,7 +13,7 @@ export const selectTool = tool("select", (session) => {
 	return {
 		pointerdown: ({clip, inRuler, time, point}) => {
 			if (inRuler) {
-				session.deps.player.seek(time)
+				session.playback.seek(time)
 				session.setPlayhead(time)
 				session.setGhostClip(null)
 				session.setDropIntent(null)

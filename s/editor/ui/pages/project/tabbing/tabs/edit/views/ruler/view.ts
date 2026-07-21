@@ -12,7 +12,6 @@ export const Ruler = shadow((context: EditorContext) => {
 	const session = context.session
 
 	const {settings} = context.strata
-	const player = context.controllers.player
 
 	const drag = useOnce(() => ({
 		leftOffset: 0
@@ -30,7 +29,7 @@ export const Ruler = shadow((context: EditorContext) => {
 
 	const updateDrag = (e: PointerEvent) => {
 		const time = pointerToTime(e)
-		player.seek(time)
+		session.playback.seek(time)
 		session.setPlayhead(time)
 	}
 

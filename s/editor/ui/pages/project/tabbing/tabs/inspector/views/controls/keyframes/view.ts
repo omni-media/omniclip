@@ -65,7 +65,7 @@ export const KeyframesControls = shadow((context: EditorContext, item: Item.Text
 	const seekTo = (target: number | undefined) => {
 		if (target == null) return
 		const time = ms(laneStart + target)
-		context.controllers.player.seek(time)
+		context.session.playback.seek(time)
 		context.session.setPlayhead(time)
 	}
 

@@ -17,6 +17,11 @@ export class Playback {
 		this.$rate.value = 1
 	}
 
+	seek(time: number) {
+		this.pause()
+		return this.player.seek(time)
+	}
+
 	toggle() {
 		if (this.$isPlaying.value) {
 			this.pause()

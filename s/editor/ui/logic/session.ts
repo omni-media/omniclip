@@ -82,9 +82,9 @@ export class OmniSession {
 		this.$ghostPlayhead.on(time => {
 			if(!this.playback.$isPlaying.value) {
 				if(is.happy(time))
-					this.deps.player.seek(time)
+					this.playback.seek(time)
 				else
-					this.deps.player.seek(this.$playhead())
+					this.playback.seek(this.$playhead())
 			}
 		})
 	}
@@ -144,7 +144,7 @@ export class OmniSession {
 		if (parent.kind === Kind.Stack && isRoleableKind(item.kind)) {
 			this.roles.placeDefault(item)
 			this.$selectedItem.value = item.id
-			this.deps.player.seek(this.$playhead())
+			this.playback.seek(this.$playhead())
 			return
 		}
 
@@ -153,7 +153,7 @@ export class OmniSession {
 		})
 
 		this.$selectedItem.value = item.id
-		this.deps.player.seek(this.$playhead())
+		this.playback.seek(this.$playhead())
 	}
 
 	applyTransitionToSelection(name: TransitionName, duration: number) {
@@ -337,7 +337,7 @@ export class OmniSession {
 			: Math.ceil(currentFrame) - 1
 		const time = ms(Math.max(0, Math.min(this.deps.player.duration, nextFrame * frameDuration)))
 
-		this.deps.player.seek(time)
+		this.playback.seek(time)
 		this.setPlayhead(time)
 	}
 
