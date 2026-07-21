@@ -5,6 +5,26 @@ import type {Atom, Mods} from "@benev/tact"
 
 import {bindings} from "./bindings.js"
 
+function activeElement() {
+	let element = document.activeElement
+	while (element?.shadowRoot?.activeElement)
+		element = element.shadowRoot.activeElement
+	return element
+}
+
+export function isEditableElement(element = activeElement()) {
+	return element instanceof HTMLElement && element.matches([
+		"input",
+		"textarea",
+		"select",
+		"[contenteditable]",
+		"wa-input",
+		"wa-textarea",
+		"wa-select",
+		"wa-number-input",
+	].join(", "))
+}
+
 function codePressed(event: KeyboardEvent, pressed: Set<string>, code: string) {
 	switch (code) {
 		case "ControlLeft":
@@ -71,6 +91,8 @@ export const prevent_default_browser_behavior = (deck: tact.Deck<typeof bindings
 	return dom.events(window, {
 		keydown: (event: KeyboardEvent) => {
 			pressed.add(event.code)
+			if (isEditableElement())
+				return
 
 			const timeline = deck.hub.portByIndex(0).bindings.timeline
 			if (

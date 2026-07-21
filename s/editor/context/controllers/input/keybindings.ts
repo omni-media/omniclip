@@ -8,7 +8,7 @@ import {bladeTool} from "../../../ui/logic/parts/modes/blade.js"
 import {positionTool} from "../../../ui/logic/parts/modes/position.js"
 import {selectTool} from "../../../ui/logic/parts/modes/select.js"
 import {zoomTool} from "../../../ui/logic/parts/modes/zoom.js"
-import {prevent_default_browser_behavior} from "./prevent-default-hack.js"
+import {isEditableElement, prevent_default_browser_behavior} from "./prevent-default-hack.js"
 
 const CUSTOM_PROFILE_LABEL = "Omniclip Custom"
 
@@ -102,7 +102,7 @@ export class Keybindings {
 
 		const [port] = this.deck.hub.poll()
 
-		if (port) {
+		if (port && !isEditableElement()) {
 			const {timeline} = port.actions
 			if (timeline.undo.down) this.session.undo()
 			if (timeline.redo.down) this.session.redo()
