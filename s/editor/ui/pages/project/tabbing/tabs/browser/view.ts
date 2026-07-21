@@ -23,12 +23,17 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 	const activeTab = useSignal<BrowserTab>("media")
 	const duration = useSignal(DEFAULT_TRANSITION_DURATION)
 
-	const makeItem = (format: MediaFormat, media: Media) => {
+	const makeItems = (format: MediaFormat, media: Media) => {
 		switch (format) {
-			case "video": return context.omni.video(media)
-			case "image": return context.omni.image(media)
-			case "audio": return context.omni.audio(media)
-			case "other": return undefined
+			case "video": {
+				const video = context.omni.video(media)
+				return media.hasAudio
+					? [context.omni.audio(media), video]
+					: [video]
+			}
+			case "image": return [context.omni.image(media)]
+			case "audio": return [context.omni.audio(media)]
+			case "other": return []
 		}
 	}
 
@@ -46,9 +51,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			media: Datafile.make(new Blob([file], {type: mime}), label),
 		})
 
-		const clip = makeItem(item.specimen.format, media)
-
-		if (clip)
+		for (const clip of makeItems(item.specimen.format, media))
 			context.session.appendItem(clip)
 	}
 
