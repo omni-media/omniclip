@@ -120,10 +120,6 @@ wa-split-panel::part(divider) {
 	display: none;
 }
 
-.mixer-panel {
-	display: none;
-}
-
 .panel[data-active="edit"] .viewport-panel {
 	display: flex;
 }
@@ -161,10 +157,6 @@ wa-split-panel::part(divider) {
 		height: 100%;
 		width: 100%;
 		display: grid;
-	}
-
-	.inspector-split {
-		--max: calc(100% - 300px);
 	}
 
 	wa-split-panel::part(divider) {

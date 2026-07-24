@@ -1,6 +1,5 @@
 
 import {Kind} from "@omnimedia/omnitool"
-import {Item} from "@omnimedia/omnitool"
 
 import {styles} from "./styles.js"
 import type {TimelineCanvas} from "../canvas.js"
@@ -30,34 +29,19 @@ export function drawSnapTargets(canvas: TimelineCanvas) {
 
 	const {intent} = preview
 
-	switch (intent.type) {
-		case "sequence-reorder":
-		case "sequence-insert": {
-			const sequence = canvas.deps.session.index.getItem<Item.Sequence>(intent.sequenceId)
-			const targetId = sequence.childrenIds[intent.index]
-			const targetBox = targetId == null ? null : canvas.getBox(targetId)
-			const x = targetBox ? targetBox.x : Math.max(0, ...canvas.layout.clips.map(clip => clip.x + clip.width))
-			const row = targetBox?.y ?? canvas.layout.clips.find(clip => sequence.childrenIds.includes(clip.itemId))?.y
-			const height = targetBox?.height ?? canvas.layout.clips.find(clip => sequence.childrenIds.includes(clip.itemId))?.height
-			if (row != null && height != null)
-				drawVertical(canvas, x, row, height)
-			return
-		}
-
-		case "stack": {
-			const row = canvas.trackY(intent.index)
-			drawHorizontal(canvas, row - 5)
-			return
-		}
-
-		case "stack-wrap-leaf": {
-			const target = canvas.deps.session.index.getItem(intent.targetId)
-			if (target.kind !== Kind.Sequence) {
-				const box = canvas.getBox(target.id)
-				if (box) {
-					drawVertical(canvas, intent.before ? box.x : box.x + box.width, box.y, box.height)
-				}
-			}
-		}
+	const parent = canvas.deps.session.index.getItem(intent.parentId)
+	if (parent.kind === Kind.Stack) {
+		drawHorizontal(canvas, canvas.trackY(intent.index) - 5)
+		return
 	}
+
+	if (parent.kind === Kind.Sequence) {
+		const target = canvas.getBox(parent.childrenIds[intent.index])
+		const sibling = target ?? canvas.clips.find(clip => parent.childrenIds.includes(clip.itemId))
+
+		if (sibling)
+			drawVertical(canvas, target?.x ?? canvas.endX, sibling.y, sibling.height)
+	}
+
 }
+

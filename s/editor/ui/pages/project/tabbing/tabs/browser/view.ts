@@ -10,7 +10,9 @@ import themeCss from "../../../../../../theme.css.js"
 import {type MediaItem} from "./views/media-item-preview/view.js"
 import textSvg from "../../../../../icons/gravity-ui/text.svg.js"
 import transitionSvg from "../../../../../icons/transition.svg.js"
+import stackSvg from "../../../../../icons/gravity-ui/bars.svg.js"
 import folderSvg from "../../../../../icons/gravity-ui/folder.svg.js"
+import sequenceSvg from "../../../../../icons/gravity-ui/timeline.svg.js"
 import type {EditorContext} from "../../../../../../context/context.js"
 import {BrowserTab, DEFAULT_TEXT_DURATION, DEFAULT_TRANSITION_DURATION, MEDIA_GROUP, TEXT_PRESETS, TextPreset, TRANSITIONS} from "./constants.js"
 
@@ -24,15 +26,16 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 	const duration = useSignal(DEFAULT_TRANSITION_DURATION)
 
 	const makeItems = (format: MediaFormat, media: Media) => {
+		const label = media.datafile.filename
 		switch (format) {
 			case "video": {
-				const video = context.omni.video(media)
+				const video = context.omni.video(media, {label})
 				return media.hasAudio
-					? [context.omni.audio(media), video]
+					? [context.omni.audio(media, {label}), video]
 					: [video]
 			}
-			case "image": return [context.omni.image(media)]
-			case "audio": return [context.omni.audio(media)]
+			case "image": return [context.omni.image(media, {label})]
+			case "audio": return [context.omni.audio(media, {label})]
 			case "other": return []
 		}
 	}
@@ -90,10 +93,18 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 	const addTextPreset = (preset: TextPreset) => {
 		const text = context.omni.text(preset.content, {
 			duration: DEFAULT_TEXT_DURATION,
+			label: preset.label,
 			styles: preset.styles,
 		})
 
 		context.session.appendItem(text)
+	}
+
+	const addContainer = (kind: "stack" | "sequence") => {
+		const item = kind === "stack"
+			? context.omni.stack("Stack")
+			: context.omni.sequence("Sequence")
+		context.session.appendItem(item)
 	}
 
 	const renderTabButton = (id: BrowserTab, label: string, icon: unknown) => html`
@@ -188,11 +199,29 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 		</div>
 	`
 
+	const renderStructure = () => html`
+		<div class="section-label">Timeline structure</div>
+
+		<div class="preset-grid">
+			<button class="preset-card" @click=${() => addContainer("stack")}>
+				<div class="text-preview">${stackSvg}</div>
+				<div class="transition-name">Stack</div>
+				<div class="transition-meta">Layers children in parallel</div>
+			</button>
+			<button class="preset-card" @click=${() => addContainer("sequence")}>
+				<div class="text-preview">${sequenceSvg}</div>
+				<div class="transition-name">Sequence</div>
+				<div class="transition-meta">Puts children in order</div>
+			</button>
+		</div>
+	`
+
 	const renderBody = () => {
 		switch (activeTab()) {
 			case "media": return renderMedia()
 			case "transitions": return renderTransitions()
 			case "text": return renderText()
+			case "structure": return renderStructure()
 		}
 	}
 
@@ -202,6 +231,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 				${renderTabButton("media", "Media", folderSvg)}
 				${renderTabButton("transitions", "Transitions", transitionSvg)}
 				${renderTabButton("text", "Text", textSvg)}
+				${renderTabButton("structure", "Struct", stackSvg)}
 			</nav>
 
 			<div class="browser-body">

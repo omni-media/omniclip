@@ -3,7 +3,6 @@ import {css, html} from "lit"
 import {shadow, useCss} from "@e280/sly"
 import {Item} from "@omnimedia/omnitool"
 
-import {RoleControls} from "./role.js"
 import {valueOf} from "./filters/utils.js"
 import {controlsStyles} from "./styles.css.js"
 import {CaptionsControls} from "./captions/view.js"
@@ -46,18 +45,13 @@ const audioStyles = css`
 export const AudioControls = shadow((context: EditorContext, item: Item.Audio) => {
 	useCss(controlsStyles, itemControlTabsCss, audioStyles)
 
-	const meta = context.strata.outliner.state.items.find(meta => meta.itemId === item.id)
-	const roleId = meta?.roleId ?? context.session.roles.lookup.defaultFor(item.kind).id
-	const mixGain = context.session.roles.gainFactor(roleId) * context.strata.masterGain.state
-
-	const gain = item.gain! / mixGain
+	const gain = item.gain ?? 1
 	const volume = Math.round(gain * 100)
 
 	const setVolume = (value: number) =>
-		context.omni.set<Item.Audio>(item.id, {gain: Math.max(0, value) / 100 * mixGain})
+		context.omni.set<Item.Audio>(item.id, {gain: Math.max(0, value) / 100})
 
 	const properties = html`
-		${RoleControls(context, item)}
 		<div class="controls-group">
 			<h4 class="heading">Audio</h4>
 			<div class="audio-controls">

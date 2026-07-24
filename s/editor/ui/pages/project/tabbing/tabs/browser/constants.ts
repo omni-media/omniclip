@@ -2,7 +2,7 @@
 import {TextStyleOptions} from "pixi.js"
 import {transitions} from "@omnimedia/omnitool"
 
-export type BrowserTab = "media" | "transitions" | "text"
+export type BrowserTab = "media" | "transitions" | "text" | "structure"
 
 export type TextPreset = {
 	id: string

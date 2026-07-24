@@ -1,64 +1,47 @@
 
-import {Id, Kind} from "@omnimedia/omnitool"
+import {Id, Item, Kind} from "@omnimedia/omnitool"
+import {DragPoint, DragSnapshot} from "./snapshot.js"
 
-import {DragSnapshot} from "./snapshot.js"
-
-export type DropIntent =
-	| {type: "sequence-reorder", sequenceId: Id, index: number}
-	| {type: "sequence-insert", sequenceId: Id, index: number}
-	| {type: "stack", parentId: Id, index: number}
-	| {type: "stack-wrap-leaf", stackId: Id, targetId: Id, before: boolean}
+export type DropIntent = {parentId: Id, index: number}
 
 type GetDropIntentOpts = {
 	snapshot: DragSnapshot
 	movingId: Id
-	pointerX: number
-	rowIndex: number
+	point: DragPoint
 }
 
-export function getDropIntent({snapshot, movingId, pointerX, rowIndex}: GetDropIntentOpts): DropIntent | null {
-	const item = snapshot.index.getItem(movingId)
-	const parent = snapshot.index.getParent(movingId)
-	const viewed = snapshot.index.getItem(snapshot.viewedId)
+export function getDropIntent({snapshot, movingId, point}: GetDropIntentOpts) {
 
-	if (viewed.kind !== Kind.Stack)
+	const into = (item: Item.Any): DropIntent | null => {
+		if (item.kind === Kind.Sequence)
+			return {parentId: item.id, index: snapshot.getInsertIndex(item, movingId, point)}
+		if (item.kind === Kind.Stack)
+			return {parentId: item.id, index: item.childrenIds.length}
 		return null
-
-	const reorderingOwnSequence = parent?.kind === Kind.Sequence
-		&& viewed.childrenIds[rowIndex] === parent.id
-
-	if (reorderingOwnSequence) {
-		return {
-			type: "sequence-reorder",
-			sequenceId: parent.id,
-			index: snapshot.getInsertIndex(parent.id, item.id, pointerX),
-		}
 	}
 
-	const targetId = viewed.childrenIds[rowIndex]
-	if (targetId == null || targetId === item.id) {
-		return {
-			type: "stack",
-			parentId: viewed.id,
-			index: rowIndex,
-		}
+	const intoSequence = (viewed: Item.Sequence): DropIntent => {
+		const target = viewed.childrenIds
+			.filter(id => id !== movingId)
+			.map(id => snapshot.getBox(id))
+			.find(box => box && point.x > box.x + 16 && point.x < box.x + box.width - 16)
+		const nested = target && into(snapshot.index.getItem(target.itemId))
+		return nested ?? {parentId: viewed.id, index: snapshot.getInsertIndex(viewed, movingId, point)}
 	}
 
-	const target = snapshot.index.getItem(targetId)
-	if (target.kind === Kind.Sequence) {
-		return {
-			type: "sequence-insert",
-			sequenceId: target.id,
-			index: snapshot.getInsertIndex(target.id, item.id, pointerX),
-		}
+	const intoStack = (viewed: Item.Stack): DropIntent => {
+		const index = snapshot.getInsertIndex(viewed, movingId, point)
+		const targetId = viewed.childrenIds[index]
+		if (targetId == null || targetId === movingId)
+			return {parentId: viewed.id, index}
+		return into(snapshot.index.getItem(targetId)) ?? {parentId: viewed.id, index}
 	}
 
-	const targetBox = snapshot.getBox(target.id)
-	return {
-		type: "stack-wrap-leaf",
-		stackId: viewed.id,
-		targetId: target.id,
-		before: !(targetBox && pointerX >= targetBox.x + targetBox.width / 2),
-	}
+	const viewed = snapshot.index.getItem(snapshot.viewedId)
+	if (viewed.kind === Kind.Sequence)
+		return intoSequence(viewed)
+	if (viewed.kind === Kind.Stack)
+		return intoStack(viewed)
+	return null
 }
 

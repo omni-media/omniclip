@@ -2,21 +2,6 @@
 import {chronicle, Chronicle} from "@e280/strata"
 import {Id, Kind, TimelineFile} from "@omnimedia/omnitool"
 
-import {defaultRoles} from "./roles/defaults.js"
-
-export type RoleScope = "video" | "audio"
-
-export type Role = {
-	id: Id
-	key: string
-	name: string
-	scope: RoleScope
-	color: string
-	gain: number
-	parentRoleId?: Id
-	enabled: boolean
-}
-
 export type Tag = {
 	id: Id
 	name: string
@@ -25,7 +10,6 @@ export type Tag = {
 
 export type OutlinerItem = {
 	itemId: Id
-	roleId: Id
 	tagIds: Id[]
 	starred: boolean
 }
@@ -55,11 +39,9 @@ export type State = {
 		hashes: string[]
 	}
 	metadata: Metadata
-	masterGain: number
 	timeline: Chronicle<TimelineFile>
 	settings: Settings
 	outliner: {
-		roles: Role[]
 		tags: Tag[]
 		items: OutlinerItem[]
 	}
@@ -86,10 +68,8 @@ export const makeDefaultState = (withRoot = false): State => ({
 	metadata: {
 		items: []
 	},
-	masterGain: 1,
 	timeline: chronicle(makeDefaultTimeline(withRoot)),
 	outliner: {
-		roles: defaultRoles.map(role => ({...role})),
 		tags: [],
 		items: []
 	},

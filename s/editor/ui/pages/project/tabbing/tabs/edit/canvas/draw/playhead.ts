@@ -51,9 +51,9 @@ export function drawPlayhead(canvas: TimelineCanvas) {
 	const trimOffsetPx = canvas.trimPreviewOffsetPx()
 
 	if (ghostX !== null)
-		drawLine(canvas, ghostX + metrics.paddingX - trimOffsetPx, styles.ghostPlayhead, 1)
+		drawLine(canvas, ghostX - trimOffsetPx, styles.ghostPlayhead, 1)
 
-	const x = canvas.playheadX() + metrics.paddingX
+	const x = canvas.playheadX()
 	drawLine(canvas, x, styles.playhead, 2, metrics.rulerHeight - headBottomGap - 1)
 	drawHead(canvas, x)
 }

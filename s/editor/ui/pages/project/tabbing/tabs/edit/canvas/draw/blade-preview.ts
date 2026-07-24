@@ -1,4 +1,5 @@
-import {metrics, styles} from "./styles.js"
+
+import {styles} from "./styles.js"
 import type {TimelineCanvas} from "../canvas.js"
 
 export function drawBladePreview(canvas: TimelineCanvas) {
@@ -8,12 +9,12 @@ export function drawBladePreview(canvas: TimelineCanvas) {
 		if (preview === null)
 			return null
 
-		const clip = canvas.layout.clips.find(c => c.itemId === preview.clipId)
+		const clip = canvas.clips.find(c => c.itemId === preview.clipId)
 		if (!clip)
 			return null
 
 		return {
-			x: canvas.viewport.timeToX(preview.time) + metrics.paddingX,
+			x: canvas.viewport.timeToX(preview.time),
 			clip
 		}
 	}

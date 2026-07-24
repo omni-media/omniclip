@@ -6,6 +6,7 @@ export class Viewport {
 	$zoom = signal(1)
 	$scrollLeft = signal(0)
 	$width = signal(0)
+	$height = signal(0)
 	$minZoom = signal(0.2)
 
 	constructor(readonly pixelsPerMillisecond: number) {}
@@ -20,6 +21,10 @@ export class Viewport {
 
 	get width() {
 		return this.$width.value
+	}
+
+	get height() {
+		return this.$height.value
 	}
 
 	get minZoom() {
@@ -54,8 +59,9 @@ export class Viewport {
 		return ms(width / this.pxPerMs())
 	}
 
-	setWidth(width: number) {
+	setSize(width: number, height: number) {
 		this.$width.value = width
+		this.$height.value = height
 	}
 
 	setMinZoom(minZoom: number) {

@@ -7,7 +7,6 @@ import type {AppRouter} from "../router.js"
 import {TabBar} from "./tabbing/bar/view.js"
 import themeCss from "../../../theme.css.js"
 import {EditTab} from "./tabbing/tabs/edit/view.js"
-import {MixerTab} from "./tabbing/tabs/mixer/view.js"
 import {ExportTab} from "./tabbing/tabs/export/view.js"
 import {ProjectNotFoundPage} from "./not-found/view.js"
 import {Strata} from "../../../context/parts/strata.js"
@@ -132,22 +131,13 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 								</div>
 							</wa-split-panel>
 
-							<wa-split-panel slot="end" orientation="vertical" class="inspector-split" primary="start" position-in-pixels="430">
-								<div
-									slot="start"
-									class="panel inspector-panel"
-									?data-active=${isInspectorTabActive}
-								>
-									${InspectorTab(context)}
-								</div>
-
-								<div
-									slot="end"
-									class="panel mixer-panel"
-								>
-									${MixerTab(context)}
-								</div>
-							</wa-split-panel>
+							<div
+								slot="end"
+								class="panel inspector-panel"
+								?data-active=${isInspectorTabActive}
+							>
+								${InspectorTab(context)}
+							</div>
 						</wa-split-panel>
 					</wa-split-panel>
 

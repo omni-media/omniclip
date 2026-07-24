@@ -1,6 +1,8 @@
 
-import {tool} from "./tool.js"
 import {Kind} from "@omnimedia/omnitool"
+
+import {tool} from "./tool.js"
+import {Idx} from "../index.js"
 import {Dragger} from "../interactions/drag/dragger.js"
 import {Roller, cursorForRoll} from "../interactions/roll/roller.js"
 import {Trimmer, cursorForTrimEdge} from "../interactions/trim/trimmer.js"
@@ -87,7 +89,9 @@ export const selectTool = tool("select", (session) => {
 		},
 
 		doubleclick: ({clip}) => {
-			if (!clip?.enterable) return
+			if (!clip || !Idx.isStruct(clip.kind))
+				return
+
 			session.$viewedItemId.value = clip.itemId
 			session.$selectedItem.value = clip.itemId
 		}

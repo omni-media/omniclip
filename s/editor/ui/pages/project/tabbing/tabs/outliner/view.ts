@@ -9,12 +9,8 @@ import styleCss from "./style.css.js"
 import {when} from "lit/directives/when.js"
 import themeCss from "../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../context/context.js"
-import {rolesModal} from "../../../../../logic/modals/roles/modal.js"
-import {OutlinerItem} from "../../../../../../context/parts/state.js"
-import {roleSections} from "../../../../../logic/parts/roles/constants.js"
-import {renderRoleRow as renderOutlinerRoleRow} from "./renderers/role-row.js"
 import {renderItemRow as renderOutlinerItemRow} from "./renderers/item-row.js"
-import {renderRoleSection as renderOutlinerRoleSection} from "./renderers/role-section.js"
+import {itemLabel} from "../../../../../logic/utils/item-label.js"
 
 export const OutlinerTab = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
@@ -22,8 +18,6 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	const searchTerm = useSignal("")
 	const outliner = context.strata.outliner
 	const items = context.strata.timeline.state.items
-	const lookup = context.session.roles.lookup
-	const selectedRoleId = useSignal<number | null>(null)
 
 	const handleItemClick = (id: number) => {
 		context.session.$selectedItem.value = id
@@ -39,26 +33,16 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 		})
 	}
 
-	const selectRole = (id: number) => {
-		selectedRoleId.value = selectedRoleId.value === id ? null : id
-		const ids = lookup.familyIds(id)
-		const item = outliner.state.items.find(item => ids.includes(item.roleId))
-		if (item)
-			handleItemClick(item.itemId)
-	}
-
 	const isStarred = (id: number) => outliner.state.items.find(({itemId}) => itemId === id)?.starred
-
-	const itemMeta = (id: number) => outliner.state.items.find(item => item.itemId === id)
-	const matchesRole = (meta?: OutlinerItem) =>
-		selectedRoleId.value === null || !!meta && lookup.familyIds(selectedRoleId.value!).includes(meta.roleId)
 
 	const matchesSearch = (item: Item.Any) => {
 		const term = searchTerm.value.trim().toLowerCase()
 		if (!term)
 			return true
 
-		return `${Kind[item.kind] ?? item.kind} ${item.id}`.toLowerCase().includes(term)
+		return `${itemLabel(item)} ${Kind[item.kind] ?? item.kind} ${item.id}`
+			.toLowerCase()
+			.includes(term)
 	}
 
 	const renderItemRow = (item: Item.Any) => {
@@ -71,34 +55,7 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 		})
 	}
 
-	const renderRoleRow = (role: typeof outliner.state.roles[number]) => {
-		const familyIds = lookup.familyIds(role.id)
-		const roleItems = outliner.state.items.filter(item => familyIds.includes(item.roleId))
-		return renderOutlinerRoleRow({
-			role,
-			count: roleItems.length,
-			selected: selectedRoleId.value === role.id,
-			disabled: !lookup.enabled(role.id),
-			subrole: !!role.parentRoleId,
-			onSelect: role => selectRole(role.id),
-			onToggle: role => context.session.roles.toggle(role.id),
-		})
-	}
-
-	const renderRoleSection = (section: typeof roleSections[number]) => {
-		const topRoles = lookup.top(section.scope)
-		return renderOutlinerRoleSection({
-			section,
-			roles: topRoles,
-			renderRole: role => html`
-				${renderRoleRow(role)}
-				${lookup.children(role.id).map(renderRoleRow)}
-			`,
-		})
-	}
-
 	const filteredItems = items.filter(item => matchesSearch(item))
-		.filter(item => matchesRole(itemMeta(item.id)))
 
 	const starredItemsFiltered = filteredItems.filter(i => isStarred(i.id))
 	const otherItemsFiltered = filteredItems.filter(i => !isStarred(i.id))
@@ -106,12 +63,10 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	return html`
 		<div class="outliner-tabs">
 			<input type="radio" name="outliner-tab" id="tab-clips" checked />
-			<input type="radio" name="outliner-tab" id="tab-roles" />
 			<input type="radio" name="outliner-tab" id="tab-tags" />
 
 			<nav class="tab-bar">
 				<label for="tab-clips">Clips</label>
-				<label for="tab-roles">Roles</label>
 				<label for="tab-tags">Tags</label>
 			</nav>
 
@@ -143,15 +98,6 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 						<div class="item-list">
 							${repeat(otherItemsFiltered as Item.Any[], item => item.id, renderItemRow)}
 						</div>
-					</div>
-				</div>
-
-				<div id="roles-panel" class="tab-panel">
-					${roleSections.map(renderRoleSection)}
-					<div class="role-actions">
-						<wa-button size="small" variant="neutral" @click=${() => context.modals.openModal(rolesModal())}>
-							Edit Roles...
-						</wa-button>
 					</div>
 				</div>
 

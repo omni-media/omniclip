@@ -3,19 +3,9 @@ import {Kind} from "@omnimedia/omnitool"
 
 import {metrics, styles} from "./styles.js"
 import type {TimelineCanvas} from "../canvas.js"
+import type {ClipBox} from "../layout/layout.js"
 
-export type TimelineClipBox = {
-	itemId: number
-	roleId: number
-	kind: Kind
-	label: string
-	x: number
-	y: number
-	width: number
-	height: number
-	selected: boolean
-	enterable: boolean
-}
+export type TimelineClipBox = ClipBox
 
 function roundedRect(
 	ctx: CanvasRenderingContext2D,
@@ -29,8 +19,17 @@ function roundedRect(
 	ctx.roundRect(x, y, width, height, radius)
 }
 
-function roleColor(canvas: TimelineCanvas, roleId: number) {
-	return canvas.deps.session.roles.lookup.require(roleId).color
+function itemColor(kind: Kind) {
+	switch (kind) {
+		case Kind.Video: return "#34527a"
+		case Kind.Audio: return "#1b6937"
+		case Kind.Image: return "#765c2d"
+		case Kind.Text: return "#5c3b91"
+		case Kind.Sequence: return "#405160"
+		case Kind.Stack: return "#37404b"
+		case Kind.Transition: return "#7b4d22"
+		default: return "#555b65"
+	}
 }
 
 function itemDisabled(canvas: TimelineCanvas, itemId: number) {
@@ -51,14 +50,16 @@ function drawLabel(canvas: TimelineCanvas, clip: TimelineClipBox, labelHeight: n
 	ctx.shadowColor = styles.clipLabelShadow
 	ctx.shadowBlur = 2
 	ctx.fillText(
-		clip.enterable ? `${clip.label} ->` : clip.label,
+		clip.label,
 		clip.x + metrics.labelInsetX,
 		clip.y + labelHeight / 2 + 0.5
 	)
 	ctx.shadowBlur = 0
 }
 
-function drawOutline(ctx: CanvasRenderingContext2D, clip: TimelineClipBox) {
+function drawOutline(canvas: TimelineCanvas, clip: TimelineClipBox) {
+	const ctx = canvas.ctx
+	const selected = canvas.selectedItemId() === clip.itemId
 	roundedRect(
 		ctx,
 		clip.x,
@@ -67,8 +68,8 @@ function drawOutline(ctx: CanvasRenderingContext2D, clip: TimelineClipBox) {
 		clip.height,
 		metrics.clipRadius
 	)
-	ctx.lineWidth = clip.selected ? 2 : 1
-	ctx.strokeStyle = clip.selected
+	ctx.lineWidth = selected ? 2 : 1
+	ctx.strokeStyle = selected
 		? styles.selectedStroke
 		: styles.trackBorder
 	ctx.stroke()
@@ -89,7 +90,7 @@ function drawDisabledOverlay(ctx: CanvasRenderingContext2D, clip: TimelineClipBo
 
 export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 	const ctx = canvas.ctx
-	const color = roleColor(canvas, clip.roleId)
+	const color = itemColor(clip.kind)
 
 	const labelHeight = Math.min(metrics.labelHeight, clip.height)
 	const contentBox = {
@@ -132,7 +133,7 @@ export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 	if (itemDisabled(canvas, clip.itemId))
 		drawDisabledOverlay(ctx, clip)
 
-	drawOutline(ctx, clip)
+	drawOutline(canvas, clip)
 }
 
 export function drawClips(canvas: TimelineCanvas) {
@@ -140,7 +141,7 @@ export function drawClips(canvas: TimelineCanvas) {
 	const activeWaveforms = new Set<number>()
 	const ghostClip = canvas.deps.session.$ghostClip.value
 
-	for (const clip of canvas.layout.clips) {
+	for (const clip of canvas.clips) {
 		if (clip.kind === Kind.Gap)
 			continue
 		if (clip.kind === Kind.Video)

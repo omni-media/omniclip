@@ -10,7 +10,6 @@ import {ContainerItem, Driver, Id, Item, Kind, O, Resource, TimelineFile, Transi
 import {Stage} from "./parts/stage.js"
 import {Tool} from "./parts/modes/tool.js"
 import {Idx, Index} from "./parts/index.js"
-import {Roles} from "./parts/roles/roles.js"
 import {Viewport} from "./parts/viewport.js"
 import {Playback} from "./parts/playback.js"
 import {selectTool} from "./parts/modes/select.js"
@@ -18,7 +17,6 @@ import {Strata} from "../../context/parts/strata.js"
 import {add, remove, update} from "./parts/mutate.js"
 import {Proposal} from "./parts/proposal/proposal.js"
 import {trim} from "./parts/interactions/trim/parts/action.js"
-import {isRoleableKind} from "../../context/parts/roles/utils.js"
 import {DropIntent} from "./parts/interactions/drag/parts/intent.js"
 import {resizeTransition} from "./parts/interactions/trim/parts/transition.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
@@ -49,7 +47,6 @@ export class OmniSession {
 	canvas
 	stage
 	playback
-	roles
 	activeMode = signal(selectTool(this))
 
 	constructor(public deps: {
@@ -69,7 +66,6 @@ export class OmniSession {
 		})
 		this.stage = new Stage(this)
 		this.playback = new Playback(this.deps.player)
-		this.roles = new Roles(this)
 		this.#index = derived(() => new Index(deps.strata.timeline.state as TimelineFile))
 		this.$viewedItemId.value = deps.strata.timeline.state.rootId
 
@@ -133,20 +129,9 @@ export class OmniSession {
 		this.$proposal.value = null
 	}
 
-	/**
-	 * Append to the currently viewed timeline container.
-	 * Stack parents route roleable items into their default role lane.
-	 * Other parents append directly to childrenIds.
-	 */
+	/** Append to the currently viewed timeline container. */
 	appendItem(item: Item.Any) {
 		const parent = this.index.getItem<ContainerItem>(this.$viewedItemId())
-
-		if (parent.kind === Kind.Stack && isRoleableKind(item.kind)) {
-			this.roles.placeDefault(item)
-			this.$selectedItem.value = item.id
-			this.playback.seek(this.$playhead())
-			return
-		}
 
 		this.deps.omnitool.set<typeof parent>(parent.id, {
 			childrenIds: [...parent.childrenIds, item.id],
