@@ -10,18 +10,17 @@ export type {ClipBox}
 export function layout(index: Index, canvas: TimelineCanvas): ClipBox[] {
   const root = canvas.getViewedItem()
   const isStack = Idx.isStack(root.kind)
-  const ids = root.childrenIds.length ? root.childrenIds : [root.id]
 
   let y = canvas.trackY(0)
 
-  return ids.map(id => {
+  return root.childrenIds.map(id => {
     const clip = makeClipBox(canvas, {
 			y,
 			rootId: root.id,
       item: index.getItem(id)
     })
 
-    if (isStack)
+	if (isStack)
 			y += clip.height + metrics.trackGap
 
 		return clip
