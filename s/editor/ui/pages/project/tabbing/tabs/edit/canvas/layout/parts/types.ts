@@ -6,7 +6,7 @@ export type ClipBox = {
 	itemId: Id
 	kind: Kind
 	label: string
-	time: Ms
+	start: Ms
 	duration: Ms
 	x: number
 	y: number

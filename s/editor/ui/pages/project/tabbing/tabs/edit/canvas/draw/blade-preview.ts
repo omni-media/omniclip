@@ -14,7 +14,7 @@ export function drawBladePreview(canvas: TimelineCanvas) {
 			return null
 
 		return {
-			x: canvas.viewport.timeToX(preview.time),
+			x: canvas.timeToX(preview.time),
 			clip
 		}
 	}

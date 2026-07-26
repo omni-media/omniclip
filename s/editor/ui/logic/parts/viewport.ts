@@ -35,6 +35,7 @@ export class Viewport {
 		return 10
 	}
 
+	// Time → linear X.
 	timeToX(time: Ms) {
 		return time * this.pxPerMs()
 	}
@@ -43,6 +44,7 @@ export class Viewport {
 		return this.timeToX(time) - this.scrollLeft
 	}
 
+	// Linear X → time.
 	xToTime(x: number) {
 		return ms(x / this.pxPerMs())
 	}
@@ -100,10 +102,12 @@ export class Viewport {
 		this.setZoomAt(viewportX, this.zoom + delta)
 	}
 
+	// Visible linear timeline start.
 	visibleStart() {
 		return this.xToTime(this.scrollLeft)
 	}
 
+	// Visible linear timeline end.
 	visibleEnd() {
 		return this.xToTime(this.scrollLeft + this.width)
 	}

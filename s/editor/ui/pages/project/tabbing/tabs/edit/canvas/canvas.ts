@@ -18,8 +18,8 @@ import {drawClipPreview} from './draw/clip-preview.js'
 import {drawSnapTargets} from './draw/snap-targets.js'
 import {TimelineFilmstrips} from './parts/filmstrips.js'
 import {TimelineWaveforms} from './parts/waveforms.js'
+import {Idx} from '../../../../../../logic/parts/index.js'
 import {OmniSession} from '../../../../../../logic/session.js'
-import type {Idx} from '../../../../../../logic/parts/index.js'
 import {Strata} from '../../../../../../../context/parts/strata.js'
 import {ToolName} from '../../../../../../logic/parts/modes/tool.js'
 
@@ -135,7 +135,7 @@ export class TimelineCanvas {
 		))
 
 		if (this.viewport.zoom !== this.#lastZoom) {
-			this.#contentExtent = ms(Math.max(stableExtent, this.viewport.visibleEnd()))
+			this.#contentExtent = ms(Math.max(stableExtent, this.visibleEnd()))
 			this.#lastZoom = this.viewport.zoom
 		} else {
 			this.#contentExtent = ms(Math.max(this.#contentExtent, stableExtent))
@@ -155,6 +155,49 @@ export class TimelineCanvas {
 
 	get duration() {
 		return this.deps.session.index.getItemDuration(this.getViewedItem().id)
+	}
+
+	// Time → nonlinear layout X.
+	timeToX(time: Ms) {
+		if (Idx.isStack(this.getViewedItem().kind))
+			return this.viewport.timeToX(time)
+
+		const clip = this.clipAtTime(time)
+		return clip ? clip.x + (time - clip.start) / clip.duration * clip.width : 0
+	}
+
+	// Nonlinear layout X → time.
+	xToTime(x: number) {
+		if (Idx.isStack(this.getViewedItem().kind))
+			return this.duration === 0 ? ms(0) : this.viewport.xToTime(x)
+
+		const clip = this.clipAtX(x)
+		if (!clip)
+			return x <= 0 ? ms(0) : this.duration
+		if (clip.duration <= 0)
+			return clip.start
+
+		return ms(clip.start + (x - clip.x) / clip.width * clip.duration)
+	}
+
+	clipAtTime(time: Ms) {
+		return this.clips.find(clip =>
+			clip.duration > 0 && time >= clip.start && time <= clip.start + clip.duration
+		)
+	}
+
+	clipAtX(x: number) {
+		return this.clips.find(clip => x >= clip.x && x <= clip.x + clip.width)
+	}
+
+	// Visible nonlinear timeline start.
+	visibleStart() {
+		return this.xToTime(this.viewport.scrollLeft)
+	}
+
+	// Visible nonlinear timeline end.
+	visibleEnd() {
+		return this.xToTime(this.viewport.scrollLeft + this.viewport.width)
 	}
 
 	get width() {
@@ -274,12 +317,12 @@ export class TimelineCanvas {
 	}
 
 	playheadX() {
-		return this.viewport.timeToX(this.deps.session.$playhead.value)
+		return this.timeToX(this.deps.session.$playhead.value)
 	}
 
 	ghostPlayheadX() {
 		const time = this.deps.session.$ghostPlayhead.value
-		return time === null ? null : this.viewport.timeToX(time)
+		return time === null ? null : this.timeToX(time)
 	}
 
 	trimPreviewOffsetPx() {
@@ -297,8 +340,8 @@ export class TimelineCanvas {
 
 	#pointerToMs(event: PointerEvent): Ms {
 		const {x} = this.#pointerPosition(event)
-		return ms(Math.max(0, this.viewport.viewportXToTime(
-			x - this.trimPreviewOffsetPx()
+		return ms(Math.max(0, this.xToTime(
+			x + this.viewport.scrollLeft - this.trimPreviewOffsetPx()
 		)))
 	}
 

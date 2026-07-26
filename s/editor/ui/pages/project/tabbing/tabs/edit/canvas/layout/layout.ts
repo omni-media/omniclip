@@ -7,21 +7,20 @@ import {Idx, type Index} from '../../../../../../../logic/parts/index.js'
 
 export type {ClipBox}
 
-export function layout(index: Index, canvas: TimelineCanvas): ClipBox[] {
-  const root = canvas.getViewedItem()
-  const isStack = Idx.isStack(root.kind)
+export function layout(index: Index, canvas: TimelineCanvas) {
+	const root = canvas.getViewedItem()
+	const isStack = Idx.isStack(root.kind)
 
-  let y = canvas.trackY(0)
+	let x = 0
+	let y = canvas.trackY(0)
 
-  return root.childrenIds.map(id => {
-    const clip = makeClipBox(canvas, {
-			y,
-			rootId: root.id,
-      item: index.getItem(id)
-    })
+	return root.childrenIds.map(id => {
+		const clip = makeClipBox({canvas, x, y, item: index.getItem(id)})
 
-	if (isStack)
+		if (isStack)
 			y += clip.height + metrics.trackGap
+		else
+			x += clip.width
 
 		return clip
 	})
