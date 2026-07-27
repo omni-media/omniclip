@@ -18,6 +18,13 @@ export class DragSnapshot {
 		return this.clips.find(clip => clip.itemId === itemId) ?? null
 	}
 
+	clipAt(point: DragPoint) {
+		return this.clips.find(box =>
+			point.x >= box.x && point.x <= box.x + box.width &&
+			point.y >= box.y && point.y <= box.y + box.height
+		) ?? null
+	}
+
 	getInsertIndex(parent: Item.Sequence | Item.Stack, movingId: Id, point: DragPoint) {
 		return parent.kind === Kind.Sequence
 			? this.#columnAt(parent, movingId, point.x)
