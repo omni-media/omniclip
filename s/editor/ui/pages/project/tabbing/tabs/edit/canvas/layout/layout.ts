@@ -3,26 +3,31 @@ import {metrics} from '../draw/styles.js'
 import type {ClipBox} from './parts/types.js'
 import {makeClipBox} from './parts/clip-box.js'
 import type {TimelineCanvas} from '../canvas.js'
-import {Idx, type Index} from '../../../../../../../logic/parts/index.js'
+import {Idx} from '../../../../../../../logic/parts/index.js'
 
 export type {ClipBox}
 
-export function layout(index: Index, canvas: TimelineCanvas) {
-	const root = canvas.getViewedItem()
-	const isStack = Idx.isStack(root.kind)
+export function layout(
+	canvas: TimelineCanvas,
+	parent = canvas.getViewedItem(),
+	x = 0,
+	y = canvas.trackY(0),
+	depth = 0,
+): ClipBox[] {
+	const isStack = Idx.isStack(parent.kind)
 
-	let x = 0
-	let y = canvas.trackY(0)
-
-	return root.childrenIds.map(id => {
-		const clip = makeClipBox({canvas, x, y, item: index.getItem(id)})
+	return parent.childrenIds.flatMap(id => {
+		const item = canvas.index.getItem(id)
+		const clip = makeClipBox({canvas, x, y, item, depth})
 
 		if (isStack)
 			y += clip.height + metrics.trackGap
 		else
 			x += clip.width
 
-		return clip
+		return Idx.isStruct(item)
+			? [clip, ...layout(canvas, item, clip.x, clip.y, depth + 1)]
+			: [clip]
 	})
 }
 

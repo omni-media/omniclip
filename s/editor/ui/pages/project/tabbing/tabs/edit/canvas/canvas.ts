@@ -60,26 +60,41 @@ export class TimelineCanvas {
 		return this.deps.session.viewport
 	}
 
+	get index() {
+		return this.deps.session.index
+	}
+
 	/**
 	* visual size of the clip item on timeline
 	**/
-	clipSize(duration: Ms) {
+	clipSize(item: Item.Any) {
 		return {
 			height: metrics.trackHeight,
-			width: this.viewport.durationToWidth(duration)
+			width: this.viewport.durationToWidth(this.index.getItemDuration(item.id))
 		}
+	}
+
+	#itemWidth(item: Item.Any): number {
+		if (!Idx.isStruct(item))
+			return this.clipSize(item).width
+
+		if (!item.childrenIds.length)
+			return STRUCT_FALLBACK_WIDTH[item.kind]
+
+		const isStack = Idx.isStack(item.kind)
+		return item.childrenIds.reduce((width, id) => {
+			const childWidth = this.#itemWidth(this.index.getItem(id))
+			return isStack ? Math.max(width, childWidth) : width + childWidth
+		}, 0)
 	}
 
 	/**
 	* visual size of the struct item on timeline
 	**/
-	structSize(kind: Kind.Sequence | Kind.Stack, duration: Ms) {
-		const isStack = kind === Kind.Stack
+	structSize(item: Idx.Struct) {
 		return {
-			width: duration > 0
-				? this.viewport.durationToWidth(duration)
-				: STRUCT_FALLBACK_WIDTH[kind],
-			height: isStack
+			width: this.#itemWidth(item),
+			height: Idx.isStack(item.kind)
 				? metrics.trackHeight * 2 + metrics.trackGap
 				: metrics.trackHeight,
 		}
@@ -181,13 +196,13 @@ export class TimelineCanvas {
 	}
 
 	clipAtTime(time: Ms) {
-		return this.clips.find(clip =>
+		return this.clips.find(clip => !clip.depth &&
 			clip.duration > 0 && time >= clip.start && time <= clip.start + clip.duration
 		)
 	}
 
 	clipAtX(x: number) {
-		return this.clips.find(clip => x >= clip.x && x <= clip.x + clip.width)
+		return this.clips.find(clip => !clip.depth && x >= clip.x && x <= clip.x + clip.width)
 	}
 
 	// Visible nonlinear timeline start.
@@ -210,7 +225,7 @@ export class TimelineCanvas {
 	}
 
 	draw() {
-		this.clips = layout(this.deps.session.index, this)
+		this.clips = layout(this)
 		this.spacer.style.width = `${this.contentWidth}px`
 		this.#resize()
 		this.clearCanvas()

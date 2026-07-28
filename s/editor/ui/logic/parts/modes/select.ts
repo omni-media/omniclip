@@ -89,7 +89,7 @@ export const selectTool = tool("select", (session) => {
 		},
 
 		doubleclick: ({clip}) => {
-			if (!clip || !Idx.isStruct(clip.kind))
+			if (!clip || !Idx.isStructKind(clip.kind))
 				return
 
 			session.$viewedItemId.value = clip.itemId

@@ -19,8 +19,12 @@ export namespace Idx {
 		return kind === Kind.Stack
 	}
 
-	export function isStruct(kind: Kind) {
+	export function isStructKind(kind: Kind) {
 		return isStack(kind) || isSequence(kind)
+	}
+
+	export function isStruct(item: AnyItem): item is Struct {
+		return "childrenIds" in item
 	}
 
 	export function isClip(kind: Kind) {
