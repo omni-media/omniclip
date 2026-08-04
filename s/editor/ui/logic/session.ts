@@ -17,12 +17,12 @@ import {Strata} from "../../context/parts/strata.js"
 import {add, remove, update} from "./parts/mutate.js"
 import {Proposal} from "./parts/proposal/proposal.js"
 import {trim} from "./parts/interactions/trim/parts/action.js"
-import {DropIntent} from "./parts/interactions/drag/parts/intent.js"
+import type {DropIntent} from "./parts/interactions/drag/parts/intent.js"
 import {resizeTransition} from "./parts/interactions/trim/parts/transition.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
 import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 import {TimelineClipBox} from "../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
-import {replaceChild, splitClip, wrapChildInSequence} from "./parts/operations/operations.js"
+import {replaceChild, splitClip, wrapChild} from "./parts/operations/operations.js"
 import {
 	cloneAnimation,
 	hasAnyKeyframes,
@@ -40,7 +40,7 @@ export class OmniSession {
 	$proposal = signal<Proposal | null>(null)
 	$ghostClip = signal<TimelineClipBox | null>(null)
 	$trimPreviewOffsetPx = signal(0)
-	$dropIntent = signal<{movingId: Id, intent: DropIntent} | null>(null)
+	$drop = signal<DropIntent | null>(null)
 
 	viewport = new Viewport(PIXELS_PER_MILLISECOND)
 
@@ -197,10 +197,6 @@ export class OmniSession {
 
 	#isVisualItem(item: Item.Any | undefined): item is Item.Video | Item.Image | Item.Text | Item.Caption {
 		return [Kind.Video, Kind.Image, Kind.Text, Kind.Caption].includes(item?.kind as Kind)
-	}
-
-	setDropIntent(dropIntent: {movingId: Id, intent: DropIntent} | null) {
-		this.$dropIntent.value = dropIntent
 	}
 
 	setGhostClip(ghostClip: TimelineClipBox | null) {
@@ -381,9 +377,13 @@ export class OmniSession {
 			}
 
 			const seqId = id()
-			const wrapped = wrapChildInSequence(parent, clipId, seqId, [leftId, rightId])
-			add(state, wrapped.sequence)
-			update(state, parent.id, wrapped.parent)
+			const sequence: Item.Sequence = {
+				id: seqId,
+				kind: Kind.Sequence,
+				childrenIds: [leftId, rightId],
+			}
+			add(state, sequence)
+			update(state, parent.id, wrapChild(parent, clipId, sequence))
 		})
 
 		this.canvas.clearPreviews()

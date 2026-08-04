@@ -1,4 +1,3 @@
-import {Kind} from "@omnimedia/omnitool"
 import {
 	TextStyle, TextStyleAlign, TextStyleOptions, TextStyleFontVariant, TextStyleFontStyle, TextStyleFontWeight,
 	TextStyleTextBaseline, TextDropShadow, Filter, TextStyleWhiteSpace, StrokeStyle, FillStyle
@@ -31,8 +30,3 @@ export const TEXT_STYLE_OPTIONS = {
 }
 
 export const TEXT_STYLE_DEFAULTS: Required<TextStyleOptions> = TextStyle.defaultTextStyle as Required<TextStyleOptions>
-
-export const STRUCT_FALLBACK_WIDTH: Record<Kind.Stack | Kind.Sequence, number> = {
-	[Kind.Stack]: 120,
-	[Kind.Sequence]: 180,
-}

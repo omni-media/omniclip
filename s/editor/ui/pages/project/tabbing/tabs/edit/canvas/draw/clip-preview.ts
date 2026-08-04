@@ -7,5 +7,8 @@ export function drawClipPreview(canvas: TimelineCanvas) {
 	if (!clip)
 		return
 
+	canvas.ctx.save()
+	canvas.ctx.globalAlpha = 0.7
 	drawClip(canvas, clip)
+	canvas.ctx.restore()
 }

@@ -19,8 +19,8 @@ export function drawRuler(canvas: TimelineCanvas) {
 	const pps = pxPerMs * 1000
 	const steps = tickSteps(timebase)
 	const scale = steps.find(step => step.major * pxPerMs >= 80) ?? steps[steps.length - 1]
-	const startMs = canvas.visibleStart()
-	const endMs = canvas.visibleEnd()
+	const startMs = canvas.viewport.visibleStart()
+	const endMs = canvas.viewport.visibleEnd()
 	const startStep = Math.floor(startMs / scale.minor)
 	const endStep = Math.ceil(endMs / scale.minor)
 	const hasMinorTicks = scale.major === 1000 && (pps / timebase) > 4
@@ -38,7 +38,7 @@ export function drawRuler(canvas: TimelineCanvas) {
 
 	for (let step = startStep; step <= endStep; step += 1) {
 		const time = ms(step * scale.minor)
-		const x = Math.round(canvas.timeToX(time) - canvas.viewport.scrollLeft + trimOffsetPx)
+		const x = Math.round(canvas.viewport.timeToX(time) - canvas.viewport.scrollLeft + trimOffsetPx)
 		const isMajor = Math.round(time) % Math.round(scale.major) === 0
 
 		if (isMajor) {

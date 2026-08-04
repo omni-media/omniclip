@@ -17,9 +17,7 @@ export function makeClipBox(
 	const duration = canvas.deps.session.index.getItemDuration(item.id)
 	const start = canvas.deps.session.index.getItemLaneStart(item.id, root.id)
 
-	const {width, height} = Idx.isStruct(item)
-		? canvas.structSize(item)
-		: canvas.clipSize(item)
+	const {width, height} = canvas.itemSize(item)
 
 	return {
 		y,

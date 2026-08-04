@@ -1,47 +1,24 @@
 
-import {Kind} from "@omnimedia/omnitool"
-
 import {styles} from "./styles.js"
 import type {TimelineCanvas} from "../canvas.js"
 
-function drawVertical(canvas: TimelineCanvas, x: number, y: number, height: number) {
-	canvas.ctx.strokeStyle = styles.selectedStroke
-	canvas.ctx.lineWidth = 2
-	canvas.ctx.beginPath()
-	canvas.ctx.moveTo(x, y)
-	canvas.ctx.lineTo(x, y + height)
-	canvas.ctx.stroke()
-}
-
-function drawHorizontal(canvas: TimelineCanvas, y: number) {
-	canvas.ctx.strokeStyle = styles.selectedStroke
-	canvas.ctx.lineWidth = 2
-	canvas.ctx.beginPath()
-	canvas.ctx.moveTo(0, y)
-	canvas.ctx.lineTo(canvas.contentWidth, y)
-	canvas.ctx.stroke()
-}
-
 export function drawSnapTargets(canvas: TimelineCanvas) {
-	const preview = canvas.deps.session.$dropIntent.value
-	if (!preview)
+	const drop = canvas.deps.session.$drop.value
+	if (!drop)
 		return
+	const {indicator} = drop
 
-	const {intent} = preview
-
-	const parent = canvas.deps.session.index.getItem(intent.parentId)
-	if (parent.kind === Kind.Stack) {
-		drawHorizontal(canvas, canvas.trackY(intent.index) - 5)
+	const {ctx} = canvas
+	ctx.strokeStyle = styles.selectedStroke
+	ctx.lineWidth = 2
+	if (indicator.width && indicator.height) {
+		ctx.strokeRect(indicator.x, indicator.y, indicator.width, indicator.height)
 		return
 	}
 
-	if (parent.kind === Kind.Sequence) {
-		const target = canvas.getBox(parent.childrenIds[intent.index])
-		const sibling = target ?? canvas.clips.find(clip => parent.childrenIds.includes(clip.itemId))
-
-		if (sibling)
-			drawVertical(canvas, target?.x ?? canvas.endX, sibling.y, sibling.height)
-	}
-
+	ctx.beginPath()
+	ctx.moveTo(indicator.x, indicator.y)
+	ctx.lineTo(indicator.x + indicator.width, indicator.y + indicator.height)
+	ctx.stroke()
 }
 

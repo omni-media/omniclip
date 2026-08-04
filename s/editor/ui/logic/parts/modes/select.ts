@@ -17,23 +17,16 @@ export const selectTool = tool("select", (session) => {
 			if (inRuler) {
 				session.playback.seek(time)
 				session.setPlayhead(time)
-				session.setGhostClip(null)
-				session.setDropIntent(null)
 				dragger.cancel(session)
-				session.canvas.scheduleDraw()
 				return
 			}
 
-			const pointerX = point.x + session.viewport.scrollLeft
-
 			if (clip) {
+				const pointerX = point.x + session.viewport.scrollLeft
 				const rollEdge = session.canvas.rollEdgeAt(clip, pointerX)
-				if (rollEdge) {
-					roller.start(clip, rollEdge, session)
-					if (roller.isRolling) {
-						session.canvas.canvas.style.cursor = cursorForRoll()
-						return
-					}
+				if (rollEdge && roller.start(clip, rollEdge, session)) {
+					session.canvas.canvas.style.cursor = cursorForRoll()
+					return
 				}
 
 				const edge = session.canvas.trimEdgeAt(clip, pointerX)
@@ -44,9 +37,14 @@ export const selectTool = tool("select", (session) => {
 				}
 			}
 
+			const moving = clip && clip.kind !== Kind.Transition && !Idx.isStructKind(clip.kind)
+				? clip
+				: null
+
 			session.$selectedItem.value = clip?.itemId ?? null
 
-			if (clip && clip.kind !== Kind.Transition) dragger.start(clip, point, session)
+			if (moving)
+				dragger.start(moving, point, session)
 			else dragger.cancel(session)
 		},
 
@@ -56,27 +54,20 @@ export const selectTool = tool("select", (session) => {
 
 			dragger.preview(point, session)
 
-			if (!dragger.isDragging) {
-				const pointerX = point.x + session.viewport.scrollLeft
-				const rollEdge = clip ? session.canvas.rollEdgeAt(clip, pointerX) : null
-				const trimEdge = clip ? session.canvas.trimEdgeAt(clip, pointerX) : null
+			if (dragger.isDragging)
+				return
 
-				session.canvas.canvas.style.cursor = rollEdge
-					? cursorForRoll()
-					: cursorForTrimEdge(trimEdge)
-			}
+			const pointerX = point.x + session.viewport.scrollLeft
+			const rollEdge = clip ? session.canvas.rollEdgeAt(clip, pointerX) : null
+			const trimEdge = clip ? session.canvas.trimEdgeAt(clip, pointerX) : null
+			session.canvas.canvas.style.cursor = rollEdge
+				? cursorForRoll()
+				: cursorForTrimEdge(trimEdge)
 		},
 
 		pointerup: () => {
-			if (roller.isRolling) {
-				roller.commit(session)
-				return
-			}
-
-			if (trimmer.isTrimming) {
-				trimmer.commit(session)
-				return
-			}
+			if (roller.isRolling) return roller.commit(session)
+			if (trimmer.isTrimming) return trimmer.commit(session)
 
 			dragger.commit(session)
 		},

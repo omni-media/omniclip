@@ -12,7 +12,6 @@ import {TimelineClipBox} from './draw/clip.js'
 import {drawPlayhead} from './draw/playhead.js'
 import {layout, type ClipBox} from './layout/layout.js'
 import {metrics, styles} from './draw/styles.js'
-import {STRUCT_FALLBACK_WIDTH} from '../constants.js'
 import {drawBladePreview} from './draw/blade-preview.js'
 import {drawClipPreview} from './draw/clip-preview.js'
 import {drawSnapTargets} from './draw/snap-targets.js'
@@ -64,39 +63,11 @@ export class TimelineCanvas {
 		return this.deps.session.index
 	}
 
-	/**
-	* visual size of the clip item on timeline
-	**/
-	clipSize(item: Item.Any) {
+	/** visual size of an item on the timeline */
+	itemSize(item: Item.Any) {
 		return {
 			height: metrics.trackHeight,
 			width: this.viewport.durationToWidth(this.index.getItemDuration(item.id))
-		}
-	}
-
-	#itemWidth(item: Item.Any): number {
-		if (!Idx.isStruct(item))
-			return this.clipSize(item).width
-
-		if (!item.childrenIds.length)
-			return STRUCT_FALLBACK_WIDTH[item.kind]
-
-		const isStack = Idx.isStack(item.kind)
-		return item.childrenIds.reduce((width, id) => {
-			const childWidth = this.#itemWidth(this.index.getItem(id))
-			return isStack ? Math.max(width, childWidth) : width + childWidth
-		}, 0)
-	}
-
-	/**
-	* visual size of the struct item on timeline
-	**/
-	structSize(item: Idx.Struct) {
-		return {
-			width: this.#itemWidth(item),
-			height: Idx.isStack(item.kind)
-				? metrics.trackHeight * 2 + metrics.trackGap
-				: metrics.trackHeight,
 		}
 	}
 
@@ -150,18 +121,14 @@ export class TimelineCanvas {
 		))
 
 		if (this.viewport.zoom !== this.#lastZoom) {
-			this.#contentExtent = ms(Math.max(stableExtent, this.visibleEnd()))
+			this.#contentExtent = ms(Math.max(stableExtent, this.viewport.visibleEnd()))
 			this.#lastZoom = this.viewport.zoom
 		} else {
 			this.#contentExtent = ms(Math.max(this.#contentExtent, stableExtent))
 		}
 
 		const timedContentPx = Math.ceil(this.viewport.durationToWidth(this.#contentExtent))
-		return Math.max(this.viewport.width, timedContentPx + this.viewport.width, this.endX + this.viewport.width)
-	}
-
-	get endX() {
-		return Math.max(...this.clips.map(clip => clip.x + clip.width))
+		return Math.max(this.viewport.width, timedContentPx + this.viewport.width)
 	}
 
 	get endY() {
@@ -170,49 +137,6 @@ export class TimelineCanvas {
 
 	get duration() {
 		return this.deps.session.index.getItemDuration(this.getViewedItem().id)
-	}
-
-	// Time → nonlinear layout X.
-	timeToX(time: Ms) {
-		if (Idx.isStack(this.getViewedItem().kind))
-			return this.viewport.timeToX(time)
-
-		const clip = this.clipAtTime(time)
-		return clip ? clip.x + (time - clip.start) / clip.duration * clip.width : 0
-	}
-
-	// Nonlinear layout X → time.
-	xToTime(x: number) {
-		if (Idx.isStack(this.getViewedItem().kind))
-			return this.duration === 0 ? ms(0) : this.viewport.xToTime(x)
-
-		const clip = this.clipAtX(x)
-		if (!clip)
-			return x <= 0 ? ms(0) : this.duration
-		if (clip.duration <= 0)
-			return clip.start
-
-		return ms(clip.start + (x - clip.x) / clip.width * clip.duration)
-	}
-
-	clipAtTime(time: Ms) {
-		return this.clips.find(clip => !clip.depth &&
-			clip.duration > 0 && time >= clip.start && time <= clip.start + clip.duration
-		)
-	}
-
-	clipAtX(x: number) {
-		return this.clips.find(clip => !clip.depth && x >= clip.x && x <= clip.x + clip.width)
-	}
-
-	// Visible nonlinear timeline start.
-	visibleStart() {
-		return this.xToTime(this.viewport.scrollLeft)
-	}
-
-	// Visible nonlinear timeline end.
-	visibleEnd() {
-		return this.xToTime(this.viewport.scrollLeft + this.viewport.width)
 	}
 
 	get width() {
@@ -253,7 +177,7 @@ export class TimelineCanvas {
 
 	clipAt(x: number, y: number) {
 		x += this.viewport.scrollLeft - this.trimPreviewOffsetPx()
-		return this.clips.find(
+		return this.clips.findLast(
 			c => c.kind !== Kind.Gap &&
 				x >= c.x && x <= c.x + c.width && y >= c.y && y <= c.y + c.height
 		) ?? null
@@ -297,17 +221,6 @@ export class TimelineCanvas {
 		return null
 	}
 
-	clampClipToCanvasBounds(clip: TimelineClipBox, x: number, y: number) {
-		return {
-			...clip,
-			x: Math.max(0, Math.min(this.contentWidth - clip.width, x)),
-			y: Math.max(
-				metrics.rulerHeight + metrics.paddingY,
-				Math.min(this.height - metrics.paddingY - clip.height, y),
-			),
-		}
-	}
-
 	clearCanvas() {
 		this.ctx.clearRect(0, 0, this.width, this.height)
 		this.ctx.fillStyle = styles.background
@@ -332,12 +245,12 @@ export class TimelineCanvas {
 	}
 
 	playheadX() {
-		return this.timeToX(this.deps.session.$playhead.value)
+		return this.viewport.timeToX(this.deps.session.$playhead.value)
 	}
 
 	ghostPlayheadX() {
 		const time = this.deps.session.$ghostPlayhead.value
-		return time === null ? null : this.timeToX(time)
+		return time === null ? null : this.viewport.timeToX(time)
 	}
 
 	trimPreviewOffsetPx() {
@@ -355,7 +268,7 @@ export class TimelineCanvas {
 
 	#pointerToMs(event: PointerEvent): Ms {
 		const {x} = this.#pointerPosition(event)
-		return ms(Math.max(0, this.xToTime(
+		return ms(Math.max(0, this.viewport.xToTime(
 			x + this.viewport.scrollLeft - this.trimPreviewOffsetPx()
 		)))
 	}
@@ -369,6 +282,9 @@ export class TimelineCanvas {
 	}
 
 	onPointerDown = (event: PointerEvent) => {
+		if (event.button !== 0)
+			return
+
 		this.canvas.setPointerCapture(event.pointerId)
 		const point = this.#pointerPosition(event)
 		const time = this.#pointerToMs(event)

@@ -1,9 +1,9 @@
 
 import {OmniSession} from "../../../session.js"
 import {DragSnapshot} from "./parts/snapshot.js"
-import {getDropIntent} from "./parts/intent.js"
+import {resolveDropIntent} from "./parts/intent.js"
 import {Proposal} from "../../proposal/proposal.js"
-import {overlayFromIntent} from "./parts/overlay.js"
+import {overlayFromDropIntent} from "./parts/overlay.js"
 import {TimelineClipBox} from "../../../../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
 
 type Point = {x: number, y: number}
@@ -26,7 +26,7 @@ export class Dragger {
 				session.index,
 				[...session.canvas.clips],
 				session.$viewedItemId.value,
-			)
+			),
 		}
 	}
 
@@ -42,58 +42,37 @@ export class Dragger {
 			return null
 
 		this.isDragging = true
-		session.setGhostClip(
-			session.canvas.clampClipToCanvasBounds(
-				clip,
-				clip.x + dx,
-				clip.y + dy,
-			)
-		)
+		const ghost = {...clip, x: clip.x + dx, y: clip.y + dy}
+		session.setGhostClip(ghost)
 
-		const intent = getDropIntent({
-			snapshot,
-			movingId: clip.itemId,
-			point: {x: point.x + session.viewport.scrollLeft, y: point.y},
-		})
-		const validIntent = intent
-
-		session.setDropIntent(validIntent ? {movingId: clip.itemId, intent: validIntent} : null)
-
-		if (validIntent) {
-			const overlay = overlayFromIntent({
-				index: snapshot.index,
-				movingId: clip.itemId,
-				intent: validIntent,
-			})
-			session.setProposal(overlay ? new Proposal(session.timeline, overlay) : null)
-		}
-		else {
-			session.clearProposal()
-		}
+		const drop = resolveDropIntent(snapshot, clip.itemId, ghost)
+		session.$drop.value = drop
 
 		session.canvas.scheduleDraw()
-		return {dx, dy, snapshot, clipId: clip.itemId, clip}
 	}
 
 	commit(session: OmniSession) {
-		if (this.isDragging) {
-			session.$proposal.value?.commit()
+		const state = this.#state
+		const drop = session.$drop.value
+		if (this.isDragging && state && drop) {
+			const overlay = overlayFromDropIntent({
+				drop,
+				index: state.snapshot.index,
+				movingId: state.clip.itemId,
+				newContainerId: session.deps.omnitool.getId(),
+			})
+			if (overlay)
+				new Proposal(session.timeline, overlay).commit()
 		}
 
 		this.cancel(session)
 	}
 
 	cancel(session: OmniSession) {
-		session.clearProposal()
 		session.setGhostClip(null)
-		session.setDropIntent(null)
-		this.end()
-		session.canvas.scheduleDraw()
-	}
-
-	end() {
+		session.$drop.value = null
 		this.#state = null
 		this.isDragging = false
+		session.canvas.scheduleDraw()
 	}
 }
-
