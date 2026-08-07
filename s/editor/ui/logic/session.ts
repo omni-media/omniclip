@@ -141,6 +141,26 @@ export class OmniSession {
 		this.playback.seek(this.$playhead())
 	}
 
+	/** Wraps item with new container. */
+	wrapItem(itemId: Id, type: "stack" | "sequence") {
+		const parent = this.index.getParent(itemId)
+		if (!parent)
+			return
+
+		const container: Idx.Struct = {
+			id: this.deps.omnitool.getId(),
+			kind: type === "stack" ? Kind.Stack : Kind.Sequence,
+			childrenIds: [itemId],
+		}
+
+		this.timeline.mutate(state => {
+			add(state, container)
+			update(state, parent.id, wrapChild(parent, itemId, container))
+		})
+
+		this.$selectedItem(container.id)
+	}
+
 	applyTransitionToSelection(name: TransitionName, duration: number) {
 		const selected = this.index.getItemMaybe(this.$selectedItem.value)
 		if (!selected)

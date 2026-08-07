@@ -6,6 +6,7 @@ import {dom, shadow, useCss, useMount, useRendered, useShadow} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import {TimelineScrollbar} from "./scrollbar/view.js"
+import {TimelineContextMenu} from "./context-menu/view.js"
 import themeCss from "../../../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 import {itemLabel} from "../../../../../../../logic/utils/item-label.js"
@@ -140,6 +141,7 @@ export const TimelineArea = shadow((context: EditorContext) => {
 		${TimelineScrollbar(updateScrollbar, timelineElement(), scrollLeft =>
 			session.viewport.setScrollLeft(scrollLeft)
 		)}
+		${TimelineContextMenu(context)}
 	`
 })
 

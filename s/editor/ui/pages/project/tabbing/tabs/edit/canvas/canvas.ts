@@ -261,23 +261,23 @@ export class TimelineCanvas {
 		return this.deps.timeline.state
 	}
 
-	#pointerPosition(event: PointerEvent) {
+	#pointerPosition(event: MouseEvent) {
 		const rect = this.canvas.getBoundingClientRect()
 		return {x: event.clientX - rect.left, y: event.clientY - rect.top}
 	}
 
-	#pointerToMs(event: PointerEvent): Ms {
+	#pointerToMs(event: MouseEvent): Ms {
 		const {x} = this.#pointerPosition(event)
 		return ms(Math.max(0, this.viewport.xToTime(
 			x + this.viewport.scrollLeft - this.trimPreviewOffsetPx()
 		)))
 	}
 
-	pointAt(event: PointerEvent) {
+	pointAt(event: MouseEvent) {
 		return this.#pointerPosition(event)
 	}
 
-	timeAt(event: PointerEvent): Ms {
+	timeAt(event: MouseEvent): Ms {
 		return this.#pointerToMs(event)
 	}
 
