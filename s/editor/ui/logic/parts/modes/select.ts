@@ -80,11 +80,17 @@ export const selectTool = tool("select", (session) => {
 		},
 
 		doubleclick: ({clip}) => {
-			if (!clip || !Idx.isStructKind(clip.kind))
+			if (!clip)
 				return
 
-			session.$viewedItemId.value = clip.itemId
-			session.$selectedItem.value = clip.itemId
+			const item = session.index.getItem(clip.itemId)
+			const container = Idx.isStruct(item) ? item : session.index.getParent(item.id)
+
+			if (!container || container.id === session.$viewedItemId())
+				return
+
+			session.$viewedItemId(container.id)
+			session.$selectedItem(container.id)
 		}
 	}
 })
