@@ -6,9 +6,11 @@ import {shadow, useCss, useMount, useSignal} from "@e280/sly"
 import styleCss from "./style.css.js"
 import themeCss from "../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../context/context.js"
-import {gainFromDb, maximumGainDb, meterHeight, minimumGainDb, sliderDbFromGain} from "../mixer/utils.js"
+import {dbFromGain, gainFromDb, maximumGainDb, meterHeight, minimumGainDb, sliderDbFromGain} from "../mixer/utils.js"
 
 import "@awesome.me/webawesome/dist/components/slider/slider.js"
+
+const scale = [12, 6, 0, -6, -12, -24, -36, -48, -60]
 
 export const AudioPanel = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
@@ -53,37 +55,53 @@ export const AudioPanel = shadow((context: EditorContext) => {
 		}
 	})
 
-	const meter = meterHeight(muted() ? 0 : peak() * gainFromDb(level()))
-	const scale = [12, 6, 0, -6, -12, -18, -24, -30, -36, null, -48, null, -60]
+	const signal = muted() ? 0 : peak() * gainFromDb(level())
+	const peakDb = dbFromGain(signal)
+	const meter = meterHeight(signal)
 
 	return html`
 		<header>Audio</header>
-		<section class="strip">
-			<div class="strip-title">
-				<strong>Master</strong>
-				<span>Master</span>
+		<div class="master-row">
+			<strong>Master</strong>
+			<button class="mute" type="button" ?data-active=${muted()} @click=${toggleMute}>M</button>
+		</div>
+
+		<div class="meter-zone">
+			<div class="readout">
+				<output>${level().toFixed(1)}</output>
+				<span>dB</span>
 			</div>
-			<button type="button" ?data-active=${muted()} @click=${toggleMute}>M</button>
-			<div class="fader">
-				<div class="meter" style=${`--level: ${meter}%`}></div>
+
+			<div class="meter-grid">
 				<wa-slider
 					orientation="vertical"
 					min=${minimumGainDb}
 					max=${maximumGainDb}
 					step="0.1"
 					with-tooltip
-					aria-label="Master audio level"
+					aria-label="Master audio gain"
 					.value=${level()}
 					.valueFormatter=${(db: number) => `${db.toFixed(1)} dB`}
 					@input=${setLevel}
 					@change=${commitAudio}
 				></wa-slider>
+				<div class="meter">
+					<div class="meter-level" style=${`--level: ${meter}%`}></div>
+				</div>
 				<div class="scale" aria-hidden="true">
-					${scale.map(value => html`<span>${value ?? ""}</span>`)}
+					${scale.map(value => html`
+						<span
+							?data-zero=${value === 0}
+							style=${`--position: ${meterHeight(gainFromDb(value))}%`}
+						>${value > 0 ? `+${value}` : value}</span>
+					`)}
 				</div>
 			</div>
-			<output>${level().toFixed(1)}</output>
-		</section>
+
+			<footer>
+				<span>Peak <strong>${peakDb} dBFS</strong></span>
+			</footer>
+		</div>
 	`
 })
 
