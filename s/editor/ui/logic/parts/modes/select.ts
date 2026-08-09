@@ -1,6 +1,4 @@
 
-import {Kind} from "@omnimedia/omnitool"
-
 import {tool} from "./tool.js"
 import {Idx} from "../index.js"
 import {Dragger} from "../interactions/drag/dragger.js"
@@ -13,7 +11,7 @@ export const selectTool = tool("select", (session) => {
 	const roller = new Roller()
 
 	return {
-		pointerdown: ({clip, inRuler, time, point}) => {
+		pointerdown: ({clip, inRuler, time, point, event}) => {
 			if (inRuler) {
 				session.playback.seek(time)
 				session.setPlayhead(time)
@@ -21,7 +19,7 @@ export const selectTool = tool("select", (session) => {
 				return
 			}
 
-			if (clip) {
+			if (clip && !event.ctrlKey) {
 				const pointerX = point.x + session.viewport.scrollLeft
 				const rollEdge = session.canvas.rollEdgeAt(clip, pointerX)
 				if (rollEdge && roller.start(clip, rollEdge, session)) {
@@ -37,11 +35,15 @@ export const selectTool = tool("select", (session) => {
 				}
 			}
 
-			const moving = clip && clip.kind !== Kind.Transition && !Idx.isStructKind(clip.kind)
-				? clip
-				: null
+			let moving = clip && Idx.isClip(clip.kind) ? clip : null
+			if (event.ctrlKey && clip) {
+				const containerId = Idx.isStructKind(clip.kind)
+					? clip.itemId
+					: session.index.getParent(clip.itemId)?.id
+				moving = session.canvas.getBox(containerId)
+			}
 
-			session.$selectedItem.value = clip?.itemId ?? null
+			session.$selectedItem.value = moving?.itemId ?? clip?.itemId ?? null
 
 			if (moving)
 				dragger.start(moving, point, session)

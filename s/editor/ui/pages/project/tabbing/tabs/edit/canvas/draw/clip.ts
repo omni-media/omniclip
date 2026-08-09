@@ -136,10 +136,28 @@ export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 	drawOutline(canvas, clip)
 }
 
+function drawDragPreview(
+	canvas: TimelineCanvas,
+	clips: TimelineClipBox[],
+	ghost: TimelineClipBox,
+) {
+	const source = canvas.getBox(ghost.itemId)
+	if (!source)
+		return
+
+	canvas.ctx.save()
+	canvas.ctx.globalAlpha = 0.7
+	canvas.ctx.translate(ghost.x - source.x, ghost.y - source.y)
+	for (const clip of clips)
+		drawClip(canvas, clip)
+	canvas.ctx.restore()
+}
+
 export function drawClips(canvas: TimelineCanvas) {
 	const activeFilmstrips = new Set<number>()
 	const activeWaveforms = new Set<number>()
-	const ghostClip = canvas.deps.session.$ghostClip.value
+	const ghost = canvas.deps.session.$ghostClip()
+	const previewClips: TimelineClipBox[] = []
 
 	for (const clip of canvas.clips) {
 		if (clip.kind === Kind.Gap)
@@ -148,10 +166,15 @@ export function drawClips(canvas: TimelineCanvas) {
 			activeFilmstrips.add(clip.itemId)
 		if (clip.kind === Kind.Audio)
 			activeWaveforms.add(clip.itemId)
-		if (clip.itemId === ghostClip?.itemId)
+		if (ghost && canvas.index.contains(ghost.itemId, clip.itemId)) {
+			previewClips.push(clip)
 			continue
+		}
 		drawClip(canvas, clip)
 	}
+
+	if (ghost)
+		drawDragPreview(canvas, previewClips, ghost)
 
 	canvas.filmstrips.retain(activeFilmstrips)
 	canvas.waveforms.retain(activeWaveforms)

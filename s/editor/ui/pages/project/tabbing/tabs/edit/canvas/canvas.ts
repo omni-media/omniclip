@@ -13,7 +13,6 @@ import {drawPlayhead} from './draw/playhead.js'
 import {layout, type ClipBox} from './layout/layout.js'
 import {metrics, styles} from './draw/styles.js'
 import {drawBladePreview} from './draw/blade-preview.js'
-import {drawClipPreview} from './draw/clip-preview.js'
 import {drawSnapTargets} from './draw/snap-targets.js'
 import {TimelineFilmstrips} from './parts/filmstrips.js'
 import {TimelineWaveforms} from './parts/waveforms.js'
@@ -159,7 +158,6 @@ export class TimelineCanvas {
 		this.ctx.translate(-this.viewport.scrollLeft, 0)
 		this.ctx.translate(this.trimPreviewOffsetPx(), 0)
 		drawClips(this)
-		drawClipPreview(this)
 		drawSnapTargets(this)
 		drawBladePreview(this)
 		drawPlayhead(this)

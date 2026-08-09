@@ -7,7 +7,7 @@ import {computeItemDuration} from '@omnimedia/omnitool/x/timeline/renderers/part
 export namespace Idx {
 	export type Text = Item.Text & {start?: number}
 	export type Image = Item.Image & {start?: number}
-	export type Clip = Item.Audio | Item.Video | Image | Text
+	export type Clip = Item.Audio | Item.Video | Item.Caption | Image | Text
 	export type Struct = Item.Sequence | Item.Stack
 	export type AnyItem = Item.Any
 
@@ -28,7 +28,8 @@ export namespace Idx {
 	}
 
 	export function isClip(kind: Kind) {
-		return kind === Kind.Audio || kind === Kind.Video || kind === Kind.Image || kind === Kind.Text
+		return kind === Kind.Audio || kind === Kind.Video || kind === Kind.Caption ||
+			kind === Kind.Image || kind === Kind.Text
 	}
 }
 
@@ -76,6 +77,15 @@ export class Index {
 
 	getParentMaybe(childId?: Id | null) {
 		return childId == null ? undefined : this.getParent(childId)
+	}
+
+	contains(containerId: Id, itemId: Id): boolean {
+		if (containerId === itemId)
+			return true
+		const parent = this.getParent(itemId)
+		if (!parent)
+			return false
+		return this.contains(containerId, parent.id)
 	}
 
 	queryItem<T extends Idx.AnyItem = Idx.AnyItem>(

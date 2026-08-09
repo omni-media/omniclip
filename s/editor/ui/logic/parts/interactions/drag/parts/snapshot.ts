@@ -21,7 +21,7 @@ export class DragSnapshot {
 
 	boxAt(point: DragPoint, movingId: Id) {
 		return this.clips.findLast(box =>
-			!this.#belongsTo(box.itemId, movingId) &&
+			!this.index.contains(movingId, box.itemId) &&
 				contains(box, point)) ?? null
 	}
 
@@ -70,12 +70,6 @@ export class DragSnapshot {
 		return children.filter(box => x >= box.x + box.width / 2).length
 	}
 
-	#belongsTo(itemId: Id, parentId: Id) {
-		for (let id: Id | undefined = itemId; id != null; id = this.index.getParent(id)?.id)
-			if (id === parentId)
-				return true
-		return false
-	}
 }
 
 function contains(bounds: DragBounds, point: DragPoint) {
