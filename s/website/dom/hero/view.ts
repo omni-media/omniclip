@@ -1,75 +1,57 @@
 
 import {html} from "lit"
-import {dom, shadow, useCss, useShadow} from "@e280/sly"
-import "@awesome.me/webawesome/dist/components/button/button.js"
-import "@awesome.me/webawesome/dist/components/drawer/drawer.js"
+import {shadow, useCss} from "@e280/sly"
 
 import styleCss from "./style.css.js"
+import discordSvg from "../../../editor/ui/icons/remix-icon/discord.svg.js"
 
-export const Hero = shadow((getSection: (id: string) => HTMLElement | undefined) => {
+const github = "https://github.com/omni-media/omniclip"
+const discord = "https://discord.gg/Nr8t9s5wSM"
+
+export const Hero = shadow(() => {
 	useCss(styleCss)
-
-	const scrollIntoElementView = (event: Event) => {
-		const target = event.target as HTMLAnchorElement
-		getDrawer().hide()
-		const id = target.hash.slice(1)
-		const section = getSection(id)
-
-		if (section?.id === id)
-			section.scrollIntoView({behavior: "smooth"})
-	}
-
-	const renderLinks = () => html`
-		<a @click=${scrollIntoElementView} href="#features">features</a>
-		<a @click=${scrollIntoElementView} href="#source">source</a>
-		<a @click=${scrollIntoElementView} href="#history">history</a>
-	`
-
-	const mobileDrawer = () => html`
-		<sl-drawer label="Menu" placement="top" class="drawer-overview">
-			<div class="drawer-links">
-				${renderLinks()}
-				<a href="#/editor">open the editor</a>
-			</div>
-			<sl-button class="drawer-primary" slot="footer" variant="primary">Close</sl-button>
-		</sl-drawer>
-	`
-
-	const shadow = useShadow()
-	function getDrawer() {
-		const drawer = dom("sl-drawer", shadow) as any
-		const closeBtn = dom('sl-button[variant="primary"]', drawer)
-		closeBtn?.addEventListener("click", () => drawer.hide())
-		return drawer
-	}
+	const version = document.querySelector("meta[data-version]")?.getAttribute("data-version")
 
 	return html`
-		${mobileDrawer()}
-		<header class="top">
-			<div class="site-name">
-				omniclip <span>v2.0</span>
-			</div>
-			<nav class="top-links" aria-label="Landing page sections">
-				${renderLinks()}
+		<main>
+			<nav>
+				<a class="brand" href="/">
+					<img src="/assets/logo/omni.png" alt="" />
+					<span>omniclip</span>
+					${version ? html`<small class="version">v${version}</small>` : null}
+				</a>
+
+				<div class="nav-actions">
+					<a class="github" href=${github} target="_blank" rel="noreferrer">View on GitHub ↗</a>
+				</div>
 			</nav>
-			<button class="menu-button" type="button" aria-label="Open menu" @click=${() => getDrawer().show()}>
-				<img src="/assets/hamburger.svg" alt="" />
-			</button>
-		</header>
 
-		<section class="hero">
-			<h1>A video editor<br>that runs in<br>your browser.</h1>
-			<p class="intro">
-				no install. no subscription. cut your footage, export your video, go on with your life.
-				simple but powerful open source video editor.
-			</p>
+			<section class="hero">
+				<div class="copy">
+					<h1>A video editor that runs in your browser.</h1>
+					<p>Cut, compose, and export without leaving your browser.</p>
 
-			<div class="cta-row">
-				<a href="#/editor" class="btn">Open the editor</a>
-				<a href="https://discord.gg/Nr8t9s5wSM" target="_blank" rel="noreferrer" class="btn-plain">Join Discord -&gt;</a>
-			</div>
+					<div class="actions">
+						<a class="primary" href="/editor/#/projects">Open the editor</a>
+						<a class="discord" href=${discord} target="_blank" rel="noreferrer">
+							${discordSvg} Join Discord
+						</a>
+					</div>
+				</div>
 
-		</section>
+				<figure class="editor">
+					<img
+						src="/assets/landing-editor-hero.png"
+						alt="Omniclip editing a cinematic video with a layered timeline and audio mixer"
+					/>
+				</figure>
+
+				<footer class="credit">
+					Built by
+					<a href="https://github.com/zenkyuv" target="_blank" rel="noreferrer">Przemek Gałęzki</a>
+				</footer>
+			</section>
+		</main>
 	`
 })
 
