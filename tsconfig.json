@@ -4,7 +4,7 @@
 		"rootDir": "s",
 		"outDir": "x",
 		"target": "es2023",
-		"lib": ["es2023", "dom", "webworker"],
+		"lib": ["es2023", "dom", "dom.asynciterable", "webworker"],
 		"module": "node16",
 		"moduleResolution": "node16",
 		"experimentalDecorators": true,

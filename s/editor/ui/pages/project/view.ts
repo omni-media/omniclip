@@ -1,12 +1,14 @@
 
 import {html} from "lit"
-import {shadow, spinner, useCss, useMount, useWait} from "@e280/sly"
+
+import {shadow, spinner, useCss, useMount, useSignal, useWait} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import type {AppRouter} from "../router.js"
 import {TabBar} from "./tabbing/bar/view.js"
 import themeCss from "../../../theme.css.js"
 import {EditTab} from "./tabbing/tabs/edit/view.js"
+import {Assistant} from "../../logic/assistant/view.js"
 import {AudioPanel} from "./tabbing/tabs/audio/view.js"
 import {ExportTab} from "./tabbing/tabs/export/view.js"
 import {ProjectNotFoundPage} from "./not-found/view.js"
@@ -39,6 +41,7 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 			return ProjectNotFoundPage(router, projectId)
 
 		useMount(() => () => context.dispose())
+		const assistantOpen = useSignal(false)
 
 		const manager = context.tabs
 
@@ -69,6 +72,13 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 					</div>
 
 					<div class=right>
+						<wa-button
+							@click=${() => assistantOpen.value = true}
+							class=assistant size="small">
+							<wa-icon slot="start" name="comments"></wa-icon>
+							Help
+						</wa-button>
+
    					<wa-button
      					@click=${openSettings}
 							class=settings size="small">
@@ -157,6 +167,7 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 				</div>
 
 				${context.modals.render()}
+				${Assistant(assistantOpen)}
 			</div>
 	`})
 })

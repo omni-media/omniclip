@@ -37,7 +37,7 @@ export default css`@layer view {
 		background: #333;
 	}
 
-	.settings, .shortcuts, .export {
+	.assistant, .settings, .shortcuts, .export {
 
 		&::part(base) {
 			height: 2em;
