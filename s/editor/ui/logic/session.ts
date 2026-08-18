@@ -170,7 +170,7 @@ export class OmniSession {
 		if (parent?.kind !== Kind.Sequence)
 			return false
 
-		if (selected.kind === Kind.Transition)
+		if (Idx.isTransition(selected))
 			return this.#updateTransition(selected.id, name, duration)
 
 		const childIndex = parent.childrenIds.indexOf(selected.id)
@@ -178,7 +178,7 @@ export class OmniSession {
 			return false
 
 		const [prev, next] = [-1, 1].map(d => this.index.getItemMaybe(parent.childrenIds[childIndex + d]))
-		const transition = [prev, next].find(s => s?.kind === Kind.Transition)
+		const transition = [prev, next].find((s): s is Item.Transition => !!s && Idx.isTransition(s))
 		if (transition)
 			return this.#updateTransition(transition.id, name, duration)
 
@@ -429,7 +429,7 @@ export class OmniSession {
 				return
 
 			const item = this.index.getItemMaybe<Item.Any>(clipId)
-			if (item?.kind === Kind.Transition)
+			if (item && Idx.isTransition(item))
 				this.#applyTransitionResize(state, item, 0, parent.childrenIds, parent.childrenIds.indexOf(clipId))
 
 			remove(state, clipId)

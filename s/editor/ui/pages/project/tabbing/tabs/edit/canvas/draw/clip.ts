@@ -28,6 +28,7 @@ function itemColor(kind: Kind) {
 		case Kind.Sequence: return "#405160"
 		case Kind.Stack: return "#37404b"
 		case Kind.Transition: return "#7b4d22"
+		case Kind.Gap: return "#292b2f"
 		default: return "#555b65"
 	}
 }
@@ -160,8 +161,6 @@ export function drawClips(canvas: TimelineCanvas) {
 	const previewClips: TimelineClipBox[] = []
 
 	for (const clip of canvas.clips) {
-		if (clip.kind === Kind.Gap)
-			continue
 		if (clip.kind === Kind.Video)
 			activeFilmstrips.add(clip.itemId)
 		if (clip.kind === Kind.Audio)

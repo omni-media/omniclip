@@ -19,6 +19,14 @@ export namespace Idx {
 		return kind === Kind.Stack
 	}
 
+	export function isTransition(item: AnyItem): item is Item.Transition {
+		return item.kind === Kind.Transition
+	}
+
+	export function isTransitionKind(kind?: Kind) {
+		return kind === Kind.Transition
+	}
+
 	export function isStructKind(kind: Kind) {
 		return isStack(kind) || isSequence(kind)
 	}

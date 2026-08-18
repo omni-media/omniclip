@@ -4,7 +4,7 @@ import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
 import {OmniSession} from "../../session.js"
 import {TimelineClipBox} from "../../../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
 
-export type ToolName = "select" | "blade" | "trim" | "position" | "zoom"
+export type ToolName = "select" | "blade" | "trim" | "position" | "hand" | "zoom"
 
 export type ToolEvent = {
 	event: PointerEvent

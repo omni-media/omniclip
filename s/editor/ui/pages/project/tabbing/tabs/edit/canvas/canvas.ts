@@ -90,6 +90,9 @@ export class TimelineCanvas {
 				this.canvas.style.cursor = "url('/assets/icons/material-design-icons/razor.svg') 12 12, crosshair"
 				break
 			case "position":
+				this.canvas.style.cursor = "move"
+				break
+			case "hand":
 				this.canvas.style.cursor = "grab"
 				break
 			case "trim":
@@ -196,7 +199,7 @@ export class TimelineCanvas {
 	}
 
 	rollEdgeAt(clip: TimelineClipBox, canvasX: number) {
-		if (clip.kind === Kind.Transition)
+		if (Idx.isTransitionKind(clip.kind))
 			return null
 
 		const parent = this.deps.session.index.getParent(clip.itemId)
@@ -212,9 +215,9 @@ export class TimelineCanvas {
 		const prev = this.deps.session.index.getItemMaybe(parent.childrenIds[index - 1])
 		const next = this.deps.session.index.getItemMaybe(parent.childrenIds[index + 1])
 
-		if (inStartZone && index > 0 && prev?.kind !== Kind.Transition)
+		if (inStartZone && index > 0 && !Idx.isTransitionKind(prev?.kind))
 			return "start"
-		if (inEndZone && index < parent.childrenIds.length - 1 && next?.kind !== Kind.Transition)
+		if (inEndZone && index < parent.childrenIds.length - 1 && !Idx.isTransitionKind(next?.kind))
 			return "end"
 		return null
 	}

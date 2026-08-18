@@ -39,8 +39,8 @@ export class Trimmer {
 			edge,
 			item,
 			laneStart: session.index.getItemLaneStart(clip.itemId, session.$viewedItemId.value),
-			prev: item.kind === Kind.Transition ? session.index.getItemMaybe<Idx.Clip>(siblings?.[idx - 1]) : undefined,
-			next: item.kind === Kind.Transition ? session.index.getItemMaybe<Idx.Clip>(siblings?.[idx + 1]) : undefined,
+			prev: Idx.isTransition(item) ? session.index.getItemMaybe<Idx.Clip>(siblings?.[idx - 1]) : undefined,
+			next: Idx.isTransition(item) ? session.index.getItemMaybe<Idx.Clip>(siblings?.[idx + 1]) : undefined,
 		}
 	}
 
@@ -50,7 +50,7 @@ export class Trimmer {
 
 		const {edge, item, laneStart, prev, next} = this.#state
 
-		if (item.kind === Kind.Transition) {
+		if (Idx.isTransition(item)) {
 			session.setProposal(new Proposal(session.timeline, trimTransition(item, edge, time, laneStart, prev, next, session)))
 			session.setGhostClip(null)
 			session.setTrimPreviewOffsetPx(0)

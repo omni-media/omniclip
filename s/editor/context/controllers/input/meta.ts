@@ -41,6 +41,8 @@ const shortcutCommandMeta = {
 	blade_tool_temp: {name: "Blade Tool Temporary", description: "Hold shortcut to use Blade, release to return to Select.", group: "tools"},
 	position_tool: {name: "Position Tool", group: "tools"},
 	position_tool_temp: {name: "Position Tool Temporary", description: "Hold shortcut to use Position, release to return to Select.", group: "tools"},
+	hand_tool: {name: "Hand Tool", group: "tools"},
+	hand_tool_temp: {name: "Hand Tool Temporary", description: "Hold shortcut to use Hand, release to return to Select.", group: "tools"},
 	select_tool: {name: "Selection Tool", group: "tools"},
 } satisfies Record<TimelineAction, ShortcutCommandMeta>
 
