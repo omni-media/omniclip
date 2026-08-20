@@ -1,6 +1,5 @@
 
 import {html} from "lit"
-import {TimelineFile} from "@omnimedia/omnitool"
 import {shadow, spinner, useCss, useMount, useWait} from "@e280/sly"
 
 import styleCss from "./style.css.js"
@@ -21,6 +20,7 @@ import modalCss from "../../../context/parts/modal/modal.css.js"
 import {settingsModal} from "../../logic/modals/settings/modal.js"
 import {shortcutsModal} from "../../logic/modals/shortcuts/modal.js"
 import {TimelineViewport} from "./tabbing/tabs/edit/views/viewport/view.js"
+import {exportProgressModal} from "../../logic/modals/export/progress/modal.js"
 
 import "@awesome.me/webawesome/dist/components/button/button.js"
 import "@awesome.me/webawesome/dist/components/split-panel/split-panel.js"
@@ -57,15 +57,8 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 
 		const openExport = async () => {
 			const settings = await context.modals.openModal(exportModal())
-			if(settings) {
-				const {readable} = await context.project.render(
-					context.strata.timeline.state as TimelineFile,
-					context.strata.settings.state.timebase
-				)
-				const handle = await window.showSaveFilePicker()
-				const writable = await handle.createWritable()
-				readable.pipeTo(writable)
-			}
+			if (settings)
+				await context.modals.openModal(exportProgressModal(settings))
 		}
 
 		return html`
