@@ -33,13 +33,15 @@ export const exportProgressModal = (
 			try {
 				const {readable} = await ctx.project.render(
 					ctx.strata.timeline.state as TimelineFile,
-					ctx.strata.settings.state.timebase,
-					render => {
-						if (aborted)
-							throw new Error("Export cancelled.")
+					{
+						framerate: ctx.strata.settings.state.timebase,
+						onProgress: render => {
+							if (aborted)
+								throw new Error("Export cancelled.")
 
-						progress({phase: "rendering", render})
-						copyFrame(ctx.controllers.player.canvas, canvas)
+							progress({phase: "rendering", render})
+							copyFrame(ctx.controllers.player.canvas, canvas)
+						},
 					},
 				)
 
