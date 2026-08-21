@@ -2,6 +2,7 @@
 import {html} from "lit"
 import {Item, Kind} from "@omnimedia/omnitool"
 
+import {itemLabel} from "../../../../../../logic/utils/item-label.js"
 import textSvg from "../../../../../../icons/gravity-ui/text.svg.js"
 import starSvg from "../../../../../../icons/gravity-ui/star.svg.js"
 import stackSvg from "../../../../../../icons/gravity-ui/bars.svg.js"
@@ -44,7 +45,7 @@ export function renderItemRow(props: {
 		>
 			<span class="color-swatch"></span>
 			<span class="icon">${renderIcon(item.kind)}</span>
-			<span class="label">${Kind[item.kind] ?? item.kind} ${item.id}</span>
+			<span class="label">${itemLabel(item)}</span>
 			<span class="duration">${duration}</span>
 
 			<button

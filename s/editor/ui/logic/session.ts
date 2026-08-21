@@ -10,7 +10,6 @@ import {ContainerItem, Driver, Id, Item, Kind, O, Resource, TimelineFile, Transi
 import {Stage} from "./parts/stage.js"
 import {Tool} from "./parts/modes/tool.js"
 import {Idx, Index} from "./parts/index.js"
-import {Roles} from "./parts/roles/roles.js"
 import {Viewport} from "./parts/viewport.js"
 import {Playback} from "./parts/playback.js"
 import {selectTool} from "./parts/modes/select.js"
@@ -18,13 +17,12 @@ import {Strata} from "../../context/parts/strata.js"
 import {add, remove, update} from "./parts/mutate.js"
 import {Proposal} from "./parts/proposal/proposal.js"
 import {trim} from "./parts/interactions/trim/parts/action.js"
-import {isRoleableKind} from "../../context/parts/roles/utils.js"
-import {DropIntent} from "./parts/interactions/drag/parts/intent.js"
+import type {DropIntent} from "./parts/interactions/drag/parts/intent.js"
 import {resizeTransition} from "./parts/interactions/trim/parts/transition.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
 import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 import {TimelineClipBox} from "../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
-import {replaceChild, splitClip, wrapChildInSequence} from "./parts/operations/operations.js"
+import {replaceChild, splitClip, wrapChild} from "./parts/operations/operations.js"
 import {
 	cloneAnimation,
 	hasAnyKeyframes,
@@ -42,14 +40,13 @@ export class OmniSession {
 	$proposal = signal<Proposal | null>(null)
 	$ghostClip = signal<TimelineClipBox | null>(null)
 	$trimPreviewOffsetPx = signal(0)
-	$dropIntent = signal<{movingId: Id, intent: DropIntent} | null>(null)
+	$drop = signal<DropIntent | null>(null)
 
 	viewport = new Viewport(PIXELS_PER_MILLISECOND)
 
 	canvas
 	stage
 	playback
-	roles
 	activeMode = signal(selectTool(this))
 
 	constructor(public deps: {
@@ -69,7 +66,6 @@ export class OmniSession {
 		})
 		this.stage = new Stage(this)
 		this.playback = new Playback(this.deps.player)
-		this.roles = new Roles(this)
 		this.#index = derived(() => new Index(deps.strata.timeline.state as TimelineFile))
 		this.$viewedItemId.value = deps.strata.timeline.state.rootId
 
@@ -133,20 +129,9 @@ export class OmniSession {
 		this.$proposal.value = null
 	}
 
-	/**
-	 * Append to the currently viewed timeline container.
-	 * Stack parents route roleable items into their default role lane.
-	 * Other parents append directly to childrenIds.
-	 */
+	/** Append to the currently viewed timeline container. */
 	appendItem(item: Item.Any) {
 		const parent = this.index.getItem<ContainerItem>(this.$viewedItemId())
-
-		if (parent.kind === Kind.Stack && isRoleableKind(item.kind)) {
-			this.roles.placeDefault(item)
-			this.$selectedItem.value = item.id
-			this.playback.seek(this.$playhead())
-			return
-		}
 
 		this.deps.omnitool.set<typeof parent>(parent.id, {
 			childrenIds: [...parent.childrenIds, item.id],
@@ -154,6 +139,26 @@ export class OmniSession {
 
 		this.$selectedItem.value = item.id
 		this.playback.seek(this.$playhead())
+	}
+
+	/** Wraps item with new container. */
+	wrapItem(itemId: Id, type: "stack" | "sequence") {
+		const parent = this.index.getParent(itemId)
+		if (!parent)
+			return
+
+		const container: Idx.Struct = {
+			id: this.deps.omnitool.getId(),
+			kind: type === "stack" ? Kind.Stack : Kind.Sequence,
+			childrenIds: [itemId],
+		}
+
+		this.timeline.mutate(state => {
+			add(state, container)
+			update(state, parent.id, wrapChild(parent, itemId, container))
+		})
+
+		this.$selectedItem(container.id)
 	}
 
 	applyTransitionToSelection(name: TransitionName, duration: number) {
@@ -165,7 +170,7 @@ export class OmniSession {
 		if (parent?.kind !== Kind.Sequence)
 			return false
 
-		if (selected.kind === Kind.Transition)
+		if (Idx.isTransition(selected))
 			return this.#updateTransition(selected.id, name, duration)
 
 		const childIndex = parent.childrenIds.indexOf(selected.id)
@@ -173,7 +178,7 @@ export class OmniSession {
 			return false
 
 		const [prev, next] = [-1, 1].map(d => this.index.getItemMaybe(parent.childrenIds[childIndex + d]))
-		const transition = [prev, next].find(s => s?.kind === Kind.Transition)
+		const transition = [prev, next].find((s): s is Item.Transition => !!s && Idx.isTransition(s))
 		if (transition)
 			return this.#updateTransition(transition.id, name, duration)
 
@@ -212,10 +217,6 @@ export class OmniSession {
 
 	#isVisualItem(item: Item.Any | undefined): item is Item.Video | Item.Image | Item.Text | Item.Caption {
 		return [Kind.Video, Kind.Image, Kind.Text, Kind.Caption].includes(item?.kind as Kind)
-	}
-
-	setDropIntent(dropIntent: {movingId: Id, intent: DropIntent} | null) {
-		this.$dropIntent.value = dropIntent
 	}
 
 	setGhostClip(ghostClip: TimelineClipBox | null) {
@@ -396,9 +397,13 @@ export class OmniSession {
 			}
 
 			const seqId = id()
-			const wrapped = wrapChildInSequence(parent, clipId, seqId, [leftId, rightId])
-			add(state, wrapped.sequence)
-			update(state, parent.id, wrapped.parent)
+			const sequence: Item.Sequence = {
+				id: seqId,
+				kind: Kind.Sequence,
+				childrenIds: [leftId, rightId],
+			}
+			add(state, sequence)
+			update(state, parent.id, wrapChild(parent, clipId, sequence))
 		})
 
 		this.canvas.clearPreviews()
@@ -424,7 +429,7 @@ export class OmniSession {
 				return
 
 			const item = this.index.getItemMaybe<Item.Any>(clipId)
-			if (item?.kind === Kind.Transition)
+			if (item && Idx.isTransition(item))
 				this.#applyTransitionResize(state, item, 0, parent.childrenIds, parent.childrenIds.indexOf(clipId))
 
 			remove(state, clipId)

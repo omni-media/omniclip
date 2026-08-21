@@ -1,44 +1,24 @@
 
 import {tool} from "./tool.js"
-
-type PanState = {
-	startPoint: {x: number, y: number}
-	startScrollLeft: number
-}
+import {Idx} from "../index.js"
+import {Dragger} from "../interactions/drag/dragger.js"
 
 export const positionTool = tool("position", (session) => {
-	let pan: PanState | null = null
+	const dragger = new Dragger(true)
 
 	return {
-		pointerdown: ({point}) => {
-			pan = {
-				startPoint: point,
-				startScrollLeft: session.viewport.scrollLeft,
-			}
-			session.canvas.canvas.style.cursor = "grabbing"
+		pointerdown: ({clip, point}) => {
+			const moving = clip && Idx.isClip(clip.kind) ? clip : null
+			session.$selectedItem.value = moving?.itemId ?? clip?.itemId ?? null
+
+			if (moving)
+				dragger.start(moving, point, session)
+			else dragger.cancel(session)
 		},
 
-		pointermove: ({point}) => {
-			if (!pan)
-				return
-
-			const maxScrollLeft = Math.max(0, session.canvas.contentWidth - session.canvas.width)
-			const nextScrollLeft = pan.startScrollLeft - (point.x - pan.startPoint.x)
-			session.viewport.setScrollLeft(
-				Math.max(0, Math.min(maxScrollLeft, nextScrollLeft))
-			)
-			session.canvas.scheduleDraw()
-		},
-
-		pointerup: () => {
-			pan = null
-			session.canvas.switchCursor("position")
-		},
-
-		pointerleave: () => {
-			pan = null
-			session.canvas.switchCursor("position")
-		},
+		pointermove: ({point}) => dragger.preview(point, session),
+		pointerup: () => dragger.commit(session),
+		pointerleave: () => dragger.cancel(session),
 	}
 })
 

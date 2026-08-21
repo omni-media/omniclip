@@ -67,7 +67,6 @@ export class Strata {
 	settings = this.trunk.lens(s => s.settings)
 	files = this.trunk.lens(s => s.files)
 	metadata = this.trunk.lens(s => s.metadata)
-	masterGain = this.trunk.lens(s => s.masterGain)
 	timeline = new Chrono(64, this.trunk.lens(state => state.timeline))
 	outliner = this.trunk.lens(s => s.outliner)
 

@@ -7,9 +7,38 @@ import {computeItemDuration} from '@omnimedia/omnitool/x/timeline/renderers/part
 export namespace Idx {
 	export type Text = Item.Text & {start?: number}
 	export type Image = Item.Image & {start?: number}
-	export type Clip = Item.Audio | Item.Video | Image | Text
+	export type Clip = Item.Audio | Item.Video | Item.Caption | Image | Text
 	export type Struct = Item.Sequence | Item.Stack
 	export type AnyItem = Item.Any
+
+	export function isSequence(kind: Kind) {
+		return kind === Kind.Sequence
+	}
+
+	export function isStack(kind: Kind) {
+		return kind === Kind.Stack
+	}
+
+	export function isTransition(item: AnyItem): item is Item.Transition {
+		return item.kind === Kind.Transition
+	}
+
+	export function isTransitionKind(kind?: Kind) {
+		return kind === Kind.Transition
+	}
+
+	export function isStructKind(kind: Kind) {
+		return isStack(kind) || isSequence(kind)
+	}
+
+	export function isStruct(item: AnyItem): item is Struct {
+		return "childrenIds" in item
+	}
+
+	export function isClip(kind: Kind) {
+		return kind === Kind.Audio || kind === Kind.Video || kind === Kind.Caption ||
+			kind === Kind.Image || kind === Kind.Text
+	}
 }
 
 export class Index {
@@ -17,8 +46,9 @@ export class Index {
 	items = new GMap<Id, Idx.AnyItem>()
 	parents = new GMap<Id, Idx.Struct>()
 	laneStarts = new GMap<Id, Ms>()
+	durations = new GMap<Id, Ms>()
 
-	constructor(private source: TimelineFile) {
+	constructor(source: TimelineFile) {
 		this.#reindex(source)
 	}
 
@@ -26,6 +56,7 @@ export class Index {
 		this.items.clear()
 		this.parents.clear()
 		this.laneStarts.clear()
+		this.durations.clear()
 
 		for (const item of state.items) {
 			this.items.set(item.id, item)
@@ -34,6 +65,8 @@ export class Index {
 					this.parents.set(childId, item)
 			}
 		}
+		for (const item of state.items)
+			this.durations.set(item.id, ms(computeItemDuration(item.id, state)))
 
 		this.#indexLaneStarts(state.rootId, ms(0))
 	}
@@ -52,6 +85,15 @@ export class Index {
 
 	getParentMaybe(childId?: Id | null) {
 		return childId == null ? undefined : this.getParent(childId)
+	}
+
+	contains(containerId: Id, itemId: Id): boolean {
+		if (containerId === itemId)
+			return true
+		const parent = this.getParent(itemId)
+		if (!parent)
+			return false
+		return this.contains(containerId, parent.id)
 	}
 
 	queryItem<T extends Idx.AnyItem = Idx.AnyItem>(
@@ -83,6 +125,10 @@ export class Index {
 		return ms(absStart - rootStart)
 	}
 
+	getItemDuration(id: Id) {
+		return this.durations.get(id) ?? ms(0)
+	}
+
 	#indexLaneStarts(id: Id, start: Ms) {
 		const item = this.getItemMaybe(id)
 		if (!item)
@@ -93,32 +139,11 @@ export class Index {
 		if (!('childrenIds' in item))
 			return
 
-		switch (item.kind) {
-
-			case Kind.Sequence: {
-				let cursor = start
-
-				for (const childId of item.childrenIds) {
-					const child = this.getItemMaybe(childId)
-					if (!child)
-						continue
-
-					this.#indexLaneStarts(childId, cursor)
-					cursor = ms(cursor + computeItemDuration(child.id, this.source))
-				}
-
-				break
-			}
-
-			case Kind.Stack: {
-				for (const childId of item.childrenIds)
-					this.#indexLaneStarts(childId, start)
-
-				break
-			}
-
-			default:
-				break
+		let cursor = start
+		for (const childId of item.childrenIds) {
+			this.#indexLaneStarts(childId, cursor)
+			if (item.kind === Kind.Sequence)
+				cursor = ms(cursor + this.getItemDuration(childId))
 		}
 	}
 }

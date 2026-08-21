@@ -1,64 +1,98 @@
 
 import {Id, Kind} from "@omnimedia/omnitool"
 
-import {DragSnapshot} from "./snapshot.js"
+import {Idx} from "../../../index.js"
+import {DragSnapshot, edgeOf, type DragBounds, type DragEdge, type DragPoint} from "./snapshot.js"
 
-export type DropIntent =
-	| {type: "sequence-reorder", sequenceId: Id, index: number}
-	| {type: "sequence-insert", sequenceId: Id, index: number}
-	| {type: "stack", parentId: Id, index: number}
-	| {type: "stack-wrap-leaf", stackId: Id, targetId: Id, before: boolean}
+/*Interpret the gesture*/
 
-type GetDropIntentOpts = {
-	snapshot: DragSnapshot
-	movingId: Id
-	pointerX: number
-	rowIndex: number
-}
+export type DropIntent = {targetId: Id, edge: DragEdge, indicator: DragBounds}
 
-export function getDropIntent({snapshot, movingId, pointerX, rowIndex}: GetDropIntentOpts): DropIntent | null {
-	const item = snapshot.index.getItem(movingId)
-	const parent = snapshot.index.getParent(movingId)
-	const viewed = snapshot.index.getItem(snapshot.viewedId)
-
-	if (viewed.kind !== Kind.Stack)
+export function resolveDropIntent(snapshot: DragSnapshot, movingId: Id, bounds: DragBounds): DropIntent | null {
+	const point = centerOf(bounds)
+	const sourceParent = snapshot.index.getParent(movingId)
+	if (!sourceParent)
 		return null
 
-	const reorderingOwnSequence = parent?.kind === Kind.Sequence
-		&& viewed.childrenIds[rowIndex] === parent.id
+	const hoveredBox = snapshot.boxAt(point, movingId)
+	const hoveredItem = snapshot.index.getItemMaybe(hoveredBox?.itemId)
 
-	if (reorderingOwnSequence) {
-		return {
-			type: "sequence-reorder",
-			sequenceId: parent.id,
-			index: snapshot.getInsertIndex(parent.id, item.id, pointerX),
-		}
+	if (hoveredBox && hoveredItem && !Idx.isStruct(hoveredItem)) {
+		const drop = dropOnHoveredLeaf(snapshot, movingId, hoveredItem, hoveredBox, point)
+		if (drop)
+			return drop
 	}
 
-	const targetId = viewed.childrenIds[rowIndex]
-	if (targetId == null || targetId === item.id) {
-		return {
-			type: "stack",
-			parentId: viewed.id,
-			index: rowIndex,
-		}
+	const edgeDrop = dropAtSourceContainerEdge(snapshot, sourceParent, point)
+	if (edgeDrop)
+		return edgeDrop
+
+	if (hoveredItem && Idx.isStruct(hoveredItem))
+		return snapshot.insertionAt(hoveredItem, movingId, point)
+
+	const viewedStruct = snapshot.index.getItem<Idx.Struct>(snapshot.viewedId)
+	return snapshot.insertionAt(viewedStruct, movingId, point)
+}
+
+function dropOnHoveredLeaf(
+	snapshot: DragSnapshot,
+	movingId: Id,
+	hoveredItem: Idx.AnyItem,
+	hoveredBox: DragBounds,
+	point: DragPoint,
+): DropIntent | null {
+	const parent = snapshot.index.getParent(hoveredItem.id)
+	if (!parent)
+		return null
+
+	if (parent.kind === Kind.Stack && hoveredItem.kind !== Kind.Gap) {
+		const edge = horizontalEdge(hoveredBox, point.x)
+		return dropAt(hoveredItem.id, hoveredBox, edge)
 	}
 
-	const target = snapshot.index.getItem(targetId)
-	if (target.kind === Kind.Sequence) {
-		return {
-			type: "sequence-insert",
-			sequenceId: target.id,
-			index: snapshot.getInsertIndex(target.id, item.id, pointerX),
-		}
-	}
+	return snapshot.insertionAt(parent, movingId, point)
+}
 
-	const targetBox = snapshot.getBox(target.id)
-	return {
-		type: "stack-wrap-leaf",
-		stackId: viewed.id,
-		targetId: target.id,
-		before: !(targetBox && pointerX >= targetBox.x + targetBox.width / 2),
+function dropAtSourceContainerEdge(
+	snapshot: DragSnapshot,
+	sourceParent: Idx.Struct,
+	point: DragPoint,
+): DropIntent | null {
+	const sourceParentBox = snapshot.getBox(sourceParent.id)
+	const sourceGrandparent = snapshot.index.getParent(sourceParent.id)
+
+	const isReorderableContainer =
+		sourceParentBox &&
+		sourceGrandparent?.kind === sourceParent.kind &&
+		sourceParent.childrenIds.length > 1
+
+	if (!isReorderableContainer)
+		return null
+
+	const edge = outsideEdge(sourceParentBox, point, sourceParent.kind)
+	return edge ? dropAt(sourceParent.id, sourceParentBox, edge) : null
+}
+
+function centerOf(bounds: DragBounds): DragPoint {
+	return {x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2}
+}
+
+function dropAt(targetId: Id, box: DragBounds, edge: DragEdge): DropIntent {
+	return {targetId, edge, indicator: edgeOf(box, edge)}
+}
+
+function horizontalEdge(box: DragBounds, x: number): DragEdge {
+	return x < box.x + box.width / 2 ? "left" : "right"
+}
+
+function outsideEdge(box: DragBounds, point: DragPoint, kind: Kind.Stack | Kind.Sequence): DragEdge | null {
+	if (kind === Kind.Stack) {
+		if (point.x < box.x) return "left"
+		if (point.x > box.x + box.width) return "right"
+	} else {
+		if (point.y < box.y) return "top"
+		if (point.y > box.y + box.height) return "bottom"
 	}
+	return null
 }
 

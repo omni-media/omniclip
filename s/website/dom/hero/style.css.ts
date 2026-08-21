@@ -1,231 +1,175 @@
-
 import {css} from "lit"
 
 export default css`
+*, *::before, *::after { box-sizing: border-box; }
+
 :host {
-	display: flex;
-	height: 100vh;
-	justify-content: center;
-	flex-direction: column;
-}
-
-.top {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 5em;
-}
-
-.site-name {
-	font-family: "IBM Plex Mono", ui-monospace, monospace;
-	font-size: var(--font-size-s);
-	color: #555;
-	letter-spacing: 0.05em;
-}
-
-.site-name span {
-	color: #e8a020;
-}
-
-.top-links {
-	display: flex;
-	align-items: center;
-	gap: 1.5em;
-	font-family: "IBM Plex Mono", ui-monospace, monospace;
-	font-size: var(--font-size-xs);
-}
-
-.top-links a {
-	color: #555;
-	text-decoration: none;
-	transition: color 0.2s;
-}
-
-.top-links a:hover {
-	color: #ccc;
-	text-decoration: none;
-}
-
-.menu-button {
-	display: none;
-	width: 1.8em;
-	height: 1.8em;
-	padding: 0;
-	border: 0;
-	background: transparent;
-	cursor: pointer;
-	opacity: 0.75;
-	transition: opacity 0.2s;
-}
-
-.menu-button:hover {
-	opacity: 1;
-}
-
-.menu-button img {
 	display: block;
+	min-height: 100svh;
+	overflow: hidden;
+	background:
+		radial-gradient(circle at 50% 58%, #335dff18, transparent 35em),
+		#050609;
+}
+
+main {
 	width: 100%;
-	height: 100%;
+	min-height: 100svh;
+	padding: 0 clamp(1em, 3vw, 3em) clamp(1.5em, 4vw, 4em);
 }
 
-sl-drawer::part(base) {
-	z-index: 100;
-}
-
-sl-drawer::part(overlay) {
-	background: rgb(0 0 0 / 0.55);
-	backdrop-filter: blur(0.5em);
-}
-
-sl-drawer::part(panel) {
-	border-bottom: 1px solid #1d1d1d;
-	background: #111;
-	color: #ccc;
-}
-
-sl-drawer::part(header) {
-	border-bottom: 1px solid #1d1d1d;
-	padding: 1em;
-}
-
-sl-drawer::part(title) {
-	color: #777;
-	font-family: "IBM Plex Mono", ui-monospace, monospace;
-	font-size: var(--font-size-xs);
-	letter-spacing: 0.12em;
-	text-transform: uppercase;
-}
-
-sl-drawer::part(close-button) {
-	color: #777;
-}
-
-sl-drawer::part(body) {
-	padding: 0.75em;
-}
-
-sl-drawer::part(footer) {
-	border-top: 1px solid #1d1d1d;
-	padding: 0.75em;
-}
-
-.drawer-links {
-	display: flex;
-	flex-direction: column;
-	gap: 0.4em;
-}
-
-.drawer-links a {
+nav {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	border: 1px solid #1d1d1d;
-	background: #161616;
-	padding: 1em 1.2em;
-	color: #ccc;
-	font-family: "IBM Plex Mono", ui-monospace, monospace;
-	font-size: var(--font-size-xs);
-	text-decoration: none;
-	transition: border-color 0.2s, color 0.2s, background 0.2s;
+	width: min(100%, 1384px);
+	height: 68px;
+	margin: 0 auto;
 }
 
-.drawer-links a::after {
-	content: "->";
-	color: #555;
-}
-
-.drawer-links a:hover {
-	border-color: #2a2a2a;
-	background: #181818;
-	color: #e8a020;
+a {
+	color: #aaa;
 	text-decoration: none;
 }
 
-.drawer-primary::part(base) {
-	border: 0;
-	background: #e8a020;
-	color: #111;
-	font-family: "IBM Plex Mono", ui-monospace, monospace;
-	font-size: var(--font-size-xs);
+a:hover {
+	color: white;
+	text-decoration: none;
+}
+
+.brand, .nav-actions, .actions {
+	display: flex;
+	align-items: center;
+}
+
+.brand {
+	flex: 0 0 auto;
+	gap: 0.55em;
+	color: #f5f5f6;
+	font-size: var(--font-size-m);
+	font-weight: 650;
+}
+
+.brand img {
+	width: 28px;
+	height: 28px;
+	object-fit: contain;
+}
+
+.version {
+	padding: 0.2em 0.5em;
+	border-radius: 5px;
+	background: #ffffff0a;
+	box-shadow: inset 0 0 0 1px #ffffff14;
+	color: #888b93;
+	font-size: 0.7em;
+	font-weight: 500;
+}
+
+.nav-actions {
+	gap: 1.5em;
+	font-size: var(--font-size-s);
+}
+
+.hero {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+}
+
+.copy {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	padding: clamp(3em, 7vh, 5.5em) 0 clamp(2.5em, 6vh, 4.5em);
+	text-align: center;
 }
 
 h1 {
-	margin-bottom: 0.5em;
-	color: #eee;
-	font-family: "IBM Plex Mono", ui-monospace, monospace;
-	font-size: clamp(1.6em, 5.5vw, 2.5em);
-	font-weight: 400;
-	line-height: 1.2;
-	letter-spacing: 0;
+	max-width: 13ch;
+	color: #f7f7f8;
+	font-size: clamp(2.25rem, 4.2vw, 4rem);
+	font-weight: 600;
+	letter-spacing: -0.055em;
+	line-height: 1.04;
 }
 
-.intro {
-	max-width: 32em;
-	margin-bottom: 2em;
-	color: #777;
-	font-size: calc(var(--font-size-m) - 1px);
+p {
+	margin-top: 1em;
+	color: #898c94;
+	font-size: clamp(var(--font-size-s), 1.5vw, var(--font-size-l));
 }
 
-.cta-row {
+.actions {
+	gap: 1.35em;
+	margin-top: 1.6em;
+	font-size: var(--font-size-s);
+}
+
+.discord {
 	display: flex;
 	align-items: center;
-	gap: 1.3em;
-	margin-bottom: 5em;
+	gap: 0.45em;
+	padding: 0.75em 0.2em;
 }
 
-.btn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	background: #e8a020;
-	color: #111;
-	padding: 0.6em 1.4em;
-	font-family: "IBM Plex Mono", ui-monospace, monospace;
-	font-size: calc(var(--font-size-s) - 1px);
-	line-height: 1.2;
-	text-decoration: none;
-	white-space: nowrap;
-	transition: opacity 0.15s;
+.discord svg {
+	width: 1.25em;
+	height: 1.25em;
 }
 
-.btn:hover {
-	opacity: 0.85;
-	text-decoration: none;
+.primary {
+	padding: 0.75em 1.4em;
+	border-radius: 7px;
+	background: #1676f3;
+	box-shadow: 0 10px 35px #126ce730;
+	color: white;
+	font-weight: 600;
 }
 
-.btn-plain {
-	color: #444;
-	font-family: "IBM Plex Mono", ui-monospace, monospace;
-	font-size: calc(var(--font-size-s) - 1px);
-	text-decoration: none;
-	transition: color 0.2s;
+.primary:hover { background: #2c88ff; }
+
+.editor {
+	width: min(100%, 1384px);
+	overflow: hidden;
+	border: 1px solid #ffffff1a;
+	border-radius: 10px;
+	background: #111;
+	box-shadow:
+		0 35px 100px #000a,
+		0 0 90px #315dff13;
 }
 
-.btn-plain:hover {
-	color: #999;
-	text-decoration: none;
+.editor img {
+	display: block;
+	width: 100%;
+	height: auto;
 }
 
-@media (max-width: 500px) {
-	.top {
-		align-items: center;
-		flex-direction: row;
-		margin-bottom: 3.5em;
-	}
+.credit {
+	margin-top: clamp(2.5em, 5vw, 4.5em);
+	color: #62656d;
+	font-size: var(--font-size-xs);
+}
 
-	.top-links {
-		display: none;
-	}
+.credit a {
+	margin-left: 0.3em;
+	color: #999ca4;
+}
 
-	.menu-button {
-		display: block;
-	}
+@media (max-width: 600px) {
+	main { padding-inline: 0.8em; }
+	nav { height: 58px; }
+	.github { display: none; }
+	.copy { padding: 3.5em 0 3em; }
+	h1 { font-size: clamp(2.2rem, 11vw, 3.25rem); }
+	p { max-width: 24em; }
+	.editor { border-radius: 6px; }
+}
 
-	.cta-row {
-		align-items: flex-start;
-		flex-direction: column;
-		gap: 0.9em;
-	}
+@media (max-width: 420px) {
+	.actions { flex-direction: column; gap: 1em; }
+	.actions .primary { order: -1; }
 }
 `
 

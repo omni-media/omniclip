@@ -50,6 +50,7 @@ export class Roller {
 		}
 		session.setGhostClip(null)
 		session.setTrimPreviewOffsetPx(0)
+		return true
 	}
 
 	preview(time: Ms, session: OmniSession) {

@@ -72,7 +72,6 @@ export default css`@layer view {
 }
 
 .outliner-tabs > input#tab-clips:checked ~ .tab-bar label[for="tab-clips"],
-.outliner-tabs > input#tab-roles:checked ~ .tab-bar label[for="tab-roles"],
 .outliner-tabs > input#tab-tags:checked ~ .tab-bar label[for="tab-tags"] {
 	color: #e8e8e8;
 	background: #3f3f3f;
@@ -89,7 +88,6 @@ export default css`@layer view {
 }
 
 .outliner-tabs > input#tab-clips:checked ~ .tab-panels #clips-panel,
-.outliner-tabs > input#tab-roles:checked ~ .tab-panels #roles-panel,
 .outliner-tabs > input#tab-tags:checked ~ .tab-panels #tags-panel {
 	display: flex;
 	flex-direction: column;
@@ -213,108 +211,6 @@ export default css`@layer view {
 
 .star-button[data-starred] {
 	color: #d4b663;
-}
-
-.role-list {
-	display: flex;
-	flex-direction: column;
-	gap: 0.25em;
-}
-
-.role-section {
-	display: flex;
-	flex-direction: column;
-	gap: 0.4em;
-}
-
-.role-section-title {
-	color: #8f8f8f;
-	font-size: calc(var(--font-size-xs) - 1px);
-	font-weight: 600;
-	text-transform: uppercase;
-}
-
-.role-row {
-	display: grid;
-	grid-template-columns: 1.7em minmax(0, 1fr) 2.5em;
-	align-items: center;
-	gap: 0.55em;
-	min-height: 30px;
-	padding: 0 0.55em;
-	border: 1px solid color-mix(in srgb, var(--role-color), #111 48%);
-	border-radius: 3px;
-	background: color-mix(in srgb, var(--role-color), #111 28%);
-	color: #e5e5e5;
-	cursor: pointer;
-	transition: filter 0.12s ease, box-shadow 0.12s ease;
-}
-
-.role-row:hover {
-	filter: brightness(1.08);
-}
-
-.role-row[data-selected] {
-	box-shadow: inset 0 0 0 1px #dadada;
-}
-
-.role-row[data-disabled] {
-	filter: grayscale(0.75) brightness(0.72);
-}
-
-.role-row[data-subrole] {
-	margin-left: 1.2em;
-}
-
-.role-toggle {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 1.15em;
-	height: 1.15em;
-	padding: 0;
-	background: rgba(0, 0, 0, 0.18);
-	border: 1px solid rgba(255, 255, 255, 0.45);
-	border-radius: 2px;
-	cursor: pointer;
-}
-
-.role-toggle span {
-	width: 0.55em;
-	height: 0.55em;
-	background: #f0f0f0;
-	opacity: 0;
-}
-
-.role-toggle[data-enabled] span {
-	opacity: 1;
-}
-
-.role-name,
-.role-count {
-	font-size: var(--font-size-xs);
-}
-
-.role-name {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	text-shadow: 0 1px 1px rgba(0, 0, 0, 0.32);
-}
-
-.role-count {
-	justify-self: end;
-	opacity: 0.82;
-}
-
-.role-actions {
-	margin-top: 0.3em;
-}
-
-.role-actions wa-button::part(base) {
-	width: 100%;
-	min-height: 2.2em;
-	border-radius: 3px;
-	font-size: var(--font-size-xs);
 }
 
 }`

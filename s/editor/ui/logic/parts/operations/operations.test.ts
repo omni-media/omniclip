@@ -3,7 +3,7 @@ import {deep} from "@e280/stz"
 import {Science, expect, test} from "@e280/science"
 import {Kind, Item, Id} from "@omnimedia/omnitool"
 
-import {spliceChildren, wrapChildInSequence} from "./operations.js"
+import {spliceChildren, wrapSiblings} from "./operations.js"
 
 const mock = {
 	video: (id: Id) => ({ id, kind: Kind.Video }),
@@ -29,11 +29,12 @@ export default Science.suite({
 		const movingId = 2
 		const targetId = 1
 
-		const {sequence, parent} = wrapChildInSequence(
+		const sequence = mock.sequence(400, [targetId, movingId])
+		const parent = wrapSiblings(
 			root as Item.Stack,
 			targetId,
-			400,
-			[targetId, movingId]
+			movingId,
+			sequence as Item.Sequence,
 		)
 
 		expect(deep.equal(parent.childrenIds, [400])).ok()
@@ -43,11 +44,12 @@ export default Science.suite({
 	"move item before standalone item": test(async () => {
 		const root = mock.stack(300, [1])
 
-		const {sequence} = wrapChildInSequence(
+		const sequence = mock.sequence(400, [2, 1])
+		wrapSiblings(
 			root as Item.Stack,
 			1,
-			400,
-			[2, 1]
+			2,
+			sequence as Item.Sequence,
 		)
 
 		expect(deep.equal(sequence.childrenIds, [2, 1])).ok()

@@ -1,14 +1,12 @@
 
 export const styles = {
-	background: "#151515",
+	background: "#161616",
 	rulerBackground: "#181818",
 	rulerBorder: "#242424",
 	rulerTick: "#696969",
 	rulerMinorTick: "#3c3c3c",
 	rulerLabel: "#9a9a9a",
-	trackBackground: "#181818",
-	trackBackgroundAlt: "#151515",
-	trackBorder: "#242424",
+	trackBorder: "#30333a",
 	playhead: "#ff5f45",
 	ghostPlayhead: "rgba(255, 95, 69, 0.32)",
 	bladePreview: "#ff7b8e",
@@ -20,7 +18,6 @@ export const styles = {
 } as const
 
 export const metrics = {
-	paddingX: 30,
 	paddingY: 14,
 	rulerHeight: 32,
 	trackHeight: 58,

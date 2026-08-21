@@ -3,7 +3,6 @@ import {html} from "lit"
 import {shadow, useCss} from "@e280/sly"
 import {Item} from "@omnimedia/omnitool"
 
-import {RoleControls} from "./role.js"
 import {CropControls} from "./crop/view.js"
 import {controlsStyles} from "./styles.css.js"
 import {FiltersControls} from "./filters/view.js"
@@ -19,7 +18,6 @@ export const VideoControls = shadow((context: EditorContext, item: Item.Video) =
 	useCss(controlsStyles, itemControlTabsCss)
 
 	const properties = html`
-		${RoleControls(context, item)}
 		<div class="controls-group">
 			<h4 class="heading">Transform</h4>
 			${TransformControls(context, item)}

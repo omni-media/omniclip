@@ -1,6 +1,6 @@
 
 export const minimumGainDb = -60
-export const maximumGainDb = 6
+export const maximumGainDb = 12
 
 export const dbFromGain = (gain: number) =>
 	gain <= 0 ? "-∞" : `${(20 * Math.log10(gain)).toFixed(1)}`

@@ -1,5 +1,5 @@
 
-import {Id, Item, Kind} from "@omnimedia/omnitool"
+import {Id} from "@omnimedia/omnitool"
 import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {Idx} from "../index.js"
@@ -22,27 +22,24 @@ export const replaceChild = (
 	replacementIds: Id[],
 ) => childrenIds.flatMap(id => id === targetId ? replacementIds : [id])
 
-export const wrapChildInSequence = (
-	parent: Item.Sequence | Item.Stack,
+export const wrapChild = (
+	parent: Idx.Struct,
 	targetId: Id,
-	sequenceId: Id,
-	sequenceChildrenIds: Id[],
-	removedIds: Id[] = [],
+	container: Idx.Struct,
 ) => ({
-	parent: {
-		...parent,
-		childrenIds: replaceChild(
-			parent.childrenIds.filter(id => !removedIds.includes(id)),
-			targetId,
-			[sequenceId],
-		),
-	},
-	sequence: {
-		id: sequenceId,
-		kind: Kind.Sequence,
-		childrenIds: sequenceChildrenIds,
-	} as Item.Sequence,
+	...parent,
+	childrenIds: replaceChild(parent.childrenIds, targetId, [container.id]),
 })
+
+export const wrapSiblings = (
+	parent: Idx.Struct,
+	targetId: Id,
+	movingId: Id,
+	container: Idx.Struct,
+) => wrapChild({
+	...parent,
+	childrenIds: parent.childrenIds.filter(id => id !== movingId),
+}, targetId, container)
 
 export const splitClip = (
 	clip: Idx.Clip,

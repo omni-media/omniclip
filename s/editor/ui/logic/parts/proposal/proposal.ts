@@ -7,6 +7,10 @@ import {add, remove, update} from "../mutate.js"
 
 export type Overlay = Map<Id, Item.Any | null>
 
+export function mergeOverlay(...overlays: Overlay[]): Overlay {
+	return new Map(overlays.flatMap(overlay => [...overlay]))
+}
+
 export class Proposal {
 	state: TimelineFile
 	index: Index

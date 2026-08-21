@@ -1,111 +1,210 @@
 
-import {OmniSession} from "../../../session.js"
-import {DragSnapshot} from "./parts/snapshot.js"
-import {getDropIntent} from "./parts/intent.js"
-import {Proposal} from "../../proposal/proposal.js"
-import {overlayFromIntent} from "./parts/overlay.js"
-import {TimelineClipBox} from "../../../../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
+import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
-type Point = {x: number, y: number}
+import type {OmniSession} from "../../../session.js"
+import {DragSnapshot} from "./parts/snapshot.js"
+import {resolveDropIntent} from "./parts/intent.js"
+import {Proposal} from "../../proposal/proposal.js"
+import {overlayFromDropIntent} from "./parts/overlay.js"
+import {
+	isPositionDropBlocked,
+	overlayFromPosition,
+	resolvePositionDrop,
+} from "./parts/position/resolve.js"
+import type {TimelineClipBox} from "../../../../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
+
+type Point = {
+	x: number
+	y: number
+}
+
+type DragState = {
+	clip: TimelineClipBox
+	startPoint: Point
+	snapshot: DragSnapshot
+}
 
 export class Dragger {
-	#state: {
-		clip: TimelineClipBox
-		startPoint: Point
-		snapshot: DragSnapshot
-	} | null = null
+	#state: DragState | null = null
 
 	isDragging = false
 
-	start(clip: TimelineClipBox, point: Point, session: OmniSession) {
+	constructor(private readonly positionItems = false) {}
+
+	start(
+		clip: TimelineClipBox,
+		point: Point,
+		session: OmniSession,
+	) {
 		this.isDragging = false
 		this.#state = {
 			clip,
 			startPoint: point,
 			snapshot: new DragSnapshot(
 				session.index,
-				{
-					clips: [...session.canvas.layout.clips],
-					rows: session.canvas.layout.rows,
-					duration: session.canvas.layout.duration,
-				},
+				[...session.canvas.clips],
 				session.$viewedItemId.value,
-			)
+			),
 		}
 	}
 
 	preview(point: Point, session: OmniSession) {
-		if (!this.#state)
+		const state = this.#state
+		if (!state)
 			return null
 
-		const {startPoint, clip, snapshot} = this.#state
-		const dx = point.x - startPoint.x
-		const dy = point.y - startPoint.y
+		const {dx, dy} = dragOffset(state.startPoint, point)
 
 		if (!this.isDragging && Math.hypot(dx, dy) < 4)
 			return null
 
 		this.isDragging = true
-		session.setGhostClip(
-			session.canvas.clampClipToCanvasBounds(
-				clip,
-				clip.x + dx,
-				clip.y + dy,
-			)
+
+		const ghost = {
+			...state.clip,
+			x: state.clip.x + dx,
+			y: state.clip.y + dy,
+		}
+
+		session.setGhostClip(ghost)
+
+		const drop = this.#resolvePreviewDrop(
+			session,
+			state,
+			ghost,
 		)
 
-		const pointerX = point.x + session.viewport.scrollLeft
-		const intent = getDropIntent({
-			snapshot,
-			movingId: clip.itemId,
-			pointerX,
-			rowIndex: snapshot.rowAt(point.y),
-		})
-		const validIntent = intent && session.roles.canDrop(clip.itemId, intent)
-			? intent
-			: null
-
-		session.setDropIntent(validIntent ? {movingId: clip.itemId, intent: validIntent} : null)
-
-		if (validIntent) {
-			const overlay = overlayFromIntent({
-				index: snapshot.index,
-				movingId: clip.itemId,
-				intent: validIntent,
-				getId: () => session.deps.omnitool.getId(),
-			})
-			session.setProposal(overlay ? new Proposal(session.timeline, overlay) : null)
-		}
-		else {
-			session.clearProposal()
-		}
-
+		session.$drop.value = drop
 		session.canvas.scheduleDraw()
-		return {dx, dy, snapshot, clipId: clip.itemId, clip}
 	}
 
 	commit(session: OmniSession) {
-		const drop = session.$dropIntent.value
-		if (this.isDragging) {
-			session.$proposal.value?.commit()
-			if (drop)
-				session.roles.assignFromDrop(drop.movingId, drop.intent)
-		}
+		const state = this.#state
+
+		if (this.isDragging && state)
+			this.#commitDrag(session, state)
 
 		this.cancel(session)
 	}
 
 	cancel(session: OmniSession) {
-		session.clearProposal()
 		session.setGhostClip(null)
-		session.setDropIntent(null)
-		this.end()
+		session.$drop.value = null
+
+		this.#state = null
+		this.isDragging = false
+
+		if (this.positionItems)
+			session.canvas.switchCursor("position")
+
 		session.canvas.scheduleDraw()
 	}
 
-	end() {
-		this.#state = null
-		this.isDragging = false
+	#resolvePreviewDrop(
+		session: OmniSession,
+		state: DragState,
+		ghost: TimelineClipBox,
+	) {
+		const {clip, snapshot} = state
+
+		const resolvedDrop = resolveDropIntent(
+			snapshot,
+			clip.itemId,
+			ghost,
+		)
+
+		if (!this.positionItems)
+			return resolvedDrop
+
+		const preview = {
+			snapshot,
+			movingId: clip.itemId,
+			desiredStart: positionStart(session, clip, ghost),
+			drop: resolvedDrop,
+		}
+
+		const drop = resolvePositionDrop(preview)
+		const blocked = isPositionDropBlocked({
+			...preview,
+			drop,
+		})
+
+		session.canvas.canvas.style.cursor = blocked
+			? "not-allowed"
+			: "move"
+
+		return drop
+	}
+
+	#commitDrag(
+		session: OmniSession,
+		state: DragState,
+	) {
+		const drop = session.$drop.value
+		const ghost = session.$ghostClip()
+
+		const desiredStart =
+			ghost && this.positionItems
+				? positionStart(session, state.clip, ghost)
+				: null
+
+		if (desiredStart !== null) {
+			this.#commitPosition(session, state, desiredStart)
+			return
+		}
+
+		if (drop)
+			this.#commitDrop(session, state, drop)
+	}
+
+	#commitPosition(
+		session: OmniSession,
+		state: DragState,
+		desiredStart: ReturnType<typeof positionStart>,
+	) {
+		const overlay = overlayFromPosition({
+			session,
+			snapshot: state.snapshot,
+			movingId: state.clip.itemId,
+			desiredStart,
+			drop: session.$drop.value,
+		})
+
+		new Proposal(session.timeline, overlay).commit()
+	}
+
+	#commitDrop(
+		session: OmniSession,
+		state: DragState,
+		drop: NonNullable<ReturnType<typeof resolveDropIntent>>,
+	) {
+		const overlay = overlayFromDropIntent({
+			drop,
+			index: state.snapshot.index,
+			movingId: state.clip.itemId,
+			newContainerId: session.deps.omnitool.getId(),
+		})
+
+		if (overlay)
+			new Proposal(session.timeline, overlay).commit()
 	}
 }
 
+function dragOffset(start: Point, current: Point) {
+	return {
+		dx: current.x - start.x,
+		dy: current.y - start.y,
+	}
+}
+
+function positionStart(
+	session: OmniSession,
+	clip: TimelineClipBox,
+	ghost: TimelineClipBox,
+) {
+	const offset = session.viewport.widthToDuration(
+		ghost.x - clip.x,
+	)
+
+	return ms(Math.max(0, clip.start + offset))
+}

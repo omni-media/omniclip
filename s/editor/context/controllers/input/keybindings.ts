@@ -6,6 +6,7 @@ import {TimelineAction} from "./meta.js"
 import {OmniSession} from "../../../ui/logic/session.js"
 import {bladeTool} from "../../../ui/logic/parts/modes/blade.js"
 import {positionTool} from "../../../ui/logic/parts/modes/position.js"
+import {handTool} from "../../../ui/logic/parts/modes/hand.js"
 import {selectTool} from "../../../ui/logic/parts/modes/select.js"
 import {zoomTool} from "../../../ui/logic/parts/modes/zoom.js"
 import {isEditableElement, prevent_default_browser_behavior} from "./prevent-default-hack.js"
@@ -122,6 +123,8 @@ export class Keybindings {
 			if (timeline.blade_tool_temp.up) this.session.setMode(selectTool)
 			if (timeline.position_tool.down) this.session.setMode(positionTool)
 			if (timeline.position_tool_temp.up) this.session.setMode(selectTool)
+			if (timeline.hand_tool.down) this.session.setMode(handTool)
+			if (timeline.hand_tool_temp.up) this.session.setMode(selectTool)
 			if (timeline.select_tool.down) this.session.setMode(selectTool)
 		}
 

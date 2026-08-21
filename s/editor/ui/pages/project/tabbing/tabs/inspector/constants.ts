@@ -1,5 +1,8 @@
 
-import type {DataType, DeviceType} from "@huggingface/transformers"
+import type {TranscriberSpec} from "@omnimedia/omnitool"
+
+export type AiDevice = TranscriberSpec["device"]
+export type AiDtype = TranscriberSpec["dtype"]
 
 export const AI_DEVICES = [
 	["webgpu", "WebGPU"],
@@ -13,7 +16,7 @@ export const AI_DEVICES = [
 	["gpu", "GPU"],
 	["cuda", "CUDA"],
 	["dml", "DML"],
-] as const satisfies readonly (readonly [DeviceType, string])[]
+] as const satisfies readonly (readonly [AiDevice, string])[]
 
 export const AI_DTYPES = [
 	["auto", "Auto"],
@@ -25,10 +28,7 @@ export const AI_DTYPES = [
 	["q4", "Q4"],
 	["bnb4", "BNB4"],
 	["q4f16", "Q4F16"],
-] as const satisfies readonly (readonly [DataType, string])[]
-
-export type AiDevice = typeof AI_DEVICES[number][0]
-export type AiDtype = typeof AI_DTYPES[number][0]
+] as const satisfies readonly (readonly [AiDtype, string])[]
 
 export const formatProgress = (n: number, label: string) =>
 	Number.isFinite(n) ? `${label} ${n}%` : `${label}...`

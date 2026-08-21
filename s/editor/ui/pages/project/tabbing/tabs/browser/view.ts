@@ -24,15 +24,16 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 	const duration = useSignal(DEFAULT_TRANSITION_DURATION)
 
 	const makeItems = (format: MediaFormat, media: Media) => {
+		const label = media.datafile.filename
 		switch (format) {
 			case "video": {
-				const video = context.omni.video(media)
+				const video = context.omni.video(media, {label})
 				return media.hasAudio
-					? [context.omni.audio(media), video]
+					? [context.omni.audio(media, {label}), video]
 					: [video]
 			}
-			case "image": return [context.omni.image(media)]
-			case "audio": return [context.omni.audio(media)]
+			case "image": return [context.omni.image(media, {label})]
+			case "audio": return [context.omni.audio(media, {label})]
 			case "other": return []
 		}
 	}
@@ -90,6 +91,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 	const addTextPreset = (preset: TextPreset) => {
 		const text = context.omni.text(preset.content, {
 			duration: DEFAULT_TEXT_DURATION,
+			label: preset.label,
 			styles: preset.styles,
 		})
 

@@ -6,6 +6,7 @@ export class Viewport {
 	$zoom = signal(1)
 	$scrollLeft = signal(0)
 	$width = signal(0)
+	$height = signal(0)
 	$minZoom = signal(0.2)
 
 	constructor(readonly pixelsPerMillisecond: number) {}
@@ -22,6 +23,10 @@ export class Viewport {
 		return this.$width.value
 	}
 
+	get height() {
+		return this.$height.value
+	}
+
 	get minZoom() {
 		return this.$minZoom.value
 	}
@@ -30,6 +35,7 @@ export class Viewport {
 		return 10
 	}
 
+	// Time → linear X.
 	timeToX(time: Ms) {
 		return time * this.pxPerMs()
 	}
@@ -38,6 +44,7 @@ export class Viewport {
 		return this.timeToX(time) - this.scrollLeft
 	}
 
+	// Linear X → time.
 	xToTime(x: number) {
 		return ms(x / this.pxPerMs())
 	}
@@ -54,8 +61,9 @@ export class Viewport {
 		return ms(width / this.pxPerMs())
 	}
 
-	setWidth(width: number) {
+	setSize(width: number, height: number) {
 		this.$width.value = width
+		this.$height.value = height
 	}
 
 	setMinZoom(minZoom: number) {
@@ -94,10 +102,12 @@ export class Viewport {
 		this.setZoomAt(viewportX, this.zoom + delta)
 	}
 
+	// Visible linear timeline start.
 	visibleStart() {
 		return this.xToTime(this.scrollLeft)
 	}
 
+	// Visible linear timeline end.
 	visibleEnd() {
 		return this.xToTime(this.scrollLeft + this.width)
 	}

@@ -8,18 +8,15 @@ import {Driver, Id, Item, Kind, Resource, VideoPlayer} from '@omnimedia/omnitool
 
 import {drawClips} from './draw/clip.js'
 import {drawRuler} from './draw/ruler.js'
-import {drawLanes} from './draw/lanes.js'
-import {buildLayout} from './layout/build.js'
-import {LayoutResult} from './layout/types.js'
 import {TimelineClipBox} from './draw/clip.js'
-import {LaneStrip} from './parts/lane-strip.js'
 import {drawPlayhead} from './draw/playhead.js'
+import {layout, type ClipBox} from './layout/layout.js'
 import {metrics, styles} from './draw/styles.js'
 import {drawBladePreview} from './draw/blade-preview.js'
-import {drawClipPreview} from './draw/clip-preview.js'
 import {drawSnapTargets} from './draw/snap-targets.js'
 import {TimelineFilmstrips} from './parts/filmstrips.js'
 import {TimelineWaveforms} from './parts/waveforms.js'
+import {Idx} from '../../../../../../logic/parts/index.js'
 import {OmniSession} from '../../../../../../logic/session.js'
 import {Strata} from '../../../../../../../context/parts/strata.js'
 import {ToolName} from '../../../../../../logic/parts/modes/tool.js'
@@ -42,13 +39,11 @@ export class TimelineCanvas {
 
 	spacer = dom.elmer("div").attr("className", "spacer").done()
 
-	layout: LayoutResult = {clips: [], rows: 1, duration: ms(0)}
+	clips: ClipBox[] = []
 	#contentExtent = ms(0)
 	#lastZoom = 0
 
 	#raf = 0
-
-	#laneStrip = new LaneStrip(this)
 
 	$previews = {
 		blade: signal<{time: Ms, clipId: Id} | null>(null)
@@ -63,8 +58,20 @@ export class TimelineCanvas {
 		return this.deps.session.viewport
 	}
 
-	resize(width: number) {
-		this.viewport.setWidth(width)
+	get index() {
+		return this.deps.session.index
+	}
+
+	/** visual size of an item on the timeline */
+	itemSize(item: Item.Any) {
+		return {
+			height: metrics.trackHeight,
+			width: this.viewport.durationToWidth(this.index.getItemDuration(item.id))
+		}
+	}
+
+	resize(width: number, height: number) {
+		this.viewport.setSize(width, height)
 		this.scheduleDraw()
 	}
 
@@ -83,6 +90,9 @@ export class TimelineCanvas {
 				this.canvas.style.cursor = "url('/assets/icons/material-design-icons/razor.svg') 12 12, crosshair"
 				break
 			case "position":
+				this.canvas.style.cursor = "move"
+				break
+			case "hand":
 				this.canvas.style.cursor = "grab"
 				break
 			case "trim":
@@ -108,7 +118,7 @@ export class TimelineCanvas {
 
 	get contentWidth() {
 		const stableExtent = ms(Math.max(
-			this.layout.duration,
+			this.duration,
 			this.deps.session.$playhead.value,
 		))
 
@@ -119,8 +129,16 @@ export class TimelineCanvas {
 			this.#contentExtent = ms(Math.max(this.#contentExtent, stableExtent))
 		}
 
-		const contentPx = Math.ceil(this.viewport.durationToWidth(this.#contentExtent)) + metrics.paddingX * 2
-		return Math.max(this.viewport.width, contentPx + this.viewport.width)
+		const timedContentPx = Math.ceil(this.viewport.durationToWidth(this.#contentExtent))
+		return Math.max(this.viewport.width, timedContentPx + this.viewport.width)
+	}
+
+	get endY() {
+		return Math.max(...this.clips.map(clip => clip.y + clip.height))
+	}
+
+	get duration() {
+		return this.deps.session.index.getItemDuration(this.getViewedItem().id)
 	}
 
 	get width() {
@@ -128,31 +146,25 @@ export class TimelineCanvas {
 	}
 
 	get height() {
-		return metrics.rulerHeight +
-			metrics.paddingY * 2 +
-			this.layout.rows * metrics.trackHeight +
-			Math.max(0, this.layout.rows - 1) * metrics.trackGap
+		const contentHeight = this.endY + metrics.paddingY
+		return Math.max(contentHeight, this.viewport.height)
 	}
 
 	draw() {
-		this.layout = buildLayout(this.deps.session.index, this)
+		this.clips = layout(this)
 		this.spacer.style.width = `${this.contentWidth}px`
 		this.#resize()
 		this.clearCanvas()
 
 		drawRuler(this)
-		drawLanes(this)
-
 		this.ctx.save()
 		this.ctx.translate(-this.viewport.scrollLeft, 0)
 		this.ctx.translate(this.trimPreviewOffsetPx(), 0)
 		drawClips(this)
-		drawClipPreview(this)
 		drawSnapTargets(this)
 		drawBladePreview(this)
 		drawPlayhead(this)
 		this.ctx.restore()
-		this.#laneStrip.draw()
 	}
 
 	#resize() {
@@ -166,27 +178,16 @@ export class TimelineCanvas {
 
 	clipAt(x: number, y: number) {
 		x += this.viewport.scrollLeft - this.trimPreviewOffsetPx()
-		return this.layout.clips.find(
+		return this.clips.findLast(
 			c => c.kind !== Kind.Gap &&
 				x >= c.x && x <= c.x + c.width && y >= c.y && y <= c.y + c.height
 		) ?? null
 	}
 
-	getBox(itemId: Id) {
-		return this.layout.clips.find(clip => clip.itemId === itemId) ?? null
-	}
-
-	getInsertIndex(parentId: Id, movingId: Id, pointerX: number) {
-		const parent = this.deps.session.index.getItem(parentId)
-		if (!("childrenIds" in parent))
-			return 0
-
-		const siblings = parent.childrenIds
-			.filter(id => id !== movingId)
-			.map(id => this.getBox(id))
-			.filter(box => !!box)
-
-		return siblings.filter(box => pointerX >= box.x + box.width / 2).length
+	getBox(itemId?: Id) {
+		return itemId == null
+			? null
+			: this.clips.find(clip => clip.itemId === itemId) ?? null
 	}
 
 	trimEdgeAt(clip: TimelineClipBox, canvasX: number) {
@@ -198,7 +199,7 @@ export class TimelineCanvas {
 	}
 
 	rollEdgeAt(clip: TimelineClipBox, canvasX: number) {
-		if (clip.kind === Kind.Transition)
+		if (Idx.isTransitionKind(clip.kind))
 			return null
 
 		const parent = this.deps.session.index.getParent(clip.itemId)
@@ -214,22 +215,11 @@ export class TimelineCanvas {
 		const prev = this.deps.session.index.getItemMaybe(parent.childrenIds[index - 1])
 		const next = this.deps.session.index.getItemMaybe(parent.childrenIds[index + 1])
 
-		if (inStartZone && index > 0 && prev?.kind !== Kind.Transition)
+		if (inStartZone && index > 0 && !Idx.isTransitionKind(prev?.kind))
 			return "start"
-		if (inEndZone && index < parent.childrenIds.length - 1 && next?.kind !== Kind.Transition)
+		if (inEndZone && index < parent.childrenIds.length - 1 && !Idx.isTransitionKind(next?.kind))
 			return "end"
 		return null
-	}
-
-	clampClipToCanvasBounds(clip: TimelineClipBox, x: number, y: number) {
-		return {
-			...clip,
-			x: Math.max(0, Math.min(this.contentWidth - clip.width, x)),
-			y: Math.max(
-				metrics.rulerHeight + metrics.paddingY,
-				Math.min(this.height - metrics.paddingY - clip.height, y),
-			),
-		}
 	}
 
 	clearCanvas() {
@@ -243,21 +233,12 @@ export class TimelineCanvas {
 			row * (metrics.trackHeight + metrics.trackGap)
 	}
 
-	rowAt(y: number) {
-		const local = y - metrics.rulerHeight - metrics.paddingY
-		if (local <= 0)
-			return 0
-
-		const row = Math.floor(local / (metrics.trackHeight + metrics.trackGap))
-		return Math.max(0, Math.min(this.layout.rows - 1, row))
-	}
-
 	selectedItemId() {
 		return this.deps.session.$selectedItem.value
 	}
 
-	viewedItemId() {
-		return this.deps.session.$viewedItemId.value
+	getViewedItem() {
+		return this.deps.session.index.getItem<Idx.Struct>(this.deps.session.$viewedItemId.value)
 	}
 
 	timebase(): Fps {
@@ -281,25 +262,30 @@ export class TimelineCanvas {
 		return this.deps.timeline.state
 	}
 
-	#pointerPosition(event: PointerEvent) {
+	#pointerPosition(event: MouseEvent) {
 		const rect = this.canvas.getBoundingClientRect()
 		return {x: event.clientX - rect.left, y: event.clientY - rect.top}
 	}
 
-	#pointerToMs(event: PointerEvent): Ms {
+	#pointerToMs(event: MouseEvent): Ms {
 		const {x} = this.#pointerPosition(event)
-		return ms(Math.max(0, this.viewport.viewportXToTime(x - metrics.paddingX)))
+		return ms(Math.max(0, this.viewport.xToTime(
+			x + this.viewport.scrollLeft - this.trimPreviewOffsetPx()
+		)))
 	}
 
-	pointAt(event: PointerEvent) {
+	pointAt(event: MouseEvent) {
 		return this.#pointerPosition(event)
 	}
 
-	timeAt(event: PointerEvent): Ms {
+	timeAt(event: MouseEvent): Ms {
 		return this.#pointerToMs(event)
 	}
 
 	onPointerDown = (event: PointerEvent) => {
+		if (event.button !== 0)
+			return
+
 		this.canvas.setPointerCapture(event.pointerId)
 		const point = this.#pointerPosition(event)
 		const time = this.#pointerToMs(event)
@@ -321,7 +307,6 @@ export class TimelineCanvas {
 		const clip = inRuler ? null : this.clipAt(point.x, point.y)
 
 		this.deps.session.setGhostPlayhead(time)
-		this.#laneStrip.hover(inRuler ? null : point)
 		this.scheduleDraw()
 
 		this.deps.session.activeMode.value.pointermove?.({
@@ -350,7 +335,6 @@ export class TimelineCanvas {
 		const clip = inRuler ? null : this.clipAt(point.x, point.y)
 
 		this.deps.session.clearGhostPlayhead()
-		this.#laneStrip.hover(null)
 		this.scheduleDraw()
 
 		this.deps.session.activeMode.value.pointerleave?.({

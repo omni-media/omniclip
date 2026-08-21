@@ -1,13 +1,15 @@
 
 import {html} from "lit"
-import {shadow, spinner, useCss, useMount, useWait} from "@e280/sly"
+
+import {shadow, spinner, useCss, useMount, useSignal, useWait} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import type {AppRouter} from "../router.js"
 import {TabBar} from "./tabbing/bar/view.js"
 import themeCss from "../../../theme.css.js"
 import {EditTab} from "./tabbing/tabs/edit/view.js"
-import {MixerTab} from "./tabbing/tabs/mixer/view.js"
+import {Assistant} from "../../logic/assistant/view.js"
+import {AudioPanel} from "./tabbing/tabs/audio/view.js"
 import {ExportTab} from "./tabbing/tabs/export/view.js"
 import {ProjectNotFoundPage} from "./not-found/view.js"
 import {Strata} from "../../../context/parts/strata.js"
@@ -39,6 +41,7 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 			return ProjectNotFoundPage(router, projectId)
 
 		useMount(() => () => context.dispose())
+		const assistantOpen = useSignal(false)
 
 		const manager = context.tabs
 
@@ -69,6 +72,13 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 					</div>
 
 					<div class=right>
+						<wa-button
+							@click=${() => assistantOpen.value = true}
+							class=assistant size="small">
+							<wa-icon slot="start" name="comments"></wa-icon>
+							Help
+						</wa-button>
+
    					<wa-button
      					@click=${openSettings}
 							class=settings size="small">
@@ -132,7 +142,7 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 								</div>
 							</wa-split-panel>
 
-							<wa-split-panel slot="end" orientation="vertical" class="inspector-split" primary="start" position-in-pixels="430">
+							<wa-split-panel slot="end" orientation="vertical" primary="start" position-in-pixels="430">
 								<div
 									slot="start"
 									class="panel inspector-panel"
@@ -141,11 +151,8 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 									${InspectorTab(context)}
 								</div>
 
-								<div
-									slot="end"
-									class="panel mixer-panel"
-								>
-									${MixerTab(context)}
+								<div slot="end" class="panel audio-panel">
+									${AudioPanel(context)}
 								</div>
 							</wa-split-panel>
 						</wa-split-panel>
@@ -160,6 +167,7 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 				</div>
 
 				${context.modals.render()}
+				${Assistant(assistantOpen)}
 			</div>
 	`})
 })

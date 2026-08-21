@@ -1,12 +1,18 @@
 
 import {html} from "lit"
 import {pub} from "@e280/stz"
+import {Item} from "@omnimedia/omnitool"
 import {dom, shadow, useCss, useMount, useRendered, useShadow} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import {TimelineScrollbar} from "./scrollbar/view.js"
+import {TimelineContextMenu} from "./context-menu/view.js"
 import themeCss from "../../../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
+import {itemLabel} from "../../../../../../../logic/utils/item-label.js"
+
+import "@awesome.me/webawesome/dist/components/breadcrumb/breadcrumb.js"
+import "@awesome.me/webawesome/dist/components/breadcrumb-item/breadcrumb-item.js"
 
 export const TimelineArea = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
@@ -32,14 +38,15 @@ export const TimelineArea = shadow((context: EditorContext) => {
 	useMount(() => {
 		const observer = new ResizeObserver(entries => {
 			for (const entry of entries) {
-				timelineCanvas.resize(entry.contentRect.width)
+				timelineCanvas.resize(entry.contentRect.width, entry.contentRect.height)
 			}
 		})
 
 		const timeline = timelineElement()
 
 		useRendered().then(async () => {
-			timelineCanvas.resize((await timeline).clientWidth)
+			const element = await timeline
+			timelineCanvas.resize(element.clientWidth, element.clientHeight)
 			observer.observe(await timeline)
 		})
 
@@ -93,7 +100,40 @@ export const TimelineArea = shadow((context: EditorContext) => {
 		}
 	})
 
+
+	const renderTrail = () => {
+
+		const path = () => {
+			const items: Item.Any[] = []
+			let item = session.index.getItemMaybe(session.$viewedItemId.value)
+			while (item) {
+				items.unshift(item)
+				item = session.index.getParent(item.id)
+			}
+			return items
+		}
+
+		return html`
+			<wa-breadcrumb>
+				${path().map((item) => html`
+					<wa-breadcrumb-item
+						?data-current=${item.id === session.$viewedItemId()}
+						@click=${() => {
+							session.$viewedItemId(item.id)
+							session.$selectedItem(item.id)
+						}}
+					>
+						${itemLabel(item)}
+					</wa-breadcrumb-item>
+				`)}
+			</wa-breadcrumb>
+		`
+	}
+
 	return html`
+		<nav class="timeline-path" aria-label="Timeline location">
+			${renderTrail()}
+		</nav>
 		<div @scroll=${onScroll} class="timeline">
 			${timelineCanvas.canvas}
 			${timelineCanvas.spacer}
@@ -101,5 +141,7 @@ export const TimelineArea = shadow((context: EditorContext) => {
 		${TimelineScrollbar(updateScrollbar, timelineElement(), scrollLeft =>
 			session.viewport.setScrollLeft(scrollLeft)
 		)}
+		${TimelineContextMenu(context)}
 	`
 })
+

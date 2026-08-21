@@ -43,8 +43,10 @@ export const bindings = tact.asBindings({
 		zoom_tool_temp: ["mods", ["code", "KeyZ", {timing: ["hold", 500]}], {}],
 		blade_tool: ["mods", "KeyB", {}],
 		blade_tool_temp: ["mods", ["code", "KeyB", {timing: ["hold", 500]}], {}],
-		position_tool: ["mods", "KeyH", {}],
-		position_tool_temp: ["mods", ["code", "KeyH", {timing: ["hold", 500]}], {}],
+		position_tool: ["mods", "KeyP", {}],
+		position_tool_temp: ["mods", ["code", "KeyP", {timing: ["hold", 500]}], {}],
+		hand_tool: ["mods", "KeyH", {}],
+		hand_tool_temp: ["mods", ["code", "KeyH", {timing: ["hold", 500]}], {}],
 		select_tool: ["or", "Escape", ["mods", "KeyA", {}]]
 	},
 })
