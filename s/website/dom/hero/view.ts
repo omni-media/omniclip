@@ -41,7 +41,7 @@ export const Hero = shadow(() => {
 
 				<figure class="editor">
 					<img
-						src="/assets/landing-editor-hero.png"
+						src="/assets/editor.png"
 						alt="Omniclip editing a cinematic video with a layered timeline and audio mixer"
 					/>
 				</figure>
