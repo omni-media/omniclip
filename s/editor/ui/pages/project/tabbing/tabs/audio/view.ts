@@ -41,7 +41,7 @@ export const AudioPanel = shadow((context: EditorContext) => {
 	useMount(() => {
 		const stopLevel = context.player.audio.levels.on(
 			() => timeline.state.items
-				.filter(item => item.kind === Kind.Audio)
+				.filter(item => item.kind === Kind.Audio || item.kind === Kind.Clip)
 				.map(item => item.id),
 			({peak: value}) => peak(value),
 		)

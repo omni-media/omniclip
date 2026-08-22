@@ -14,6 +14,7 @@ import styleCss from "./style.css.js"
 import {valueOf} from "../filters/utils.js"
 import textStyleCss from "../text/style.css.js"
 import {aiControlStyles, controlsStyles} from "../styles.css.js"
+import type {Idx} from "../../../../../../../../logic/parts/index.js"
 import binSvg from "../../../../../../../../icons/gravity-ui/bin.svg.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 import speechToTextSvg from "../../../../../../../../icons/speech-to-text.svg.js"
@@ -29,7 +30,7 @@ import "@awesome.me/webawesome/dist/components/details/details.js"
 import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 
 
-export const CaptionsControls = shadow((context: EditorContext, item: Item.Video | Item.Audio) => {
+export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoItem | Idx.AudioItem) => {
 	useCss(controlsStyles, textStyleCss, aiControlStyles, styleCss)
 
 	const tool = context.omni

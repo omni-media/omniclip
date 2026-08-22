@@ -7,13 +7,14 @@ import type {Transform, TransformAnimation} from "@omnimedia/omnitool/x/timeline
 
 import {OmniSession} from "../session.js"
 import {add, update} from "./mutate.js"
+import {Idx} from "./index.js"
 import {
 	ANIMATION_CHANNELS,
 	cloneAnimation,
 	setAnimationKeyframe,
 } from "../../pages/project/tabbing/tabs/inspector/views/controls/keyframes/utils.js"
 
-type StageItem = Item.Video | Item.Text
+type StageItem = Idx.VideoItem | Item.Text
 
 export class Stage {
 	kimura

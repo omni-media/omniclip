@@ -4,6 +4,7 @@ import {Item} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
 import {controlsStyles} from "../styles.css.js"
+import type {Idx} from "../../../../../../../../logic/parts/index.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 
 import "@awesome.me/webawesome/dist/components/option/option.js"
@@ -15,7 +16,7 @@ const BLEND_MODES = [
 	"Exclusion", "Hue", "Saturation", "Color", "Luminosity"
 ]
 
-export const CompositingControls = shadow((context: EditorContext, item: Item.Video | Item.Image | Item.Text) => {
+export const CompositingControls = shadow((context: EditorContext, item: Idx.VideoItem | Item.Image | Item.Text) => {
 	useCss(controlsStyles, styleCss)
 	const timeline = context.strata.timeline.state.items
 
@@ -74,3 +75,4 @@ export const CompositingControls = shadow((context: EditorContext, item: Item.Vi
 		</div>
 	`
 })
+

@@ -7,6 +7,7 @@ import {resolveTransformAnimation} from '@omnimedia/omnitool/x/timeline/utils/an
 
 import styleCss from './style.css.js'
 import {controlsStyles} from '../styles.css.js'
+import type {Idx} from '../../../../../../../../logic/parts/index.js'
 import {add, update} from '../../../../../../../../logic/parts/mutate.js'
 import keyframesSvg from '../../../../../../../../icons/keyframes.svg.js'
 import {EditorContext} from '../../../../../../../../../context/context.js'
@@ -15,7 +16,7 @@ import {ANIMATION_CHANNELS, getTrack, setAnimationKeyframe, SpatialLike, clamp, 
 
 import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 
-export const TransformControls = shadow((context: EditorContext, item: Item.Text | Item.Video | Item.Image) => {
+export const TransformControls = shadow((context: EditorContext, item: Item.Text | Idx.VideoItem | Item.Image) => {
 	useCss(controlsStyles, styleCss)
 
 	const tool = context.omni

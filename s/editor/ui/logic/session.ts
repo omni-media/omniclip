@@ -215,8 +215,8 @@ export class OmniSession {
 		return true
 	}
 
-	#isVisualItem(item: Item.Any | undefined): item is Item.Video | Item.Image | Item.Text | Item.Caption {
-		return [Kind.Video, Kind.Image, Kind.Text, Kind.Caption].includes(item?.kind as Kind)
+	#isVisualItem(item: Item.Any | undefined): item is Idx.VideoItem | Item.Image | Item.Text | Item.Caption {
+		return [Kind.Video, Kind.Clip, Kind.Image, Kind.Text, Kind.Caption].includes(item?.kind as Kind)
 	}
 
 	setGhostClip(ghostClip: TimelineClipBox | null) {
@@ -272,7 +272,7 @@ export class OmniSession {
 	}
 
 	updateTransformAnimation(
-		item: Item.Text | Item.Video | Item.Image,
+		item: Item.Text | Idx.VideoItem | Item.Image,
 		transform: Transform,
 		mutateAnimation: (draft: TransformAnimation) => void,
 	) {

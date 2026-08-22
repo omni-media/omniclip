@@ -9,6 +9,7 @@ import {ImageControls} from "./views/controls/image.js"
 import {TextControls} from "./views/controls/text/view.js"
 import themeCss from "./../../../../../../theme.css.js"
 import {EditorContext} from "./../../../../../../context/context.js"
+import type {Idx} from "../../../../../logic/parts/index.js"
 
 export const InspectorTab = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
@@ -21,6 +22,8 @@ export const InspectorTab = shadow((context: EditorContext) => {
 		switch(selectedItem?.kind) {
 			case Kind.Video:
 				return VideoControls(context, selectedItem as Item.Video)
+			case Kind.Clip:
+				return VideoControls(context, selectedItem as Idx.VideoItem)
 			case Kind.Image:
 				return ImageControls(context, selectedItem as Item.Image)
 			case Kind.Audio:

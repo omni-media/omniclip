@@ -7,6 +7,7 @@ import {resolveTransformAnimation} from '@omnimedia/omnitool/x/timeline/utils/an
 
 import styleCss from './style.css.js'
 import {controlsStyles} from '../styles.css.js'
+import type {Idx} from '../../../../../../../../logic/parts/index.js'
 import keyframesSvg from '../../../../../../../../icons/keyframes.svg.js'
 import {EditorContext} from '../../../../../../../../../context/context.js'
 import {
@@ -22,7 +23,7 @@ import {
 import '@awesome.me/webawesome/dist/components/details/details.js'
 import '@awesome.me/webawesome/dist/components/button/button.js'
 
-export const KeyframesControls = shadow((context: EditorContext, item: Item.Text | Item.Video | Item.Image) => {
+export const KeyframesControls = shadow((context: EditorContext, item: Item.Text | Idx.VideoItem | Item.Image) => {
 	useCss(controlsStyles, styleCss)
 
 	const index = context.session.index

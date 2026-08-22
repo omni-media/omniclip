@@ -1,9 +1,10 @@
 
 import {AnimationPreset, animationPresets, Item} from "@omnimedia/omnitool"
+import type {Idx} from "../../../../../../../../logic/parts/index.js"
 
 export type PresetChoice = AnimationPreset | "none"
 export type PresetDirection = "enter" | "exit"
-export type PresetItem = Item.Text | Item.Video | Item.Image
+export type PresetItem = Item.Text | Idx.VideoItem | Item.Image
 
 const ORDER = ["fade", "slide", "zoom", "spin", "bounce"]
 

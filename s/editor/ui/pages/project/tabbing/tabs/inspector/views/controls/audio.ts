@@ -6,10 +6,11 @@ import {Item} from "@omnimedia/omnitool"
 import {valueOf} from "./filters/utils.js"
 import {controlsStyles} from "./styles.css.js"
 import {CaptionsControls} from "./captions/view.js"
+import type {Idx} from "../../../../../../../logic/parts/index.js"
 import {ItemControlTabs, itemControlTabsCss} from "./control-tabs.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
-const audioStyles = css`
+export const audioStyles = css`
 .audio-controls {
 	display: flex;
 	flex-direction: column;
@@ -42,16 +43,14 @@ const audioStyles = css`
 }
 `
 
-export const AudioControls = shadow((context: EditorContext, item: Item.Audio) => {
-	useCss(controlsStyles, itemControlTabsCss, audioStyles)
-
+export function AudioProperties(context: EditorContext, item: Idx.AudioItem) {
 	const gain = item.gain ?? 1
 	const volume = Math.round(gain * 100)
 
 	const setVolume = (value: number) =>
-		context.omni.set<Item.Audio>(item.id, {gain: Math.max(0, value) / 100})
+		context.omni.set<Idx.AudioItem>(item.id, {gain: Math.max(0, value) / 100})
 
-	const properties = html`
+	return html`
 		<div class="controls-group">
 			<h4 class="heading">Audio</h4>
 			<div class="audio-controls">
@@ -83,10 +82,14 @@ export const AudioControls = shadow((context: EditorContext, item: Item.Audio) =
 			</div>
 		</div>
 	`
+}
+
+export const AudioControls = shadow((context: EditorContext, item: Item.Audio) => {
+	useCss(controlsStyles, itemControlTabsCss, audioStyles)
 
 	return html`
 		${ItemControlTabs({
-			properties,
+			properties: AudioProperties(context, item),
 			effects: html`
 				<div class="controls-group">
 					<p class="muted">Audio effects are not wired yet.</p>

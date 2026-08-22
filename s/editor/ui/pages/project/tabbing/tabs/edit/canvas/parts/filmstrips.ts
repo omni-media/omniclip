@@ -1,10 +1,11 @@
 
-import {Item, Filmstrip} from "@omnimedia/omnitool"
+import {Filmstrip} from "@omnimedia/omnitool"
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {metrics, styles} from "../draw/styles.js"
 import type {TimelineCanvas} from "../canvas.js"
 import type {TimelineClipBox} from "../draw/clip.js"
+import type {Idx} from "../../../../../../../logic/parts/index.js"
 
 type Tile = {
 	time: number
@@ -31,7 +32,7 @@ export class TimelineFilmstrips {
 	}
 
 	draw(ctx: CanvasRenderingContext2D, box: TimelineClipBox) {
-		const clip = this.canvas.deps.session.index.getItem<Item.Video>(box.itemId)
+		const clip = this.canvas.deps.session.index.getItem<Idx.VideoItem>(box.itemId)
 		const media = this.canvas.deps.resolveMedia(clip)
 
 		if (!media) {
@@ -61,7 +62,7 @@ export class TimelineFilmstrips {
 		ctx.restore()
 	}
 
-	#entry(clip: Item.Video) {
+	#entry(clip: Idx.VideoItem) {
 		const existing = this.#entries.get(clip.id)
 		if (existing)
 			return existing
@@ -117,7 +118,7 @@ export class TimelineFilmstrips {
 		ctx.restore()
 	}
 
-	#sync(entry: Entry, box: TimelineClipBox, clip: Item.Video) {
+	#sync(entry: Entry, box: TimelineClipBox, clip: Idx.VideoItem) {
 		const range = this.#visibleRange(box, clip)
 		if (!range)
 			return
@@ -126,7 +127,7 @@ export class TimelineFilmstrips {
 		entry.filmstrip?.update({range, frequency})
 	}
 
-	#visibleRange(box: TimelineClipBox, clip: Item.Video) {
+	#visibleRange(box: TimelineClipBox, clip: Idx.VideoItem) {
 		const viewportLeft = this.canvas.viewport.scrollLeft
 		const viewportRight = viewportLeft + this.canvas.viewport.width
 		const previewOffset = this.canvas.trimPreviewOffsetPx()
@@ -148,14 +149,14 @@ export class TimelineFilmstrips {
 		return THUMB_WIDTH_PX / (pixelsPerMillisecond * 1000)
 	}
 
-	#tileLeft(box: TimelineClipBox, clip: Item.Video, time: number) {
+	#tileLeft(box: TimelineClipBox, clip: Idx.VideoItem, time: number) {
 		if (clip.duration <= 0)
 			return 0
 
 		return ((time * 1000 - clip.start) / clip.duration) * box.width
 	}
 
-	#tileWidth(box: TimelineClipBox, clip: Item.Video) {
+	#tileWidth(box: TimelineClipBox, clip: Idx.VideoItem) {
 		if (clip.duration <= 0)
 			return 0
 

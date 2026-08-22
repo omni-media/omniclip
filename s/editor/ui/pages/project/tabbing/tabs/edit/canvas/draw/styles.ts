@@ -14,6 +14,7 @@ export const styles = {
 	selectedStroke: "#ececff",
 	clipLabelText: "#c9d2df",
 	clipLabelShadow: "rgba(0, 0, 0, 0.32)",
+	gapFill: "#292b2f",
 	waveformFill: "rgb(211, 143, 58)",
 } as const
 

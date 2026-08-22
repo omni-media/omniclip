@@ -15,6 +15,7 @@ function renderIcon(kind: Kind) {
 		case Kind.Stack: return stackSvg
 		case Kind.Sequence: return sequenceSvg
 		case Kind.Video: return videoPlayerSvg
+		case Kind.Clip: return videoPlayerSvg
 		case Kind.Text: return textSvg
 		default: return html`?`
 	}

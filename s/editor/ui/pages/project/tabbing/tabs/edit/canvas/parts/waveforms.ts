@@ -1,11 +1,11 @@
 
-import {Item} from "@omnimedia/omnitool"
 import {Waveform} from "@omnimedia/omnitool/x/timeline/parts/waveform/waveform.js"
 import type {WaveformTileData} from "@omnimedia/omnitool/x/timeline/parts/waveform/parts/types.js"
 
 import {metrics, styles} from "../draw/styles.js"
 import type {TimelineCanvas} from "../canvas.js"
 import type {TimelineClipBox} from "../draw/clip.js"
+import type {Idx} from "../../../../../../../logic/parts/index.js"
 
 type Entry = {
 	waveform: Promise<Waveform>
@@ -25,7 +25,7 @@ export class TimelineWaveforms {
 	}
 
 	draw(ctx: CanvasRenderingContext2D, box: TimelineClipBox) {
-		const clip = this.canvas.deps.session.index.getItem<Item.Audio>(box.itemId)
+		const clip = this.canvas.deps.session.index.getItem<Idx.AudioItem>(box.itemId)
 		const media = this.canvas.deps.resolveMedia(clip)
 
 		if (!media) {
@@ -53,7 +53,7 @@ export class TimelineWaveforms {
 		ctx.restore()
 	}
 
-	#entry(clip: Item.Audio) {
+	#entry(clip: Idx.AudioItem) {
 		const existing = this.#entries.get(clip.id)
 		if (existing)
 			return existing
@@ -99,7 +99,7 @@ export class TimelineWaveforms {
 		ctx.restore()
 	}
 
-	#sync(entry: Entry, box: TimelineClipBox, clip: Item.Audio) {
+	#sync(entry: Entry, box: TimelineClipBox, clip: Idx.AudioItem) {
 		const range = this.#visibleRange(box, clip)
 		if (!range)
 			return
@@ -118,7 +118,7 @@ export class TimelineWaveforms {
 		})
 	}
 
-	#visibleRange(box: TimelineClipBox, clip: Item.Audio) {
+	#visibleRange(box: TimelineClipBox, clip: Idx.AudioItem) {
 		const viewportLeft = this.canvas.viewport.scrollLeft
 		const viewportRight = viewportLeft + this.canvas.viewport.width
 		const previewOffset = this.canvas.trimPreviewOffsetPx()
@@ -137,19 +137,19 @@ export class TimelineWaveforms {
 		return [start / 1000, end / 1000] as [number, number]
 	}
 
-	#pixelsPerSecond(box: TimelineClipBox, clip: Item.Audio) {
+	#pixelsPerSecond(box: TimelineClipBox, clip: Idx.AudioItem) {
 		if (clip.duration <= 0)
 			return 1
 		return box.width / (clip.duration / 1000)
 	}
 
-	#tileLeft(box: TimelineClipBox, clip: Item.Audio, startTime: number) {
+	#tileLeft(box: TimelineClipBox, clip: Idx.AudioItem, startTime: number) {
 		if (clip.duration <= 0)
 			return 0
 		return ((startTime * 1000 - clip.start) / clip.duration) * box.width
 	}
 
-	#tileWidth(box: TimelineClipBox, clip: Item.Audio, tile: WaveformTileData) {
+	#tileWidth(box: TimelineClipBox, clip: Idx.AudioItem, tile: WaveformTileData) {
 		if (clip.duration <= 0)
 			return 0
 		return (((tile.endTime - tile.startTime) * 1000) / clip.duration) * box.width

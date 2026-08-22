@@ -22,13 +22,14 @@ function roundedRect(
 function itemColor(kind: Kind) {
 	switch (kind) {
 		case Kind.Video: return "#34527a"
+		case Kind.Clip: return "#34527a"
 		case Kind.Audio: return "#1b6937"
 		case Kind.Image: return "#765c2d"
 		case Kind.Text: return "#5c3b91"
 		case Kind.Sequence: return "#405160"
 		case Kind.Stack: return "#37404b"
 		case Kind.Transition: return "#7b4d22"
-		case Kind.Gap: return "#292b2f"
+		case Kind.Gap: return styles.gapFill
 		default: return "#555b65"
 	}
 }
@@ -128,7 +129,18 @@ export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 	if (clip.kind === Kind.Audio)
 		canvas.waveforms.draw(ctx, contentBox)
 
-	drawLabel(canvas, clip, labelHeight, color)
+	if (clip.kind === Kind.Clip) {
+		const filmstripHeight = contentBox.height * 0.65
+		canvas.filmstrips.draw(ctx, {...contentBox, height: filmstripHeight})
+		canvas.waveforms.draw(ctx, {
+			...contentBox,
+			y: contentBox.y + filmstripHeight,
+			height: contentBox.height - filmstripHeight,
+		})
+	}
+
+	if (clip.kind !== Kind.Gap)
+		drawLabel(canvas, clip, labelHeight, color)
 	ctx.restore()
 
 	if (itemDisabled(canvas, clip.itemId))
@@ -161,9 +173,9 @@ export function drawClips(canvas: TimelineCanvas) {
 	const previewClips: TimelineClipBox[] = []
 
 	for (const clip of canvas.clips) {
-		if (clip.kind === Kind.Video)
+		if (clip.kind === Kind.Video || clip.kind === Kind.Clip)
 			activeFilmstrips.add(clip.itemId)
-		if (clip.kind === Kind.Audio)
+		if (clip.kind === Kind.Audio || clip.kind === Kind.Clip)
 			activeWaveforms.add(clip.itemId)
 		if (ghost && canvas.index.contains(ghost.itemId, clip.itemId)) {
 			previewClips.push(clip)
