@@ -1,4 +1,6 @@
 
+import type {RenderContainer} from "@omnimedia/omnitool"
+
 export type ExportCodec = "h264" | "vp9" | "vp8" | "hevc"
 export type ExportBitrate = "high" | "medium" | "low" | "custom"
 
@@ -8,7 +10,7 @@ export type ExportResult = {
 	format: ExportFormat
 }
 
-export type ExportFormat = "mp4" | "mov" | "webm"
+export type ExportFormat = RenderContainer
 
 export const codecOptions = [
 	{value: "h264", label: "H.264"},
@@ -28,8 +30,8 @@ export const getQualityLabel = (opt: typeof qualityOptions[number]) =>
 	opt.value === "custom" ? opt.label : `${opt.label} (${opt.kbps / 1000} Mbps)`
 
 export const codecSupportedFormats: Record<ExportCodec, ExportFormat[]> = {
-	h264: ["mp4", "mov"],
-	hevc: ["mp4", "mov"],
-	vp9:  ["webm"],
-	vp8: ["webm"]
+	h264: ["mp4", "mov", "mkv"],
+	hevc: ["mp4", "mov", "mkv"],
+	vp9: ["mp4", "webm", "mov", "mkv"],
+	vp8: ["mp4", "webm", "mov", "mkv"],
 }

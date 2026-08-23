@@ -4,17 +4,12 @@ import {shadow, useCss, useMount, useOnce, useSignal} from "@e280/sly"
 
 import styleCss from "../style.css.js"
 import {ExportResult} from "../constants.js"
+import {copyFrame, toOmnitoolExportConfig} from "./utils.js"
 import {ExportProgress, renderExportProgress} from "./render.js"
 import modalCss from "../../../../../context/parts/modal/modal.css.js"
 import {ModalDefinition} from "../../../../../context/parts/modal/types.js"
 
 import "@awesome.me/webawesome/dist/components/button/button.js"
-
-function copyFrame(src: HTMLCanvasElement, dst: HTMLCanvasElement) {
-	if (dst.width !== src.width) dst.width = src.width
-	if (dst.height !== src.height) dst.height = src.height
-	dst.getContext("2d")?.drawImage(src, 0, 0)
-}
 
 export const exportProgressModal = (
 	settings: ExportResult,
@@ -31,13 +26,24 @@ export const exportProgressModal = (
 
 		const exportVideo = async () => {
 			try {
-				const {readable} = await ctx.project.render(
+				const handle = await window.showSaveFilePicker({
+					suggestedName: `export.${settings.format}`,
+				})
+				if (aborted) return
+
+				const writable = await handle.createWritable()
+				const {readable, done} = await ctx.project.render(
 					ctx.strata.timeline.state as TimelineFile,
 					{
-						framerate: ctx.strata.settings.state.timebase,
+						config: toOmnitoolExportConfig(
+							settings,
+							ctx.strata.settings.state.timebase,
+						),
 						onProgress: render => {
 							if (aborted)
 								throw new Error("Export cancelled.")
+							if (progress.value.phase !== "rendering")
+								return
 
 							progress({phase: "rendering", render})
 							copyFrame(ctx.controllers.player.canvas, canvas)
@@ -46,13 +52,7 @@ export const exportProgressModal = (
 				)
 
 				if (aborted) return
-
-				progress({phase: "saving"})
-				const handle = await window.showSaveFilePicker()
-				if (aborted) return
-
-				const writable = await handle.createWritable()
-				await readable.pipeTo(writable)
+				await Promise.all([readable.pipeTo(writable), done])
 				if (aborted) return
 
 				progress({phase: "complete"})
