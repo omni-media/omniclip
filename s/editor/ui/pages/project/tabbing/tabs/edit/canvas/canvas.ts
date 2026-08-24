@@ -179,8 +179,7 @@ export class TimelineCanvas {
 	clipAt(x: number, y: number) {
 		x += this.viewport.scrollLeft - this.trimPreviewOffsetPx()
 		return this.clips.findLast(
-			c => c.kind !== Kind.Gap &&
-				x >= c.x && x <= c.x + c.width && y >= c.y && y <= c.y + c.height
+			c => x >= c.x && x <= c.x + c.width && y >= c.y && y <= c.y + c.height
 		) ?? null
 	}
 

@@ -7,9 +7,10 @@ import {computeItemDuration} from '@omnimedia/omnitool/x/timeline/renderers/part
 export namespace Idx {
 	export type Text = Item.Text & {start?: number}
 	export type Image = Item.Image & {start?: number}
+	export type Gap = Item.Gap & {start?: number}
 	export type AudioItem = Item.Audio | Item.Clip
 	export type VideoItem = Item.Video | Item.Clip
-	export type Clip = AudioItem | VideoItem | Item.Caption | Image | Text
+	export type Clip = AudioItem | VideoItem | Item.Caption | Gap | Image | Text
 	export type Struct = Item.Sequence | Item.Stack
 	export type AnyItem = Item.Any
 
@@ -39,7 +40,7 @@ export namespace Idx {
 
 	export function isClip(kind: Kind) {
 		return kind === Kind.Audio || kind === Kind.Video || kind === Kind.Clip || kind === Kind.Caption ||
-			kind === Kind.Image || kind === Kind.Text
+			kind === Kind.Image || kind === Kind.Text || kind === Kind.Gap
 	}
 }
 
