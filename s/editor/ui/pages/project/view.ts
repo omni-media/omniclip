@@ -1,9 +1,12 @@
 
 import {html} from "lit"
 
-import {shadow, spinner, useCss, useMount, useSignal, useWait} from "@e280/sly"
+import {waitSelect} from "@e280/strata"
+import {ErrorDisplay, shadow, useCss, useMount, useSignal, useWait} from "@e280/sly"
 
 import styleCss from "./style.css.js"
+import loadingCss from "./loading.css.js"
+import {ProjectLoading} from "./loading.js"
 import type {AppRouter} from "../router.js"
 import {TabBar} from "./tabbing/bar/view.js"
 import themeCss from "../../../theme.css.js"
@@ -28,15 +31,17 @@ import "@awesome.me/webawesome/dist/components/button/button.js"
 import "@awesome.me/webawesome/dist/components/split-panel/split-panel.js"
 
 export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
-	useCss(themeCss, modalCss, styleCss)
+	useCss(themeCss, modalCss, styleCss, loadingCss)
 
 	const context = useWait(async() =>
 		await Strata.hasProject(projectId)
 			? EditorContext.setup(projectId)
 			: null
 	)
-
-	return spinner(context(), context => {
+	return waitSelect(context(), {
+		pending: ProjectLoading,
+		err: ErrorDisplay,
+		ok: context => {
 		if (!context)
 			return ProjectNotFoundPage(router, projectId)
 
@@ -169,6 +174,8 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 				${context.modals.render()}
 				${Assistant(assistantOpen)}
 			</div>
-	`})
+	`
+		},
+	})
 })
 
