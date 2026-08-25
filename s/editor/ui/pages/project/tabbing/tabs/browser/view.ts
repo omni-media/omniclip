@@ -48,7 +48,10 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 
 		const {specimen: {mime, label}} = item
 		const {media} = await context.project.load({
-			media: Datafile.make(new Blob([file], {type: mime}), label),
+			media: Datafile.make(new Blob([file], {type: mime}), {
+				filename: label,
+				hash: item.specimen.hash,
+			}),
 		})
 
 		for (const clip of makeItems(item.specimen.format, media))

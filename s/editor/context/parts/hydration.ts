@@ -14,7 +14,10 @@ export async function hydrateProject(
 	for await (const record of library.records()) {
 		const cask = await library.cellar.load(record.hash)
 		await omni.load({
-			media: Datafile.make(new Blob([cask.file], {type: record.mime}), record.label),
+			media: Datafile.make(new Blob([cask.file], {type: record.mime}), {
+				filename: record.label,
+				hash: record.hash
+			}),
 		})
 	}
 
@@ -30,7 +33,10 @@ export async function hydrateProject(
 
 		const cask = await cellar.load(image.mediaHash)
 		await omni.load({
-			[image.mediaHash]: Datafile.make(new Blob([cask.file], {type: "image/png"}), `${image.mediaHash}.png`),
+			[image.mediaHash]: Datafile.make(new Blob([cask.file], {type: "image/png"}), {
+				filename: `${image.mediaHash}.png`,
+				hash: image.mediaHash
+			}),
 		})
 	}
 }
