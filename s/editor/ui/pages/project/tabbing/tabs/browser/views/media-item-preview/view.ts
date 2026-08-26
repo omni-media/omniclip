@@ -51,12 +51,7 @@ export const MediaItemPreview = shadow((options: MediaItemPreviewOptions) => {
 	}
 
 	return html`
-		<div
-			class="preview"
-			?data-addable=${addable}
-			title=${addable ? "Double-click to add to timeline" : ""}
-			@dblclick=${options.onAdd}
-		>
+		<div class="preview">
 			${renderPreview()}
 			${uploading() ? html`
 				<div class="upload" style=${`--progress: ${progress() * 100}%`}>
@@ -64,9 +59,9 @@ export const MediaItemPreview = shadow((options: MediaItemPreviewOptions) => {
 				</div>
 			` : null}
 			${addable ? html`
-				<div class="overlay" aria-hidden="true">
+				<button class="add" title="Add to timeline" aria-label="Add to timeline" @click=${options.onAdd}>
 					<wa-icon name="plus"></wa-icon>
-				</div>
+				</button>
 			` : null}
 			${item.isKind("file") && item.specimen.hash ? html`
 				<button class="remove" title="Remove from media bin" @click=${options.onRemove}>

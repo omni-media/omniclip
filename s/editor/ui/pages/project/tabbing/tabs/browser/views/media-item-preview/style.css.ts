@@ -10,13 +10,16 @@ export default css`
 
 .preview {
 	position: relative;
+	display: grid;
+	place-items: center;
 	width: 100%;
 	height: 100%;
 	pointer-events: auto;
 }
 
-.preview[data-addable] {
-	cursor: pointer;
+.preview > sl-icon {
+	color: #999;
+	font-size: 1.4rem;
 }
 
 img {
@@ -26,18 +29,21 @@ img {
 	object-fit: cover;
 }
 
-.overlay {
+.add,
+.remove {
 	position: absolute;
-	inset: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: rgb(0 0 0 / 32%);
-	color: rgb(255 255 255 / 46%);
-	font-size: 32px;
+	display: grid;
+	place-items: center;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	border: 0;
+	border-radius: 4px;
+	color: white;
+	font-size: 11px;
+	cursor: pointer;
 	opacity: 0;
-	transition: opacity 120ms ease;
-	pointer-events: none;
+	transition: background 120ms ease, opacity 120ms ease;
 }
 
 .upload {
@@ -53,27 +59,16 @@ img {
 	pointer-events: none;
 }
 
-.preview:hover > .overlay {
-	opacity: 1;
+.add {
+	right: 4px;
+	bottom: 4px;
+	background: rgb(35 93 184 / 92%);
 }
 
 .remove {
-	position: absolute;
 	top: 4px;
 	right: 4px;
-	display: grid;
-	place-items: center;
-	width: 20px;
-	height: 20px;
-	padding: 0;
-	border: 0;
-	border-radius: 4px;
 	background: rgb(0 0 0 / 54%);
-	color: white;
-	font-size: 11px;
-	opacity: 0;
-	cursor: pointer;
-	transition: opacity 120ms ease;
 }
 
 .remove:hover {
@@ -81,6 +76,16 @@ img {
 }
 
 .preview:hover > .remove {
+	opacity: 1;
+}
+
+.preview:hover > .add {
+	opacity: 0.9;
+}
+
+.add:hover,
+.add:focus-visible {
+	background: rgb(49 113 216 / 100%);
 	opacity: 1;
 }
 `
