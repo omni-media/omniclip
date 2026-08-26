@@ -60,7 +60,6 @@ export const AudioPanel = shadow((context: EditorContext) => {
 	const meter = meterHeight(signal)
 
 	return html`
-		<header>Audio</header>
 		<div class="master-row">
 			<strong>Master</strong>
 			<button class="mute" type="button" ?data-active=${muted()} @click=${toggleMute}>M</button>

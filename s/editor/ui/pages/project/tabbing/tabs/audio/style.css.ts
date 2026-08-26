@@ -13,18 +13,6 @@ export default css`@layer view {
 	color: #ddd;
 }
 
-header {
-	display: flex;
-	align-items: center;
-	min-height: 36px;
-	padding: 0 10px;
-	border-bottom: 1px solid #101010;
-	background: #1d1d1d;
-	color: #aaa;
-	font-size: var(--font-size-xs);
-	letter-spacing: 0.04em;
-}
-
 .master-row {
 	display: flex;
 	align-items: center;
@@ -32,7 +20,6 @@ header {
 	gap: 6px;
 	min-height: 42px;
 	padding: 0 10px;
-	border-bottom: 1px solid #242424;
 
 	strong {
 		color: #ddd;
@@ -213,7 +200,6 @@ footer {
 	gap: 5px;
 	margin-top: 2px;
 	padding-top: 10px;
-	border-top: 1px solid #292929;
 	color: #777;
 	font-size: 0.55rem;
 
