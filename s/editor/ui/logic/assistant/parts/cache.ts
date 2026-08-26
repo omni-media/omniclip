@@ -1,7 +1,7 @@
 
 import {Cellar} from "@e280/quay"
 
-const dirname = "assistant-gemma-4-e2b"
+import {assistantModelId} from "../../models/builtins.js"
 
 export async function cacheModel(
 	url: string,
@@ -9,7 +9,7 @@ export async function cacheModel(
 ) {
 	await navigator.storage.persist()
 
-	const cellar = await Cellar.opfs(dirname)
+	const cellar = await Cellar.opfs(assistantModelId)
 	const cached = await getCachedModel(cellar)
 
 	if (cached)
