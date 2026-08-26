@@ -6,6 +6,8 @@ export default css`@layer theme, view; @layer theme {
 	padding: 0;
 	margin: 0;
 	box-sizing: border-box;
+	scrollbar-width: thin;
+	scrollbar-color: #282828 transparent;
 }
 
 :host {
@@ -43,10 +45,11 @@ export default css`@layer theme, view; @layer theme {
 	--wa-form-control-placeholder-color: #8a8a8a;
 }
 
-::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 1em; }
-::-webkit-scrollbar-thumb:hover { background: #444; }
+::-webkit-scrollbar-thumb { background: #282828; border-radius: 1em; }
+::-webkit-scrollbar-thumb:hover { background: #333; }
 
 a {
 	color: var(--link);
