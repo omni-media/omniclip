@@ -11,8 +11,6 @@ export default css`@layer view {
 	justify-content: space-between;
 	align-items: center;
 	padding: 0.22em 0.75em;
-	background: #181818;
-	border-top: 1px solid #242424;
 }
 
 .toolbar > * {
@@ -32,6 +30,82 @@ export default css`@layer view {
 	padding: 0.05em;
 }
 
+.tool-trigger {
+	width: 2.7em;
+	gap: 0.25em;
+	background: #1c1c1c;
+	color: #999;
+}
+
+.tool-trigger:hover {
+	background: #2b2b2b;
+}
+
+.tool-trigger > wa-icon:first-child {
+	font-size: 0.95em;
+}
+
+.tool-caret {
+	color: #888;
+	font-size: 0.55em;
+}
+
+.tool-picker::part(menu) {
+	min-width: 15.5em;
+	padding: 0.45em;
+	border-color: #383838;
+	border-radius: 0.45em;
+	background: #202020;
+	box-shadow: 0 0.6em 1.8em #000a;
+}
+
+.tool-picker small {
+	display: block;
+	padding: 0.25em 0.75em 0.55em;
+	color: #8f8f8f;
+	font-size: calc(var(--font-size-xs) - 1px);
+	font-weight: 600;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+.tool-picker wa-dropdown-item {
+	min-height: 2.35em;
+	padding: 0.55em 0.75em;
+	border-radius: 0.3em;
+	color: #c8c8c8;
+	font-size: var(--font-size-xs);
+	line-height: 1.2;
+}
+
+.tool-picker wa-dropdown-item:hover {
+	background: #2d2d2d;
+}
+
+.tool-picker wa-dropdown-item wa-icon[slot="icon"] {
+	width: 1.15em;
+	color: #aaa;
+	font-size: 1.05em;
+}
+
+.tool-picker wa-dropdown-item[data-active] {
+	background: #292929;
+	color: #eee;
+}
+
+.tool-picker wa-dropdown-item[data-active]:hover {
+	background: #333;
+}
+
+.tool-picker kbd {
+	display: inline-block;
+	min-width: 3.5em;
+	color: #7f7f7f;
+	font: inherit;
+	font-size: calc(var(--font-size-xs) - 1px);
+	text-align: end;
+}
+
 .transport-controls {
 	align-items: center;
 	gap: 0.2em;
@@ -45,7 +119,7 @@ button {
 	height: 1.65em;
 	background: transparent;
 	border: none;
-	color: #aaa;
+	color: #b8b8b8;
 	border-radius: 0.18em;
 	cursor: pointer;
 	transition: background 0.12s ease, color 0.12s ease;
@@ -57,7 +131,7 @@ button:hover {
 }
 
 button:disabled {
-	opacity: 0.32;
+	opacity: 0.48;
 	cursor: not-allowed;
 	background: transparent;
 }

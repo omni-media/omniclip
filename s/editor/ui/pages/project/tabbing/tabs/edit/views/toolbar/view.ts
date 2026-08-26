@@ -3,6 +3,7 @@ import {html} from "lit"
 import {shadow, useCss} from "@e280/sly"
 
 import styleCss from "./style.css.js"
+import {toolOptions} from "./tools.js"
 import {formatTime} from "../../../../utils/format-time.js"
 import themeCss from "../../../../../../../../theme.css.js"
 import binSvg from "../../../../../../../icons/gravity-ui/bin.svg.js"
@@ -12,10 +13,13 @@ import pauseSvg from "../../../../../../../icons/gravity-ui/pause.svg.js"
 import scissorsSvg from "../../../../../../../icons/gravity-ui/scissors.svg.js"
 import redoSvg from "../../../../../../../icons/material-design-icons/redo.svg.js"
 import undoSvg from "../../../../../../../icons/material-design-icons/undo.svg.js"
+import {combosFromAtom} from "../../../../../../../logic/modals/shortcuts/utils.js"
 import zoomInSvg from "../../../../../../../icons/material-design-icons/zoom-in.svg.js"
 import zoomOutSvg from "../../../../../../../icons/material-design-icons/zoom-out.svg.js"
 
 import "@awesome.me/webawesome/dist/components/slider/slider.js"
+import "@awesome.me/webawesome/dist/components/dropdown/dropdown.js"
+import "@awesome.me/webawesome/dist/components/dropdown-item/dropdown-item.js"
 
 export const Toolbar = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
@@ -32,6 +36,19 @@ export const Toolbar = shadow((context: EditorContext) => {
 
 	const canZoomOut = zoom > minZoom
 	const canZoomIn = zoom < maxZoom
+	const activeTool = toolOptions.find(tool => tool.id === session.activeMode.value.id) ?? toolOptions[0]
+
+	const shortcutLabel = (action: typeof toolOptions[number]["shortcut"]) => {
+		return combosFromAtom(context.keybindings.getBinding(action))
+			.map(combo => combo.keys.join("+"))
+			.join(" / ")
+	}
+
+	const selectTool = ({detail}: CustomEvent) => {
+		const selected = toolOptions.find(tool => tool.id === detail.item.value)
+		if (selected && selected.id !== session.activeMode.value.id)
+			session.setMode(selected.tool)
+	}
 
 	const handleReverse = () => {
 		session.playback.shuttle(-1)
@@ -66,6 +83,36 @@ export const Toolbar = shadow((context: EditorContext) => {
 	return html`
 		<div class="toolbar">
 			<div class="toolbar-section left">
+				<div class="button-group">
+					<wa-dropdown
+						class="tool-picker"
+						placement="bottom-start"
+						distance="5"
+						@wa-select=${selectTool}
+					>
+						<button
+							slot="trigger"
+							class="tool-trigger"
+							title="${activeTool.label} Tool (${shortcutLabel(activeTool.shortcut)})"
+							aria-label="Choose timeline tool; current tool is ${activeTool.label}"
+						>
+							<wa-icon name=${activeTool.icon}></wa-icon>
+							<wa-icon class="tool-caret" name="chevron-down"></wa-icon>
+						</button>
+
+						<small>Timeline tools</small>
+						${toolOptions.map(tool => html`
+							<wa-dropdown-item
+								value=${tool.id}
+								?data-active=${tool.id === activeTool.id}
+							>
+								<wa-icon slot="icon" name=${tool.icon}></wa-icon>
+								${tool.label} Tool
+								<kbd slot="details">${shortcutLabel(tool.shortcut)}</kbd>
+							</wa-dropdown-item>
+						`)}
+					</wa-dropdown>
+				</div>
 				<div class="button-group">
 					<button @click=${context.undo} ?disabled=${context.strata.timeline.undoable === 0}>
 						${undoSvg}
