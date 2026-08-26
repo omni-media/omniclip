@@ -10,13 +10,7 @@ export default css`
 	.toolbar, .tabs {
 		display: flex;
 		align-items: center;
-		border-bottom: 1px solid #292929;
-	}
-
-	.toolbar {
 		gap: 0.65em;
-		padding: 0.65em 0.75em;
-		background: #1b1b1b;
 	}
 
 	.search {
@@ -50,13 +44,8 @@ export default css`
 
 	.tabs {
 		display: block;
-		background: #202020;
 		--track-color: #303030;
 		--indicator-color: #888;
-	}
-
-	.tabs::part(base) {
-		border-bottom: 1px solid #292929;
 	}
 
 	.tabs::part(body) {
@@ -107,7 +96,6 @@ export default css`
 		align-items: center;
 		min-height: 2.6em;
 		padding: 0.45em 0.5em;
-		border-top: 1px solid #272727;
 		border-radius: 4px;
 	}
 
@@ -117,7 +105,6 @@ export default css`
 
 	.row[data-editing] {
 		background: #252525;
-		outline: 1px solid #555;
 	}
 
 	.command {
