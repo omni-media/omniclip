@@ -1,8 +1,8 @@
 
-import {Id} from "@omnimedia/omnitool"
+import {Id, Item} from "@omnimedia/omnitool"
 import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
-import {Idx} from "../index.js"
+import {Idx, Index} from "../index.js"
 import {getBounds} from "../bounds.js"
 
 
@@ -60,3 +60,30 @@ export const splitClip = (
 	}
 }
 
+export const copyClip = (
+	clip: Idx.Clip,
+	index: Index,
+	getId: () => Id,
+	id = getId(),
+) => {
+	const references: Item.Any[] = []
+	const copyReference = (sourceId: Id) => {
+		const copy = structuredClone(index.getItem(sourceId))
+		copy.id = getId()
+		references.push(copy)
+		return copy.id
+	}
+
+	const copy = structuredClone(clip)
+	copy.id = id
+	if ("spatialId" in copy && copy.spatialId !== undefined)
+		copy.spatialId = copyReference(copy.spatialId)
+	if ("styleId" in copy && copy.styleId !== undefined)
+		copy.styleId = copyReference(copy.styleId)
+	if ("animationIds" in copy && copy.animationIds)
+		copy.animationIds = copy.animationIds.map(copyReference)
+	if ("filterIds" in copy && copy.filterIds)
+		copy.filterIds = copy.filterIds.map(copyReference)
+
+	return {copy, items: [...references, copy]}
+}

@@ -22,7 +22,7 @@ import {resizeTransition} from "./parts/interactions/trim/parts/transition.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
 import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 import {TimelineClipBox} from "../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
-import {replaceChild, splitClip, wrapChild} from "./parts/operations/operations.js"
+import {copyClip, replaceChild, splitClip, wrapChild} from "./parts/operations/operations.js"
 import {
 	cloneAnimation,
 	hasAnyKeyframes,
@@ -159,6 +159,30 @@ export class OmniSession {
 		})
 
 		this.$selectedItem(container.id)
+	}
+
+	duplicateClip(itemId: Id) {
+		const item = this.index.getItemMaybe(itemId)
+		const parent = this.index.getParent(itemId)
+		if (!item || !parent || !Idx.isClip(item.kind))
+			return
+
+		const {copy, items} = copyClip(
+			item as Idx.Clip,
+			this.index,
+			() => this.deps.omnitool.getId(),
+		)
+
+		this.timeline.mutate(state => {
+			for (const item of items)
+				add(state, item)
+			update(state, parent.id, {
+				childrenIds: replaceChild(parent.childrenIds, itemId, [itemId, copy.id]),
+			})
+		})
+
+		this.$selectedItem.value = copy.id
+		this.canvas.scheduleDraw()
 	}
 
 	applyTransitionToSelection(name: TransitionName, duration: number) {
@@ -385,8 +409,15 @@ export class OmniSession {
 			const leftId = id()
 			const rightId = id()
 			const {left, right} = splitClip(clip, leftId, rightId, offset)
+			const {items} = copyClip(
+				right,
+				this.index,
+				id,
+				right.id,
+			)
 			add(state, left)
-			add(state, right)
+			for (const item of items)
+				add(state, item)
 			remove(state, clipId)
 
 			if (parent.kind === Kind.Sequence) {

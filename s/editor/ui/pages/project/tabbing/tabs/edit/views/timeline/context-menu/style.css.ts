@@ -7,7 +7,7 @@ export default css`@layer view {
 }
 
 wa-dropdown::part(menu) {
-	min-width: 10em;
+	min-width: 14em;
 	padding: 0.35em;
 	border-color: #383838;
 	border-radius: 0.45em;
@@ -16,8 +16,26 @@ wa-dropdown::part(menu) {
 }
 
 wa-dropdown-item {
-	padding: 0.55em 0.7em;
+	padding: 0.45em 0.65em;
 	font-size: var(--font-size-xs);
+}
+
+small {
+	display: block;
+	padding: 0.25em 0.65em 0.35em;
+	color: #8f8f8f;
+	font-size: calc(var(--font-size-xs) - 1px);
+	font-weight: 600;
+}
+
+wa-divider {
+	--color: #343434;
+	--spacing: 0.25em;
+}
+
+.danger,
+.danger span {
+	color: #ff8f8f;
 }
 
 span {
