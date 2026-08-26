@@ -38,6 +38,7 @@ wa-breadcrumb-item[data-current]::part(label) {
 
 .timeline {
 	position: relative;
+	flex: 1;
 	overflow: auto;
 	scrollbar-width: none;
 	background: #111;

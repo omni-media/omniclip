@@ -9,7 +9,7 @@ export default css`@layer view {
 
 .timeline-scrollbar {
 	position: relative;
-	height: 0.9em;
+	height: 0.75em;
 	background: #151515;
 	border-top: 1px solid #242424;
 	cursor: pointer;
@@ -18,11 +18,11 @@ export default css`@layer view {
 
 .timeline-scrollbar-thumb {
 	position: absolute;
-	top: 0.22em;
+	top: 0.19em;
 	left: 0;
-	height: 0.44em;
-	background: #424242;
-	border-radius: 1px;
+	height: 0.36em;
+	background: #505050;
+	border-radius: 2px;
 	cursor: grab;
 }
 
@@ -31,11 +31,11 @@ export default css`@layer view {
 }
 
 .timeline-scrollbar-thumb:hover {
-	background: #555;
+	background: #686868;
 }
 
 .timeline-scrollbar-thumb:active {
-	background: #686868;
+	background: #7a7a7a;
 	cursor: grabbing;
 }
 
