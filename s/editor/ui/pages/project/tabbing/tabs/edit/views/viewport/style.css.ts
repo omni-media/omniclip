@@ -23,8 +23,6 @@ export default css`@layer view {
 	min-height: 36px;
 	padding: 0 0.9em;
 	color: #aaa;
-	background: #1d1d1d;
-	border-bottom: 1px solid #101010;
 	font-size: var(--font-size-xs);
 }
 

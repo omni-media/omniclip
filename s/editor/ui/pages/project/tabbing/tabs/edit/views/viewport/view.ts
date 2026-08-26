@@ -29,7 +29,9 @@ export const TimelineViewport = shadow((context: EditorContext) => {
 	const resolution = getResolutionLabel(settings.aspectRatio, settings.resolution)
 
 	const setViewerZoom = (value: number) => {
-		viewerZoom.value = Math.max(minViewerZoom, Math.min(maxViewerZoom, value))
+		const zoom = Math.max(minViewerZoom, Math.min(maxViewerZoom, value))
+		viewerZoom(zoom)
+		context.session.stage.setViewerZoom(zoom)
 	}
 
 	const selectViewerZoom = (event: Event) => {

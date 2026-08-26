@@ -20,8 +20,10 @@ export class Stage {
 	kimura
 
 	compositor
-	#active: {id: Id, object: Container} | null = null
+	#viewerZoom = 1
 	#ticker = new Ticker()
+	#active: {id: Id, object: Container} | null = null
+	#resizeObserver = new ResizeObserver(() => this.#render())
 
 	constructor(private session: OmniSession) {
 		this.compositor = session.deps.driver.compositor
@@ -32,6 +34,7 @@ export class Stage {
 		this.kimura.stageHeight = this.compositor.pixi.renderer.height
 
 		this.#ticker.add(() => this.#render())
+		this.#resizeObserver.observe(this.compositor.pixi.renderer.canvas)
 		this.#wireSelection()
 		this.#wirePointerEvents()
 	}
@@ -48,8 +51,23 @@ export class Stage {
 		this.kimura.stageHeight = height
 	}
 
+	setViewerZoom(zoom: number) {
+		this.#viewerZoom = zoom
+		this.#render()
+	}
+
 	#render() {
+		this.#scaleOverlayToViewport()
 		this.compositor.pixi.renderer.render(this.compositor.pixi.stage)
+	}
+
+	#scaleOverlayToViewport() {
+		const renderer = this.compositor.pixi.renderer
+		const {clientWidth: width, clientHeight: height} = renderer.canvas
+		if (width && height)
+			this.kimura.setOverlayScale(
+				Math.max(renderer.width / width, renderer.height / height) / this.#viewerZoom,
+			)
 	}
 
 	/**
