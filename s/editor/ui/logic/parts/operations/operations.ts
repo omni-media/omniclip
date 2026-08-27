@@ -5,7 +5,6 @@ import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
 import {Idx, Index} from "../index.js"
 import {getBounds} from "../bounds.js"
 
-
 export const spliceChildren = (
 	childrenIds: Id[],
 	childId: Id,
@@ -87,3 +86,10 @@ export const copyClip = (
 
 	return {copy, items: [...references, copy]}
 }
+
+export const ownedReferences = (item: Item.Any) => [
+	...("spatialId" in item && item.spatialId !== undefined ? [item.spatialId] : []),
+	...("styleId" in item && item.styleId !== undefined ? [item.styleId] : []),
+	...("animationIds" in item ? item.animationIds ?? [] : []),
+	...("filterIds" in item ? item.filterIds ?? [] : []),
+]
