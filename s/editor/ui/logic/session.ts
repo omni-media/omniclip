@@ -71,6 +71,8 @@ export class OmniSession {
 
 		this.viewport.$width.on(this.#updateMinZoom)
 		this.deps.strata.timeline.lens(s => s).on(() => {
+			if (!this.#index().getItemMaybe(this.$viewedItemId()))
+				this.$viewedItemId(this.timeline.state.rootId)
 			this.#updateMinZoom()
 			this.setPlayhead(this.$playhead.value)
 		})
