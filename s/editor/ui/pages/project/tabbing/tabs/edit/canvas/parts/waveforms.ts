@@ -72,6 +72,8 @@ export class TimelineWaveforms {
 				tileHeight: metrics.trackHeight,
 				color: styles.waveformFill,
 				onChange: (tiles: WaveformTileData[]) => {
+					for (const tile of tiles)
+						this.#renderBars(tile)
 					entry.tiles = tiles
 					this.canvas.scheduleDraw()
 				}
@@ -83,6 +85,34 @@ export class TimelineWaveforms {
 
 		this.#entries.set(clip.id, entry)
 		return entry
+	}
+
+	#renderBars({canvas, peaks}: WaveformTileData) {
+		const ctx = canvas.getContext("2d")
+		if (!ctx)
+			return
+
+		const scale = window.devicePixelRatio || 1
+		const width = canvas.width / scale
+		const height = canvas.height / scale
+		const bars = Math.ceil(width / 3)
+		const peaksPerBar = peaks.length / bars
+
+		ctx.setTransform(scale, 0, 0, scale, 0, 0)
+		ctx.clearRect(0, 0, width, height)
+		ctx.fillStyle = styles.waveformFill
+		ctx.beginPath()
+
+		for (let bar = 0; bar < bars; bar++) {
+			const start = Math.floor(bar * peaksPerBar)
+			const end = Math.max(start + 1, Math.floor((bar + 1) * peaksPerBar))
+			let peak = 0
+			for (let i = start; i < end && i < peaks.length; i++)
+				peak = Math.max(peak, peaks[i]!)
+			const barHeight = peak * height
+			ctx.roundRect(bar * 3, height - barHeight, 2, barHeight, 1)
+		}
+		ctx.fill()
 	}
 
 	#drawMissingMedia(ctx: CanvasRenderingContext2D, box: TimelineClipBox) {
