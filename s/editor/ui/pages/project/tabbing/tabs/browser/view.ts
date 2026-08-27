@@ -97,6 +97,15 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			styles: preset.styles,
 		})
 
+		if (preset.relativePosition) {
+			const [width, height] = context.strata.settings.state.resolution.split("x").map(Number)
+			const [x, y] = preset.relativePosition
+			const spatial = context.omni.spatial(context.omni.transform({
+				position: [width * x, height * y],
+			}))
+			context.omni.set<Item.Text>(text.id, {spatialId: spatial.id})
+		}
+
 		context.session.appendItem(text)
 	}
 

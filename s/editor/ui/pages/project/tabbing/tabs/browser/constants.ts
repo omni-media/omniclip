@@ -9,6 +9,7 @@ export type TextPreset = {
 	label: string
 	content: string
 	styles: TextStyleOptions
+	relativePosition?: [x: number, y: number]
 }
 
 export const DEFAULT_TRANSITION_DURATION = 700
@@ -31,6 +32,7 @@ export const TEXT_PRESETS: TextPreset[] = [
 		label: "Lower Third",
 		content: "Lower Third",
 		styles: {fill: "#ffffff", fontSize: 42, fontWeight: "600"},
+		relativePosition: [0.1, 0.75],
 	},
 	{
 		id: "caption",
