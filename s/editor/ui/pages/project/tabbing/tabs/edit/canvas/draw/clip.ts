@@ -4,6 +4,7 @@ import {Kind} from "@omnimedia/omnitool"
 import {metrics, styles} from "./styles.js"
 import type {TimelineCanvas} from "../canvas.js"
 import type {ClipBox} from "../layout/layout.js"
+import {Idx} from "../../../../../../../logic/parts/index.js"
 
 export type TimelineClipBox = ClipBox
 
@@ -26,8 +27,6 @@ function itemColor(kind: Kind) {
 		case Kind.Audio: return "#1b6937"
 		case Kind.Image: return "#765c2d"
 		case Kind.Text: return "#5c3b91"
-		case Kind.Sequence: return "#405160"
-		case Kind.Stack: return "#37404b"
 		case Kind.Transition: return "#7b4d22"
 		case Kind.Gap: return styles.gapFill
 		default: return "#555b65"
@@ -59,7 +58,11 @@ function drawLabel(canvas: TimelineCanvas, clip: TimelineClipBox, labelHeight: n
 	ctx.shadowBlur = 0
 }
 
-function drawOutline(canvas: TimelineCanvas, clip: TimelineClipBox) {
+function drawOutline(
+	canvas: TimelineCanvas,
+	clip: TimelineClipBox,
+	stroke: string = styles.trackBorder,
+) {
 	const ctx = canvas.ctx
 	const selected = canvas.selectedItemId() === clip.itemId
 	roundedRect(
@@ -73,7 +76,7 @@ function drawOutline(canvas: TimelineCanvas, clip: TimelineClipBox) {
 	ctx.lineWidth = selected ? 2 : 1
 	ctx.strokeStyle = selected
 		? styles.selectedStroke
-		: styles.trackBorder
+		: stroke
 	ctx.stroke()
 }
 
@@ -91,6 +94,9 @@ function drawDisabledOverlay(ctx: CanvasRenderingContext2D, clip: TimelineClipBo
 }
 
 export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
+	if (Idx.isStructKind(clip.kind))
+		return
+
 	const ctx = canvas.ctx
 	const color = itemColor(clip.kind)
 
@@ -163,6 +169,9 @@ function drawDragPreview(
 	canvas.ctx.translate(ghost.x - source.x, ghost.y - source.y)
 	for (const clip of clips)
 		drawClip(canvas, clip)
+	for (const clip of clips)
+		if (Idx.isStructKind(clip.kind))
+			drawOutline(canvas, clip, styles.containerStroke)
 	canvas.ctx.restore()
 }
 
@@ -171,6 +180,7 @@ export function drawClips(canvas: TimelineCanvas) {
 	const activeWaveforms = new Set<number>()
 	const ghost = canvas.deps.session.$ghostClip()
 	const previewClips: TimelineClipBox[] = []
+	const containers: TimelineClipBox[] = []
 
 	for (const clip of canvas.clips) {
 		if (clip.kind === Kind.Video || clip.kind === Kind.Clip)
@@ -181,8 +191,13 @@ export function drawClips(canvas: TimelineCanvas) {
 			previewClips.push(clip)
 			continue
 		}
-		drawClip(canvas, clip)
+		if (Idx.isStructKind(clip.kind))
+			containers.push(clip)
+		else
+			drawClip(canvas, clip)
 	}
+	for (const clip of containers)
+		drawOutline(canvas, clip, styles.containerStroke)
 
 	if (ghost)
 		drawDragPreview(canvas, previewClips, ghost)

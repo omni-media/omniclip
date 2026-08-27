@@ -7,6 +7,7 @@ export const styles = {
 	rulerMinorTick: "#3c3c3c",
 	rulerLabel: "#9a9a9a",
 	trackBorder: "#30333a",
+	containerStroke: "#596474",
 	playhead: "#ff5f45",
 	ghostPlayhead: "rgba(255, 95, 69, 0.32)",
 	bladePreview: "#ff7b8e",
@@ -21,7 +22,7 @@ export const styles = {
 export const metrics = {
 	paddingY: 14,
 	rulerHeight: 32,
-	trackHeight: 58,
+	trackHeight: 72,
 	trackGap: 8,
 	clipRadius: 5,
 	labelHeight: 20,
