@@ -21,7 +21,7 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 
 	const handleItemClick = (id: number) => {
 		context.session.$selectedItem.value = id
-		context.session.setPlayhead(ms(context.session.index
+		context.session.seekPlayhead(ms(context.session.index
 			.getItemLaneStart(id, context.session.$viewedItemId.value)
 		))
 	}

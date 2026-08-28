@@ -29,8 +29,7 @@ export const Ruler = shadow((context: EditorContext) => {
 
 	const updateDrag = (e: PointerEvent) => {
 		const time = pointerToTime(e)
-		session.playback.seek(time)
-		session.setPlayhead(time)
+		session.seekPlayhead(time)
 	}
 
 	const startDrag = (e: PointerEvent) => {

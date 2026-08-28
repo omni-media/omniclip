@@ -1,5 +1,4 @@
 
-import {is} from "@e280/stz"
 import {derived, signal} from "@e280/strata"
 import {visualAnimations} from "@omnimedia/omnitool"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
@@ -74,16 +73,17 @@ export class OmniSession {
 			if (!this.#index().getItemMaybe(this.$viewedItemId()))
 				this.$viewedItemId(this.timeline.state.rootId)
 			this.#updateMinZoom()
-			this.setPlayhead(this.$playhead.value)
+			this.$playhead.value = ms(Math.min(this.$playhead.value, this.viewedDuration()))
 		})
 
-		this.$ghostPlayhead.on(time => {
-			if(!this.playback.$isPlaying.value) {
-				if(is.happy(time))
-					this.playback.seek(time)
-				else
-					this.playback.seek(this.$playhead())
-			}
+		const $activePlayhead = derived(() =>
+			this.playback.$isPlaying()
+				? this.$playhead()
+				: this.$ghostPlayhead() ?? this.$playhead()
+		)
+		$activePlayhead.on(time => {
+			if (!this.playback.$isPlaying())
+				this.playback.seek(time)
 		})
 	}
 
@@ -266,8 +266,10 @@ export class OmniSession {
 		this.canvas.scheduleDraw()
 	}
 
-	setPlayhead(time: Ms) {
+	seekPlayhead(time: Ms) {
+		this.playback.pause()
 		this.$playhead.set(ms(Math.min(Math.max(0, time), this.viewedDuration())))
+		this.$ghostPlayhead.set(null)
 	}
 
 	setGhostPlayhead(time: Ms | null) {
@@ -275,7 +277,7 @@ export class OmniSession {
 	}
 
 	clearGhostPlayhead() {
-		this.$ghostPlayhead.set(null)
+		this.setGhostPlayhead(null)
 	}
 
 	viewedDuration() {
@@ -364,8 +366,7 @@ export class OmniSession {
 			: Math.ceil(currentFrame) - 1
 		const time = ms(Math.max(0, Math.min(this.deps.player.duration, nextFrame * frameDuration)))
 
-		this.playback.seek(time)
-		this.setPlayhead(time)
+		this.seekPlayhead(time)
 	}
 
 	getPlayheadInMs() {

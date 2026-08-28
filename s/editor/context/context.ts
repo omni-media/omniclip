@@ -24,9 +24,9 @@ export class EditorContext {
 			syncOutliner(state, this.strata.timeline.state as TimelineFile)
 		)
 
-		this.#stopPlaybackTick = requirements.controllers.player.playback.onTick.on(() =>
-			this.session.setPlayhead(ms(requirements.controllers.player.currentTime))
-		)
+		this.#stopPlaybackTick = requirements.controllers.player.playback.onTick.on(() => {
+			this.session.$playhead.value = ms(requirements.controllers.player.currentTime)
+		})
 
 		this.#stopTimelineSync = this.strata.timeline.lens(s => s).on(async state => {
 			const timeline = state as TimelineFile

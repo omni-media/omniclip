@@ -59,6 +59,7 @@ export class Dragger {
 			return null
 
 		this.isDragging = true
+		session.clearGhostPlayhead()
 
 		const ghost = {
 			...state.clip,

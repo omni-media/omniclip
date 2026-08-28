@@ -9,12 +9,13 @@ export const selectTool = tool("select", (session) => {
 	const dragger = new Dragger()
 	const trimmer = new Trimmer()
 	const roller = new Roller()
+	let scrubbing = false
 
 	return {
 		pointerdown: ({clip, inRuler, time, point, event}) => {
 			if (inRuler) {
-				session.playback.seek(time)
-				session.setPlayhead(time)
+				scrubbing = true
+				session.seekPlayhead(time)
 				dragger.cancel(session)
 				return
 			}
@@ -51,6 +52,11 @@ export const selectTool = tool("select", (session) => {
 		},
 
 		pointermove: ({clip, point, time}) => {
+			if (scrubbing) {
+				session.seekPlayhead(time)
+				return
+			}
+
 			if (roller.isRolling) return roller.preview(time, session)
 			if (trimmer.isTrimming) return trimmer.preview(time, session)
 
@@ -68,6 +74,11 @@ export const selectTool = tool("select", (session) => {
 		},
 
 		pointerup: () => {
+			if (scrubbing) {
+				scrubbing = false
+				return
+			}
+
 			if (roller.isRolling) return roller.commit(session)
 			if (trimmer.isTrimming) return trimmer.commit(session)
 
