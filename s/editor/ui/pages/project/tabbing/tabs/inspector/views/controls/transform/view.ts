@@ -14,6 +14,7 @@ import {EditorContext} from '../../../../../../../../../context/context.js'
 import rotateSvg from '../../../../../../../../icons/material-design-icons/rotate.svg.js'
 import {ANIMATION_CHANNELS, getTrack, setAnimationKeyframe, SpatialLike, clamp, type AnimatableProperty} from '../keyframes/utils.js'
 
+import "@awesome.me/webawesome/dist/components/icon/icon.js"
 import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 
 export const TransformControls = shadow((context: EditorContext, item: Item.Text | Idx.VideoItem | Item.Image) => {
@@ -23,6 +24,7 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 	const index = context.session.index
 	const timeline = context.session.timeline
 	const spatial = index.getItemMaybe<SpatialLike>(item.spatialId)
+	const preserveAspectRatio = context.session.stage.$preserveAspectRatio
 
 	const animationItem = (item.animationIds ?? [])
 		.map(id => index.getItemMaybe<Item.Animation>(id))
@@ -100,6 +102,28 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 
 	const numberValue = (e: Event) => Number((e.target as HTMLInputElement).value)
 
+	const updateScale = (value: number, axis: 0 | 1) => {
+		const nextScale = [...scale] as [number, number]
+		if (preserveAspectRatio.value)
+			nextScale[1 - axis] *= value / (scale[axis] || value || 1)
+		nextScale[axis] = value
+		updateTransform([position, nextScale, rotation])
+	}
+
+	const toggleAspectRatioLock = () => preserveAspectRatio(!preserveAspectRatio())
+
+	const renderReset = (label: string, reset: () => void) => html`
+		<button
+			type="button"
+			class="transform-reset"
+			@click=${reset}
+			title=${`Reset ${label}`}
+			aria-label=${`Reset ${label}`}
+		>
+			<wa-icon name="rotate-left"></wa-icon>
+		</button>
+	`
+
 	return html`
 		<div>
 			<input @change=${onEnableTransform} id="transform" type="checkbox" .checked=${!!spatial?.enabled} />
@@ -136,6 +160,7 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 						</wa-number-input>
 					</div>
 				</div>
+				${renderReset("position", () => updateTransform([[0, 0], scale, rotation]))}
 			</div>
 
 			<div class="control-row">
@@ -149,13 +174,21 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 							step="0.01"
 							min="0"
 							.value=${String(scale[0])}
-							@input=${(e: Event) =>
-								updateTransform([position, [numberValue(e), scale[1]], rotation])}
+							@input=${(e: Event) => updateScale(numberValue(e), 0)}
 						>
 							<span slot="start" class="prefix">X</span>
 							${renderKeyframeToggle('scale.x')}
 						</wa-number-input>
 					</div>
+					<button
+						type="button"
+						class="scale-link"
+						aria-pressed=${preserveAspectRatio.value}
+						@click=${toggleAspectRatioLock}
+						title=${preserveAspectRatio.value ? "Unlink scale" : "Link scale"}
+					>
+						<wa-icon name=${preserveAspectRatio.value ? "link" : "link-slash"}></wa-icon>
+					</button>
 					<div class="input-group">
 						<wa-number-input
 							class="transform-input"
@@ -164,14 +197,14 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 							step="0.01"
 							min="0"
 							.value=${String(scale[1])}
-							@input=${(e: Event) =>
-								updateTransform([position, [scale[0], numberValue(e)], rotation])}
+							@input=${(e: Event) => updateScale(numberValue(e), 1)}
 						>
 							<span slot="start" class="prefix">Y</span>
 							${renderKeyframeToggle('scale.y')}
 						</wa-number-input>
 					</div>
 				</div>
+				${renderReset("scale", () => updateTransform([position, [1, 1], rotation]))}
 			</div>
 
 			<div class="control-row">
@@ -191,6 +224,7 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 						</wa-number-input>
 					</div>
 				</div>
+				${renderReset("rotation", () => updateTransform([position, scale, 0]))}
 			</div>
 		</div>
 	`

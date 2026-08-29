@@ -15,10 +15,14 @@ export default css`
 }
 
 .control-row {
-	display: flex;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
 	align-items: center;
-	gap: 1em;
-	flex-wrap: wrap;
+	gap: 0.35em 0.5em;
+}
+
+.control-row > label {
+	grid-column: 1 / -1;
 }
 
 label {
@@ -32,7 +36,6 @@ label {
 .inputs {
 	display: flex;
 	gap: 0.5em;
-	flex-grow: 1;
 }
 
 .input-group {
@@ -47,6 +50,27 @@ label {
 
 .transform-input {
 	flex: 1;
+}
+
+.scale-link,
+.transform-reset {
+	align-self: center;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: #666;
+	cursor: pointer;
+}
+
+.scale-link[aria-pressed="true"],
+.transform-reset:hover {
+	color: #aaa;
+}
+
+.scale-link wa-icon,
+.transform-reset wa-icon {
+	display: block;
+	font-size: 0.8em;
 }
 
 .transform-input::part(base) {

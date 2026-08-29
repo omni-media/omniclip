@@ -1,4 +1,5 @@
 
+import {signal} from "@e280/strata"
 import {Kimura} from "@omnimedia/kimura"
 import {Id, Item, Kind, TimelineFile} from "@omnimedia/omnitool"
 import {Container, FederatedPointerEvent, Ticker} from "pixi.js"
@@ -24,11 +25,13 @@ export class Stage {
 	#ticker = new Ticker()
 	#active: {id: Id, object: Container} | null = null
 	#resizeObserver = new ResizeObserver(() => this.#render())
+	$preserveAspectRatio = signal(true)
 
 	constructor(private session: OmniSession) {
 		this.compositor = session.deps.driver.compositor
-		this.kimura = new Kimura({stage: this.compositor.pixi.stage})
 		this.compositor.pixi.stage.sortableChildren = true
+		this.kimura = new Kimura({stage: this.compositor.pixi.stage})
+		this.$preserveAspectRatio.on(value => {this.kimura.preserveAspectRatio = value})
 
 		this.kimura.stageWidth = this.compositor.pixi.renderer.width
 		this.kimura.stageHeight = this.compositor.pixi.renderer.height
