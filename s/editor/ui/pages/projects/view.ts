@@ -9,7 +9,6 @@ import {ProjectGrid} from './renderers/grid.js'
 import {FeaturedProject} from './renderers/featured.js'
 import addSvg from '../../icons/gravity-ui/add.svg.js'
 import {Strata} from '../../../context/parts/strata.js'
-import {ProjectLocalStatus} from './renderers/status.js'
 import {ProjectDetailsDrawer} from './renderers/drawer.js'
 import exportSvg from '../../icons/gravity-ui/export.svg.js'
 import {loadProjectPreviews, sortLabels, SortMode, ViewMode} from './constants.js'
@@ -129,7 +128,6 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 						<button class="banner-button" @click=${createProject}>${addSvg}<span>Create project</span></button>
 					</section>
 
-					${ProjectLocalStatus()}
 				</main>
 
 				${drawerProject

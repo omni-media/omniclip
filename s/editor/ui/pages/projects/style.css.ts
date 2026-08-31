@@ -50,7 +50,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 }
 
 .brand, .controls, .library-controls, .featured-actions,
-.featured-meta, .metadata, .local-status {
+.featured-meta, .metadata {
 	display: flex;
 	align-items: center;
 }
@@ -446,23 +446,6 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 }
 .banner-button { height: 38px; flex: 0 0 auto; }
 
-.local-status {
-	justify-content: center;
-	gap: 0.65em;
-	margin: 1.5em 0 0;
-	color: #5f6267;
-	font-size: var(--font-size-xs);
-
-	i { width: 1px; height: 14px; background: var(--border); }
-}
-.status-dot {
-	width: 0.5em;
-	height: 0.5em;
-	border-radius: 50%;
-	background: var(--accent);
-	box-shadow: 0 0 10px #4c8dff66;
-}
-
 .empty-state {
 	display: grid;
 	place-items: center;
@@ -599,7 +582,6 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 	.project-grid.list .project-card { grid-template-columns: 120px minmax(0, 1fr); }
 	.creator-banner { align-items: stretch; flex-direction: column; }
 	.banner-button { align-self: start; }
-	.local-status { flex-wrap: wrap; }
 }
 
 @media (max-width: 560px) {
