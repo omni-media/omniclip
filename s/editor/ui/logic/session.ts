@@ -200,7 +200,7 @@ export class OmniSession {
 			return this.#updateTransition(selected.id, name, duration)
 
 		const childIndex = parent.childrenIds.indexOf(selected.id)
-		if (!this.#isVisualItem(selected) || childIndex === -1)
+		if (!this.isVisualItem(selected) || childIndex === -1)
 			return false
 
 		const [prev, next] = [-1, 1].map(d => this.index.getItemMaybe(parent.childrenIds[childIndex + d]))
@@ -208,10 +208,29 @@ export class OmniSession {
 		if (transition)
 			return this.#updateTransition(transition.id, name, duration)
 
-		const index = this.#isVisualItem(next) ? childIndex + 1 : this.#isVisualItem(prev) ? childIndex : -1
+		const index = this.isVisualItem(next) ? childIndex + 1 : this.isVisualItem(prev) ? childIndex : -1
 		if (index === -1)
 			return false
+		return this.#createTransition(parent, index, name, duration)
+	}
 
+	applyTransitionAt(name: TransitionName, duration: number, targetId: Id) {
+		const target = this.index.getItemMaybe(targetId)
+		if (!target)
+			return false
+		if (Idx.isTransition(target))
+			return this.#updateTransition(target.id, name, duration)
+
+		const parent = this.index.getParent(target.id)
+		const index = parent?.childrenIds.indexOf(target.id) ?? -1
+		const previous = parent && this.index.getItemMaybe(parent.childrenIds[index - 1])
+		if (parent?.kind !== Kind.Sequence || !this.isVisualItem(previous) || !this.isVisualItem(target))
+			return false
+
+		return this.#createTransition(parent, index, name, duration)
+	}
+
+	#createTransition(parent: Item.Sequence, index: number, name: TransitionName, duration: number) {
 		const created = this.deps.omnitool.transition[name](duration)
 		this.timeline.mutate(s => {
 			const childrenIds = [...parent.childrenIds]
@@ -241,7 +260,7 @@ export class OmniSession {
 		return true
 	}
 
-	#isVisualItem(item: Item.Any | undefined): item is Idx.VideoItem | Item.Image | Item.Text | Item.Caption {
+	isVisualItem(item: Item.Any | undefined): item is Idx.VideoItem | Item.Image | Item.Text | Item.Caption {
 		return [Kind.Video, Kind.Clip, Kind.Image, Kind.Text, Kind.Caption].includes(item?.kind as Kind)
 	}
 

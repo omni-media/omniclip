@@ -1,6 +1,6 @@
 
 import {html} from "lit"
-import {Datafile, Item, Media} from "@omnimedia/omnitool"
+import {Datafile, Item, Media, type Transition} from "@omnimedia/omnitool"
 import {shadow, useCss, useOnce, useSignal} from "@e280/sly"
 import {components as quayComponents, dom, type MediaFormat} from "@e280/quay"
 
@@ -12,6 +12,7 @@ import textSvg from "../../../../../icons/gravity-ui/text.svg.js"
 import transitionSvg from "../../../../../icons/transition.svg.js"
 import folderSvg from "../../../../../icons/gravity-ui/folder.svg.js"
 import type {EditorContext} from "../../../../../../context/context.js"
+import {transitionDropTargets} from "../edit/canvas/drop_targets/transition.js"
 import {BrowserTab, DEFAULT_TEXT_DURATION, DEFAULT_TRANSITION_DURATION, MEDIA_GROUP, TEXT_PRESETS, TextPreset, TRANSITIONS} from "./constants.js"
 
 dom.register(quayComponents, {soft: true})
@@ -90,6 +91,14 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			duration.value = next
 	}
 
+	const dragTransition = (event: DragEvent, transition: Transition) => {
+		const canvas = context.session.canvas
+		canvas.dragDrop.start(event, {
+			targets: transitionDropTargets(canvas),
+			drop: ({targetId}) => context.session.applyTransitionAt(transition.name, duration.value, targetId),
+		})
+	}
+
 	const addTextPreset = (preset: TextPreset) => {
 		const text = context.omni.text(preset.content, {
 			duration: DEFAULT_TEXT_DURATION,
@@ -166,8 +175,11 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 					.filter(transition => transition.label.toLowerCase().includes(query.value.trim().toLowerCase()))
 					.map(transition => html`
 					<button class="transition-card"
+						draggable="true"
 						?data-active=${selected?.name === transition?.name}
 						title=${transition.label}
+						@dragstart=${(event: DragEvent) => dragTransition(event, transition)}
+						@dragend=${context.session.canvas.dragDrop.end}
 						@click=${() => context.session.applyTransitionToSelection(transition.name, duration.value)}>
 						<div class="transition-preview" aria-hidden="true"></div>
 						<div class="transition-name">${transition.label}</div>

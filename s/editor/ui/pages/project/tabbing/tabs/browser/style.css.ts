@@ -215,6 +215,10 @@ quay-browser {
 	border-color: color-mix(in srgb, var(--prime) 55%, #4a4a4a);
 }
 
+.transition-card:active {
+	cursor: grabbing;
+}
+
 .transition-preview {
 	position: relative;
 	height: 50px;

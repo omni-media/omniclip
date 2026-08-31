@@ -13,6 +13,8 @@ export const styles = {
 	bladePreview: "#ff7b8e",
 	text: "#d6d7dc",
 	selectedStroke: "#ececff",
+	dropTarget: "#ffad42",
+	dropTargetActive: "#ffd08a",
 	clipLabelText: "#c9d2df",
 	clipLabelShadow: "rgba(0, 0, 0, 0.32)",
 	gapFill: "#292b2f",

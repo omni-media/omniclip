@@ -89,7 +89,10 @@ export const TimelineArea = shadow((context: EditorContext) => {
 			pointermove: timelineCanvas.onPointerMove,
 			pointerup: timelineCanvas.onPointerUp,
 			pointerleave: timelineCanvas.onPointerLeave,
-			dblclick: timelineCanvas.onDoubleClick
+			dblclick: timelineCanvas.onDoubleClick,
+			dragover: timelineCanvas.dragDrop.dragover,
+			dragleave: timelineCanvas.dragDrop.dragleave,
+			drop: timelineCanvas.dragDrop.drop,
 		})
 
 		return () => {

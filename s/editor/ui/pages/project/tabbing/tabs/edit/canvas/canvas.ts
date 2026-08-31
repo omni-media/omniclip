@@ -16,6 +16,7 @@ import {drawBladePreview} from './draw/blade-preview.js'
 import {drawSnapTargets} from './draw/snap-targets.js'
 import {TimelineFilmstrips} from './parts/filmstrips.js'
 import {TimelineWaveforms} from './parts/waveforms.js'
+import {CanvasDragDrop} from './parts/drag_drop.js'
 import {Idx} from '../../../../../../logic/parts/index.js'
 import {OmniSession} from '../../../../../../logic/session.js'
 import {Strata} from '../../../../../../../context/parts/strata.js'
@@ -31,7 +32,6 @@ type EditCanvasDeps = {
 }
 
 type CursorIcon = ToolName
-
 export class TimelineCanvas {
 	canvas = document.createElement('canvas')
 	ctx = this.canvas.getContext('2d')!
@@ -48,6 +48,7 @@ export class TimelineCanvas {
 	$previews = {
 		blade: signal<{time: Ms, clipId: Id} | null>(null)
 	}
+	dragDrop = new CanvasDragDrop(this)
 
 	filmstrips = new TimelineFilmstrips(this)
 	waveforms = new TimelineWaveforms(this)
@@ -161,9 +162,9 @@ export class TimelineCanvas {
 		this.ctx.translate(-this.viewport.scrollLeft, 0)
 		this.ctx.translate(this.trimPreviewOffsetPx(), 0)
 		drawClips(this)
-		drawSnapTargets(this)
 		drawBladePreview(this)
 		drawPlayhead(this)
+		drawSnapTargets(this)
 		this.ctx.restore()
 	}
 
