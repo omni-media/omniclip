@@ -29,6 +29,7 @@ export const EditorApp = (router: AppRouter) => shadowElement(() => {
 
 	return ShinyDrawer.with({
 		props: [{button: true, control: drawer}],
+		attrs: {"data-projects": router.$hash() === "projects"},
 		children: html`
 			<nav>
 				<h2>
@@ -38,7 +39,6 @@ export const EditorApp = (router: AppRouter) => shadowElement(() => {
 				${renderLink("About", router.href.home(), router.$hash() === "")}
 				${renderLink("Account", router.href.account(), router.$hash() === "account")}
 				${renderLink("Project List", router.href.projects(), router.$hash() === "projects")}
-				${renderLink("Project", router.href.project("123"), router.$hash().startsWith("project/"))}
 			</nav>
 
 			<section slot=plate>

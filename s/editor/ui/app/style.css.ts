@@ -31,6 +31,10 @@ export default css`@layer view {
 	transition: background 0.12s ease, color 0.12s ease;
 }
 
+[view="shiny-drawer"][data-projects]::part(button) {
+	top: calc((58px - var(--button-size)) / 2);
+}
+
 [view="shiny-drawer"]::part(button):hover {
 	color: #e8e8e8;
 	background: #333;
@@ -42,6 +46,7 @@ export default css`@layer view {
 
 [view="shiny-drawer"]::part(tray) {
 	width: min(18em, calc(100% - var(--button-size)));
+	z-index: 11;
 }
 
 [view="shiny-drawer"]::part(slate) {
@@ -51,6 +56,7 @@ export default css`@layer view {
 }
 
 [view="shiny-drawer"]::part(blanket) {
+	z-index: 10;
 	background: rgb(0 0 0 / 0.35);
 	backdrop-filter: none;
 }
@@ -124,4 +130,3 @@ section {
 }
 
 }`
-

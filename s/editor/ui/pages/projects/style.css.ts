@@ -43,6 +43,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 	gap: 1em;
 	min-height: 58px;
 	padding: 0.55em max(1em, calc((100% - 1200px) / 2));
+	padding-left: max(3.25em, calc((100% - 1200px) / 2));
 	border-bottom: 1px solid #ffffff0d;
 	background: #0a0b0ce0;
 	backdrop-filter: blur(18px);
@@ -603,12 +604,17 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 
 @media (max-width: 560px) {
 	.topbar {
-		grid-template-columns: 1fr auto;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		gap: 0.5em;
 		padding: 0.65em;
+		padding-left: 3.25em;
 		background: #0a0b0c;
 	}
-	.search { grid-column: 1 / -1; grid-row: 2; }
-	.controls { grid-column: 2; grid-row: 1; }
+	.topbar-button.primary {
+		width: 34px;
+		padding: 0;
+	}
+	.topbar-button.primary span { display: none; }
 }
 
 @media (max-width: 480px) {
