@@ -28,7 +28,7 @@ export const EditorApp = (router: AppRouter) => shadowElement(() => {
 	}
 
 	return ShinyDrawer.with({
-		props: [{button: true}],
+		props: [{button: true, control: drawer}],
 		children: html`
 			<nav>
 				<h2>
