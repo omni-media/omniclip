@@ -112,6 +112,14 @@ export class Viewport {
 		return this.xToTime(this.scrollLeft + this.width)
 	}
 
+	revealTime(time: Ms, padding = 16) {
+		const x = this.timeToX(time)
+		if (x < this.scrollLeft + padding)
+			this.setScrollLeft(x - padding)
+		else if (x > this.scrollLeft + this.width - padding)
+			this.setScrollLeft(x - this.width + padding)
+	}
+
 	pxPerMs() {
 		return this.pixelsPerMillisecond * this.zoom
 	}

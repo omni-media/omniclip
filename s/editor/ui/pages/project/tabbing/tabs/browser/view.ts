@@ -116,6 +116,9 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 		}
 
 		context.session.appendItem(text)
+		const start = context.session.index.getItemLaneStart(text.id, context.session.$viewedItemId.value)
+		context.session.seekPlayhead(start)
+		context.session.viewport.revealTime(start)
 	}
 
 	const renderTabButton = (id: BrowserTab, label: string, icon: unknown) => html`
