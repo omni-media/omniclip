@@ -25,6 +25,8 @@ export const TimelineContextMenu = shadow((context: EditorContext) => {
 	const canvas = session.canvas
 	const selected = session.index.getItemMaybe(session.$selectedItem.value)
 	const container = !!selected && Idx.isStruct(selected)
+	const stack = !!selected && Idx.isStack(selected.kind)
+	const collapsed = stack && canvas.isStackCollapsed(selected.id)
 	const splittable = !!selected && Idx.isClip(selected.kind)
 
 	useMount(() => dom.events(canvas.canvas, {
@@ -63,6 +65,9 @@ export const TimelineContextMenu = shadow((context: EditorContext) => {
 					enabled: selected.enabled === false,
 				}))
 				break
+			case "collapse":
+				canvas.toggleStack(selected.id)
+				break
 			case "split":
 				if (Idx.isClip(selected.kind))
 					session.splitClipAt(selected.id, session.getPlayheadInMs())
@@ -88,6 +93,12 @@ export const TimelineContextMenu = shadow((context: EditorContext) => {
 				<span slot="icon">${eyeSvg}</span>
 				${selected?.enabled === false ? "Enable" : "Disable"} ${container ? "Container" : "Item"}
 			</wa-dropdown-item>
+			${stack ? html`
+				<wa-dropdown-item value="collapse">
+					<span slot="icon">${stackSvg}</span>
+					${collapsed ? "Expand" : "Collapse"} Stack
+				</wa-dropdown-item>
+			` : null}
 			<wa-dropdown-item value="split" ?disabled=${!splittable}>
 				<span slot="icon">${scissorsSvg}</span>
 				Split at Playhead

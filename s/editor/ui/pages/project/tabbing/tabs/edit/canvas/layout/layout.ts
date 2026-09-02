@@ -19,7 +19,11 @@ export function layout(
 	return parent.childrenIds.flatMap(id => {
 		const item = canvas.index.getItem(id)
 		const clip = makeClipBox({canvas, x, y, item, depth})
-		const children = Idx.isStruct(item) ? layout(canvas, item, x, y, depth + 1) : []
+		const collapsed = Idx.isStack(item.kind) && canvas.isStackCollapsed(item.id)
+
+		const children = Idx.isStruct(item) && !collapsed
+			? layout(canvas, item, x, y, depth + 1)
+			: []
 
 		if (children.length)
 			clip.height = Math.max(...children.map(child => child.y + child.height)) - y

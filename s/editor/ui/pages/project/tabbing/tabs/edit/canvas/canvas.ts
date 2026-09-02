@@ -40,6 +40,7 @@ export class TimelineCanvas {
 	spacer = dom.elmer("div").attr("className", "spacer").done()
 
 	clips: ClipBox[] = []
+	$collapsedStacks = signal<ReadonlySet<Id>>(new Set())
 	#contentExtent = ms(0)
 	#lastZoom = 0
 
@@ -61,6 +62,17 @@ export class TimelineCanvas {
 
 	get index() {
 		return this.deps.session.index
+	}
+
+	isStackCollapsed(id: Id) {
+		return this.$collapsedStacks().has(id)
+	}
+
+	toggleStack(id: Id) {
+		const collapsed = new Set(this.$collapsedStacks())
+		collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id)
+		this.$collapsedStacks(collapsed)
+		this.scheduleDraw()
 	}
 
 	/** visual size of an item on the timeline */

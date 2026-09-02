@@ -7,6 +7,7 @@ export const styles = {
 	rulerMinorTick: "#3c3c3c",
 	rulerLabel: "#9a9a9a",
 	trackBorder: "#30333a",
+	containerFill: "#252a31",
 	containerStroke: "#596474",
 	playhead: "#ff5f45",
 	ghostPlayhead: "rgba(255, 95, 69, 0.32)",

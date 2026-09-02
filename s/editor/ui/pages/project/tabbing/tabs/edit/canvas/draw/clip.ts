@@ -43,7 +43,13 @@ function itemDisabled(canvas: TimelineCanvas, itemId: number) {
 	return false
 }
 
-function drawLabel(canvas: TimelineCanvas, clip: TimelineClipBox, labelHeight: number, color: string) {
+function drawLabel(
+	canvas: TimelineCanvas,
+	clip: TimelineClipBox,
+	labelHeight: number,
+	color: string,
+	label = clip.label,
+) {
 	const ctx = canvas.ctx
 
 	ctx.fillStyle = color
@@ -55,11 +61,23 @@ function drawLabel(canvas: TimelineCanvas, clip: TimelineClipBox, labelHeight: n
 	ctx.shadowColor = styles.clipLabelShadow
 	ctx.shadowBlur = 2
 	ctx.fillText(
-		clip.label,
+		label,
 		clip.x + metrics.labelInsetX,
 		clip.y + labelHeight / 2 + 0.5
 	)
 	ctx.shadowBlur = 0
+}
+
+function drawContainer(canvas: TimelineCanvas, clip: TimelineClipBox) {
+	if (canvas.isStackCollapsed(clip.itemId)) {
+		roundedRect(canvas.ctx, clip.x, clip.y, clip.width, clip.height, metrics.clipRadius)
+		canvas.ctx.fillStyle = styles.containerFill
+		canvas.ctx.fill()
+		drawLabel(canvas, clip, metrics.labelHeight, styles.containerFill, `▸ ${clip.label}`)
+		if (itemDisabled(canvas, clip.itemId))
+			drawDisabledOverlay(canvas.ctx, clip)
+	}
+	drawOutline(canvas, clip, styles.containerStroke)
 }
 
 function drawOutline(
@@ -175,7 +193,7 @@ function drawDragPreview(
 		drawClip(canvas, clip)
 	for (const clip of clips)
 		if (Idx.isStructKind(clip.kind))
-			drawOutline(canvas, clip, styles.containerStroke)
+			drawContainer(canvas, clip)
 	canvas.ctx.restore()
 }
 
@@ -201,7 +219,7 @@ export function drawClips(canvas: TimelineCanvas) {
 			drawClip(canvas, clip)
 	}
 	for (const clip of containers)
-		drawOutline(canvas, clip, styles.containerStroke)
+		drawContainer(canvas, clip)
 
 	if (ghost)
 		drawDragPreview(canvas, previewClips, ghost)
