@@ -24,6 +24,7 @@ export const TimelineContextMenu = shadow((context: EditorContext) => {
 	const session = context.session
 	const canvas = session.canvas
 	const selected = session.index.getItemMaybe(session.$selectedItem.value)
+	const container = !!selected && Idx.isStruct(selected)
 	const splittable = !!selected && Idx.isClip(selected.kind)
 
 	useMount(() => dom.events(canvas.canvas, {
@@ -34,10 +35,15 @@ export const TimelineContextMenu = shadow((context: EditorContext) => {
 			const menu = dom.in(root).require("wa-dropdown") as HTMLElementTagNameMap["wa-dropdown"]
 			menu.open = false
 
-			if (!clip || Idx.isStructKind(clip.kind))
+			if (!clip)
 				return
 
-			session.$selectedItem.value = clip.itemId
+			const selectedId = session.$selectedItem()
+			const targetSelectedContainer = selectedId !== null &&
+				selectedId !== session.$viewedItemId() &&
+				session.index.contains(selectedId, clip.itemId)
+
+			session.$selectedItem(targetSelectedContainer ? selectedId : clip.itemId)
 			canvas.scheduleDraw()
 
 			const anchor = dom.in(root).require("button")
@@ -77,10 +83,10 @@ export const TimelineContextMenu = shadow((context: EditorContext) => {
 	return html`
 		<wa-dropdown placement="bottom-start" size="small" @wa-select=${runAction}>
 			<button slot="trigger" aria-label="Timeline item actions"></button>
-			<small>Clip actions</small>
+			<small>${container ? "Container" : "Clip"} actions</small>
 			<wa-dropdown-item value="toggle">
 				<span slot="icon">${eyeSvg}</span>
-				${selected?.enabled === false ? "Enable" : "Disable"} Item
+				${selected?.enabled === false ? "Enable" : "Disable"} ${container ? "Container" : "Item"}
 			</wa-dropdown-item>
 			<wa-dropdown-item value="split" ?disabled=${!splittable}>
 				<span slot="icon">${scissorsSvg}</span>
@@ -100,7 +106,7 @@ export const TimelineContextMenu = shadow((context: EditorContext) => {
 				Add to Sequence
 			</wa-dropdown-item>
 			<wa-divider></wa-divider>
-			<wa-dropdown-item class="danger" value="delete">
+			<wa-dropdown-item class="danger" value="delete" ?disabled=${container}>
 				<span slot="icon">${binSvg}</span>
 				Delete Item
 			</wa-dropdown-item>

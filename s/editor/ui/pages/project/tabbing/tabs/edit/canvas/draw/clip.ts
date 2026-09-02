@@ -34,9 +34,13 @@ function itemColor(kind: Kind) {
 }
 
 function itemDisabled(canvas: TimelineCanvas, itemId: number) {
-	return canvas.deps.session.deps.strata.timeline.state.items
-		.find(item => item.id === itemId)
-		?.enabled === false
+	let item = canvas.index.getItemMaybe(itemId)
+	while (item) {
+		if (item.enabled === false)
+			return true
+		item = canvas.index.getParent(item.id)
+	}
+	return false
 }
 
 function drawLabel(canvas: TimelineCanvas, clip: TimelineClipBox, labelHeight: number, color: string) {
