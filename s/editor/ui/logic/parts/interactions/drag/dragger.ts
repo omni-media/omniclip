@@ -18,6 +18,8 @@ type Point = {
 	y: number
 }
 
+const SNAP_THRESHOLD_PX = 8
+
 type DragState = {
 	clip: TimelineClipBox
 	startPoint: Point
@@ -29,7 +31,7 @@ export class Dragger {
 
 	isDragging = false
 
-	constructor(private readonly positionItems = false) {}
+	constructor(private readonly positionMode = false) {}
 
 	start(
 		clip: TimelineClipBox,
@@ -66,6 +68,8 @@ export class Dragger {
 			x: state.clip.x + dx,
 			y: state.clip.y + dy,
 		}
+		if (this.positionMode)
+			ghost.x = snapToPlayhead(session, ghost)
 
 		session.setGhostClip(ghost)
 
@@ -95,7 +99,7 @@ export class Dragger {
 		this.#state = null
 		this.isDragging = false
 
-		if (this.positionItems)
+		if (this.positionMode)
 			session.canvas.switchCursor("position")
 
 		session.canvas.scheduleDraw()
@@ -114,7 +118,7 @@ export class Dragger {
 			ghost,
 		)
 
-		if (!this.positionItems)
+		if (!this.positionMode)
 			return resolvedDrop
 
 		const preview = {
@@ -145,7 +149,7 @@ export class Dragger {
 		const ghost = session.$ghostClip()
 
 		const desiredStart =
-			ghost && this.positionItems
+			ghost && this.positionMode
 				? positionStart(session, state.clip, ghost)
 				: null
 
@@ -196,6 +200,16 @@ function dragOffset(start: Point, current: Point) {
 		dx: current.x - start.x,
 		dy: current.y - start.y,
 	}
+}
+
+function snapToPlayhead(session: OmniSession, clip: TimelineClipBox) {
+	const playheadX = session.viewport.timeToX(session.$playhead())
+	const startX = playheadX
+	const endX = playheadX - clip.width
+	const snappedX = endX >= 0 && Math.abs(endX - clip.x) < Math.abs(startX - clip.x)
+		? endX
+		: startX
+	return Math.abs(snappedX - clip.x) <= SNAP_THRESHOLD_PX ? snappedX : clip.x
 }
 
 function positionStart(
