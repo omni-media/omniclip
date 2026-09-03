@@ -1,5 +1,5 @@
 
-import {Index} from "../../index.js"
+import {Index} from "../../../index.js"
 import {Id} from "@omnimedia/omnitool"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
@@ -66,4 +66,3 @@ export function getSnapTargets(
 	collect(rootId, ms(0))
 	return Array.from(targets).sort((a, b) => a - b)
 }
-

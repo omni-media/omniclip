@@ -1,11 +1,13 @@
 
-import {ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
+import {Idx} from "../../index.js"
 import type {OmniSession} from "../../../session.js"
 import {DragSnapshot} from "./parts/snapshot.js"
 import {resolveDropIntent} from "./parts/intent.js"
 import {Proposal} from "../../proposal/proposal.js"
 import {overlayFromDropIntent} from "./parts/overlay.js"
+import {getSnapCandidates, snap} from "./parts/snappy.js"
 import {
 	isPositionDropBlocked,
 	overlayFromPosition,
@@ -24,6 +26,7 @@ type DragState = {
 	clip: TimelineClipBox
 	startPoint: Point
 	snapshot: DragSnapshot
+	snapCandidates: Ms[]
 }
 
 export class Dragger {
@@ -39,14 +42,16 @@ export class Dragger {
 		session: OmniSession,
 	) {
 		this.isDragging = false
+		const clips = [...session.canvas.clips]
 		this.#state = {
 			clip,
 			startPoint: point,
 			snapshot: new DragSnapshot(
 				session.index,
-				[...session.canvas.clips],
+				clips,
 				session.$viewedItemId.value,
 			),
+			snapCandidates: this.positionMode ? positionSnapCandidates(session, clip, clips) : [],
 		}
 	}
 
@@ -69,7 +74,11 @@ export class Dragger {
 			y: state.clip.y + dy,
 		}
 		if (this.positionMode)
-			ghost.x = snapToPlayhead(session, ghost)
+			ghost.x = session.viewport.timeToX(snap(
+				positionStart(session, state.clip, ghost),
+				session.viewport.widthToDuration(SNAP_THRESHOLD_PX),
+				state.snapCandidates,
+			))
 
 		session.setGhostClip(ghost)
 
@@ -202,14 +211,17 @@ function dragOffset(start: Point, current: Point) {
 	}
 }
 
-function snapToPlayhead(session: OmniSession, clip: TimelineClipBox) {
-	const playheadX = session.viewport.timeToX(session.$playhead())
-	const startX = playheadX
-	const endX = playheadX - clip.width
-	const snappedX = endX >= 0 && Math.abs(endX - clip.x) < Math.abs(startX - clip.x)
-		? endX
-		: startX
-	return Math.abs(snappedX - clip.x) <= SNAP_THRESHOLD_PX ? snappedX : clip.x
+function positionSnapCandidates(session: OmniSession, moving: TimelineClipBox, clips: TimelineClipBox[]) {
+	const targets = [
+		session.$playhead(),
+		...clips
+			.filter(clip => clip.itemId !== moving.itemId && Idx.isClip(clip.kind))
+			.flatMap(clip => [clip.start, ms(clip.start + clip.duration)]),
+	]
+	return getSnapCandidates(targets, [{
+		start: moving.start,
+		end: ms(moving.start + moving.duration),
+	}], moving.start)
 }
 
 function positionStart(
