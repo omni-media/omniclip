@@ -10,6 +10,8 @@ import {EditorContext} from "../../../../../../../../../context/context.js"
 import binSvg from "../../../../../../../../icons/gravity-ui/bin.svg.js"
 import eyeSvg from "../../../../../../../../icons/gravity-ui/eye.svg.js"
 import stackSvg from "../../../../../../../../icons/gravity-ui/stack.svg.js"
+import exportSvg from "../../../../../../../../icons/gravity-ui/export.svg.js"
+import {openExport} from "../../../../../../../../logic/modals/export/modal.js"
 import scissorsSvg from "../../../../../../../../icons/gravity-ui/scissors.svg.js"
 import sequenceSvg from "../../../../../../../../icons/gravity-ui/sequence.svg.js"
 import duplicateSvg from "../../../../../../../../icons/gravity-ui/duplicate.svg.js"
@@ -68,6 +70,9 @@ export const TimelineContextMenu = shadow((context: EditorContext) => {
 			case "collapse":
 				canvas.toggleStack(selected.id)
 				break
+			case "export":
+				openExport(context, session.timelineFrom(selected.id))
+				break
 			case "split":
 				if (Idx.isClip(selected.kind))
 					session.splitClipAt(selected.id, session.getPlayheadInMs())
@@ -97,6 +102,12 @@ export const TimelineContextMenu = shadow((context: EditorContext) => {
 				<wa-dropdown-item value="collapse">
 					<span slot="icon">${stackSvg}</span>
 					${collapsed ? "Expand" : "Collapse"} Stack
+				</wa-dropdown-item>
+			` : null}
+			${container ? html`
+				<wa-dropdown-item value="export">
+					<span slot="icon">${exportSvg}</span>
+					Export Container
 				</wa-dropdown-item>
 			` : null}
 			<wa-dropdown-item value="split" ?disabled=${!splittable}>

@@ -20,12 +20,11 @@ import {EditorContext} from "../../../context/context.js"
 import {OutlinerTab} from "./tabbing/tabs/outliner/view.js"
 import {InspectorTab} from "./tabbing/tabs/inspector/view.js"
 import {BrowserTabPanel} from "./tabbing/tabs/browser/view.js"
-import {exportModal} from "../../logic/modals/export/modal.js"
+import {openExport} from "../../logic/modals/export/modal.js"
 import modalCss from "../../../context/parts/modal/modal.css.js"
 import {settingsModal} from "../../logic/modals/settings/modal.js"
 import {shortcutsModal} from "../../logic/modals/shortcuts/modal.js"
 import {TimelineViewport} from "./tabbing/tabs/edit/views/viewport/view.js"
-import {exportProgressModal} from "../../logic/modals/export/progress/modal.js"
 
 import "@awesome.me/webawesome/dist/components/button/button.js"
 import "@awesome.me/webawesome/dist/components/split-panel/split-panel.js"
@@ -63,12 +62,6 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 
 		const openShortcuts = () => context.modals.openModal(shortcutsModal())
 
-		const openExport = async () => {
-			const settings = await context.modals.openModal(exportModal())
-			if (settings)
-				await context.modals.openModal(exportProgressModal(settings))
-		}
-
 		return html`
 			<div class="project-page">
 				<header theme=topper>
@@ -100,8 +93,8 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 
 						<div class=spacer></div>
 
-   					<wa-button
-							@click=${openExport}
+					<wa-button
+							@click=${() => openExport(context, context.session.timelineFrom(context.session.$viewedItemId()))}
 							class=export
 							size="small"
 						>

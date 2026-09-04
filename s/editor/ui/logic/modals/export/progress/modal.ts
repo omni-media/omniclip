@@ -13,8 +13,9 @@ import "@awesome.me/webawesome/dist/components/button/button.js"
 
 export const exportProgressModal = (
 	settings: ExportResult,
+	timeline: TimelineFile,
 ): ModalDefinition<boolean> => ({
-	label: "Export Project",
+	label: "Export",
 
 	render: (ctx, modal) => shadow(() => {
 		useCss(modalCss, styleCss)
@@ -33,7 +34,7 @@ export const exportProgressModal = (
 
 				const writable = await handle.createWritable()
 				const {readable, done} = await ctx.project.render(
-					ctx.strata.timeline.state as TimelineFile,
+					timeline,
 					{
 						config: toOmnitoolExportConfig(
 							settings,

@@ -108,6 +108,10 @@ export class OmniSession {
 		return this.deps.strata.timeline
 	}
 
+	timelineFrom(rootId: Id = this.timeline.state.rootId): TimelineFile {
+		return {...this.timeline.state, rootId}
+	}
+
 	get index() {
 		return this.$proposal.value?.index ?? this.#index()
 	}

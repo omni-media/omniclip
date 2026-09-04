@@ -1,9 +1,12 @@
 
 import {html} from "lit"
+import {TimelineFile} from "@omnimedia/omnitool"
 import {shadow, useCss, useSignal} from "@e280/sly"
 import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import styleCss from "./style.css.js"
+import {exportProgressModal} from "./progress/modal.js"
+import type {EditorContext} from "../../../../context/context.js"
 import modalCss from "../../../../context/parts/modal/modal.css.js"
 import {ModalDefinition} from "../../../../context/parts/modal/types.js"
 import {codecOptions, ExportCodec, ExportResult, qualityOptions, getQualityLabel, codecSupportedFormats, ExportFormat, ExportBitrate} from "./constants.js"
@@ -14,11 +17,17 @@ import "@awesome.me/webawesome/dist/components/input/input.js"
 import "@awesome.me/webawesome/dist/components/option/option.js"
 import "@awesome.me/webawesome/dist/components/select/select.js"
 
-export const exportModal = (): ModalDefinition<ExportResult> => ({
+export async function openExport(context: EditorContext, timeline: TimelineFile) {
+	const settings = await context.modals.openModal(exportModal(timeline))
+	if (settings)
+		await context.modals.openModal(exportProgressModal(settings, timeline))
+}
+
+export const exportModal = (timeline: TimelineFile): ModalDefinition<ExportResult> => ({
 	label: html`
 		<div class="header">
 			<wa-icon name="download"></wa-icon>
-			<span>Export Project</span>
+			<span>Export</span>
 		</div>
 	`,
 
@@ -61,7 +70,7 @@ export const exportModal = (): ModalDefinition<ExportResult> => ({
 			selectedFormat.value = target.value as ExportFormat
 		}
 
-		const duration = ctx.controllers.player.duration
+		const duration = ctx.session.index.getItemDuration(timeline.rootId)
 
 		const estimateFileSize = () => {
 			const size = ((+bitrate.value / 1000) * (duration / 1000)) / 8
