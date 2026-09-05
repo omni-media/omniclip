@@ -1,8 +1,9 @@
 
 import {html} from "lit"
-import {Datafile, Item, Media, type Transition} from "@omnimedia/omnitool"
+import {keyed} from "lit/directives/keyed.js"
 import {shadow, useCss, useOnce, useSignal} from "@e280/sly"
-import {components as quayComponents, dom, type MediaFormat} from "@e280/quay"
+import {Datafile, Item, Media, type Transition} from "@omnimedia/omnitool"
+import {components as quayComponents, dom, type MediaFormat, type MediaLibrary} from "@e280/quay"
 
 import styleCss from "./style.css.js"
 import {setupMediaGroup} from "./setup.js"
@@ -20,8 +21,11 @@ dom.register(quayComponents, {soft: true})
 export const BrowserTabPanel = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
 
+	const cargo = context.controllers.cargo
+
 	const query = useSignal("")
 	const activeTab = useSignal<BrowserTab>("media")
+	const mediaScope = useSignal<"project" | "all">("project")
 	const duration = useSignal(DEFAULT_TRANSITION_DURATION)
 
 	const makeItems = (format: MediaFormat, media: Media) => {
@@ -59,7 +63,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			context.session.appendItem(clip)
 	}
 
-	const removeMedia = async(event: Event, item: MediaItem) => {
+	const removeMedia = async(event: Event, item: MediaItem, library: MediaLibrary) => {
 		event.preventDefault()
 		event.stopPropagation()
 
@@ -76,10 +80,23 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			return
 		}
 
-		await context.controllers.cargo.mediaLibrary.delete(item)
+		await library.delete(item)
 	}
 
-	useOnce(() => setupMediaGroup(context, addMedia, removeMedia))
+	useOnce(() => {
+		setupMediaGroup({
+			group: `${MEDIA_GROUP}-project`,
+			library: cargo.projectLibrary,
+			onAdd: addMedia,
+			onRemove: (event, item) => removeMedia(event, item, cargo.projectLibrary),
+		})
+		setupMediaGroup({
+			group: `${MEDIA_GROUP}-all`,
+			library: cargo.editorLibrary,
+			onAdd: addMedia,
+			onRemove: (event, item) => removeMedia(event, item, cargo.editorLibrary),
+		})
+	})
 
 	const setQuery = (event: InputEvent) => {
 		query.value = (event.target as HTMLInputElement).value
@@ -129,20 +146,26 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 		</button>
 	`
 
-	const renderMedia = () => html`
-		<div class="media-bin" group=${MEDIA_GROUP}>
+	const renderMediaPath = () => html`
+		<nav class="media-path" aria-label="Media location">
+			<button ?data-current=${mediaScope() === "all"} @click=${() => mediaScope("all")}>Library</button>
+			<span>/</span>
+			<button ?data-current=${mediaScope() === "project"} @click=${() => mediaScope("project")}>Project</button>
+		</nav>
+	`
+
+	const renderMedia = () => keyed(mediaScope(), html`
+		<div class="media-bin" group=${`${MEDIA_GROUP}-${mediaScope()}`}>
 			<div class="media-toolbar">
 				<quay-searchbar></quay-searchbar>
 				<quay-filter></quay-filter>
 				<quay-sort></quay-sort>
 			</div>
-			<quay-dropzone></quay-dropzone>
-			<div class="media-path">
-				<quay-breadcrumb></quay-breadcrumb>
-			</div>
+			<quay-dropzone group=${`${MEDIA_GROUP}-project`}></quay-dropzone>
+			${renderMediaPath()}
 			<quay-browser></quay-browser>
 		</div>
-	`
+	`)
 
 	const renderTransitions = () => {
 		const selected = context.session.index.getItemMaybe<Item.Transition>(context.session.$selectedItem.value)

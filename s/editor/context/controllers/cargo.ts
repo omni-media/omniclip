@@ -7,19 +7,21 @@ import {Strata} from "../parts/strata.js"
 
 export class CargoController {
 	static async setup(strata: Strata, cellar: Cellar, project: Omni) {
-		const mediaLibrary = await MediaLibrary.open(`omniclip:${strata.projectId}`)
-		return new this(strata, cellar, project, mediaLibrary)
+		const projectLibrary = await MediaLibrary.open(`omniclip:${strata.projectId}`)
+		const editorLibrary = await MediaLibrary.open(`omniclip`)
+		return new this(strata, cellar, project, projectLibrary, editorLibrary)
 	}
 
 	constructor(
 		public strata: Strata,
 		public cellar: Cellar,
 		public project: Omni,
-		public mediaLibrary: MediaLibrary
+		public projectLibrary: MediaLibrary,
+		public editorLibrary: MediaLibrary
 	) {}
 
 	async loadMedia(hash: string) {
-		const cask = await this.mediaLibrary.cellar.load(hash)
+		const cask = await this.projectLibrary.cellar.load(hash)
 		return cask.file
 	}
 
@@ -35,7 +37,8 @@ export class CargoController {
 	}
 
 	dispose() {
-		this.mediaLibrary.dispose()
+		this.projectLibrary.dispose()
+		this.editorLibrary.dispose()
 	}
 }
 
