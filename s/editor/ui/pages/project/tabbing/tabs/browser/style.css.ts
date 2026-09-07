@@ -99,6 +99,28 @@ export default css`@layer view {
 	--quay-browser-thumb-height: 64px;
 }
 
+.media-path {
+	display: flex;
+	align-items: center;
+	gap: 0.4em;
+	color: #666;
+	font-size: var(--font-size-xs);
+}
+
+.media-path button {
+	padding: 0;
+	color: #aaa;
+	background: transparent;
+	border: 0;
+	font: inherit;
+	cursor: pointer;
+}
+
+.media-path button:hover,
+.media-path button[data-current] {
+	color: #e8e8e8;
+}
+
 .media-toolbar {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto auto;
