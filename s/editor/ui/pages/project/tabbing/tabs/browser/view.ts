@@ -49,13 +49,15 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 		if (!item.isKind("file"))
 			return
 
-		const file = await context.controllers.cargo.loadMedia(item.specimen.hash!)
+		const hash = item.specimen.hash!
+		await cargo.projectLibrary.include(hash)
+		const file = await cargo.loadMedia(hash)
 
 		const {specimen: {mime, label}} = item
 		const {media} = await context.project.load({
 			media: Datafile.make(new Blob([file], {type: mime}), {
 				filename: label,
-				hash: item.specimen.hash,
+				hash,
 			}),
 		})
 

@@ -7,8 +7,8 @@ import {Strata} from "../parts/strata.js"
 
 export class CargoController {
 	static async setup(strata: Strata, cellar: Cellar, project: Omni) {
-		const projectLibrary = await MediaLibrary.open(`omniclip:${strata.projectId}`)
 		const editorLibrary = await MediaLibrary.open(`omniclip`)
+		const projectLibrary = await editorLibrary.scope(strata.projectId)
 		return new this(strata, cellar, project, projectLibrary, editorLibrary)
 	}
 
