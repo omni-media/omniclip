@@ -21,7 +21,7 @@ import speechToTextSvg from "../../../../../../../../icons/speech-to-text.svg.js
 import {renderCaptionStyleControls, renderTranscriptPreview} from "./renderers.js"
 import {replaceChild} from "../../../../../../../../logic/parts/operations/operations.js"
 import {AI_DEVICES, AI_DTYPES, AiDevice, AiDtype, formatProgress} from "../../../constants.js"
-import {CaptionConfigKey, LANGUAGES, Transcriber, TranscriberModel, TRANSCRIBER_MODELS, transcriberWorkerPath} from "./constants.js"
+import {CaptionConfigKey, LANGUAGES, Transcriber, TranscriberModel, transcriberModels, transcriberWorkerPath} from "./constants.js"
 
 import "@awesome.me/webawesome/dist/components/button/button.js"
 import "@awesome.me/webawesome/dist/components/option/option.js"
@@ -45,7 +45,7 @@ export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoI
 	const language = useSignal("")
 	const generating = useSignal(false)
 	const transcriber = useSignal<Transcriber | null>(null)
-	const model = useSignal<TranscriberModel>(TRANSCRIBER_MODELS[0][0])
+	const model = useSignal<TranscriberModel>(transcriberModels[0].id)
 	const device = useSignal<AiDevice>("webgpu")
 	const dtype = useSignal<AiDtype>("auto")
 	const maxChars = useSignal(existingCaption?.maxChars ?? 42)
@@ -219,7 +219,7 @@ export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoI
 					<wa-select size="small" .value=${model()}
 						?disabled=${generating()}
 						@change=${(e: Event) => setModel(valueOf(e) as TranscriberModel)}>
-						${TRANSCRIBER_MODELS.map(([value, label]) => html`<wa-option value=${value}>${label}</wa-option>`)}
+						${transcriberModels.map(({id, name}) => html`<wa-option value=${id}>${name}</wa-option>`)}
 					</wa-select>
 				</label>
 

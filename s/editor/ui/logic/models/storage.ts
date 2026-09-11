@@ -1,7 +1,5 @@
 
-import {Cellar} from "@e280/quay"
-
-import {assistantModelId, builtinModelMetadata} from "./builtins.js"
+import {modelMetadata} from "./metadata.js"
 
 const transformersCacheName = "transformers-cache"
 
@@ -10,7 +8,6 @@ export type CachedModel = {
 	label: string
 	purpose: string
 	size: number
-	storage: "assistant" | "transformers"
 }
 
 export type ModelStorage = {
@@ -22,10 +19,7 @@ export type ModelStorage = {
 }
 
 export async function inspectModelStorage(): Promise<ModelStorage> {
-	const models = [
-		...await inspectAssistantModel(),
-		...await inspectTransformersModels(),
-	]
+	const models = await inspectTransformersModels()
 	const {usage = 0, quota = 0} = await navigator.storage.estimate()
 	return {
 		models,
@@ -37,30 +31,10 @@ export async function inspectModelStorage(): Promise<ModelStorage> {
 }
 
 export async function removeCachedModel(model: CachedModel) {
-	if (model.storage === "assistant") {
-		await (await Cellar.opfs(assistantModelId)).clear()
-		return
-	}
-
 	const cache = await caches.open(transformersCacheName)
 	for (const request of await cache.keys())
 		if (modelId(request.url) === model.id)
 			await cache.delete(request)
-}
-
-async function inspectAssistantModel(): Promise<CachedModel[]> {
-	const cellar = await Cellar.opfs(assistantModelId)
-	let size = 0
-
-	for await (const hash of cellar.list())
-		size += (await cellar.load(hash)).file.size
-
-	return size ? [{
-		id: assistantModelId,
-		...builtinModelMetadata[assistantModelId],
-		size,
-		storage: "assistant",
-	}] : []
 }
 
 async function inspectTransformersModels(): Promise<CachedModel[]> {
@@ -81,8 +55,8 @@ async function inspectTransformersModels(): Promise<CachedModel[]> {
 	}
 
 	return [...grouped].map(([id, size]) => {
-		const metadata = builtinModelMetadata[id] ?? {label: id, purpose: "AI model"}
-		return {id, ...metadata, size, storage: "transformers" as const}
+		const metadata = modelMetadata[id] ?? {label: id, purpose: "AI model"}
+		return {id, ...metadata, size}
 	})
 }
 

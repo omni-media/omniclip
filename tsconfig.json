@@ -7,6 +7,7 @@
 		"lib": ["es2023", "dom", "dom.asynciterable", "webworker"],
 		"module": "node16",
 		"moduleResolution": "node16",
+		"jsx": "react-jsx",
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true,
 		"esModuleInterop": true,
@@ -17,6 +18,7 @@
 	},
 	"include": [
 		"s/**/*.ts",
+		"s/**/*.tsx",
 		"s/**/*.js"
 	],
 	"exclude": [

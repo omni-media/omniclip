@@ -13,7 +13,7 @@ import {blobToFrame, frameToPng} from "./utils.js"
 import {aiControlStyles, controlsStyles} from "../styles.css.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 import {
-	BG_REMOVER_MODELS,
+	backgroundRemoverModels,
 	BgRemover,
 	BgRemoverModel,
 	bgRemoverWorkerPath,
@@ -35,7 +35,7 @@ export const BackgroundRemoverControls = shadow((context: EditorContext, item: I
 	const status = useSignal("")
 	const running = useSignal(false)
 	const remover = useSignal<BgRemover | null>(null)
-	const model = useSignal<BgRemoverModel>("Xenova/modnet")
+	const model = useSignal<BgRemoverModel>(backgroundRemoverModels[0].id)
 	const device = useSignal<AiDevice>("webgpu")
 	const dtype = useSignal<AiDtype>("auto")
 	const metadata = context.strata.trunk.get().metadata
@@ -162,7 +162,7 @@ export const BackgroundRemoverControls = shadow((context: EditorContext, item: I
 					<wa-select size="small" .value=${model()}
 						?disabled=${running()}
 						@change=${(e: Event) => setModel(valueOf(e) as BgRemoverModel)}>
-						${BG_REMOVER_MODELS.map(([value, label]) => html`<wa-option value=${value}>${label}</wa-option>`)}
+						${backgroundRemoverModels.map(({id, name}) => html`<wa-option value=${id}>${name}</wa-option>`)}
 					</wa-select>
 				</label>
 
