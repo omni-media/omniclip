@@ -66,7 +66,7 @@
 		"@floating-ui/dom": "^1.7.1",
 		"@huggingface/transformers": "^4.2.0",
 		"@omnimedia/kimura": "^1.0.5-10",
-		"@omnimedia/omnitool": "^1.1.0-128",
+		"@omnimedia/omnitool": "^1.1.0-130",
 		"@pixi/colord": "^2.9.6",
 		"@zip.js/zip.js": "^2.7.62",
 		"coi-serviceworker": "^0.1.7",
