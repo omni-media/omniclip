@@ -13,6 +13,19 @@ let loaded: string | undefined
 const availableDtypes = (modelId: string) =>
 	ModelRegistry.get_available_dtypes(modelId) as Promise<AssistantDtype[]>
 
+// Remove after https://github.com/huggingface/transformers.js/pull/1681 is released.
+function patchGenerationLogits(model: AssistantBackend["model"]) {
+	const decoder = model.sessions.decoder_model_merged
+	if (!decoder?.inputNames.includes("num_logits_to_keep"))
+		return
+
+	const run = decoder.run.bind(decoder)
+	decoder.run = (inputs: Record<string, {data: BigInt64Array}>) => {
+		inputs.num_logits_to_keep.data[0] = 1n
+		return run(inputs)
+	}
+}
+
 await Comrade.worker<AssistantSchematic>(({host}) => ({
 	availableDtypes: exposeErrors(availableDtypes),
 	prepare: exposeErrors(async(options, settings) => {
@@ -40,6 +53,7 @@ await Comrade.worker<AssistantSchematic>(({host}) => ({
 			...runtime,
 			progress_callback,
 		})
+		patchGenerationLogits(model)
 
 		backend = {processor, model, contextLength}
 		loaded = key
