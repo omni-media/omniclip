@@ -1,22 +1,21 @@
 
-import {Tensor, TextStreamer, type Message} from "@huggingface/transformers"
+import {Tensor, TextStreamer} from "@huggingface/transformers"
 
 import type {AssistantBackend} from "./types.js"
-import {assistantKnowledge} from "./knowledge.js"
-import type {AssistantSettings} from "../../models/assistant.js"
+import {assistantKnowledge} from "../../../../../iso/assistant/knowledge.js"
+import type {AssistantMessage} from "../../../../../iso/assistant/types.js"
 
 const systemMessage = {role: "system" as const, content: assistantKnowledge}
 const templateOptions = {add_generation_prompt: true, enable_thinking: false, tokenize: true as const}
 
 export async function ask(
 	backend: AssistantBackend,
-	messages: Message[],
-	settings: AssistantSettings,
+	messages: AssistantMessage[],
 	onText: (text: string) => void,
 ) {
 
-	const {processor, model} = backend
-	const contextLength = settings.contextLength === "auto" ? backend.contextLength : settings.contextLength
+	const {processor, model, settings} = backend
+	const contextLength = settings.contextLength === "auto" ? backend.maxContextLength : settings.contextLength
 	const inputs = fitContext(processor, messages, contextLength - settings.maxOutputTokens)
 
 	try {
@@ -42,7 +41,7 @@ export async function ask(
 
 function fitContext(
 	processor: AssistantBackend["processor"],
-	messages: Message[],
+	messages: AssistantMessage[],
 	maxTokens: number,
 ) {
 	let history = messages

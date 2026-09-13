@@ -2,10 +2,11 @@
 import {Comrade, type Thread} from "@e280/comrade"
 
 import {abortable} from "../utils/abortable.js"
-import {assistantModels} from "../models/assistant.js"
-import type {AssistantProgressCallback, AssistantRequest, AssistantSchematic} from "./parts/types.js"
+import type {Assistant, AssistantInput} from "../../../../iso/assistant/types.js"
+import type {AssistantProgressCallback, AssistantSchematic} from "./parts/types.js"
+import {localAssistantModels, type LocalAssistantModelId, type AssistantSettings} from "../models/assistant.js"
 
-export class Assistant {
+export class LocalAssistant implements Assistant {
 	#thread?: Promise<Thread<AssistantSchematic>>
 	#receiveText?: (text: string) => void
 
@@ -26,19 +27,23 @@ export class Assistant {
 		return (await this.thread).work.availableDtypes(id)
 	}
 
-	async #run({modelId, messages, settings}: AssistantRequest) {
-		const thread = await this.thread
-		const model = assistantModels.find(model => model.id === modelId)!
-		await thread.work.prepare(model, settings)
-		await thread.work.ask(messages, settings)
+	async prepare(modelId: LocalAssistantModelId, settings: AssistantSettings, signal: AbortSignal) {
+		const model = localAssistantModels.find(model => model.id === modelId)!
+		await abortable(
+			this.thread.then(thread => thread.work.prepare(model, settings)),
+			signal, () => this.dispose(),
+		)
 	}
 
-	ask(request: AssistantRequest) {
+	async ask({messages}: AssistantInput, signal: AbortSignal) {
 		return new ReadableStream<string>({
 			start: async controller => {
 				this.#receiveText = text => controller.enqueue(text)
 				try {
-					await abortable(this.#run(request), request.signal, () => this.dispose())
+					await abortable(
+						this.thread.then(thread => thread.work.ask(messages)),
+						signal, () => this.dispose(),
+					)
 					controller.close()
 				}
 				finally {this.#receiveText = undefined}

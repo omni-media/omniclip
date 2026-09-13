@@ -1,7 +1,7 @@
 
 import {useEffect, useState} from "react"
 import {RotateCcwIcon} from "lucide-react"
-import type {Assistant} from "../../assistant.js"
+import type {LocalAssistant} from "../../local.js"
 import type {DataType, DeviceType} from "@huggingface/transformers"
 import WaOption from "@awesome.me/webawesome/dist/react/option/index.js"
 import WaSelect from "@awesome.me/webawesome/dist/react/select/index.js"
@@ -9,7 +9,7 @@ import WaSlider from "@awesome.me/webawesome/dist/react/slider/index.js"
 import WaDivider from "@awesome.me/webawesome/dist/react/divider/index.js"
 import WaPopover from "@awesome.me/webawesome/dist/react/popover/index.js"
 import WaNumberInput from "@awesome.me/webawesome/dist/react/number-input/index.js"
-import {assistantModels, defaultAssistantSettings, type AssistantDtype, type AssistantModelId, type AssistantSettings} from "../../../models/assistant.js"
+import {localAssistantModels, defaultAssistantSettings, type AssistantDtype, type LocalAssistantModelId, type AssistantSettings} from "../../../models/assistant.js"
 
 const devices: [DeviceType, string][] = [
 	["auto", "Auto"],
@@ -28,8 +28,8 @@ export const ModelSettings = ({
 	settings,
 	onChange,
 }: {
-	assistant: Assistant
-	modelId: AssistantModelId
+	assistant: LocalAssistant
+	modelId: LocalAssistantModelId
 	settings: AssistantSettings
 	onChange: (settings: AssistantSettings) => void
 }) => {
@@ -38,9 +38,9 @@ export const ModelSettings = ({
 		assistant.availableDtypes(modelId).then(setDtypes, () => {})
 	}, [assistant, modelId])
 
-	const model = assistantModels.find(model => model.id === modelId)!
+	const model = localAssistantModels.find(model => model.id === modelId)!
 	const contextLengths = [2_048, 4_096, 8_192, 16_384, 32_768]
-		.filter(length => length <= model.contextLength)
+		.filter(length => length <= model.maxContextLength)
 	const update = (change: Partial<AssistantSettings>) =>
 		onChange({...settings, ...change})
 

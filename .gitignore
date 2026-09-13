@@ -1,9 +1,11 @@
 /node_modules
 /x
+/x-stale-*
 /notes.md
 /notes
 /bin
 /assets/temp
+/.env
 
 # Local Netlify folder
 .netlify

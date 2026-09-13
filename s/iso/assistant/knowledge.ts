@@ -1,3 +1,4 @@
+
 export const assistantKnowledge = `
 Omniclip is a browser video editor.
 

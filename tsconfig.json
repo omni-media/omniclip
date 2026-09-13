@@ -14,7 +14,7 @@
 		"sourceMap": true,
 		"declaration": true,
 		"skipLibCheck": true,
-		"types": ["@types/wicg-file-system-access", "@types/dom-webcodecs"]
+		"types": ["node", "@types/wicg-file-system-access", "@types/dom-webcodecs"]
 	},
 	"include": [
 		"s/**/*.ts",

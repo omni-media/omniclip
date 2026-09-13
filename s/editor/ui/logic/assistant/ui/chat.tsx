@@ -11,31 +11,35 @@ import {
 	useLocalRuntime,
 } from "@assistant-ui/react"
 
-import {Assistant} from "../assistant.js"
+import {LocalAssistant} from "../local.js"
+import {RemoteAssistant} from "../remote.js"
 import {ModelSettings} from "./renderers/model-settings.js"
 import {ModelSelector} from "./renderers/model-selector.js"
 import type {AssistantProgressReport} from "../parts/types.js"
 import {AssistantMessage, UserMessage} from "./renderers/messages.js"
+import type {AssistantMessage as Message} from "../../../../../iso/assistant/types.js"
 import {assistantModels, defaultAssistantSettings, type AssistantModelId, type AssistantSettings} from "../../models/assistant.js"
 
 export function AssistantChat({onClose}: {onClose: () => void}) {
 
 	const [minimized, setMinimized] = useState(false)
 	const [progress, setProgress] = useState<AssistantProgressReport>()
-	const model = useMemo(() => new Assistant(setProgress), [])
+	const local = useMemo(() => new LocalAssistant(setProgress), [])
+	const remote = useMemo(() => new RemoteAssistant(), [])
 	const [modelId, setModelId] = useState<AssistantModelId>(assistantModels[0].id)
 	const [settings, setSettings] = useState<AssistantSettings>(defaultAssistantSettings)
+	const model = assistantModels.find(model => model.id === modelId)!
 
 	const close = () => {
 		setMinimized(false)
 		onClose()
 	}
 
-	useEffect(() => () => {model.dispose()}, [model])
+	useEffect(() => () => {local.dispose()}, [local])
 
 	const adapter = useMemo<ChatModelAdapter>(() => ({
 		async *run({messages, abortSignal}) {
-			const history = messages.map(message => ({
+			const history: Message[] = messages.map(message => ({
 				role: message.role,
 				content: message.content
 					.filter(part => part.type === "text")
@@ -49,12 +53,10 @@ export function AssistantChat({onClose}: {onClose: () => void}) {
 			const streamStartTime = Date.now()
 
 			try {
-				const stream = model.ask({
-					modelId,
-					messages: history,
-					settings,
-					signal: abortSignal,
-				})
+				if (model.source === "Local")
+					await local.prepare(model.id, settings, abortSignal)
+				const assistant = model.source === "Local" ? local : remote
+				const stream = await assistant.ask({messages: history}, abortSignal)
 
 				for await (const token of stream) {
 					firstTokenTime ??= Date.now() - streamStartTime
@@ -73,9 +75,9 @@ export function AssistantChat({onClose}: {onClose: () => void}) {
 						firstTokenTime,
 						totalStreamTime,
 						tokenCount,
-					tokensPerSecond: totalStreamTime && tokenCount
-						? tokenCount / (totalStreamTime / 1000)
-						: undefined,
+						tokensPerSecond: totalStreamTime && tokenCount
+							? tokenCount / (totalStreamTime / 1000)
+							: undefined,
 						totalChunks: chunks,
 						toolCallCount: 0,
 					}},
@@ -85,7 +87,7 @@ export function AssistantChat({onClose}: {onClose: () => void}) {
 				setProgress(undefined)
 			}
 		},
-	}), [model, modelId, settings])
+	}), [local, model, remote, settings])
 
 	const speech = useMemo(() => new WebSpeechSynthesisAdapter(), [])
 	const runtime = useLocalRuntime(adapter, {
@@ -114,7 +116,7 @@ export function AssistantChat({onClose}: {onClose: () => void}) {
 					<AuiIf condition={state => state.thread.isEmpty}>
 						<div className="welcome">
 							<strong>How can I help you today?</strong>
-							<span>Your first message downloads the local model.</span>
+							<span>Ask about Omniclip and video editing.</span>
 						</div>
 					</AuiIf>
 
@@ -139,10 +141,10 @@ export function AssistantChat({onClose}: {onClose: () => void}) {
 							setSettings(defaultAssistantSettings)
 						}} />
 
-						<button className="settings-trigger" id="assistant-settings" type="button"
+						{model.source === "Local" && <button className="settings-trigger" id="assistant-settings" type="button"
 							title="Advanced model settings">
 							<Settings2Icon />
-						</button>
+						</button>}
 					</div>
 
 					<AuiIf condition={state => !state.thread.isRunning}>
@@ -154,12 +156,12 @@ export function AssistantChat({onClose}: {onClose: () => void}) {
 					</AuiIf>
 				</ComposerPrimitive.Root>
 
-				<ModelSettings
-					assistant={model}
+				{model.source === "Local" && <ModelSettings
+					assistant={local}
 					key={modelId}
-					modelId={modelId}
+					modelId={model.id}
 					settings={settings}
-					onChange={setSettings} />
+					onChange={setSettings} />}
 			</div>
 		</aside>
 	</AssistantRuntimeProvider>

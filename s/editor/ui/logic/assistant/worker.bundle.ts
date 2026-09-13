@@ -32,13 +32,15 @@ await Comrade.worker<AssistantSchematic>(({host}) => ({
 		const report = (progress: number, text: string) => host.loading({progress, text})
 
 		const key = `${options.id}:${settings.device}:${settings.dtype}`
-		if (loaded === key)
+		if (loaded === key) {
+			backend.settings = settings
 			return
+		}
 
 		loaded = undefined
 		await backend?.model.dispose()
 
-		const {id, name, contextLength} = options
+		const {id, name, maxContextLength} = options
 		const runtime = await resolveRuntime(await availableDtypes(id), settings)
 
 		report(0, `Loading ${name}…`)
@@ -55,11 +57,11 @@ await Comrade.worker<AssistantSchematic>(({host}) => ({
 		})
 		patchGenerationLogits(model)
 
-		backend = {processor, model, contextLength}
+		backend = {processor, model, maxContextLength, settings}
 		loaded = key
 
 		report(1, `${name} loaded`)
 	}),
-	ask: exposeErrors((messages, settings) =>
-		ask(backend, messages, settings, text => host.deliverText(text))),
+	ask: exposeErrors(messages =>
+		ask(backend, messages, text => host.deliverText(text))),
 }))
