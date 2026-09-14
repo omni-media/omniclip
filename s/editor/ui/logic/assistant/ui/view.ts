@@ -8,8 +8,9 @@ import {shadow, useCss, useMount, useOnce, useRendered} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import {AssistantChat} from "./chat.js"
+import type {EditorContext} from "../../../../context/context.js"
 
-export const Assistant = shadow((open: Signal<boolean>) => {
+export const Assistant = shadow((context: EditorContext, open: Signal<boolean>) => {
 	useCss(styleCss)
 
 	const container = useOnce(() => createRef<HTMLDivElement>())
@@ -25,6 +26,7 @@ export const Assistant = shadow((open: Signal<boolean>) => {
 
 			root = createRoot(container.value!)
 			root.render(createElement(AssistantChat, {
+				getContext: () => context.getAssistantContext(),
 				onClose: () => open.value = false,
 			}))
 		})

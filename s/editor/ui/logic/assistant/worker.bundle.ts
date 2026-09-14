@@ -62,6 +62,6 @@ await Comrade.worker<AssistantSchematic>(({host}) => ({
 
 		report(1, `${name} loaded`)
 	}),
-	ask: exposeErrors(messages =>
-		ask(backend, messages, text => host.deliverText(text))),
+	ask: exposeErrors(input =>
+		ask(backend, input, text => host.deliverText(text))),
 }))

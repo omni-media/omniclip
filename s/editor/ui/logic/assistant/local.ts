@@ -35,13 +35,13 @@ export class LocalAssistant implements Assistant {
 		)
 	}
 
-	async ask({messages}: AssistantInput, signal: AbortSignal) {
+	async ask(input: AssistantInput, signal: AbortSignal) {
 		return new ReadableStream<string>({
 			start: async controller => {
 				this.#receiveText = text => controller.enqueue(text)
 				try {
 					await abortable(
-						this.thread.then(thread => thread.work.ask(messages)),
+						this.thread.then(thread => thread.work.ask(input)),
 						signal, () => this.dispose(),
 					)
 					controller.close()

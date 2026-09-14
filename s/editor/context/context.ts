@@ -6,6 +6,7 @@ import {prepareViews} from "../ui/views/views.js"
 import {ModalManager} from "./parts/modal/modal.js"
 import {syncOutliner} from "./parts/outliner.js"
 import {Requirements, setupRequirements} from "./parts/requirements.js"
+import type {AssistantContext} from "../../iso/assistant/types.js"
 
 export class EditorContext {
 	static async setup(projectId: string) {
@@ -46,6 +47,15 @@ export class EditorContext {
 	get tabs() {return this.requirements.tabs}
 	get player() {return this.controllers.player}
 	get keybindings() {return this.requirements.keybindings}
+
+	getAssistantContext(): AssistantContext {
+		return {
+			timeline: this.session.timeline.state as TimelineFile,
+			playhead: this.session.$playhead(),
+			viewedItemId: this.session.$viewedItemId(),
+			selectedItemId: this.session.$selectedItem(),
+		}
+	}
 
 	dispose = () => {
 		this.#stopPlaybackTick()

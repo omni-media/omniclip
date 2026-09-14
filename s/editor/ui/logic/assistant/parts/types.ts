@@ -1,7 +1,7 @@
 
 import type {AsSchematic} from "@e280/comrade"
 import type {PreTrainedModel, Processor} from "@huggingface/transformers"
-import type {AssistantMessage} from "../../../../../iso/assistant/types.js"
+import type {AssistantInput} from "../../../../../iso/assistant/types.js"
 import type {AssistantDtype, AssistantModelOptions, AssistantSettings} from "../../models/assistant.js"
 
 export type AssistantBackend = {
@@ -18,7 +18,7 @@ export type AssistantSchematic = AsSchematic<{
 	work: {
 		availableDtypes(modelId: string): Promise<AssistantDtype[]>
 		prepare(options: AssistantModelOptions, settings: AssistantSettings): Promise<void>
-		ask(messages: AssistantMessage[]): Promise<void>
+		ask(input: AssistantInput): Promise<void>
 	}
 	host: {
 		loading(report: AssistantProgressReport): Promise<void>

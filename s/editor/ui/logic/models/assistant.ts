@@ -33,6 +33,12 @@ export const localAssistantModels = [
 		source: "Local",
 		maxContextLength: 131_072,
 	},
+	{
+		id: "onnx-community/Qwen3.5-2B-ONNX-OPT",
+		name: "Qwen3.5 2B",
+		source: "Local",
+		maxContextLength: 262_144,
+	},
 ] as const satisfies readonly (AssistantModelOptions & {source: "Local"})[]
 
 export const assistantModels = [

@@ -2,21 +2,25 @@
 import {Tensor, TextStreamer} from "@huggingface/transformers"
 
 import type {AssistantBackend} from "./types.js"
-import {assistantKnowledge} from "../../../../../iso/assistant/knowledge.js"
-import type {AssistantMessage} from "../../../../../iso/assistant/types.js"
+import {assistantInstructions} from "../../../../../iso/assistant/knowledge.js"
+import type {AssistantInput, AssistantMessage} from "../../../../../iso/assistant/types.js"
 
-const systemMessage = {role: "system" as const, content: assistantKnowledge}
 const templateOptions = {add_generation_prompt: true, enable_thinking: false, tokenize: true as const}
 
 export async function ask(
 	backend: AssistantBackend,
-	messages: AssistantMessage[],
+	{messages, context}: AssistantInput,
 	onText: (text: string) => void,
 ) {
 
 	const {processor, model, settings} = backend
 	const contextLength = settings.contextLength === "auto" ? backend.maxContextLength : settings.contextLength
-	const inputs = fitContext(processor, messages, contextLength - settings.maxOutputTokens)
+	const inputs = fitContext(
+		processor,
+		messages,
+		contextLength - settings.maxOutputTokens,
+		assistantInstructions(context),
+	)
 
 	try {
 		const output = await model.generate({
@@ -43,7 +47,9 @@ function fitContext(
 	processor: AssistantBackend["processor"],
 	messages: AssistantMessage[],
 	maxTokens: number,
+	instructions: string,
 ) {
+	const systemMessage = {role: "system" as const, content: instructions}
 	let history = messages
 	while (true) {
 		const inputs = processor.tokenizer!.apply_chat_template(

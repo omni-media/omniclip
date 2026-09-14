@@ -165,7 +165,7 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 				</div>
 
 				${context.modals.render()}
-				${Assistant(assistantOpen)}
+				${Assistant(context, assistantOpen)}
 			</div>
 	`
 		},

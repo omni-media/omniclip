@@ -1,5 +1,5 @@
 import OpenAI from "openai"
-import {assistantKnowledge} from "../iso/assistant/knowledge.js"
+import {assistantInstructions} from "../iso/assistant/knowledge.js"
 import type {Assistant, AssistantInput} from "../iso/assistant/types.js"
 
 export class OpenAIAssistant implements Assistant {
@@ -7,10 +7,10 @@ export class OpenAIAssistant implements Assistant {
 
 	constructor(public model = "gpt-5.6-luna") {}
 
-	async ask({messages}: AssistantInput, signal: AbortSignal) {
+	async ask({messages, context}: AssistantInput, signal: AbortSignal) {
 		const stream = await this.#openai.responses.create({
 			model: this.model,
-			instructions: assistantKnowledge,
+			instructions: assistantInstructions(context),
 			input: messages,
 			store: false,
 			stream: true,

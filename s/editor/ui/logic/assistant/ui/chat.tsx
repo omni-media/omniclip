@@ -17,10 +17,13 @@ import {ModelSettings} from "./renderers/model-settings.js"
 import {ModelSelector} from "./renderers/model-selector.js"
 import type {AssistantProgressReport} from "../parts/types.js"
 import {AssistantMessage, UserMessage} from "./renderers/messages.js"
-import type {AssistantMessage as Message} from "../../../../../iso/assistant/types.js"
+import type {AssistantContext, AssistantMessage as Message} from "../../../../../iso/assistant/types.js"
 import {assistantModels, defaultAssistantSettings, type AssistantModelId, type AssistantSettings} from "../../models/assistant.js"
 
-export function AssistantChat({onClose}: {onClose: () => void}) {
+export function AssistantChat({getContext, onClose}: {
+	getContext: () => AssistantContext
+	onClose: () => void
+}) {
 
 	const [minimized, setMinimized] = useState(false)
 	const [progress, setProgress] = useState<AssistantProgressReport>()
@@ -46,6 +49,7 @@ export function AssistantChat({onClose}: {onClose: () => void}) {
 					.map(part => part.text)
 					.join(""),
 			}))
+			const input = {messages: history, context: getContext()}
 
 			let answer = ""
 			let chunks = 0
@@ -56,7 +60,7 @@ export function AssistantChat({onClose}: {onClose: () => void}) {
 				if (model.source === "Local")
 					await local.prepare(model.id, settings, abortSignal)
 				const assistant = model.source === "Local" ? local : remote
-				const stream = await assistant.ask({messages: history}, abortSignal)
+				const stream = await assistant.ask(input, abortSignal)
 
 				for await (const token of stream) {
 					firstTokenTime ??= Date.now() - streamStartTime
@@ -87,7 +91,7 @@ export function AssistantChat({onClose}: {onClose: () => void}) {
 				setProgress(undefined)
 			}
 		},
-	}), [local, model, remote, settings])
+	}), [getContext, local, model, remote, settings])
 
 	const speech = useMemo(() => new WebSpeechSynthesisAdapter(), [])
 	const runtime = useLocalRuntime(adapter, {
