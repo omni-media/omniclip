@@ -1,5 +1,5 @@
 
-import {Item, Resource} from "@omnimedia/omnitool"
+import {Id, Item, Resource} from "@omnimedia/omnitool"
 import {Ms, ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {trim} from "./action.js"
@@ -28,7 +28,7 @@ export function resizeTransition(
 	resolveMedia: (item: Item.Any) => Resource.Media | null,
 ) {
 	const halfDelta = ms((newDuration - item.duration) / 2)
-	const overlay = new Map<number, Item.Any>()
+	const overlay = new Map<Id, Item.Any>()
 	let duration = item.duration
 
 	const absorb = (clip: Idx.Clip | undefined, edge: TrimEdge, offset: Ms) => {

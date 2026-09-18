@@ -270,7 +270,7 @@ export class TimelineCanvas {
 		return this.deps.session.$trimPreviewOffsetPx.value
 	}
 
-	get timeline(): {rootId: number, items: readonly unknown[]} {
+	get timeline() {
 		return this.deps.timeline.state
 	}
 

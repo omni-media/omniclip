@@ -2,7 +2,7 @@
 import {html} from "lit"
 import {deep} from "@e280/stz"
 import {shadow, useCss, useSignal} from "@e280/sly"
-import {FilterableItem, Item, Kind, filters} from "@omnimedia/omnitool"
+import {FilterableItem, Id, Item, Kind, filters} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
 import {controlsStyles} from "../styles.css.js"
@@ -31,14 +31,14 @@ export const FiltersControls = shadow((context: EditorContext, item: FilterableI
 		.map(id => index.items.get(id))
 		.filter((e): e is Item.Filter => !!e)
 
-	const selectedFilterId = useSignal<number | null>(attachedFilters[0]?.id ?? null)
+	const selectedFilterId = useSignal<Id | null>(attachedFilters[0]?.id ?? null)
 
 	const selectedFilter =
 		attachedFilters.find(f => f.id === selectedFilterId.value)
 		?? attachedFilters[0]
 		?? null
 
-	const selectFilter = (id: number) => selectedFilterId.value = id
+	const selectFilter = (id: Id) => selectedFilterId.value = id
 
 	const setFilterParams = (filter: Item.Filter, path: Path, value: any) => {
 		const next = deep.clone(filter.params ?? Schema.meta(filter).defaultParams)
@@ -74,7 +74,7 @@ export const FiltersControls = shadow((context: EditorContext, item: FilterableI
 		selectedFilterId.value = filter.id
 	}
 
-	const removeFilter = async (filterId: number) => {
+	const removeFilter = async (filterId: Id) => {
 		const remaining = attachedFilters.filter(f => f.id !== filterId)
 
 		await context.strata.timeline.mutate(state => {

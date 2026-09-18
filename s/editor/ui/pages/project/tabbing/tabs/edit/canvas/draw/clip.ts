@@ -1,5 +1,5 @@
 
-import {Kind} from "@omnimedia/omnitool"
+import {Id, Kind} from "@omnimedia/omnitool"
 
 import {metrics, styles} from "./styles.js"
 import type {TimelineCanvas} from "../canvas.js"
@@ -33,7 +33,7 @@ function itemColor(kind: Kind) {
 	}
 }
 
-function itemDisabled(canvas: TimelineCanvas, itemId: number) {
+function itemDisabled(canvas: TimelineCanvas, itemId: Id) {
 	let item = canvas.index.getItemMaybe(itemId)
 	while (item) {
 		if (item.enabled === false)
@@ -198,8 +198,8 @@ function drawDragPreview(
 }
 
 export function drawClips(canvas: TimelineCanvas) {
-	const activeFilmstrips = new Set<number>()
-	const activeWaveforms = new Set<number>()
+	const activeFilmstrips = new Set<Id>()
+	const activeWaveforms = new Set<Id>()
 	const ghost = canvas.deps.session.$ghostClip()
 	const previewClips: TimelineClipBox[] = []
 	const containers: TimelineClipBox[] = []

@@ -1,14 +1,14 @@
 
 import {html} from "lit"
-import type {Item} from "@omnimedia/omnitool"
+import type {Id, Item} from "@omnimedia/omnitool"
 
 import {checkedOf, titleize, Filters} from "../utils.js"
 
 export const renderFilterList = (props: {
 	filters: Item.Filter[]
 	selectedFilter: Item.Filter | null
-	selectFilter: (filterId: number) => void
-	removeFilter: (filterId: number) => void
+	selectFilter: (filterId: Id) => void
+	removeFilter: (filterId: Id) => void
 	setEnabled: (filter: Item.Filter, enabled: boolean) => void
 }) => html`
 	<div class="section">

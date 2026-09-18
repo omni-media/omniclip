@@ -1,10 +1,10 @@
-import {Item, Kind, TimelineFile} from "@omnimedia/omnitool"
+import {Id, Item, Kind, TimelineFile} from "@omnimedia/omnitool"
 
 export function crawl(file: TimelineFile): Item.Any[][] {
 	const itemsMap = new Map(file.items.map(item => [item.id, item]))
 	const tracks: Item.Any[][] = []
 
-	const walk = (id: number, track: number) => {
+	const walk = (id: Id, track: number) => {
 		const item = itemsMap.get(id)!
 		switch(item.kind) {
 			case Kind.Video: {

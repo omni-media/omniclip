@@ -1,4 +1,5 @@
 
+import type {Id} from "@omnimedia/omnitool"
 import {Waveform} from "@omnimedia/omnitool/x/timeline/parts/waveform/waveform.js"
 import type {WaveformTileData} from "@omnimedia/omnitool/x/timeline/parts/waveform/parts/types.js"
 
@@ -13,11 +14,11 @@ type Entry = {
 }
 
 export class TimelineWaveforms {
-	#entries = new Map<number, Entry>()
+	#entries = new Map<Id, Entry>()
 
 	constructor(private canvas: TimelineCanvas) {}
 
-	retain(itemIds: Set<number>) {
+	retain(itemIds: Set<Id>) {
 		for (const id of this.#entries.keys()) {
 			if (!itemIds.has(id))
 				this.#entries.delete(id)

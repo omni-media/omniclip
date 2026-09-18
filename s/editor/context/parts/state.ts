@@ -1,4 +1,5 @@
 
+import {hex} from "@e280/stz"
 import {chronicle, Chronicle} from "@e280/strata"
 import {Id, Kind, TimelineFile} from "@omnimedia/omnitool"
 
@@ -46,19 +47,18 @@ export type State = {
 		items: OutlinerItem[]
 	}
 }
-const makeDefaultTimeline = (withRoot = false): TimelineFile => ({
-	info: "https://omniclip.app/",
-	format: "timeline",
-	version: 0,
-	rootId: 1,
-	items: withRoot
-		? [{
-			id: 1,
-			kind: Kind.Stack,
-			childrenIds: []
-		}]
-		: []
-})
+const makeDefaultTimeline = (withRoot = false): TimelineFile => {
+	const rootId = hex.random(16)
+	return {
+		info: "https://omniclip.app/",
+		format: "timeline",
+		version: 1,
+		rootId,
+		items: withRoot
+			? [{id: rootId, kind: Kind.Stack, childrenIds: []}]
+			: []
+	}
+}
 
 export const makeDefaultState = (withRoot = false): State => ({
 	updatedAt: Date.now(),

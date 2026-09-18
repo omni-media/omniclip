@@ -1,5 +1,5 @@
 
-import {Filmstrip} from "@omnimedia/omnitool"
+import {Filmstrip, Id} from "@omnimedia/omnitool"
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import {metrics, styles} from "../draw/styles.js"
@@ -20,11 +20,11 @@ type Entry = {
 const THUMB_WIDTH_PX = 100
 
 export class TimelineFilmstrips {
-	#entries = new Map<number, Entry>()
+	#entries = new Map<Id, Entry>()
 
 	constructor(private canvas: TimelineCanvas) {}
 
-	retain(itemIds: Set<number>) {
+	retain(itemIds: Set<Id>) {
 		for (const id of this.#entries.keys()) {
 			if (!itemIds.has(id))
 				this.#entries.delete(id)

@@ -35,7 +35,7 @@ export class OmniSession {
 	$ghostPlayhead = signal<Ms | null>(null)
 
 	$selectedItem = signal<Id | null>(null)
-	$viewedItemId = signal<Id>(0)
+	$viewedItemId = signal<Id>("")
 	$proposal = signal<Proposal | null>(null)
 	$ghostClip = signal<TimelineClipBox | null>(null)
 	$trimPreviewOffsetPx = signal(0)

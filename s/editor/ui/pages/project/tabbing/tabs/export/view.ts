@@ -18,7 +18,7 @@ export const ExportTab = shadow((context: EditorContext) => {
 
 	const starredItems = outliner.state.items.filter(item => item.starred)
 	const selectedItemId = useSignal(outliner.state.items[0]?.itemId ?? null)
-	const itemLabels = ["example.mp4"]
+	const itemLabels = new Map([[starredItems[0]?.itemId, "example.mp4"]])
 
 	const itemsMap = new Map(timeline.state.items.map(i => [i.id, i]))
 	const starredItemDetails = starredItems.map(({itemId}) => itemsMap.get(itemId)!).filter(Boolean)
@@ -39,7 +39,7 @@ export const ExportTab = shadow((context: EditorContext) => {
 							?data-selected=${item.id === selectedItemId.value}
 							@click=${() => selectedItemId(item.id)}
 						>
-							<span class="label">${itemLabels[item.id] || `Item ${item.id}`}</span>
+							<span class="label">${itemLabels.get(item.id) || `Item ${item.id}`}</span>
 							<span class="kind">${Kind[item.kind]}</span>
 						</button>
 					`)}
@@ -83,7 +83,7 @@ export const ExportTab = shadow((context: EditorContext) => {
 					` : html`
 						<button class="export-button" @click=${handleExport} ?disabled=${selectedItemId.value === null}>
 							${exportSvg}
-							<span>Export "${itemLabels[selectedItemId.value!] || `Item ${selectedItemId.value!}`}"</span>
+							<span>Export "${itemLabels.get(selectedItemId.value!) || `Item ${selectedItemId.value!}`}"</span>
 						</button>
 					`}
 				</div>

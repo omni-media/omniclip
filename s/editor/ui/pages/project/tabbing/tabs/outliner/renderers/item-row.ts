@@ -1,6 +1,6 @@
 
 import {html} from "lit"
-import {Item, Kind} from "@omnimedia/omnitool"
+import {Id, Item, Kind} from "@omnimedia/omnitool"
 
 import {itemLabel} from "../../../../../../logic/utils/item-label.js"
 import textSvg from "../../../../../../icons/gravity-ui/text.svg.js"
@@ -25,8 +25,8 @@ export function renderItemRow(props: {
 	item: Item.Any
 	selected: boolean
 	starred: boolean
-	onSelect: (id: number) => void
-	onToggleStar: (id: number) => void
+	onSelect: (id: Id) => void
+	onToggleStar: (id: Id) => void
 }) {
 	const {item, selected, starred, onSelect, onToggleStar} = props
 	const duration = (item as any).duration ? `${((item as any).duration / 1000).toFixed(2)}s` : "-"

@@ -1,7 +1,7 @@
 
 import {html} from "lit"
 import {repeat} from "lit/directives/repeat.js"
-import {Item, Kind} from "@omnimedia/omnitool"
+import {Id, Item, Kind} from "@omnimedia/omnitool"
 import {shadow, useCss, useSignal} from "@e280/sly"
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
@@ -19,21 +19,21 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	const outliner = context.strata.outliner
 	const items = context.strata.timeline.state.items
 
-	const handleItemClick = (id: number) => {
+	const handleItemClick = (id: Id) => {
 		context.session.$selectedItem.value = id
 		context.session.seekPlayhead(ms(context.session.index
 			.getItemLaneStart(id, context.session.$viewedItemId.value)
 		))
 	}
 
-	const toggleStar = (id: number) => {
+	const toggleStar = (id: Id) => {
 		outliner.mutate(state => {
 			const item = state.items.find(({itemId}) => itemId === id)
 			item!.starred = !item!.starred
 		})
 	}
 
-	const isStarred = (id: number) => outliner.state.items.find(({itemId}) => itemId === id)?.starred
+	const isStarred = (id: Id) => outliner.state.items.find(({itemId}) => itemId === id)?.starred
 
 	const matchesSearch = (item: Item.Any) => {
 		const term = searchTerm.value.trim().toLowerCase()
