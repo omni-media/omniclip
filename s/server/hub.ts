@@ -1,6 +1,5 @@
-
-import type {Assistant} from "../iso/assistant/types.js"
+import {openai} from "@ai-sdk/openai"
 
 export class Hub {
-	constructor(public assistant: Assistant) {}
+	constructor(public assistantModel = openai("gpt-5.6-luna")) {}
 }

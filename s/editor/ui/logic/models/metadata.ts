@@ -1,5 +1,4 @@
 
-import {assistantModels} from "./assistant.js"
 import {transcriberModels} from "./transcriber.js"
 import {backgroundRemoverModels} from "./bg-remover.js"
 
@@ -14,7 +13,6 @@ const metadata = (
 	) => models.map(({id, name}) => [id, {label: name, purpose}] as const)
 
 export const modelMetadata: Record<string, ModelMetadata> = Object.fromEntries([
-	...metadata(assistantModels, "AI assistant"),
 	...metadata(transcriberModels, "Automatic speech recognition"),
 	...metadata(backgroundRemoverModels, "Background removal"),
 ])

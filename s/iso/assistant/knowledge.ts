@@ -21,9 +21,10 @@ Main areas:
 - Export renders and saves the current project.
 - Shortcuts in the top bar lists available keyboard controls.
 
-Give short, concrete instructions using the names shown in the interface. Use the current project context when relevant. If the answer is not in this manual or context, say that you are not sure. Never claim to change the project.`
+Give short, concrete instructions using the names shown in the interface. Use the current project context when relevant. If the answer is not in this manual, context, or an available skill, say that you are not sure. Never claim to change the project.`
 
-export const assistantInstructions = (context: AssistantContext) => `${assistantKnowledge}
+export const assistantInstructions = (context: AssistantContext, skills: string) => `${assistantKnowledge}
+${skills}
 
 Current project context:
 ${JSON.stringify(context)}`
