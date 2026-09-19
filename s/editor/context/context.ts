@@ -5,8 +5,9 @@ import type {TimelineFile} from "@omnimedia/omnitool"
 import {prepareViews} from "../ui/views/views.js"
 import {ModalManager} from "./parts/modal/modal.js"
 import {syncOutliner} from "./parts/outliner.js"
-import {Requirements, setupRequirements} from "./parts/requirements.js"
 import type {AssistantContext} from "../../iso/assistant/types.js"
+import {Requirements, setupRequirements} from "./parts/requirements.js"
+import type {TimelinePatch, TimelinePatchResult} from "../../iso/timeline.js"
 
 export class EditorContext {
 	static async setup(projectId: string) {
@@ -19,6 +20,7 @@ export class EditorContext {
 
 	#stopPlaybackTick
 	#stopTimelineSync
+	#timelineRevision = 0
 
 	constructor(private requirements: Requirements) {
 		this.strata.outliner.mutate(state =>
@@ -30,6 +32,7 @@ export class EditorContext {
 		})
 
 		this.#stopTimelineSync = this.strata.timeline.lens(s => s).on(async state => {
+			this.#timelineRevision += 1
 			const timeline = state as TimelineFile
 			this.strata.outliner.mutate(state => syncOutliner(state, timeline))
 			await this.controllers.player.update(timeline)
@@ -51,9 +54,26 @@ export class EditorContext {
 	getAssistantContext(): AssistantContext {
 		return {
 			timeline: this.session.timeline.state as TimelineFile,
+			timelineRevision: this.#timelineRevision,
 			playhead: this.session.$playhead(),
 			viewedItemId: this.session.$viewedItemId(),
 			selectedItemId: this.session.$selectedItem(),
+		}
+	}
+
+	patchTimeline = async(patch: TimelinePatch): Promise<TimelinePatchResult> => {
+		try {
+			if (patch.baseRevision !== this.#timelineRevision)
+				throw new Error("The timeline changed. Read the current context and try again.")
+
+			await this.session.commitPatch(patch)
+			return {
+				success: true,
+				revision: this.#timelineRevision,
+				summary: `Applied ${patch.operations.length} timeline operation${patch.operations.length === 1 ? "" : "s"}.`,
+			}
+		} catch (error) {
+			return {success: false, error: error instanceof Error ? error.message : String(error)}
 		}
 	}
 

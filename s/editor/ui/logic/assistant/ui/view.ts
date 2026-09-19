@@ -26,7 +26,7 @@ export const Assistant = shadow((context: EditorContext, open: Signal<boolean>) 
 
 			root = createRoot(container.value!)
 			root.render(createElement(AssistantChat, {
-				getContext: () => context.getAssistantContext(),
+				context,
 				onClose: () => open.value = false,
 			}))
 		})

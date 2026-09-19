@@ -15,6 +15,8 @@ import {selectTool} from "./parts/modes/select.js"
 import {Strata} from "../../context/parts/strata.js"
 import {add, remove, update} from "./parts/mutate.js"
 import {Proposal} from "./parts/proposal/proposal.js"
+import {applyTimelinePatch} from "./timeline/patch.js"
+import type {TimelinePatch} from "../../../iso/timeline.js"
 import {trim} from "./parts/interactions/trim/parts/action.js"
 import type {DropIntent} from "./parts/interactions/drag/parts/intent.js"
 import {resizeTransition} from "./parts/interactions/trim/parts/transition.js"
@@ -106,6 +108,12 @@ export class OmniSession {
 
 	get timeline() {
 		return this.deps.strata.timeline
+	}
+
+	async commitPatch(patch: TimelinePatch) {
+		const timeline = applyTimelinePatch(this.timeline.state as TimelineFile, patch)
+		await this.timeline.mutate(state => Object.assign(state, timeline, {audio: timeline.audio}))
+		this.reconcile()
 	}
 
 	timelineFrom(rootId: Id = this.timeline.state.rootId): TimelineFile {

@@ -12,14 +12,12 @@ import {
 import {lastAssistantMessageIsCompleteWithToolCalls} from "ai"
 import {AssistantChatTransport, useChatRuntime} from "@assistant-ui/ai-sdk"
 
-import {assistantToolkit} from "./toolkit.js"
+import {createAssistantToolkit} from "./toolkit.js"
 import {AssistantMessage, UserMessage} from "./renderers/messages.js"
-import type {AssistantContext} from "../../../../../iso/assistant/types.js"
+import type {EditorContext} from "../../../../context/context.js"
 
-const assistantConfig = AuiConfig({tools: Tools({toolkit: assistantToolkit})})
-
-export function AssistantChat({getContext, onClose}: {
-	getContext: () => AssistantContext
+export function AssistantChat({context, onClose}: {
+	context: EditorContext
 	onClose: () => void
 }) {
 
@@ -32,16 +30,20 @@ export function AssistantChat({getContext, onClose}: {
 
 	const transport = useMemo(() => new AssistantChatTransport({
 		api: "/api/assistant",
-		body: () => ({context: getContext()}),
-	}), [getContext])
+		body: () => ({context: context.getAssistantContext()}),
+	}), [context])
 	const speech = useMemo(() => new WebSpeechSynthesisAdapter(), [])
+	const config = useMemo(
+		() => AuiConfig({tools: Tools({toolkit: createAssistantToolkit(context)})}),
+		[context],
+	)
 	const runtime = useChatRuntime({
 		transport,
 		adapters: {speech},
 		sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
 	})
 
-	return <AssistantRuntimeProvider runtime={runtime} config={assistantConfig}>
+	return <AssistantRuntimeProvider runtime={runtime} config={config}>
 		<aside className="assistant-panel" data-minimized={minimized || undefined}>
 			<header>
 				<strong><span>✦</span> Omniclip AI</strong>
