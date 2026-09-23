@@ -1,7 +1,7 @@
 
 import type {Id} from "@omnimedia/omnitool"
 import {Waveform} from "@omnimedia/omnitool/x/timeline/parts/waveform/waveform.js"
-import type {WaveformTileData} from "@omnimedia/omnitool/x/timeline/parts/waveform/parts/types.js"
+import type {WaveformTileData, WaveformTileRenderInput} from "@omnimedia/omnitool/x/timeline/parts/waveform/parts/types.js"
 
 import {metrics, styles} from "../draw/styles.js"
 import type {TimelineCanvas} from "../canvas.js"
@@ -11,6 +11,26 @@ import type {Idx} from "../../../../../../../logic/parts/index.js"
 type Entry = {
 	waveform: Promise<Waveform>
 	tiles: WaveformTileData[]
+}
+
+const renderWaveformBars = ({context, peaks, bounds}: WaveformTileRenderInput) => {
+	const {width, height} = bounds
+	const bars = Math.ceil(width / 3)
+	const peaksPerBar = peaks.length / bars
+
+	context.fillStyle = styles.waveformFill
+	context.beginPath()
+
+	for (let bar = 0; bar < bars; bar++) {
+		const start = Math.floor(bar * peaksPerBar)
+		const end = Math.max(start + 1, Math.floor((bar + 1) * peaksPerBar))
+		let peak = 0
+		for (let i = start; i < end && i < peaks.length; i++)
+			peak = Math.max(peak, peaks[i]!)
+		const barHeight = peak * height
+		context.roundRect(bar * 3, height - barHeight, 2, barHeight, 1)
+	}
+	context.fill()
 }
 
 export class TimelineWaveforms {
@@ -27,6 +47,10 @@ export class TimelineWaveforms {
 
 	draw(ctx: CanvasRenderingContext2D, box: TimelineClipBox) {
 		const clip = this.canvas.deps.session.index.getItem<Idx.AudioItem>(box.itemId)
+		const range = this.#visibleRange(box, clip)
+		if (!range)
+			return
+
 		const media = this.canvas.deps.resolveMedia(clip)
 
 		if (!media) {
@@ -35,7 +59,7 @@ export class TimelineWaveforms {
 		}
 
 		const entry = this.#entry(clip)
-		this.#sync(entry, box, clip)
+		this.#sync(entry, box, clip, range)
 
 		ctx.save()
 		ctx.beginPath()
@@ -72,9 +96,8 @@ export class TimelineWaveforms {
 			{
 				tileHeight: metrics.trackHeight,
 				color: styles.waveformFill,
+				drawTile: renderWaveformBars,
 				onChange: (tiles: WaveformTileData[]) => {
-					for (const tile of tiles)
-						this.#renderBars(tile)
 					entry.tiles = tiles
 					this.canvas.scheduleDraw()
 				}
@@ -86,34 +109,6 @@ export class TimelineWaveforms {
 
 		this.#entries.set(clip.id, entry)
 		return entry
-	}
-
-	#renderBars({canvas, peaks}: WaveformTileData) {
-		const ctx = canvas.getContext("2d")
-		if (!ctx)
-			return
-
-		const scale = window.devicePixelRatio || 1
-		const width = canvas.width / scale
-		const height = canvas.height / scale
-		const bars = Math.ceil(width / 3)
-		const peaksPerBar = peaks.length / bars
-
-		ctx.setTransform(scale, 0, 0, scale, 0, 0)
-		ctx.clearRect(0, 0, width, height)
-		ctx.fillStyle = styles.waveformFill
-		ctx.beginPath()
-
-		for (let bar = 0; bar < bars; bar++) {
-			const start = Math.floor(bar * peaksPerBar)
-			const end = Math.max(start + 1, Math.floor((bar + 1) * peaksPerBar))
-			let peak = 0
-			for (let i = start; i < end && i < peaks.length; i++)
-				peak = Math.max(peak, peaks[i]!)
-			const barHeight = peak * height
-			ctx.roundRect(bar * 3, height - barHeight, 2, barHeight, 1)
-		}
-		ctx.fill()
 	}
 
 	#drawMissingMedia(ctx: CanvasRenderingContext2D, box: TimelineClipBox) {
@@ -130,11 +125,7 @@ export class TimelineWaveforms {
 		ctx.restore()
 	}
 
-	#sync(entry: Entry, box: TimelineClipBox, clip: Idx.AudioItem) {
-		const range = this.#visibleRange(box, clip)
-		if (!range)
-			return
-
+	#sync(entry: Entry, box: TimelineClipBox, clip: Idx.AudioItem, range: [number, number]) {
 		const zoom = this.#pixelsPerSecond(box, clip)
 		void entry.waveform.then(waveform => {
 			if (

@@ -33,6 +33,10 @@ export class TimelineFilmstrips {
 
 	draw(ctx: CanvasRenderingContext2D, box: TimelineClipBox) {
 		const clip = this.canvas.deps.session.index.getItem<Idx.VideoItem>(box.itemId)
+		const range = this.#visibleRange(box, clip)
+		if (!range)
+			return
+
 		const media = this.canvas.deps.resolveMedia(clip)
 
 		if (!media) {
@@ -41,7 +45,7 @@ export class TimelineFilmstrips {
 		}
 
 		const entry = this.#entry(clip)
-		this.#sync(entry, box, clip)
+		this.#sync(entry, range)
 
 		ctx.save()
 		ctx.beginPath()
@@ -118,11 +122,7 @@ export class TimelineFilmstrips {
 		ctx.restore()
 	}
 
-	#sync(entry: Entry, box: TimelineClipBox, clip: Idx.VideoItem) {
-		const range = this.#visibleRange(box, clip)
-		if (!range)
-			return
-
+	#sync(entry: Entry, range: [number, number]) {
 		const frequency = this.#frequencyInSeconds()
 		entry.filmstrip?.update({range, frequency})
 	}
