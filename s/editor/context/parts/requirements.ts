@@ -5,6 +5,7 @@ import {Strata} from "./strata.js"
 import {hydrateProject} from "./hydration.js"
 import {OmniSession} from "../../ui/logic/session.js"
 import {CargoController} from "../controllers/cargo.js"
+import {AssistantController} from "../controllers/assistant.js"
 import {Keybindings} from "../controllers/input/keybindings.js"
 import {TabManager} from "../../ui/logic/parts/tab-manager.js"
 
@@ -21,7 +22,6 @@ export async function setupRequirements(projectId: string) {
 	await hydrateProject(cargo.projectLibrary, project, cellar, strata)
 
 	const player = await project.playback(strata.timeline.state as TimelineFile)
-	const controllers = {cargo, player}
 	const omni = new O({
 		get timeline() {
 			return strata.timeline.state
@@ -39,6 +39,7 @@ export async function setupRequirements(projectId: string) {
 			? project.resources.require(item.mediaHash)
 			: null,
 	})
+	const controllers = {cargo, player, assistant: new AssistantController(session)}
 	const keybindings = await Keybindings.setup(session)
 	return {strata, controllers, tabs, keybindings, omni, project, driver, session}
 }

@@ -21,7 +21,7 @@ Main areas:
 - Export renders and saves the current project.
 - Shortcuts in the top bar lists available keyboard controls.
 
-Give short, concrete instructions using the names shown in the interface. Use the current project context when relevant. If the answer is not in this manual, context, or an available skill, say that you are not sure. Only edit the project when the user asks for a change, and only claim success after a tool confirms it.`
+Give short, concrete instructions using the names shown in the interface. Use the current project context when relevant. When the source video's visual or audio content determines the answer or edit, first call provide_selected_video, then immediately call inspect_video with its fileName and a focused question. It analyzes the original source, not the rendered timeline. If the answer is not in this manual, context, or an available skill, say that you are not sure. Only edit the project when the user asks for a change, and only claim success after a tool confirms it.`
 
 export const assistantInstructions = (context: AssistantContext, skills: string) => `${assistantKnowledge}
 ${skills}

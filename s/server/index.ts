@@ -1,18 +1,26 @@
 
 import {createServer} from "node:http"
+import Renraku from "@e280/renraku"
 
-import {Hub} from "./hub.js"
 import {setupHttp} from "./parts/http.js"
-import {setupAssistantApi} from "./parts/assistant.js"
+import {R2Bucket} from "./parts/bucket.js"
+import {mediaAnalysisApi} from "./parts/assistant/analysis.js"
+import {assistantChatApi} from "./parts/assistant/chat.js"
 
 const isDev = process.env.NODE_ENV !== "production"
-const hub = new Hub()
+const bucket = new R2Bucket()
+
 const serveHttp = setupHttp(isDev)
-const serveAssistant = setupAssistantApi(hub)
+const serveAssistantChat = assistantChatApi()
+const serveMediaAnalysis = Renraku.makeRequestListener({
+	rpc: Renraku.asRpc(async () => mediaAnalysisApi(bucket))
+})
 
 createServer((request, response) => {
 	if (request.method === "POST" && request.url === "/api/assistant")
-		serveAssistant(request, response)
+		serveAssistantChat(request, response)
+	else if (request.method === "POST" && request.url === "/api/analyze")
+		serveMediaAnalysis(request, response)
 	else
 		serveHttp(request, response)
 })

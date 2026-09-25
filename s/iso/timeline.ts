@@ -13,5 +13,5 @@ export type TimelinePatch = {
 }
 
 export type TimelinePatchResult =
-	| {success: true, revision: number, summary: string}
+	| {success: true, revision: number, summary: string, assistantEditId: string}
 	| {success: false, error: string}
