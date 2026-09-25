@@ -73,8 +73,8 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 						<wa-button
 							@click=${() => assistantOpen.value = true}
 							class=assistant size="small">
-							<wa-icon slot="start" name="comments"></wa-icon>
-							Help
+							<span slot="start" class="assistant-mark" aria-hidden="true">✦</span>
+							<span class="assistant-label">Ask AI</span>
 						</wa-button>
 
    					<wa-button

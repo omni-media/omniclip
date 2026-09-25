@@ -51,7 +51,6 @@ export default css`@layer view {
 
 		&:hover::part(base) {
 			color: #e8e8e8;
-			background: #333;
 		}
 
 		&::part(label),
@@ -67,12 +66,52 @@ export default css`@layer view {
 	}
 
 	.export::part(base) {
-		color: #d3d3d3;
-		background: #2b2b2b;
+		color: #1d2940;
+		background: linear-gradient(135deg, #fff, #dbe5f7);
+		font-weight: 600;
+		box-shadow: inset 0 1px 0 #fff, 0 2px 10px #b8c8e54d;
+		transition: background 160ms ease, box-shadow 160ms ease;
+	}
+
+	.assistant::part(base) {
+		font-weight: 600;
+	}
+
+	.assistant-label,
+	.assistant-mark {
+		color: #89b6ff;
+		background: linear-gradient(110deg, #65c5ff, #9182ff);
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		transition: filter 160ms ease;
+	}
+
+	.assistant:hover .assistant-label,
+	.assistant:hover .assistant-mark {
+		filter: brightness(1.25);
 	}
 
 	.export:hover::part(base) {
-		background: #3a3a3a;
+		color: #1d2940;
+		background: linear-gradient(135deg, #fff, #edf3ff);
+		box-shadow: inset 0 1px 0 #fff, 0 3px 14px #ceddff80;
+	}
+
+	.export:active::part(base) {
+		box-shadow: inset 0 1px 3px #0004;
+	}
+
+	.assistant:focus-visible::part(base),
+	.export:focus-visible::part(base) {
+		outline: 2px solid #b8d8ff;
+		outline-offset: 2px;
+	}
+
+	.assistant-mark {
+		margin-right: 0.35em;
+		font-size: 1.1em;
+		line-height: 1;
 	}
 }
 
