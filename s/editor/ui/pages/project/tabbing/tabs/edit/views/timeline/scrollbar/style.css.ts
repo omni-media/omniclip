@@ -10,7 +10,7 @@ export default css`@layer view {
 .timeline-scrollbar {
 	position: relative;
 	height: 0.75em;
-	background: #151515;
+	background: #0f0f0f;
 	border-top: 1px solid #242424;
 	cursor: pointer;
 	user-select: none;
@@ -40,4 +40,3 @@ export default css`@layer view {
 }
 
 }`
-

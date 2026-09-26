@@ -25,8 +25,7 @@ export default css`
 .section-label,
 .group-title {
 	font-size: var(--font-size-xs);
-	color: #8f8f8f;
-	text-transform: uppercase;
+	color: var(--inspector-muted);
 }
 
 .section {
@@ -37,39 +36,52 @@ export default css`
 
 .filter-grid {
 	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 0.5em;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 0.4em;
 }
 
 .filter-card {
 	display: flex;
-	flex-direction: column;
-	gap: 0.45em;
-	padding: 0.55em;
-	border: 1px solid #292929;
-	border-radius: 4px;
-	background: #1d1d1d;
-	color: #d8d8d8;
-	text-align: left;
-	cursor: pointer;
-	transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+	align-items: center;
+	gap: 0.6em;
+	min-width: 0;
+	padding: 0.4em 0.55em;
+	border: 0;
+	border-radius: 7px;
+	background: var(--inspector-surface);
+	color: var(--inspector-text);
+	transition: background 0.15s ease, color 0.15s ease;
+	cursor: default;
 
 	&:hover {
-		border-color: #4a4a4a;
-		background: #242424;
+		background: #1c1c1c;
 	}
 
 	&[data-active] {
-		border-color: #555;
-		background: #252525;
+		background: #202020;
 	}
+}
+
+.filter-card[data-selectable] {
+	cursor: pointer;
+}
+
+.ghost-button:focus-visible,
+.action-button:focus-visible,
+.tab-button:focus-visible {
+	outline: 2px solid var(--prime);
+	outline-offset: 2px;
 }
 
 .filter-card-header {
 	display: flex;
+	flex: 1;
 	align-items: center;
 	justify-content: space-between;
 	gap: 0.5em;
+	min-width: 0;
+	padding: 0;
+	color: inherit;
 }
 
 .filter-name {
@@ -79,14 +91,14 @@ export default css`
 
 .filter-tag {
 	font-size: var(--font-size-xs);
-	color: #8f8f8f;
+	color: var(--inspector-muted);
 }
 
 .filter-card-actions {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	gap: 0.75em;
+	justify-content: flex-end;
+	gap: 0.4em;
 }
 
 .toggle {
@@ -94,7 +106,7 @@ export default css`
 	align-items: center;
 	gap: 0.45em;
 	font-size: var(--font-size-xs);
-	color: #aaa;
+	color: var(--inspector-muted);
 }
 
 .ghost-button,
@@ -103,10 +115,10 @@ export default css`
 select,
 input[type="number"],
 input[type="text"] {
-	background: #1f1f1f;
-	color: #e0e0e0;
-	border: 1px solid #303030;
-	border-radius: 3px;
+	background: var(--inspector-control);
+	color: var(--inspector-text);
+	border: 1px solid transparent;
+	border-radius: 7px;
 }
 
 .ghost-button,
@@ -116,8 +128,23 @@ input[type="text"] {
 }
 
 .ghost-button {
-	padding: 0.35em 0.6em;
-	font-size: var(--font-size-xs);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.8em;
+	height: 1.8em;
+	padding: 0;
+	background: transparent;
+	color: var(--inspector-muted);
+}
+
+.ghost-button:hover {
+	background: #292929;
+	color: var(--inspector-text);
+}
+
+.ghost-button wa-icon {
+	font-size: 0.85em;
 }
 
 .action-button {
@@ -147,7 +174,7 @@ input[type="text"] {
 
 .param-name {
 	font-size: var(--font-size-xs);
-	color: #cfcfcf;
+	color: var(--inspector-text);
 }
 
 .range-row,
@@ -188,16 +215,15 @@ wa-slider {
 	display: flex;
 	flex-direction: column;
 	gap: 0.65em;
-	padding: 0.65em;
-	background: #1b1b1b;
-	border: 1px solid #292929;
-	border-radius: 4px;
+	padding: 0.8em;
+	background: var(--inspector-surface);
+	border: 0;
+	border-radius: 8px;
 }
 
 .empty-state,
 .muted {
-	color: #8f8f8f;
+	color: var(--inspector-muted);
 	font-size: var(--font-size-xs);
 }
 `
-

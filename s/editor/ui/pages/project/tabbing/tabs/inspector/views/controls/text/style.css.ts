@@ -20,47 +20,35 @@ export default css`
 
 	.info {
 		padding: 1em;
-    color: #888;
-    font-style: italic;
-    text-align: center;
+		color: var(--inspector-muted);
+		font-style: italic;
+		text-align: center;
 	}
 }
 
 .text-style-controls {
 	display: flex;
 	flex-direction: column;
-	gap: 0;
-}
-
-.text-style-controls wa-details::part(header) {
-	border-radius: 0;
-}
-
-.text-style-controls wa-details::part(base) {
-	border-radius: 0;
+	gap: 0.55em;
 }
 
 .text-input {
 	box-sizing: border-box;
 	width: 100%;
 	min-height: 5.5em;
-	padding: 0.55em 0.65em;
+	padding: 0.7em 0.8em;
 	resize: vertical;
-	background: #1f1f1f;
-	border: 1px solid #303030;
-	border-radius: 3px;
-	color: #e0e0e0;
+	background: var(--inspector-control);
+	border: 1px solid transparent;
+	border-radius: 8px;
+	color: var(--inspector-text);
 	font: inherit;
 	font-size: var(--font-size-xs);
 	line-height: 1.45;
 }
 
-.text-input:hover {
-	border-color: #444;
-}
-
 .text-input:focus {
-	border-color: #575757;
+	border-color: var(--prime);
 	outline: none;
 }
 
@@ -83,11 +71,11 @@ label {
 input,
 select,
 button {
-	background: #222;
-	color: #eee;
-	border: 1px solid #444;
-	padding: 0.35em 0.45em;
-	border-radius: 3px;
+	background: var(--inspector-control);
+	color: var(--inspector-text);
+	border: 1px solid transparent;
+	padding: 0.4em 0.55em;
+	border-radius: 7px;
 	font-size: var(--font-size-xs);
 }
 
@@ -97,7 +85,7 @@ button {
 }
 
 button:hover {
-	background: #333;
+	background: var(--inspector-hover);
 }
 
 .flex {
@@ -106,4 +94,3 @@ button:hover {
 	gap: 0.3em;
 }
 `
-

@@ -8,8 +8,7 @@ export default css`@layer view {
 	width: 104px;
 	max-width: 100%;
 	height: 100%;
-	border-right: 1px solid #292929;
-	background: linear-gradient(180deg, #191919, #151515);
+	background: #0f0f0f;
 	color: #ddd;
 }
 

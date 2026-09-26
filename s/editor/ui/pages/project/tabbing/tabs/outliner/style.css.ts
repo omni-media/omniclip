@@ -7,30 +7,36 @@ export default css`@layer view {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	background: #151515;
+	background: #0f0f0f;
 	color: #cfcfcf;
 }
 
 .search-bar {
 	padding: 0.75em;
 	border-bottom: 1px solid #101010;
-	background: #151515;
+	background: #0f0f0f;
 }
 
 .search-bar input {
 	width: 100%;
 	height: 32px;
 	padding: 0 0.65em;
-	background: #1f1f1f;
-	border: 1px solid #2b2b2b;
-	border-radius: 3px;
+	background: #161616;
+	border: 1px solid transparent;
+	border-radius: 7px;
 	color: #d3d3d3;
+	font-family: inherit;
 	font-size: var(--font-size-xs);
+	transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.search-bar input::placeholder {
+	color: #777;
 }
 
 .search-bar input:focus {
 	outline: none;
-	border-color: #575757;
+	border-color: #3a3a3a;
 }
 
 .outliner-tabs {
@@ -45,11 +51,12 @@ export default css`@layer view {
 
 .tab-bar {
 	display: flex;
-	height: 36px;
-	gap: 0.2em;
+	height: 32px;
+	gap: 0.15em;
+	margin: 0.2em 0.4em;
 	padding: 0.2em;
-	border-bottom: 1px solid #101010;
-	background: #1d1d1d;
+	border-radius: 7px;
+	background: #191919;
 }
 
 .tab-bar label {
@@ -60,7 +67,7 @@ export default css`@layer view {
 	padding: 0 0.7em;
 	color: #aaa;
 	background: transparent;
-	border-radius: 0.25em;
+	border-radius: 5px;
 	font-size: var(--font-size-xs);
 	cursor: pointer;
 	transition: background 0.12s ease, color 0.12s ease;
@@ -68,13 +75,13 @@ export default css`@layer view {
 
 .tab-bar label:hover {
 	color: #e8e8e8;
-	background: #333;
+	background: #222;
 }
 
 .outliner-tabs > input#tab-clips:checked ~ .tab-bar label[for="tab-clips"],
 .outliner-tabs > input#tab-tags:checked ~ .tab-bar label[for="tab-tags"] {
 	color: #e8e8e8;
-	background: #3f3f3f;
+	background: #2a2a2a;
 }
 
 .tab-panels {
@@ -139,7 +146,6 @@ export default css`@layer view {
 	gap: 0.5em;
 	min-height: 30px;
 	padding: 0 0.5em;
-	border-bottom: 1px solid #242424;
 	background: transparent;
 	cursor: pointer;
 	transition: background 0.12s ease, color 0.12s ease;
@@ -214,4 +220,3 @@ export default css`@layer view {
 }
 
 }`
-

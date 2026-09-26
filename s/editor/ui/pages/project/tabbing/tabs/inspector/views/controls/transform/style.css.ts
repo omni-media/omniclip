@@ -6,7 +6,7 @@ export default css`
 .transform-controls {
 	display: flex;
 	flex-direction: column;
-	gap: 0.65em;
+	gap: 0.8em;
 
 	&[data-disabled] {
 		opacity: 0.5;
@@ -29,7 +29,7 @@ label {
 	flex-basis: 55px;
 	flex-shrink: 0;
 	font-size: var(--font-size-xs);
-	color: #aaa;
+	color: var(--inspector-muted);
 	text-align: left;
 }
 
@@ -41,11 +41,15 @@ label {
 .input-group {
 	display: flex;
 	align-items: center;
-	background: #1f1f1f;
-	border: 1px solid #303030;
-	border-radius: 3px;
+	background: var(--inspector-control);
+	border: 1px solid transparent;
+	border-radius: 7px;
 	overflow: hidden;
 	flex: 1;
+}
+
+.input-group:focus-within {
+	border-color: var(--prime);
 }
 
 .transform-input {
@@ -58,13 +62,13 @@ label {
 	padding: 0;
 	border: 0;
 	background: transparent;
-	color: #666;
+	color: var(--inspector-muted);
 	cursor: pointer;
 }
 
 .scale-link[aria-pressed="true"],
 .transform-reset:hover {
-	color: #aaa;
+	color: var(--inspector-text);
 }
 
 .scale-link wa-icon,
@@ -80,7 +84,7 @@ label {
 
 .transform-input::part(input) {
 	width: 100%;
-	color: #e0e0e0;
+	color: var(--inspector-text);
 	text-align: center;
 	font-size: var(--font-size-xs);
 }
@@ -91,7 +95,7 @@ label {
 }
 
 .prefix {
-	color: #888;
+	color: var(--inspector-muted);
 	font-size: 0.8em;
 	display: flex;
 	align-items: center;
@@ -110,7 +114,7 @@ label {
 	justify-content: center;
 	border: none;
 	background: transparent;
-	color: #7d8595;
+	color: var(--inspector-muted);
 	cursor: pointer;
 	transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
 
@@ -129,4 +133,3 @@ label {
 	fill: currentColor;
 }
 `
-

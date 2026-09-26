@@ -11,7 +11,7 @@ export default css`@layer view {
 	flex-direction: column;
 	justify-content: space-between;
 	align-items: center;
-	background: #0b0b0b;
+	background: #111;
 	overflow: hidden;
 }
 

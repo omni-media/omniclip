@@ -19,8 +19,8 @@ export default css`@layer view {
 	display: flex;
 	align-items: center;
 	min-height: 36px;
-	background: #1d1d1d;
-	border-bottom: 1px solid #101010;
+	background: #0f0f0f;
+	border-bottom: 0;
 }
 
 .right {
@@ -139,7 +139,7 @@ wa-split-panel::part(divider) {
 	height: 100%;
 	width: 100%;
 	overflow: auto;
-	background: #181818;
+	background: #0f0f0f;
 }
 
 .panel[data-active] {
@@ -221,4 +221,3 @@ wa-split-panel::part(divider) {
 }
 
 }`
-

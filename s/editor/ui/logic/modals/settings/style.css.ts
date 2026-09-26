@@ -5,6 +5,8 @@ export default css`
 		display: flex;
 		flex-direction: column;
 		gap: 0.65em;
+		font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+		-webkit-font-smoothing: antialiased;
 	}
 
 	.video, .audio, .model-storage {
@@ -16,7 +18,7 @@ export default css`
 
 	.section-label {
 		margin-bottom: 0.35em;
-		color: #8a8a8a;
+		color: #858585;
 		font-size: calc(var(--font-size-xs) - 1px);
 		font-weight: 600;
 		text-transform: uppercase;
@@ -26,9 +28,16 @@ export default css`
 		display: grid;
 		grid-template-columns: 7.8em minmax(0, 1fr);
 		gap: 0.65em;
-		align-items: center;
-		color: #b7b7b7;
+		align-items: stretch;
+		color: #bdbdbd;
 		font-size: var(--font-size-xs);
+		font-weight: 500;
+		letter-spacing: -0.01em;
+	}
+
+	.field > span {
+		display: flex;
+		align-items: center;
 	}
 
 	.field wa-option {
@@ -37,7 +46,7 @@ export default css`
 
 	.model-storage {
 		gap: 0.5em;
-		border-top: 1px solid #292929;
+		border-top: 1px solid #272727;
 		padding-top: 0.8em;
 	}
 
@@ -68,6 +77,8 @@ export default css`
 
 	.model-row wa-button::part(base) {
 		min-height: 1.9em;
+		border-radius: 6px;
+		font-family: inherit;
 		font-size: var(--font-size-xs);
 	}
 
@@ -85,6 +96,6 @@ export default css`
 		gap: 1em;
 		margin-top: 0.4em;
 		padding-top: 0.55em;
-		border-top: 1px solid #252525;
+		border-top: 1px solid #242424;
 	}
 `

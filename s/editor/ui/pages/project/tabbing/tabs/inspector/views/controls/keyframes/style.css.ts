@@ -1,9 +1,9 @@
 
-import {css} from 'lit'
+import {css} from "lit"
 
 export default css`
 .animations-panel {
-	--wa-panel-border-radius: 4px;
+	--wa-panel-border-radius: 8px;
 }
 
 .animations-panel::part(content) {
@@ -15,7 +15,7 @@ export default css`
 .keyframes-summary,
 .keyframes-hint {
 	font-size: var(--font-size-xs);
-	color: #8f8f8f;
+	color: var(--inspector-muted);
 }
 
 .keyframe-list {
@@ -29,31 +29,34 @@ export default css`
 	grid-template-columns: auto 1fr auto auto;
 	align-items: center;
 	gap: 0.55em;
-	padding: 0.45em 0.55em;
-	border: 1px solid #292929;
-	border-radius: 4px;
-	background: #1d1d1d;
-	color: #d8d8d8;
+	padding: 0.6em 0.7em;
+	border: 1px solid transparent;
+	border-radius: 8px;
+	background: var(--inspector-surface);
+	color: var(--inspector-text);
 	text-align: left;
 	cursor: pointer;
-	transition: border-color 0.15s ease, background 0.15s ease;
+	transition: background 0.15s ease;
 
 	&:hover {
-		border-color: #4a4a4a;
-		background: #242424;
+		background: var(--inspector-hover);
 	}
 
 	&[data-active] {
-		border-color: #555;
-		background: #252525;
+		background: var(--inspector-active);
 	}
+}
+
+.keyframe-property:focus-visible {
+	outline: 2px solid var(--prime);
+	outline-offset: 2px;
 }
 
 .property-icon {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	color: #b8b8b8;
+	color: var(--inspector-muted);
 }
 
 .property-icon svg {
@@ -68,7 +71,7 @@ export default css`
 
 .property-meta {
 	font-size: calc(var(--font-size-xs) - 1px);
-	color: #8f8f8f;
+	color: var(--inspector-muted);
 }
 
 .keyframe-actions {
@@ -87,4 +90,3 @@ export default css`
 	gap: 0.4em;
 }
 `
-

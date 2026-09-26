@@ -27,11 +27,6 @@ export function drawRuler(canvas: TimelineCanvas) {
 
 	canvas.ctx.fillStyle = styles.rulerBackground
 	canvas.ctx.fillRect(0, 0, canvas.width, metrics.rulerHeight)
-	canvas.ctx.strokeStyle = styles.rulerBorder
-	canvas.ctx.beginPath()
-	canvas.ctx.moveTo(0, metrics.rulerHeight - 0.5)
-	canvas.ctx.lineTo(canvas.width, metrics.rulerHeight - 0.5)
-	canvas.ctx.stroke()
 
 	canvas.ctx.font = "11px sans-serif"
 	canvas.ctx.textBaseline = "middle"
@@ -66,4 +61,3 @@ export function drawRuler(canvas: TimelineCanvas) {
 		}
 	}
 }
-

@@ -10,6 +10,8 @@ import type {Idx} from "../../../../../../../logic/parts/index.js"
 import {ItemControlTabs, itemControlTabsCss} from "./control-tabs.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 
+import "@awesome.me/webawesome/dist/components/slider/slider.js"
+
 export const audioStyles = css`
 .audio-controls {
 	display: flex;
@@ -39,7 +41,28 @@ export const audioStyles = css`
 
 .audio-actions {
 	display: flex;
-	gap: 0.5em;
+	gap: 0.4em;
+}
+
+.audio-actions wa-button::part(base) {
+	height: 26px;
+	min-height: 26px;
+	padding: 0 0.7em;
+	border: 0;
+	border-radius: 6px;
+	background: var(--inspector-surface);
+	color: var(--inspector-muted);
+	font-size: var(--font-size-xs);
+}
+
+.audio-actions wa-button:hover::part(base) {
+	background: var(--inspector-control);
+	color: var(--inspector-text);
+}
+
+.audio-actions wa-button:focus-visible::part(base) {
+	outline: 2px solid var(--prime);
+	outline-offset: 2px;
 }
 `
 
@@ -101,4 +124,3 @@ export const AudioControls = shadow((context: EditorContext, item: Item.Audio) =
 		})}
 	`
 })
-

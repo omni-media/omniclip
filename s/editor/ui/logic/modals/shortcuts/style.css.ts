@@ -5,6 +5,8 @@ export default css`
 		display: flex;
 		flex-direction: column;
 		height: min(39em, calc(100vh - 7em));
+		font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+		-webkit-font-smoothing: antialiased;
 	}
 
 	.toolbar, .tabs {
@@ -19,15 +21,38 @@ export default css`
 	}
 
 	.search wa-input {
+		--wa-form-control-background-color: #161616;
 		width: 100%;
 	}
 
 	.search wa-input::part(base) {
-		font-size: var(--font-size-xs);
+		min-height: 2em;
 	}
 
 	wa-button::part(base) {
+		font-family: inherit;
 		font-size: var(--font-size-xs);
+	}
+
+	wa-button[variant="neutral"]::part(base) {
+		border-color: transparent;
+		border-radius: 6px;
+		background: #252525;
+		color: #ddd;
+	}
+
+	wa-button[variant="neutral"]:hover::part(base) {
+		background: #303030;
+	}
+
+	wa-button[appearance="plain"]::part(base) {
+		border-radius: 5px;
+		color: #999;
+	}
+
+	wa-button[appearance="plain"]:hover::part(base) {
+		background: #242424;
+		color: #ddd;
 	}
 
 	.replace::part(base) {
@@ -44,8 +69,19 @@ export default css`
 
 	.tabs {
 		display: block;
-		--track-color: #303030;
-		--indicator-color: #888;
+		--track-color: transparent;
+		--indicator-color: transparent;
+	}
+
+	.tabs::part(nav) {
+		padding: 0;
+	}
+
+	.tabs::part(tabs) {
+		gap: 0.2em;
+		padding: 0.12em;
+		border-radius: 7px;
+		background: #191919;
 	}
 
 	.tabs::part(body) {
@@ -53,19 +89,23 @@ export default css`
 	}
 
 	wa-tab::part(base) {
-		color: #9a9a9a;
+		min-height: unset;
+		padding: 0.4em 0.9em;
+		border-radius: 5px;
+		color: #aaa;
 		font-size: var(--font-size-xs);
 	}
 
 	wa-tab[active]::part(base) {
-		color: #e0e0e0;
+		background: #2a2a2a;
+		color: #e8e8e8;
 	}
 
 	.list {
 		flex: 1;
 		overflow: auto;
 		padding: 0.5em;
-		background: #181818;
+		background: #171717;
 	}
 
 	.group {
@@ -77,7 +117,7 @@ export default css`
 		top: -0.5em;
 		z-index: 1;
 		padding: 0.35em 0.5em;
-		background: #181818;
+		background: #171717;
 		color: #888;
 		font-size: calc(var(--font-size-xs) - 1px);
 		font-weight: 600;
@@ -96,7 +136,7 @@ export default css`
 		align-items: center;
 		min-height: 2.6em;
 		padding: 0.45em 0.5em;
-		border-radius: 4px;
+		border-radius: 6px;
 	}
 
 	.row:hover {

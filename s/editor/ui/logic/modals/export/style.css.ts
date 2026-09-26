@@ -2,17 +2,26 @@
 import {css} from "lit"
 
 export default css`
+	.modal {
+		font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+		-webkit-font-smoothing: antialiased;
+	}
+
 	.grid {
 		display: grid;
 		grid-template-columns: 7em minmax(0, 1fr);
 		gap: 0.55em 0.75em;
-		align-items: center;
+		align-items: stretch;
 		padding: 0.35em 0;
 	}
 
 	.label {
-		color: #9a9a9a;
+		display: flex;
+		align-items: center;
+		color: #bdbdbd;
 		font-size: var(--font-size-xs);
+		font-weight: 500;
+		letter-spacing: -0.01em;
 	}
 
 	.value {
@@ -45,7 +54,7 @@ export default css`
 			display: inline-block;
 			height: 15px;
 			width: 1px;
-			background: #383838;
+			background: #2b2b2b;
 			margin: 0.4em;
 		}
 	}
@@ -53,6 +62,10 @@ export default css`
 	.export > div:last-child {
 		display: flex;
 		gap: 0.5em;
+	}
+
+	.export wa-button::part(base) {
+		font-family: inherit;
 	}
 
 	.export-progress {

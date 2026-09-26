@@ -3,11 +3,19 @@ import {css} from "lit"
 export default css`@layer view {
 
 :host {
+	--inspector-bg: #0f0f0f;
+	--inspector-surface: #171717;
+	--inspector-control: #202020;
+	--inspector-hover: #2a2a2a;
+	--inspector-active: #303030;
+	--inspector-text: #e7e7e7;
+	--inspector-muted: #9d9d9d;
+	--inspector-divider: rgb(255 255 255 / 6%);
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	background: #151515;
-	color: #cfcfcf;
+	background: var(--inspector-bg);
+	color: var(--inspector-text);
 }
 
 .placeholder {
@@ -16,7 +24,7 @@ export default css`@layer view {
 	justify-content: center;
 	height: 100%;
 	padding: 1em;
-	color: #8f8f8f;
+	color: var(--inspector-muted);
 	font-size: var(--font-size-xs);
 	text-align: center;
 }
@@ -33,4 +41,3 @@ export default css`@layer view {
 }
 
 }`
-

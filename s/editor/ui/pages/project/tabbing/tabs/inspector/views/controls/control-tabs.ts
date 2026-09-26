@@ -10,11 +10,12 @@ export const itemControlTabsCss = css`
 
 .control-tab-bar {
 	display: flex;
-	height: 36px;
-	gap: 0.2em;
+	height: 32px;
+	gap: 0.15em;
+	margin: 0.2em 0.4em;
 	padding: 0.2em;
-	border-bottom: 1px solid #101010;
-	background: #1d1d1d;
+	border-radius: 7px;
+	background: #191919;
 	box-sizing: border-box;
 }
 
@@ -24,10 +25,10 @@ export const itemControlTabsCss = css`
 	align-items: center;
 	justify-content: center;
 	padding: 0 0.7em;
-	color: #9a9a9a;
+	color: #aaa;
 	background: transparent;
 	border: 0;
-	border-radius: 0.25em;
+	border-radius: 5px;
 	font-size: var(--font-size-xs);
 	cursor: pointer;
 	transition: background 0.12s ease, color 0.12s ease;
@@ -35,12 +36,17 @@ export const itemControlTabsCss = css`
 
 .control-tab:hover {
 	color: #e8e8e8;
-	background: #333;
+	background: #222;
 }
 
 .control-tab[data-active] {
 	color: #e8e8e8;
-	background: #3f3f3f;
+	background: #2a2a2a;
+}
+
+.control-tab:focus-visible {
+	outline: 2px solid var(--prime);
+	outline-offset: 2px;
 }
 
 .control-tab-panel {
@@ -49,7 +55,7 @@ export const itemControlTabsCss = css`
 }
 
 .muted {
-	color: #8f8f8f;
+	color: var(--inspector-muted);
 	font-size: var(--font-size-xs);
 }
 `
@@ -89,4 +95,3 @@ export const ItemControlTabs = light((props: {
 		</div>
 	`
 })
-

@@ -6,6 +6,7 @@ export default css`@layer view {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	background: #0f0f0f;
 }
 
 .timeline-path {
@@ -13,9 +14,7 @@ export default css`@layer view {
 	align-items: center;
 	min-height: 32px;
 	padding: 0 0.7em;
-	border-top: 1px solid #1c1c1c;
-	border-bottom: 1px solid #282828;
-	background: #181818;
+	background: #0f0f0f;
 }
 
 wa-breadcrumb {
@@ -41,8 +40,7 @@ wa-breadcrumb-item[data-current]::part(label) {
 	flex: 1;
 	overflow: auto;
 	scrollbar-width: none;
-	background: #111;
-	border-top: 1px solid #1c1c1c;
+	background: #0f0f0f;
 }
 
 .spacer {
@@ -58,7 +56,7 @@ canvas {
 	position: sticky;
 	left: 0;
 	top: 0;
+	background: #0f0f0f;
 }
 
 }`
-

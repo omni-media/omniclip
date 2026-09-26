@@ -14,7 +14,7 @@ export default css`@layer view {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	background: #111;
+	background: #0f0f0f;
 	overflow: hidden;
 }
 

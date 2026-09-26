@@ -31,6 +31,10 @@ export const EditorApp = (router: AppRouter) => shadowElement(() => {
 		props: [{button: true, control: drawer}],
 		attrs: {"data-projects": router.$hash() === "projects"},
 		children: html`
+			<svg slot="button" width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+				<path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+			</svg>
+
 			<nav>
 				<h2>
 					<span>Omniclip</span>

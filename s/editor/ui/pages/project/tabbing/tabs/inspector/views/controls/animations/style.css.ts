@@ -13,8 +13,7 @@ export default css`
 	align-items: center;
 	gap: 0.45em;
 	font-size: var(--font-size-xs);
-	color: #8f8f8f;
-	text-transform: uppercase;
+	color: var(--inspector-muted);
 
 	&::before {
 		content: "";
@@ -41,24 +40,28 @@ export default css`
 	min-width: 0;
 	padding: 0.55em 0.5em;
 	border: 1px solid transparent;
-	border-radius: 3px;
-	background: #1d1d1d;
-	color: #aaa;
+	border-radius: 7px;
+	background: var(--inspector-surface);
+	color: var(--inspector-muted);
 	font-size: var(--font-size-xs);
 	line-height: 1;
 	cursor: pointer;
-	transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+	transition: background 0.15s ease, color 0.15s ease;
 
 	&:hover {
-		color: #e0e0e0;
-		background: #242424;
+		color: var(--inspector-text);
+		background: var(--inspector-hover);
 	}
 
 	&[data-active] {
-		color: #f0f0f0;
-		background: #252525;
-		border-color: #555;
+		color: var(--inspector-text);
+		background: var(--inspector-active);
 	}
+}
+
+.preset-button:focus-visible {
+	outline: 2px solid var(--prime);
+	outline-offset: 2px;
 }
 
 .duration-row {
@@ -69,7 +72,7 @@ export default css`
 
 	.duration-label,
 	.duration-unit {
-		color: #8f8f8f;
+		color: var(--inspector-muted);
 		font-size: var(--font-size-xs);
 	}
 }
@@ -86,4 +89,3 @@ export default css`
 	}
 }
 `
-

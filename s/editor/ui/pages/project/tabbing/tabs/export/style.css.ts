@@ -6,7 +6,7 @@ export default css`@layer view {
 	display: block;
 	height: 100%;
 	overflow-y: auto;
-	background: #1f1f1f;
+	background: #0f0f0f;
 }
 
 .export-container {
@@ -22,10 +22,10 @@ export default css`@layer view {
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
-	background: #2a2a2a;
+	background: #171717;
 	padding: 1.5em;
 	border-radius: 12px;
-	border: 1px solid #3a3a3a;
+	border: 1px solid #242424;
 }
 
 h4 {
@@ -34,7 +34,7 @@ h4 {
 	color: #aaa;
 	text-transform: uppercase;
 	margin: 0;
-	border-bottom: 1px solid #3a3a3a;
+	border-bottom: 1px solid #242424;
 	padding-bottom: 0.8em;
 }
 
@@ -50,8 +50,8 @@ h4 {
 	align-items: flex-start;
 	padding: 1em;
 	border-radius: 8px;
-	background: #333;
-	border: 1px solid #444;
+	background: #202020;
+	border: 1px solid #2a2a2a;
 	cursor: pointer;
 	text-align: left;
 	color: #ddd;
@@ -59,12 +59,12 @@ h4 {
 }
 
 .item-card:hover {
-	background: #3c3c3c;
-	border-color: #555;
+	background: #282828;
+	border-color: #383838;
 }
 
 .item-card[data-selected] {
-	background: color-mix(in srgb, var(--prime) 20%, #333);
+	background: color-mix(in srgb, var(--prime) 20%, #202020);
 	border-color: var(--prime);
 	box-shadow: 0 0 0 2px color-mix(in srgb, var(--prime) 30%, transparent);
 }
@@ -104,8 +104,8 @@ h4 {
 
 .settings-group select {
 	padding: 0.8em;
-	background: #222;
-	border: 1px solid #444;
+	background: #202020;
+	border: 1px solid #2a2a2a;
 	border-radius: 8px;
 	color: #eee;
 	font-size: 1em;
@@ -114,7 +114,7 @@ h4 {
 .export-action {
 	margin-top: auto; /* Pushes the button to the bottom */
 	padding-top: 1.5em;
-	border-top: 1px solid #3a3a3a;
+	border-top: 1px solid #242424;
 }
 
 .export-button {
@@ -151,7 +151,7 @@ h4 {
 
 .progress-bar {
 	width: 100%;
-	background: #222;
+	background: #202020;
 	border-radius: 8px;
 	overflow: hidden;
 	position: relative;
@@ -159,7 +159,7 @@ h4 {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border: 1px solid #444;
+	border: 1px solid #2a2a2a;
 }
 
 .progress-bar span {

@@ -8,7 +8,7 @@ export default css`@layer view {
 	flex-direction: column;
 	min-height: 0;
 	height: 100%;
-	background: #151515;
+	background: #0f0f0f;
 	color: #cfcfcf;
 }
 
@@ -21,11 +21,12 @@ export default css`@layer view {
 
 .browser-tabs {
 	display: flex;
-	height: 36px;
-	gap: 0.2em;
+	height: 32px;
+	gap: 0.15em;
+	margin: 0.2em 0.4em;
 	padding: 0.2em;
-	border-bottom: 1px solid #101010;
-	background: #1d1d1d;
+	border-radius: 7px;
+	background: #191919;
 }
 
 .browser-tab {
@@ -38,7 +39,7 @@ export default css`@layer view {
 	color: #aaa;
 	background: transparent;
 	border: 0;
-	border-radius: 0.25em;
+	border-radius: 5px;
 	font-size: var(--font-size-xs);
 	cursor: pointer;
 	transition: background 0.12s ease, color 0.12s ease;
@@ -57,12 +58,12 @@ export default css`@layer view {
 
 .browser-tab:hover {
 	color: #e8e8e8;
-	background: #333;
+	background: #222;
 }
 
 .browser-tab[data-active] {
 	color: #e8e8e8;
-	background: #3f3f3f;
+	background: #2a2a2a;
 }
 
 .browser-body {
@@ -73,7 +74,7 @@ export default css`@layer view {
 	flex: 1;
 	padding: 0.75em;
 	overflow: auto;
-	background: #151515;
+	background: #0f0f0f;
 }
 
 .browser-controls {
@@ -87,14 +88,15 @@ export default css`@layer view {
 	display: flex;
 	flex-direction: column;
 	gap: 0.65em;
-	--quay-surface: #181818;
-	--quay-surface-hover: #242424;
-	--quay-surface-selected: #303030;
-	--quay-border: #242424;
+	--quay-surface: #161616;
+	--quay-surface-hover: #222;
+	--quay-surface-selected: #202020;
+	--quay-border: transparent;
 	--quay-text: #cfcfcf;
-	--quay-muted: #8f8f8f;
+	--quay-muted: #858585;
 	--quay-accent: #777;
-	--quay-radius: 3px;
+	--quay-radius: 7px;
+	--sl-font-size-small: var(--font-size-xs);
 	--quay-browser-thumb-width: 112px;
 	--quay-browser-thumb-height: 64px;
 }
@@ -128,16 +130,31 @@ export default css`@layer view {
 	align-items: center;
 }
 
+.media-toolbar quay-searchbar,
+.media-toolbar quay-filter,
+.media-toolbar quay-sort {
+	--quay-text: #d0d0d0;
+	--sl-input-background-color: #161616;
+	--sl-input-color: #d0d0d0;
+	--sl-input-placeholder-color: #777;
+	--sl-color-neutral-0: #161616;
+	--sl-color-neutral-50: #222;
+	--sl-input-border-radius-small: 7px;
+	--sl-input-border-radius-medium: 7px;
+}
+
 quay-dropzone {
+	display: block;
 	min-height: 5em;
+	border-radius: 7px;
+	background: #161616;
 }
 
 quay-browser {
 	min-height: 0;
 	overflow: auto;
-	border: 1px solid var(--quay-border);
-	border-radius: var(--quay-radius);
-	background: var(--quay-surface);
+	border: 0;
+	background: transparent;
 }
 
 .search {
@@ -146,10 +163,15 @@ quay-browser {
 	gap: 0.5em;
 	height: 32px;
 	padding: 0 0.65em;
-	border: 1px solid #2b2b2b;
-	border-radius: 3px;
-	background: #1f1f1f;
+	border: 1px solid transparent;
+	border-radius: 7px;
+	background: #161616;
 	color: #8f8f8f;
+	transition: border-color 0.12s ease;
+}
+
+.search:focus-within {
+	border-color: #3a3a3a;
 }
 
 .search input {
@@ -159,7 +181,12 @@ quay-browser {
 	background: transparent;
 	border: 0;
 	outline: 0;
+	font-family: inherit;
 	font-size: var(--font-size-xs);
+}
+
+.search input::placeholder {
+	color: #777;
 }
 
 .duration-control {
@@ -177,10 +204,17 @@ quay-browser {
 	height: 100%;
 	padding: 0 0.55em;
 	color: #d3d3d3;
-	background: #1f1f1f;
-	border: 1px solid #2b2b2b;
-	border-radius: 3px;
+	background: #161616;
+	border: 1px solid transparent;
+	border-radius: 7px;
+	outline: 0;
+	font-family: inherit;
 	font-size: var(--font-size-xs);
+	transition: border-color 0.12s ease;
+}
+
+.duration-control input:focus {
+	border-color: #3a3a3a;
 }
 
 .section-label {
@@ -211,6 +245,22 @@ quay-browser {
 	transition: background 0.12s ease, border-color 0.12s ease;
 }
 
+.preset-card {
+	gap: 0.5em;
+	padding: 0.5em;
+	background: #171717;
+	border-color: transparent;
+	border-radius: 8px;
+}
+
+.transition-card {
+	gap: 0.5em;
+	padding: 0.5em;
+	background: #171717;
+	border-color: transparent;
+	border-radius: 8px;
+}
+
 .remove-transition {
 	height: 30px;
 	color: #ffd7d7;
@@ -229,12 +279,17 @@ quay-browser {
 .transition-card:hover,
 .transition-card[data-active],
 .preset-card:hover {
-	border-color: #4a4a4a;
-	background: #242424;
+	border-color: transparent;
+	background: #202020;
 }
 
 .transition-card[data-active] {
 	border-color: color-mix(in srgb, var(--prime) 55%, #4a4a4a);
+}
+
+.preset-card:hover {
+	border-color: transparent;
+	background: #202020;
 }
 
 .transition-card:active {
@@ -245,7 +300,7 @@ quay-browser {
 	position: relative;
 	height: 50px;
 	overflow: hidden;
-	border-radius: 3px;
+	border-radius: 6px;
 	background: #0b0b0b;
 }
 
@@ -278,6 +333,11 @@ quay-browser {
 	text-align: center;
 }
 
+.preset-card .text-preview {
+	border-radius: 6px;
+	background: #111;
+}
+
 .transition-name {
 	color: #d8d8d8;
 	font-size: var(--font-size-xs);
@@ -304,4 +364,3 @@ quay-browser {
 }
 
 }`
-

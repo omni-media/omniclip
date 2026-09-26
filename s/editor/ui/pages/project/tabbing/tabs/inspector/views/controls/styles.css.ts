@@ -3,28 +3,27 @@ import {css} from "lit"
 export const controlsStyles = css`
 
 .controls-group {
-	padding: 0.65em;
-	border-bottom: 1px solid #252525;
+	padding: 1em 1.1em;
+	border-bottom: 1px solid var(--inspector-divider);
 }
 
 .heading {
-	margin: 0 0 0.65em;
-	color: #8f8f8f;
-	font-size: calc(var(--font-size-xs) - 1px);
+	margin: 0 0 0.9em;
+	color: var(--inspector-text);
+	font-size: var(--font-size-xs);
 	font-weight: 600;
-	text-transform: uppercase;
 }
 
 wa-select,
 wa-input,
 wa-number-input {
-	--wa-form-control-background-color: #1f1f1f;
-	--wa-form-control-border-color: #303030;
-	--wa-form-control-border-color-hover: #444;
-	--wa-form-control-border-color-focus: #575757;
-	--wa-form-control-border-radius: 3px;
-	--wa-form-control-value-color: #e0e0e0;
-	--wa-form-control-label-color: #aaa;
+	--wa-form-control-background-color: var(--inspector-control);
+	--wa-form-control-border-color: transparent;
+	--wa-form-control-border-color-hover: transparent;
+	--wa-form-control-border-color-focus: var(--prime);
+	--wa-form-control-border-radius: 7px;
+	--wa-form-control-value-color: var(--inspector-text);
+	--wa-form-control-label-color: var(--inspector-muted);
 	--wa-form-control-placeholder-color: #777;
 }
 
@@ -41,42 +40,62 @@ wa-number-input::part(input) {
 	font-size: var(--font-size-xs);
 }
 
+wa-slider {
+	--track-size: 3px;
+	--thumb-width: 11px;
+	--thumb-height: 11px;
+}
+
+wa-slider::part(track) {
+	background: #252525;
+}
+
+wa-slider::part(indicator) {
+	background: #3b3b3b;
+}
+
+wa-slider::part(thumb) {
+	border: 0;
+	background: #747474;
+	box-shadow: none;
+}
+
 wa-details {
-	--spacing: 0.65em;
+	--spacing: 0.85em;
 }
 
 wa-details::part(base) {
-	border: 1px solid #292929;
-	border-radius: 4px;
-	background: #1b1b1b;
+	border: 0;
+	border-radius: 9px;
+	background: var(--inspector-surface);
+	overflow: hidden;
 }
 
 wa-details::part(header) {
-	min-height: 2.4em;
-	padding: 0 0.65em;
-	border-bottom: 1px solid transparent;
-	background: #202020;
-	color: #cfcfcf;
+	min-height: 2.7em;
+	padding: 0 0.85em;
+	border-bottom: 0;
+	background: var(--inspector-surface);
+	color: var(--inspector-text);
 }
 
 wa-details::part(summary) {
-	color: #cfcfcf;
-	font-size: calc(var(--font-size-xs) - 1px);
+	color: var(--inspector-text);
+	font-size: var(--font-size-xs);
 	font-weight: 600;
-	text-transform: uppercase;
 }
 
 wa-details[open]::part(header) {
-	border-bottom-color: #292929;
+	background: var(--inspector-hover);
 }
 
 wa-details::part(icon) {
-	color: #8f8f8f;
+	color: var(--inspector-muted);
 }
 
 wa-details::part(content) {
-	background: #181818;
-	color: #cfcfcf;
+	background: var(--inspector-surface);
+	color: var(--inspector-text);
 	font-size: var(--font-size-xs);
 }
 
@@ -86,7 +105,7 @@ wa-details::part(content) {
 }
 
 .advanced-panel::part(base) {
-	background: #181818;
+	background: var(--inspector-surface);
 }
 
 .advanced-panel::part(header) {
@@ -121,7 +140,7 @@ export const aiControlStyles = css`
 .ai-description,
 .muted {
 	margin: 0;
-	color: #8f8f8f;
+	color: var(--inspector-muted);
 	font-size: var(--font-size-xs);
 }
 
@@ -131,7 +150,7 @@ export const aiControlStyles = css`
 
 .field-label,
 .section-label {
-	color: #8f8f8f;
+	color: var(--inspector-muted);
 	font-size: var(--font-size-xs);
 }
 
@@ -150,10 +169,10 @@ wa-button::part(base) {
 	align-items: center;
 	justify-content: center;
 	width: 100%;
-	color: #cfcfcf;
-	background: #1f1f1f;
-	border: 1px solid #303030;
-	border-radius: 4px;
+	color: var(--inspector-text);
+	background: var(--inspector-control);
+	border: 0;
+	border-radius: 7px;
 	cursor: pointer;
 }
 
@@ -164,7 +183,7 @@ wa-button::part(base) {
 
 .status {
 	min-height: 1.1em;
-	color: #8f8f8f;
+	color: var(--inspector-muted);
 	font-size: var(--font-size-xs);
 }
 
@@ -172,4 +191,3 @@ wa-button::part(base) {
 	color: #ff8f8f;
 }
 `
-

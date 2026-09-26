@@ -1,8 +1,7 @@
 
 export const styles = {
-	background: "#161616",
-	rulerBackground: "#181818",
-	rulerBorder: "#242424",
+	background: "#0f0f0f",
+	rulerBackground: "#0f0f0f",
 	rulerTick: "#696969",
 	rulerMinorTick: "#3c3c3c",
 	rulerLabel: "#9a9a9a",
@@ -33,4 +32,3 @@ export const metrics = {
 	labelInsetX: 8,
 	labelInsetY: 10,
 } as const
-

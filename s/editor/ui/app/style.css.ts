@@ -14,7 +14,7 @@ export default css`@layer view {
 	display: block;
 	width: 100%;
 	height: 100%;
-	--button-size: 2em;
+	--button-size: 2.3em;
 	--drawer-height: 100%;
 	--blanket-bg: rgb(0 0 0 / 0.35);
 	--blanket-backdrop-filter: none;
@@ -22,11 +22,14 @@ export default css`@layer view {
 }
 
 [view="shiny-drawer"]::part(button) {
-	top: calc((36px - var(--button-size)) / 2);
-	margin-left: 0.35em;
-	color: #aaa;
+	top: calc((40px - var(--button-size)) / 2);
+	margin-left: 0.5em;
+	display: grid;
+	place-items: center;
+	padding: 0;
+	color: #777;
 	background: transparent;
-	border-radius: 0.18em;
+	border-radius: 0;
 	opacity: 1;
 	transition: background 0.12s ease, color 0.12s ease;
 }
@@ -36,8 +39,8 @@ export default css`@layer view {
 }
 
 [view="shiny-drawer"]::part(button):hover {
-	color: #e8e8e8;
-	background: #333;
+	color: #aaa;
+	background: transparent;
 }
 
 [view="shiny-drawer"]:state(opened)::part(button) {
