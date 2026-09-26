@@ -52,6 +52,7 @@
 	"dependencies": {
 		"@ai-sdk/openai": "^4.0.67",
 		"@assistant-ui/ai-sdk": "^0.0.6",
+		"@assistant-ui/core": "^0.3.19",
 		"@assistant-ui/react": "^0.15.20",
 		"@awesome.me/webawesome": "^3.4.0",
 		"@aws-sdk/client-s3": "^3.1138.0",

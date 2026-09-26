@@ -12,18 +12,43 @@ export default css`@layer view {
 	--assistant-text-soft: #d4d4d4;
 	--assistant-muted: #999;
 	--assistant-faint: #6f6f6f;
+	display: block;
 	position: fixed;
 	top: 52px;
 	right: 16px;
 	z-index: 20;
 	width: min(460px, calc(100vw - 32px));
+	height: min(680px, calc(100vh - 68px));
+	min-width: min(320px, calc(100vw - 32px));
+	min-height: min(260px, calc(100vh - 68px));
+	max-width: calc(100vw - 32px);
+	max-height: calc(100vh - 68px);
+	resize: both;
+	overflow: hidden;
+}
+
+:host([data-minimized]) {
+	height: 48px;
+	min-height: 48px;
+	resize: horizontal;
+}
+
+:host > div {
+	width: 100%;
+	height: 100%;
+}
+
+:host:has(> div[hidden]) {
+	display: none;
 }
 
 .assistant-panel {
 	display: grid;
-	grid-template-rows: 48px minmax(0, 1fr) auto;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: minmax(0, 1fr);
 	width: 100%;
-	height: min(680px, calc(100vh - 68px));
+	height: 100%;
+	box-sizing: border-box;
 	overflow: hidden;
 	color: var(--assistant-text);
 	background: var(--assistant-bg);
@@ -31,12 +56,156 @@ export default css`@layer view {
 	box-shadow: 0 24px 80px #000c;
 }
 
+.chat-view {
+	display: grid;
+	grid-template-rows: 48px minmax(0, 1fr) auto;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.assistant-panel[data-fullscreen] {
+	grid-template-columns: 240px minmax(0, 1fr);
+}
+
+.assistant-panel[data-fullscreen] header {
+	cursor: default;
+	touch-action: auto;
+}
+
+.assistant-panel[data-fullscreen] .messages {
+	align-items: center;
+}
+
+.assistant-panel[data-fullscreen] .message {
+	width: min(100%, 700px);
+}
+
+.assistant-panel[data-fullscreen] .chat-view > .composer-area {
+	width: min(100%, 700px);
+	justify-self: center;
+}
+
 .assistant-panel[data-minimized] {
 	height: 48px;
 }
 
-[data-minimized] > :not(header) {
+.assistant-panel[data-minimized] .chat-view {
+	grid-template-rows: 48px;
+}
+
+.assistant-panel[data-minimized] .chat-view > :not(header),
+.assistant-panel[data-minimized] .thread-sidebar {
 	display: none;
+}
+
+.thread-sidebar {
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+	min-height: 0;
+	padding: 0.85rem 0.65rem;
+	background: #141414;
+	border-right: 1px solid var(--assistant-border);
+}
+
+.thread-sidebar-label {
+	color: var(--assistant-muted);
+	font-size: 0.7rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.thread-navigation {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.5rem;
+	min-height: 0;
+}
+
+.thread-new,
+.thread-trigger {
+	padding: 0.5rem 0.6rem;
+	border-radius: 7px;
+	font-size: 0.77rem;
+}
+
+.thread-search {
+	display: flex;
+	align-items: center;
+	gap: 0.45rem;
+	padding-inline: 0.55rem;
+	color: var(--assistant-muted);
+	background: var(--assistant-bg);
+	border: 1px solid var(--assistant-border);
+	border-radius: 7px;
+}
+
+.thread-search:focus-within {
+	border-color: var(--assistant-border-hover);
+}
+
+.thread-search input {
+	width: 100%;
+	min-width: 0;
+	padding-block: 0.48rem;
+	color: var(--assistant-text);
+	background: transparent;
+	border: 0;
+	outline: 0;
+	font: inherit;
+	font-size: 0.77rem;
+}
+
+.thread-new {
+	display: flex;
+	align-items: center;
+	gap: 0.45rem;
+	width: 100%;
+	text-align: left;
+	color: var(--assistant-text);
+	background: var(--assistant-surface);
+	border: 1px solid var(--assistant-border);
+}
+
+.thread-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+}
+
+.thread-row {
+	display: flex;
+	align-items: center;
+}
+
+.thread-trigger {
+	flex: 1;
+	min-width: 0;
+	text-align: left;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.thread-row[data-active="true"] .thread-trigger {
+	color: var(--assistant-text);
+	background: var(--assistant-raised);
+}
+
+.thread-delete {
+	width: 1.7rem;
+	opacity: 0;
+}
+
+.thread-row:hover .thread-delete,
+.thread-row:focus-within .thread-delete {
+	opacity: 1;
 }
 
 header,
@@ -50,6 +219,13 @@ header {
 	justify-content: space-between;
 	padding-inline: 0.9rem 0.6rem;
 	background: var(--assistant-bg);
+	cursor: grab;
+	touch-action: none;
+	user-select: none;
+}
+
+header:active {
+	cursor: grabbing;
 }
 
 header strong {
@@ -72,11 +248,15 @@ button {
 }
 
 header button {
+	display: grid;
+	place-items: center;
+	flex: 0 0 1.9rem;
 	width: 1.9rem;
 	height: 1.9rem;
 	padding: 0;
 	border-radius: 7px;
 	font-size: 1rem;
+	line-height: 1;
 }
 
 button:hover:not(:disabled) {
@@ -125,6 +305,43 @@ button:hover:not(:disabled) {
 	font-size: 1.4rem;
 	font-weight: 500;
 	letter-spacing: -0.035em;
+}
+
+.welcome-fullscreen {
+	width: min(100%, 700px);
+	box-sizing: border-box;
+	gap: 1rem;
+	padding-inline: 1rem;
+}
+
+.welcome-fullscreen .composer-area {
+	width: 100%;
+}
+
+.welcome-fullscreen form {
+	margin: 0;
+}
+
+.starter-prompts {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.45rem;
+	width: min(100%, 430px);
+	margin-top: 0.5rem;
+}
+
+.starter-prompt {
+	padding: 0.4rem 0.65rem;
+	border: 1px solid var(--assistant-border);
+	border-radius: 99px;
+	font-size: 0.72rem;
+}
+
+.starter-prompt:hover {
+	color: var(--assistant-text);
+	background: var(--assistant-raised);
+	border-color: var(--assistant-border-hover);
 }
 
 .message {
@@ -482,13 +699,50 @@ textarea:focus {
 	:host {
 		inset: 42px 0 auto;
 		width: auto;
+		height: calc(100vh - 42px);
+		min-width: 0;
+		min-height: 0;
+		max-width: none;
+		max-height: none;
+		resize: none;
+	}
+
+	:host([data-minimized]) {
+		height: 48px;
+		min-height: 48px;
 	}
 
 	.assistant-panel {
-		height: calc(100vh - 42px);
+		height: 100%;
 		border-radius: 0;
+	}
+
+	.assistant-panel[data-fullscreen] {
+		grid-template-columns: minmax(150px, 40vw) minmax(0, 1fr);
+	}
+
+	header {
+		cursor: default;
+		touch-action: auto;
 	}
 }
 
-}`
+:host([data-fullscreen]) {
+	position: fixed !important;
+	inset: 0 !important;
+	width: 100vw !important;
+	height: 100vh !important;
+	height: 100dvh !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	max-width: none !important;
+	max-height: none !important;
+	resize: none !important;
+	z-index: 1000;
+}
 
+:host([data-fullscreen]) .assistant-panel {
+	border-radius: 0;
+}
+
+}`

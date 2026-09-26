@@ -1,115 +1,79 @@
 
-import {useMemo, useState} from "react"
-import {
-	AssistantRuntimeProvider,
-	AuiConfig,
-	AuiIf,
-	ComposerPrimitive,
-	ThreadPrimitive,
-	Tools,
-	WebSpeechSynthesisAdapter,
-} from "@assistant-ui/react"
-import {lastAssistantMessageIsCompleteWithToolCalls} from "ai"
-import {AssistantChatTransport, useChatRuntime} from "@assistant-ui/ai-sdk"
-import WaDropdown from "@awesome.me/webawesome/dist/react/dropdown/index.js"
-import WaDropdownItem from "@awesome.me/webawesome/dist/react/dropdown-item/index.js"
+import {useState} from "react"
+import {AssistantRuntimeProvider, AuiIf, ThreadPrimitive} from "@assistant-ui/react"
 
-import {createAssistantToolkit} from "./toolkit/toolkit.js"
+import {starterPrompts} from "./parts/starter.js"
+import {ChatHeader} from "./parts/header.js"
+import {ChatComposer} from "./parts/composer.js"
+import {useChatPanel} from "./parts/panel.js"
+import {ThreadSidebar} from "./parts/threads.js"
 import {AssistantEditorProvider} from "./renderers/tool-group.js"
 import type {EditorContext} from "../../../../context/context.js"
 import {AssistantMessage, UserMessage} from "./renderers/messages.js"
+import {useProjectChatRuntime, type ReasoningEffort} from "./parts/runtime.js"
 
 export function AssistantChat({context, onClose}: {
 	context: EditorContext
 	onClose: () => void
 }) {
+	const panel = useChatPanel(onClose)
+	const {panelRef, minimized, fullscreen} = panel
+	const [threadSearch, setThreadSearch] = useState("")
+	const [reasoningEffort, setReasoningEffort] = useState<ReasoningEffort>("xhigh")
+	const {runtime, config} = useProjectChatRuntime(context, reasoningEffort)
 
-	const [minimized, setMinimized] = useState(false)
-	const [reasoningEffort, setReasoningEffort] = useState<"none" | "low" | "medium" | "xhigh">("xhigh")
-
-	const close = () => {
-		setMinimized(false)
-		onClose()
-	}
-
-	const transport = useMemo(() => new AssistantChatTransport({
-		api: "/api/assistant",
-		body: () => ({context: context.getAssistantContext(), reasoningEffort}),
-	}), [context, reasoningEffort])
-	const speech = useMemo(() => new WebSpeechSynthesisAdapter(), [])
-	const config = useMemo(
-		() => AuiConfig({tools: Tools({toolkit: createAssistantToolkit(context, reasoningEffort)})}),
-		[context, reasoningEffort],
-	)
-	const runtime = useChatRuntime({
-		transport,
-		adapters: {speech},
-		sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-	})
+	const composer = <ChatComposer
+		effort={reasoningEffort}
+		onEffortChange={setReasoningEffort}
+	/>
 
 	return <AssistantRuntimeProvider runtime={runtime} config={config}>
 		<AssistantEditorProvider context={context}>
-		<aside className="assistant-panel" data-minimized={minimized || undefined}>
-			<header>
-				<strong><span>✦</span> Omniclip AI</strong>
+			<aside
+				ref={panelRef}
+				className="assistant-panel"
+				data-fullscreen={fullscreen || undefined}
+				data-minimized={minimized || undefined}>
+				{fullscreen && <ThreadSidebar
+					search={threadSearch}
+					onSearchChange={setThreadSearch}
+				/>}
 
-				<div>
-					<button
-						type="button"
-						title={minimized ? "Restore" : "Minimize"}
-						onClick={() => setMinimized(value => !value)}>
-						{minimized ? "+" : "−"}
-					</button>
+				<div className="chat-view">
+					<ChatHeader panel={panel} />
 
-					<button type="button" title="Close" onClick={close}>×</button>
+					<ThreadPrimitive.Root className="thread">
+						<ThreadPrimitive.Viewport
+							className="messages"
+							turnAnchor="top">
+							<AuiIf condition={state => state.thread.isEmpty}>
+								<div className={fullscreen ? "welcome welcome-fullscreen" : "welcome"}>
+									<strong>How can I help you today?</strong>
+									{!fullscreen && <span>Ask about Omniclip and video editing.</span>}
+									{fullscreen && composer}
+									{fullscreen && <div className="starter-prompts">
+										{starterPrompts.map(({title, prompt}) =>
+											<ThreadPrimitive.Suggestion
+												key={title}
+												className="starter-prompt"
+												prompt={prompt}
+												send>
+												{title}
+											</ThreadPrimitive.Suggestion>,
+										)}
+									</div>}
+								</div>
+							</AuiIf>
+
+							<ThreadPrimitive.Messages components={{UserMessage, AssistantMessage}} />
+						</ThreadPrimitive.Viewport>
+					</ThreadPrimitive.Root>
+
+					<AuiIf condition={state => !fullscreen || !state.thread.isEmpty}>
+						{composer}
+					</AuiIf>
 				</div>
-			</header>
-
-			<ThreadPrimitive.Root className="thread">
-				<ThreadPrimitive.Viewport className="messages" turnAnchor="top">
-					<AuiIf condition={state => state.thread.isEmpty}>
-						<div className="welcome">
-							<strong>How can I help you today?</strong>
-							<span>Ask about Omniclip and video editing.</span>
-						</div>
-					</AuiIf>
-
-					<ThreadPrimitive.Messages components={{
-						UserMessage,
-						AssistantMessage,
-					}} />
-				</ThreadPrimitive.Viewport>
-			</ThreadPrimitive.Root>
-
-			<div className="composer-area">
-				<ComposerPrimitive.Root>
-					<ComposerPrimitive.Input autoFocus placeholder="Send a message…" />
-					<WaDropdown
-						className="thinking-effort"
-						onWaSelect={event => setReasoningEffort(
-							(event.detail.item as HTMLElementTagNameMap["wa-dropdown-item"]).value as typeof reasoningEffort,
-						)}>
-						<button slot="trigger" type="button" title="Thinking effort for this turn">
-							{({none: "Off", low: "Fast", medium: "Balanced", xhigh: "Deep"})[reasoningEffort]} <span>⌄</span>
-						</button>
-						{(["none", "low", "medium", "xhigh"] as const).map(value =>
-							<WaDropdownItem key={value} value={value}>
-								<span className="thinking-check">{reasoningEffort === value ? "✓" : ""}</span>
-								{({none: "Off", low: "Fast", medium: "Balanced", xhigh: "Deep"})[value]}
-							</WaDropdownItem>,
-						)}
-					</WaDropdown>
-
-					<AuiIf condition={state => !state.thread.isRunning}>
-						<ComposerPrimitive.Send className="send" title="Send">↑</ComposerPrimitive.Send>
-					</AuiIf>
-
-					<AuiIf condition={state => state.thread.isRunning}>
-						<ComposerPrimitive.Cancel className="send" title="Stop">■</ComposerPrimitive.Cancel>
-					</AuiIf>
-				</ComposerPrimitive.Root>
-			</div>
-		</aside>
+			</aside>
 		</AssistantEditorProvider>
 	</AssistantRuntimeProvider>
 }
