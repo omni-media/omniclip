@@ -4,6 +4,7 @@ import {ExposedError} from "@e280/renraku"
 
 import {R2Bucket} from "../bucket.js"
 import {requireEnv} from "../../utils/env.js"
+import {trackTemporaryUpload, type ProjectSession} from "../cleanup.js"
 
 export const reasoningEfforts = ['none', 'low', 'medium', 'xhigh'] as const
 export type ReasoningEffort = typeof reasoningEfforts[number]
@@ -11,19 +12,16 @@ type VideoRequest = {prompt: string; fileName: string; reasoningEffort: Reasonin
 type ModelResponse = {choices?: {message?: {content?: string}}[]}
 
 export const mediaAnalysisApi = (r2: R2Bucket) => ({
-	async uploadTarget() {
-		return r2.createUploadTarget(`analysis/${randomUUID()}`)
+	async uploadTarget(input: ProjectSession) {
+		const target = await r2.createUploadTarget(`analysis/${randomUUID()}`)
+		trackTemporaryUpload(input.projectId, target.fileName)
+		return target
 	},
 	async inspectVideo(input: VideoRequest) {
 		if (!isVideoRequest(input)) throw new ExposedError("Invalid video request")
 
-		try {
-			const videoUrl = await r2.downloadUrl(input.fileName)
-			return {analysis: await analyzeVideo(videoUrl, input.prompt, input.reasoningEffort)}
-		}
-		finally {
-			await r2.delete(input.fileName).catch(error => console.error("Could not delete temporary R2 video", error))
-		}
+		const videoUrl = await r2.downloadUrl(input.fileName)
+		return {analysis: await analyzeVideo(videoUrl, input.prompt, input.reasoningEffort)}
 	},
 })
 

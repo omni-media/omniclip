@@ -7,6 +7,7 @@ import {ChatHeader} from "./parts/header.js"
 import {ChatComposer} from "./parts/composer.js"
 import {useChatPanel} from "./parts/panel.js"
 import {ThreadSidebar} from "./parts/threads.js"
+import {useProjectHeartbeat} from "./parts/heartbeat.js"
 import {AssistantEditorProvider} from "./renderers/tool-group.js"
 import type {EditorContext} from "../../../../context/context.js"
 import {AssistantMessage, UserMessage} from "./renderers/messages.js"
@@ -21,6 +22,8 @@ export function AssistantChat({context, onClose}: {
 	const [threadSearch, setThreadSearch] = useState("")
 	const [reasoningEffort, setReasoningEffort] = useState<ReasoningEffort>("xhigh")
 	const {runtime, config} = useProjectChatRuntime(context, reasoningEffort)
+
+	useProjectHeartbeat(context.strata.projectId)
 
 	const composer = <ChatComposer
 		effort={reasoningEffort}

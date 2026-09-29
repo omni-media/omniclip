@@ -1,6 +1,6 @@
 
 import {getSignedUrl} from "@aws-sdk/s3-request-presigner"
-import {DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client} from "@aws-sdk/client-s3"
+import {DeleteObjectsCommand, GetObjectCommand, PutObjectCommand, S3Client} from "@aws-sdk/client-s3"
 
 import {requireEnv} from "../utils/env.js"
 
@@ -23,7 +23,7 @@ export class R2Bucket {
 		const uploadUrl = await getSignedUrl(this.#client, new PutObjectCommand({
 			Bucket: this.#bucket,
 			Key: fileName,
-		}), {expiresIn: 600})
+		}), {expiresIn: 3600})
 		return {fileName, uploadUrl}
 	}
 
@@ -34,11 +34,14 @@ export class R2Bucket {
 		}), {expiresIn: 3600})
 	}
 
-	async delete(fileName: string) {
-		await this.#client.send(new DeleteObjectCommand({
+	async deleteMany(fileNames: string[]) {
+		if (!fileNames.length) return
+		const result = await this.#client.send(new DeleteObjectsCommand({
 			Bucket: this.#bucket,
-			Key: fileName,
+			Delete: {Objects: fileNames.map(Key => ({Key})), Quiet: true},
 		}))
+		if (result.Errors?.length)
+			throw new Error(`Could not delete ${result.Errors.length} temporary uploads`)
 	}
 }
 

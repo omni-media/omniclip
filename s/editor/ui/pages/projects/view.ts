@@ -1,5 +1,6 @@
 
 import {html} from 'lit'
+import {bytes, thumbprint} from '@e280/stz'
 import {shadow, spinner, useCss, useName, useSignal, useWait} from '@e280/sly'
 
 import styleCss from './style.css.js'
@@ -25,7 +26,7 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 
 	const openProject = (id: string) => router.go.project(id)
 	const createProject = async() => {
-		const projectId = `project-${Date.now().toString(36)}`
+		const projectId = thumbprint.fromBytes(bytes.random(16))
 		await Strata.createProject(projectId)
 		router.go.project(projectId)
 	}

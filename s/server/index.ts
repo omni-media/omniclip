@@ -4,20 +4,23 @@ import Renraku from "@e280/renraku"
 
 import {setupHttp} from "./parts/http.js"
 import {R2Bucket} from "./parts/bucket.js"
+import {cleanupBucketApi} from "./parts/cleanup.js"
 import {mediaAnalysisApi} from "./parts/assistant/analysis.js"
 import {assistantChatApi} from "./parts/assistant/chat.js"
 
 const isDev = process.env.NODE_ENV !== "production"
 const bucket = new R2Bucket()
-
 const serveHttp = setupHttp(isDev)
 const serveAssistantChat = assistantChatApi()
 const serveMediaAnalysis = Renraku.makeRequestListener({
 	rpc: Renraku.asRpc(async () => mediaAnalysisApi(bucket))
 })
+const serveCleanup = cleanupBucketApi(bucket)
 
 createServer((request, response) => {
-	if (request.method === "POST" && request.url === "/api/assistant")
+	if (request.method === "POST" && request.url === "/api/session/heartbeat")
+		serveCleanup(request, response)
+	else if (request.method === "POST" && request.url === "/api/assistant")
 		serveAssistantChat(request, response)
 	else if (request.method === "POST" && request.url === "/api/analyze")
 		serveMediaAnalysis(request, response)

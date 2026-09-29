@@ -8,8 +8,8 @@ import type {MediaAnalysisApi, ReasoningEffort} from "../../../../../../server/p
 
 const mediaAnalysis = Renraku.httpRemote<MediaAnalysisApi>({url: "/api/analyze"})
 
-async function uploadVideo(source: Blob) {
-	const target = await mediaAnalysis.uploadTarget()
+async function uploadVideo(projectId: string, source: Blob) {
+	const target = await mediaAnalysis.uploadTarget({projectId})
 	const response = await fetch(target.uploadUrl, {
 		method: "PUT",
 		headers: {"content-type": source.type || "video/mp4"},
@@ -31,7 +31,7 @@ export const videoTools = (context: EditorContext, reasoningEffort: ReasoningEff
 			const source = context.project.resources.require(item.mediaHash).blob
 			if (!source.type.startsWith("video/")) throw new Error("The selected item is not a video.")
 
-			const fileName = await uploadVideo(source)
+			const fileName = await uploadVideo(context.strata.projectId, source)
 			return new ToolResponse({
 				result: {fileName},
 				modelContent: [{type: "text", text: `The selected source video is available as temporary cloud model context with fileName ${fileName}. Call inspect_video with this fileName and the user's precise question.`}],
