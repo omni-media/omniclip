@@ -1,5 +1,5 @@
 
-import {defineToolkit} from "@assistant-ui/react"
+import {defineToolkit, type Toolkit} from "@assistant-ui/react"
 
 import {videoTools} from "./video.js"
 import {timelinePatchParameters} from "./schema.js"
@@ -15,7 +15,7 @@ const emptyParameters = {type: "object" as const, properties: {}, additionalProp
 export const createAssistantToolkit = (
 	context: EditorContext,
 	reasoningEffort: ReasoningEffort,
-) => defineToolkit({
+): Toolkit => defineToolkit({
 	read_skill: {
 		type: "backend",
 		renderText: {

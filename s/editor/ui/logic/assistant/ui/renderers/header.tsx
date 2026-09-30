@@ -1,6 +1,6 @@
 
 import {Maximize2Icon, Minimize2Icon} from "lucide-react"
-import type {useChatPanel} from "./panel.js"
+import type {useChatPanel} from "../parts/panel.js"
 
 export function ChatHeader({
 	panel,
@@ -50,4 +50,3 @@ export function ChatHeader({
 		</div>
 	</header>
 }
-

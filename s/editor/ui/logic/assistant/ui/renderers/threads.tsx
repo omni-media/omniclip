@@ -49,4 +49,3 @@ export function ThreadSidebar({
 		</ThreadListPrimitive.Root>
 	</nav>
 }
-

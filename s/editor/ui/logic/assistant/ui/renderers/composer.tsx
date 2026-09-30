@@ -3,7 +3,7 @@ import {AuiIf, ComposerPrimitive} from "@assistant-ui/react"
 import WaDropdown from "@awesome.me/webawesome/dist/react/dropdown/index.js"
 import WaDropdownItem from "@awesome.me/webawesome/dist/react/dropdown-item/index.js"
 
-import type {ReasoningEffort} from "./runtime.js"
+import type {ReasoningEffort} from "../parts/runtime.js"
 
 const effortLabels: Record<ReasoningEffort, string> = {
 	none: "Off",
@@ -44,4 +44,3 @@ export function ChatComposer({effort, onEffortChange}: {
 		</ComposerPrimitive.Root>
 	</div>
 }
-
