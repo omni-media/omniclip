@@ -1,3 +1,4 @@
+
 import {
 	ALL_FORMATS,
 	BlobSource,
@@ -10,7 +11,7 @@ import {
 
 const MAX_PART_SIZE = 1_900_000_000
 const MAX_PART_DURATION = 2 * 60 * 60
-const DIRECTORY = 'omniclip-analysis'
+const DIRECTORY_NAME = 'omniclip-analysis'
 
 export type MediaPart = {
 	blob: Blob
@@ -22,6 +23,7 @@ export type MediaPart = {
  * Splits source media into temporary parts for cloud analysis.
  * Each part stays below Qwen's two-hour and two-gigabyte limits, with a 1.9 GB margin.
  * Parts are remuxed into OPFS one at a time, uploaded by the caller, then deleted.
+ * It is fast because it transmux instead re-encode.
  */
 export class MediaSplitter {
 	#input: Input
@@ -128,13 +130,14 @@ export class MediaSplitter {
 
 		const root = await navigator.storage.getDirectory()
 
-		return this.#directory = await root.getDirectoryHandle(DIRECTORY, {
+		return this.#directory = await root.getDirectoryHandle(DIRECTORY_NAME, {
 			create: true
 		})
 	}
 
 	static async clearTemporaryMedia() {
 		const root = await navigator.storage.getDirectory()
-		await root.removeEntry(DIRECTORY, {recursive: true}).catch(() => {})
+		await root.removeEntry(DIRECTORY_NAME, {recursive: true}).catch(() => {})
 	}
 }
+

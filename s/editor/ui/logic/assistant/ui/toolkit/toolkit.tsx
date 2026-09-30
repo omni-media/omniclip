@@ -1,7 +1,7 @@
 
 import {defineToolkit, type Toolkit} from "@assistant-ui/react"
 
-import {videoTools} from "./video.js"
+import {videoTools} from "./video/tool.js"
 import {timelinePatchParameters} from "./schema.js"
 import {activity, resultActivity} from "./activity.js"
 import type {EditorContext} from "../../../../../context/context.js"

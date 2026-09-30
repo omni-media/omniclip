@@ -1,5 +1,5 @@
 
-import {useState} from "react"
+import {useEffect, useState} from "react"
 import {AssistantRuntimeProvider, AuiIf, ThreadPrimitive} from "@assistant-ui/react"
 
 import {useChatPanel} from "./parts/panel.js"
@@ -8,6 +8,7 @@ import {starterPrompts} from "./parts/starter.js"
 import {ThreadSidebar} from "./renderers/threads.js"
 import {ChatComposer} from "./renderers/composer.js"
 import {useProjectHeartbeat} from "./parts/heartbeat.js"
+import {MediaSplitter} from "./toolkit/video/splitter.js"
 import {AssistantEditorProvider} from "./renderers/tool-group.js"
 import type {EditorContext} from "../../../../context/context.js"
 import {AssistantMessage, UserMessage} from "./renderers/messages.js"
@@ -24,6 +25,7 @@ export function AssistantChat({context, onClose}: {
 	const {runtime, config} = useProjectChatRuntime(context, reasoningEffort)
 
 	useProjectHeartbeat(context.strata.projectId)
+	useEffect(() => {MediaSplitter.clearTemporaryMedia()}, [])
 
 	const composer = <ChatComposer
 		effort={reasoningEffort}
