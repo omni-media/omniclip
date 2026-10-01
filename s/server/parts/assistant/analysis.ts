@@ -1,21 +1,25 @@
 
-import {randomUUID} from "node:crypto"
 import {ExposedError} from "@e280/renraku"
 
 import {R2Bucket} from "../bucket.js"
 import {requireEnv} from "../../utils/env.js"
-import {trackTemporaryUpload, type ProjectSession} from "../cleanup.js"
-
-export const reasoningEfforts = ['none', 'low', 'medium', 'xhigh'] as const
-export type ReasoningEffort = typeof reasoningEfforts[number]
-type VideoRequest = {prompt: string; fileName: string; reasoningEffort: ReasoningEffort}
-type ModelResponse = {choices?: {message?: {content?: string}}[]}
+import {trackTemporaryUpload} from "../cleanup.js"
+import {FileRequest, ModelResponse, ReasoningEffort, UploadedPart, VideoRequest} from "./types.js"
 
 export const mediaAnalysisApi = (r2: R2Bucket) => ({
-	async uploadTarget(input: ProjectSession) {
-		const target = await r2.createUploadTarget(`analysis/${randomUUID()}`)
-		trackTemporaryUpload(input.projectId, target.fileName)
+	async uploadTarget(input: FileRequest) {
+		const target = await r2.createUploadTarget(input.fileName)
+		trackTemporaryUpload(input.projectId, input.fileName)
 		return target
+	},
+	async getUploadedParts(input: FileRequest) {
+		const parts = await r2.getJson<UploadedPart[]>(input.fileName)
+		if (parts) {
+			trackTemporaryUpload(input.projectId, input.fileName)
+			for (const part of parts)
+				trackTemporaryUpload(input.projectId, part.fileName)
+		}
+		return parts
 	},
 	async inspectVideo(input: VideoRequest) {
 		if (!isVideoRequest(input)) throw new ExposedError("Invalid video request")

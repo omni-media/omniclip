@@ -2,11 +2,11 @@
 import {defineToolkit, type Toolkit} from "@assistant-ui/react"
 
 import {videoTools} from "./video/tool.js"
+import {ReasoningEffort} from "../parts/runtime.js"
 import {timelinePatchParameters} from "./schema.js"
 import {activity, resultActivity} from "./activity.js"
 import type {EditorContext} from "../../../../../context/context.js"
 import type {TimelinePatchResult} from "../../../../../../iso/timeline.js"
-import type {ReasoningEffort} from "../../../../../../server/parts/assistant/analysis.js"
 
 type SkillCall = {skill: string; path: string}
 
@@ -39,7 +39,7 @@ export const createAssistantToolkit = (
 	...videoTools(context, reasoningEffort),
 	patch_timeline: {
 		type: "frontend",
-		description: "Atomically edit the current timeline when the user asks for a change. Use stable item IDs and preserve IDs when replacing complete items. Express timing changes by replacing the item; express reordering or reparenting by replacing the affected containers. The baseRevision must equal the current timelineRevision.",
+		description: "Atomically edit the current timeline when the user asks for a change. Use stable item IDs and preserve IDs when replacing complete items. Express timing changes by replacing the item; express reordering or reparenting by replacing the affected containers. Use timelineRevision from the latest supplied project context as baseRevision. After a revision mismatch, rebuild the patch from that context; never guess or increment a revision.",
 		execute: context.assistant.patchTimeline,
 		parameters: timelinePatchParameters,
 		renderText: {

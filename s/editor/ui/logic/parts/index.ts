@@ -82,6 +82,20 @@ export class Index {
 		return id == null ? undefined : this.items.get(id) as T | undefined
 	}
 
+	getMediaItems(rootId: Id) {
+		const items: Extract<Idx.AnyItem, {mediaHash: string}>[] = []
+		const visit = (id: Id) => {
+			const item = this.getItem(id)
+			if (item.enabled === false) return
+			if (Idx.isStruct(item))
+				item.childrenIds.forEach(visit)
+			else if ('mediaHash' in item)
+				items.push(item)
+		}
+		visit(rootId)
+		return items
+	}
+
 	getParent(childId: Id) {
 		return this.parents.get(childId)
 	}

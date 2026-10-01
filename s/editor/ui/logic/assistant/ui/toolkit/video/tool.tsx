@@ -2,11 +2,13 @@
 import {ToolResponse} from "assistant-stream"
 import {defineToolkit, type ToolCallMessagePartProps, type Toolkit} from "@assistant-ui/react"
 
+import {TimelineAnalysis} from "./types.js"
+import {inspectTimeline} from "./timeline.js"
+import {ReasoningEffort} from "../../parts/runtime.js"
 import {activity, resultActivity} from "../activity.js"
 import {mediaAnalysis, VideoContext} from "./context.js"
-import {clearUploadProgress, setUploadProgress, useUploadProgress} from "./progress.js"
 import type {EditorContext} from "../../../../../../context/context.js"
-import type {ReasoningEffort} from "../../../../../../../server/parts/assistant/analysis.js"
+import {clearUploadProgress, setProgressMessage, setUploadProgress, useUploadProgress} from "./progress.js"
 
 export const videoTools = (context: EditorContext, reasoningEffort: ReasoningEffort): Toolkit => defineToolkit({
 	provide_selected_video: {
@@ -20,8 +22,10 @@ export const videoTools = (context: EditorContext, reasoningEffort: ReasoningEff
 			if (!source.type.startsWith("video/")) throw new Error("The selected item is not a video.")
 
 			try {
+				setProgressMessage(toolCallId, "Preparing video context")
 				const video = new VideoContext(
 					context.strata.projectId,
+					item.mediaHash,
 					source,
 					progress => setUploadProgress(toolCallId, "Uploading video context", progress),
 				)
@@ -76,6 +80,41 @@ export const videoTools = (context: EditorContext, reasoningEffort: ReasoningEff
 			running: () => activity("Inspecting video with cloud model", "running"),
 			complete: ({result}: {result?: {analysis: string}}) =>
 				resultActivity(result, "Inspected the selected video", "Video inspection failed"),
+		},
+	},
+	inspect_timeline: {
+		type: "frontend",
+		description: "Inspect every video source in the current timeline, one at a time, when the user's question needs visual or audio understanding of the whole edit. This analyzes original sources, not a rendered timeline, so use the timeline context to account for edits, timing, captions, and effects.",
+		execute: async ({prompt}: {prompt: string}, {toolCallId}) => {
+			try {
+				const analyses = await inspectTimeline(context, prompt, reasoningEffort,
+					message => setProgressMessage(toolCallId, message),
+				)
+				const mediaContext = analyses.map(({itemId, mediaHash, start, end, analysis}) =>
+					`Timeline item ${itemId}, source ${mediaHash}, part ${start}s–${end}s:\n${analysis}`
+				).join("\n\n")
+				return new ToolResponse({
+					result: {analyses},
+					modelContent: [{type: "text", text: `Timeline source analyses:\n${mediaContext}\nUse these with the current timeline context to answer the user's question.`}],
+				})
+			}
+			finally {
+				clearUploadProgress(toolCallId)
+			}
+		},
+		parameters: {
+			type: "object",
+			properties: {
+				prompt: {type: "string", description: "The user's question about the timeline."},
+			},
+			required: ["prompt"],
+			additionalProperties: false,
+		},
+		render: function InspectTimelineActivity({status, toolCallId, result}: ToolCallMessagePartProps<unknown, {analyses: TimelineAnalysis[]}>) {
+			const progress = useUploadProgress(toolCallId)
+			return status.type === "running"
+				? activity(progress, "running")
+				: resultActivity(result, "Inspected timeline sources", "Timeline inspection failed")
 		},
 	},
 })

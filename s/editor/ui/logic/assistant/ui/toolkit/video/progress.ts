@@ -6,7 +6,11 @@ const messages = new Map<string, string>()
 const listeners = new Set<() => void>()
 
 export function setUploadProgress(toolCallId: string, label: string, value: number) {
-	messages.set(toolCallId, `${label} · ${Math.round(value * 100)}%`)
+	setProgressMessage(toolCallId, `${label} · ${Math.round(value * 100)}%`)
+}
+
+export function setProgressMessage(toolCallId: string, message: string) {
+	messages.set(toolCallId, message)
 	for (const listener of listeners) listener()
 }
 

@@ -1,10 +1,10 @@
 
 import {getSignedUrl} from "@aws-sdk/s3-request-presigner"
-import {DeleteObjectsCommand, GetObjectCommand, PutObjectCommand, S3Client} from "@aws-sdk/client-s3"
+import {DeleteObjectsCommand, GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client} from "@aws-sdk/client-s3"
 
 import {requireEnv} from "../utils/env.js"
 
-export type UploadTarget = {fileName: string; uploadUrl: string}
+export type UploadTarget = {uploadUrl: string}
 
 export class R2Bucket {
 	readonly #bucket = requireEnv("R2_BUCKET_APAC")
@@ -24,7 +24,7 @@ export class R2Bucket {
 			Bucket: this.#bucket,
 			Key: fileName,
 		}), {expiresIn: 3600})
-		return {fileName, uploadUrl}
+		return {uploadUrl}
 	}
 
 	downloadUrl(fileName: string) {
@@ -32,6 +32,21 @@ export class R2Bucket {
 			Bucket: this.#bucket,
 			Key: fileName,
 		}), {expiresIn: 3600})
+	}
+
+	async getJson<Value>(fileName: string): Promise<Value | undefined> {
+		try {
+			const result = await this.#client.send(new GetObjectCommand({
+				Bucket: this.#bucket,
+				Key: fileName,
+			}))
+			return JSON.parse(await result.Body!.transformToString()) as Value
+		}
+		catch (error) {
+			if (error instanceof NoSuchKey)
+				return
+			throw error
+		}
 	}
 
 	async deleteMany(fileNames: string[]) {

@@ -8,16 +8,11 @@ import {
 	Output,
 	StreamTarget
 } from 'mediabunny'
+import {MediaPart} from './types.js'
 
 const MAX_PART_SIZE = 1_900_000_000
 const MAX_PART_DURATION = 2 * 60 * 60
 const DIRECTORY_NAME = 'omniclip-analysis'
-
-export type MediaPart = {
-	blob: Blob
-	start: number
-	end: number
-}
 
 /**
  * Splits source media into temporary parts for cloud analysis.

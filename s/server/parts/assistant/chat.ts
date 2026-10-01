@@ -9,22 +9,15 @@ import {
 	stepCountIs,
 	streamText,
 	toUIMessageStream,
-	type UIMessage,
 } from "ai"
-import {frontendTools, type FrontendTools} from "@assistant-ui/ai-sdk"
+import {frontendTools} from "@assistant-ui/ai-sdk"
 
+import {AssistantRequest} from "./types.js"
+import {requireEnv} from "../../utils/env.js"
 import {assistantTools} from "../../tools.js"
 import {skillInstructions} from "../../skills.js"
-import type {AssistantContext} from "../../../iso/assistant/types.js"
 import {assistantInstructions} from "../../../iso/assistant/knowledge.js"
-import {requireEnv} from "../../utils/env.js"
 
-type AssistantRequest = {
-	messages: UIMessage[]
-	tools?: FrontendTools
-	context: AssistantContext
-	reasoningEffort?: "none" | "low" | "medium" | "xhigh"
-}
 
 export const assistantChatApi = (): RequestListener => {
 	const model = createOpenAI({

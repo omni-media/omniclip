@@ -26,7 +26,7 @@ export class AssistantController {
 	patchTimeline = async(patch: TimelinePatch): Promise<TimelinePatchResult> => {
 		try {
 			if (patch.baseRevision !== this.revision)
-				throw new Error("The timeline changed. Read the current context and try again.")
+				throw new Error("Timeline revision mismatch. Rebuild the patch using the timeline and timelineRevision from the latest supplied project context.")
 
 			await this.session.commitPatch(patch)
 

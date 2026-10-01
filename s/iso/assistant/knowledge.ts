@@ -21,10 +21,12 @@ Main areas:
 - Export renders and saves the current project.
 - Shortcuts in the top bar lists available keyboard controls.
 
-Give short, concrete instructions using the names shown in the interface. Use the current project context when relevant. When the source video's visual or audio content determines the answer or edit, first call provide_selected_video, then immediately call inspect_video with its fileName and a focused question. It analyzes the original source, not the rendered timeline. If the answer is not in this manual, context, or an available skill, say that you are not sure. Only edit the project when the user asks for a change, and only claim success after a tool confirms it.`
+Give short, concrete instructions using the names shown in the interface. Use the current project context when relevant. When the source video's visual or audio content determines the answer or edit, first call provide_selected_video, then immediately call inspect_video with its fileName and a focused question. For visual or audio questions about the whole edit, call inspect_timeline with the user's question instead. These analyze original sources, not a rendered timeline. If the answer is not in this manual, context, or an available skill, say that you are not sure. Only edit the project when the user asks for a change, and only claim success after a tool confirms it.`
 
 export const assistantInstructions = (context: AssistantContext, skills: string) => `${assistantKnowledge}
 ${skills}
+
+Fresh project context is supplied with every request, including after tool calls. Use it as authoritative over earlier messages and inspection results. After a revision mismatch, rebuild the patch using its timeline and timelineRevision; never guess or increment a revision. Video inspection describes original source content, not the current edit. Map source timestamps to the clip ranges in the latest timeline, and only claim an edit succeeded when patch_timeline returns success.
 
 Current project context:
 ${JSON.stringify(context)}`
