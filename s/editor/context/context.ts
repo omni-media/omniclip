@@ -1,10 +1,11 @@
 
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
-import type {TimelineFile} from "@omnimedia/omnitool"
+import {Kind, type TimelineFile} from "@omnimedia/omnitool"
 
-import {prepareViews} from "../ui/views/views.js"
-import {ModalManager} from "./parts/modal/modal.js"
 import {syncOutliner} from "./parts/outliner.js"
+import {prepareViews} from "../ui/views/views.js"
+import {McpController} from "./controllers/mcp.js"
+import {ModalManager} from "./parts/modal/modal.js"
 import type {AssistantContext} from "../../iso/assistant/types.js"
 import {Requirements, setupRequirements} from "./parts/requirements.js"
 
@@ -16,6 +17,7 @@ export class EditorContext {
 
 	views = prepareViews(this)
 	modals = new ModalManager(this)
+	mcp = new McpController(this)
 
 	#stopPlaybackTick
 	#stopTimelineSync
@@ -51,16 +53,27 @@ export class EditorContext {
 	get keybindings() {return this.requirements.keybindings}
 
 	getAssistantContext(): AssistantContext {
+		const timeline = this.session.timeline.state as TimelineFile
+		const hashes = new Set(timeline.items.flatMap(item => "mediaHash" in item ? [item.mediaHash] : []))
 		return {
-			timeline: this.session.timeline.state as TimelineFile,
+			timeline,
+			projectId: this.strata.projectId,
 			timelineRevision: this.assistant.revision,
 			playhead: this.session.$playhead(),
 			viewedItemId: this.session.$viewedItemId(),
 			selectedItemId: this.session.$selectedItem(),
+			media: Array.from(hashes, mediaHash => {
+				const {filename, blob, duration} = this.project.resources.require(mediaHash)
+				return {mediaHash, filename, type: blob.type, duration}
+			}),
+			kinds: Object.fromEntries(
+				Object.entries(Kind).filter((entry): entry is [string, number] => typeof entry[1] === "number")
+			)
 		}
 	}
 
 	dispose = () => {
+		this.mcp.dispose()
 		this.#stopPlaybackTick()
 		this.#stopTimelineSync()
 		this.strata.dispose()

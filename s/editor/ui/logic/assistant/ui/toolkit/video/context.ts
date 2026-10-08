@@ -1,11 +1,11 @@
 
-import Renraku from "@e280/renraku"
+import {httpRemote} from "@e280/renraku"
 
 import {MediaSplitter} from "./splitter.js"
 import {UploadedPart} from "../../../../../../../server/parts/assistant/types.js"
 import type {MediaAnalysisApi} from "../../../../../../../server/parts/assistant/analysis.js"
 
-export const mediaAnalysis: Renraku.Remote<MediaAnalysisApi> = Renraku.httpRemote<MediaAnalysisApi>({url: "/api/analyze"})
+export const mediaAnalysis = httpRemote<MediaAnalysisApi>("/api/analyze", {timeout: 60_000})
 
 export class VideoContext {
 	#uploaded = 0

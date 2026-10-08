@@ -1,5 +1,6 @@
 
-import Renraku from "@e280/renraku"
+import {makeEndpoint} from "@e280/renraku"
+import {httpListener} from "@e280/renraku/node"
 
 import {R2Bucket} from "./bucket.js"
 
@@ -29,9 +30,7 @@ export function cleanupBucketApi(bucket: R2Bucket) {
 				.catch(error => console.error("Could not clean temporary uploads", error))
 	}, heartbeatInterval)
 
-	return Renraku.makeRequestListener({
-		rpc: Renraku.asRpc(async () => sessionApi())
-	})
+	return httpListener(makeEndpoint(sessionApi()))
 }
 
 function project(projectId: string) {

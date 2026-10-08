@@ -5,6 +5,7 @@ import {shadow, useCss, useOnce, useSignal} from '@e280/sly'
 import styleCss from './style.css.js'
 import modalCss from '../../../../context/parts/modal/modal.css.js'
 
+import {McpSettings} from './mcp.js'
 import {settings} from './constants.js'
 import {aspectRatioOptions, getResolutions} from './utils.js'
 import {
@@ -164,6 +165,11 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 								removing.value,
 								removeModel,
 							)}
+						</section>
+
+						<section>
+							<div class="section-label">MCP</div>
+							${McpSettings(ctx)}
 						</section>
 
 					</div>

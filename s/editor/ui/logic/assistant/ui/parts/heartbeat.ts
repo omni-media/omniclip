@@ -1,10 +1,10 @@
 import {useEffect} from "react"
-import Renraku from "@e280/renraku"
+import {httpRemote} from "@e280/renraku"
 
 import type {SessionApi} from "../../../../../../server/parts/cleanup.js"
 
 const heartbeatInterval = 60_000
-const session = Renraku.httpRemote<SessionApi>({url: "/api/session/heartbeat"})
+const session = httpRemote<SessionApi>("/api/session/heartbeat", {timeout: 60_000})
 
 export function useProjectHeartbeat(projectId: string) {
 	useEffect(() => {

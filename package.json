@@ -8,6 +8,9 @@
 		"s"
 	],
 	"type": "module",
+	"bin": {
+		"omniclipmcp": "x/mcp/index.js"
+	},
 	"scripts": {
 		"build": "run-s _clean _coi _ln _tsc _scute",
 		"build-netlify": "run-s _clean _tsc _copy-assets _scute _copy-node-modules",
@@ -38,6 +41,7 @@
 		"@types/react": "^19.2.18",
 		"@types/react-dom": "^19.2.7",
 		"@types/wicg-file-system-access": "^2023.10.6",
+		"@types/ws": "^8.18.2",
 		"chai": "^5.2.0",
 		"chokidar": "^4.0.3",
 		"chokidar-cli": "^3.0.0",
@@ -61,23 +65,28 @@
 		"@benev/tact": "^0.1.1",
 		"@e280/kv": "^0.1.2",
 		"@e280/quay": "^0.0.0-21",
-		"@e280/renraku": "^0.5.9",
+		"@e280/renraku": "^0.6.0-17",
 		"@e280/shiny": "^0.1.0-21",
 		"@e280/sly": "^0.3.12",
 		"@e280/strata": "^0.3.5",
 		"@e280/stz": "^0.2.36",
+		"@fastify/cors": "^11.3.0",
+		"@fastify/websocket": "^11.3.3",
 		"@ffmpeg/ffmpeg": "^0.12.15",
 		"@ffmpeg/util": "^0.12.2",
 		"@floating-ui/dom": "^1.7.1",
 		"@huggingface/transformers": "^4.2.0",
+		"@modelcontextprotocol/sdk": "^1.32.1",
 		"@omnimedia/kimura": "^1.0.5-10",
 		"@omnimedia/omnitool": "^1.1.0-140",
 		"@pixi/colord": "^2.9.6",
 		"@zip.js/zip.js": "^2.7.62",
 		"ai": "^7.0.102",
 		"assistant-stream": "^0.3.43",
+		"claude-video-vision": "1.4.0",
 		"coi-serviceworker": "^0.1.7",
 		"es-module-shims": "^2.6.0",
+		"fastify": "^5.12.5",
 		"ffprobe-wasm": "^0.3.1",
 		"gl-transitions": "^1.43.0",
 		"gsap": "^3.13.0",
@@ -94,6 +103,7 @@
 		"sirv": "^3.0.2",
 		"sparrow-rtc": "^0.2.9",
 		"wavesurfer.js": "^7.9.5",
-		"web-demuxer": "^2.3.8"
+		"ws": "^8.22.0",
+		"zod": "^4.6.5"
 	}
 }

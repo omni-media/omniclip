@@ -1,6 +1,7 @@
 
 import {createServer} from "node:http"
-import Renraku from "@e280/renraku"
+import {makeEndpoint} from "@e280/renraku"
+import {httpListener} from "@e280/renraku/node"
 
 import {setupHttp} from "./parts/http.js"
 import {R2Bucket} from "./parts/bucket.js"
@@ -12,9 +13,7 @@ const isDev = process.env.NODE_ENV !== "production"
 const bucket = new R2Bucket()
 const serveHttp = setupHttp(isDev)
 const serveAssistantChat = assistantChatApi()
-const serveMediaAnalysis = Renraku.makeRequestListener({
-	rpc: Renraku.asRpc(async () => mediaAnalysisApi(bucket))
-})
+const serveMediaAnalysis = httpListener(makeEndpoint(mediaAnalysisApi(bucket)))
 const serveCleanup = cleanupBucketApi(bucket)
 
 createServer((request, response) => {

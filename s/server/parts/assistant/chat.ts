@@ -9,13 +9,15 @@ import {
 	stepCountIs,
 	streamText,
 	toUIMessageStream,
+	safeValidateUIMessages,
 } from "ai"
 import {frontendTools} from "@assistant-ui/ai-sdk"
 
-import {AssistantRequest} from "./types.js"
+import {assistantRequest} from "./schema.js"
 import {requireEnv} from "../../utils/env.js"
 import {assistantTools} from "../../tools.js"
 import {skillInstructions} from "../../skills.js"
+import type {AssistantContext} from "../../../iso/assistant/types.js"
 import {assistantInstructions} from "../../../iso/assistant/knowledge.js"
 
 
@@ -31,17 +33,26 @@ export const assistantChatApi = (): RequestListener => {
 		response.on("close", () => controller.abort())
 
 		try {
-			const body = await json(request) as AssistantRequest
+			const parsed = assistantRequest.safeParse(await json(request))
+
+			if (!parsed.success)
+				return response.writeHead(400).end("Invalid assistant request")
+
+			const body = parsed.data
 			const tools = {...frontendTools(body.tools ?? {}), ...assistantTools}
-			const reasoningEffort = body.reasoningEffort ?? "xhigh"
+			const messages = await safeValidateUIMessages({messages: body.messages, tools})
+
+			if (!messages.success)
+				return response.writeHead(400).end("Invalid assistant messages")
+
 			const result = streamText({
 				tools,
 				model,
 				stopWhen: stepCountIs(8),
 				abortSignal: controller.signal,
-				providerOptions: {openai: {reasoningEffort}},
-				system: assistantInstructions(body.context, skillInstructions),
-				messages: await convertToModelMessages(body.messages, {tools})
+				providerOptions: {openai: {reasoningEffort: body.reasoningEffort ?? "xhigh"}},
+				system: assistantInstructions(body.context as AssistantContext, skillInstructions),
+				messages: await convertToModelMessages(messages.data, {tools})
 			})
 
 			await pipeUIMessageStreamToResponse({
