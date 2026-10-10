@@ -3,7 +3,7 @@ import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 import cors from '@fastify/cors'
 import type {WebSocket} from 'ws'
-import {GMap, hex} from '@e280/stz'
+import {guarantee, hex} from '@e280/stz'
 import websocket from '@fastify/websocket'
 import {mkdtemp, rm, writeFile} from 'node:fs/promises'
 import {connect, Messenger, wire, type Remote} from '@e280/renraku'
@@ -23,7 +23,7 @@ export class EditorBridge {
 	#editor?: Remote<EditorRpc>
 	#disconnected = new AbortController()
 	#uploads = new Set<string>()
-	#media = new GMap<string, Promise<ProvidedMedia>>()
+	#media = new Map<string, Promise<ProvidedMedia>>()
 
 	constructor(private origin: string, public port = bridgePort) {}
 
@@ -71,7 +71,7 @@ export class EditorBridge {
 	}
 
 	provide(mediaHash: string, signal?: AbortSignal) {
-		return this.#media.guarantee(mediaHash, async () => {
+		return guarantee(this.#media, mediaHash, async () => {
 			const id = hex.random(16)
 			const path = join(this.#directory, id)
 

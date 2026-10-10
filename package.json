@@ -69,7 +69,7 @@
 		"@e280/shiny": "^0.1.0",
 		"@e280/sly": "^0.4.8",
 		"@e280/strata": "^0.5.5",
-		"@e280/stz": "^0.2.36",
+		"@e280/stz": "^0.4.7",
 		"@fastify/cors": "^11.3.0",
 		"@fastify/websocket": "^11.3.3",
 		"@ffmpeg/ffmpeg": "^0.12.15",

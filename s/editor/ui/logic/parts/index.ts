@@ -1,5 +1,5 @@
 
-import {GMap} from '@e280/stz'
+import {need} from '@e280/stz'
 import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
 import {Id, Item, Kind, TimelineFile} from '@omnimedia/omnitool'
 import {computeItemDuration} from '@omnimedia/omnitool/x/timeline/renderers/parts/handy.js'
@@ -46,10 +46,10 @@ export namespace Idx {
 
 export class Index {
 
-	items = new GMap<Id, Idx.AnyItem>()
-	parents = new GMap<Id, Idx.Struct>()
-	laneStarts = new GMap<Id, Ms>()
-	durations = new GMap<Id, Ms>()
+	items = new Map<Id, Idx.AnyItem>()
+	parents = new Map<Id, Idx.Struct>()
+	laneStarts = new Map<Id, Ms>()
+	durations = new Map<Id, Ms>()
 
 	constructor(source: TimelineFile) {
 		this.#reindex(source)
@@ -75,7 +75,7 @@ export class Index {
 	}
 
 	getItem<T extends Idx.AnyItem>(id: Id) {
-		return this.items.require(id) as T
+		return need(this.items, id) as T
 	}
 
 	getItemMaybe<T extends Idx.AnyItem>(id?: Id | null) {
