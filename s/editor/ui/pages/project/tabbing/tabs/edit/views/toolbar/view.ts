@@ -36,7 +36,7 @@ export const Toolbar = shadow((context: EditorContext) => {
 
 	const canZoomOut = zoom > minZoom
 	const canZoomIn = zoom < maxZoom
-	const activeTool = toolOptions.find(tool => tool.id === session.activeMode.value.id) ?? toolOptions[0]
+	const activeTool = toolOptions.find(tool => tool.id === session.activeMode().id) ?? toolOptions[0]
 
 	const shortcutLabel = (action: typeof toolOptions[number]["shortcut"]) => {
 		return combosFromAtom(context.keybindings.getBinding(action))
@@ -46,7 +46,7 @@ export const Toolbar = shadow((context: EditorContext) => {
 
 	const selectTool = ({detail}: CustomEvent) => {
 		const selected = toolOptions.find(tool => tool.id === detail.item.value)
-		if (selected && selected.id !== session.activeMode.value.id)
+		if (selected && selected.id !== session.activeMode().id)
 			session.setMode(selected.tool)
 	}
 
@@ -67,7 +67,7 @@ export const Toolbar = shadow((context: EditorContext) => {
 	}
 
 	const handleClipDelete = () => {
-		session.deleteClip(session.$selectedItem.value)
+		session.deleteClip(session.$selectedItem())
 	}
 
 	const setZoom = (event: Event) => {
@@ -123,14 +123,14 @@ export const Toolbar = shadow((context: EditorContext) => {
 				</div>
 				<div class="button-group">
 					<button
-						?disabled=${!session.$selectedItem.value}
+						?disabled=${!session.$selectedItem()}
 						@click=${handleClipDelete}
 						title="Delete Clip"
 					>
 						${binSvg}
 					</button>
 					<button
-						?disabled=${!session.$selectedItem.value}
+						?disabled=${!session.$selectedItem()}
 						@click=${handleSplit}
 						title="Split Clip (Cmd+B)"
 					>
@@ -141,7 +141,7 @@ export const Toolbar = shadow((context: EditorContext) => {
 
 			<div class="toolbar-section center">
 				<div class="timecode">
-					${formatTime(session.$playhead.value, {milliseconds: true})}
+					${formatTime(session.$playhead(), {milliseconds: true})}
 				</div>
 				<div class="button-group transport-controls">
 					<button

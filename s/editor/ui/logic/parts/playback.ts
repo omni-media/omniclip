@@ -13,8 +13,9 @@ export class Playback {
 	pause() {
 		this.player.pause()
 		this.player.playbackRate = 1
-		this.$isPlaying.value = false
-		this.$rate.value = 1
+		if (this.$isPlaying())
+			this.$isPlaying(false)
+		this.$rate(1)
 	}
 
 	seek(time: number) {
@@ -23,27 +24,27 @@ export class Playback {
 	}
 
 	toggle() {
-		if (this.$isPlaying.value) {
+		if (this.$isPlaying()) {
 			this.pause()
 			return
 		}
 
 		this.player.playbackRate = 1
 		this.player.play()
-		this.$isPlaying.value = true
-		this.$rate.value = 1
+		this.$isPlaying(true)
+		this.$rate(1)
 	}
 
 	shuttle(direction: -1 | 1) {
-		const current = this.$isPlaying.value ? this.$rate.value : 0
+		const current = this.$isPlaying() ? this.$rate() : 0
 		const sameDirection = Math.sign(current) === direction
 		const absRate = sameDirection ? Math.abs(current) : 0
 		const rate = playbackRates.find(rate => rate > absRate) ?? playbackRates[playbackRates.length - 1]
 
 		this.player.playbackRate = rate * direction
 		this.player.play()
-		this.$isPlaying.value = true
-		this.$rate.value = rate * direction
+		this.$isPlaying(true)
+		this.$rate(rate * direction)
 	}
 
 }

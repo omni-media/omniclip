@@ -27,7 +27,7 @@ export const Assistant = shadow((context: EditorContext, open: Signal<boolean>) 
 			root = createRoot(container.value!)
 			root.render(createElement(AssistantChat, {
 				context,
-				onClose: () => open.value = false,
+				onClose: () => open(false),
 			}))
 		})
 
@@ -39,7 +39,7 @@ export const Assistant = shadow((context: EditorContext, open: Signal<boolean>) 
 
 	return html`
 		<div
-			?hidden=${!open.value}
+			?hidden=${!open()}
 			${ref(container)}>
 		</div>
 	`

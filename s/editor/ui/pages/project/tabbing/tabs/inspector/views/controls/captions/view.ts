@@ -87,7 +87,7 @@ export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoI
 
 	const setCaptionConfig = (key: CaptionConfigKey, value: number) => {
 		const next = Math.max(1, Math.round(value) || 1);
-		({maxChars, maxDuration, maxSilence})[key].value = next
+		({maxChars, maxDuration, maxSilence})[key](next)
 		updateCaption({[key]: next})
 	}
 
@@ -95,25 +95,27 @@ export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoI
 		tool.set(item.id, {style: {...item.style, ...style}})
 
 	const ensureTranscriber = async () => {
-		if (transcriber.value)
-			return transcriber.value
+		const existing = transcriber()
+		if (existing)
+			return existing
 
-		transcriber.value = await makeTranscriber({
+		const next = await makeTranscriber({
 			driver: context.driver,
 			workerUrl: transcriberWorkerPath,
 			spec: {
 				...defaultTranscriberSpec(),
-				model: model.value,
-				device: device.value,
-				dtype: dtype.value,
+				model: model(),
+				device: device(),
+				dtype: dtype(),
 			},
 			onLoading: ({progress}) => {
-				if (!error.value)
+				if (!error())
 					status(formatProgress(Math.round(progress), "Loading speech model"))
 			}
 		})
+		transcriber(next)
 
-		return transcriber.value
+		return next
 	}
 
 	const insertCaption = (caption: Item.Caption) => {
@@ -142,28 +144,28 @@ export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoI
   	generating(true)
   	status("Preparing transcription...")
 
-  	const run = async () => {
-    	const transcriber = await ensureTranscriber()
-    	const nextTranscript = await transcriber.transcribe({
-      	source: media.blob,
-      	language: language.value,
-      	onTranscription: text => {
-      		if (!error.value && text.trim())
-      			status(text)
-      	},
-      	onReport: ({progress}) => {
-      		if (!error.value)
-      			status(formatProgress(Math.round(progress), "Transcribing"))
-      	}
-    	})
-    	const caption = context.omni.captions.make(nextTranscript, {
-      	itemId: item.id,
-      	start: item.start,
-      	duration: item.duration,
-      	maxChars: maxChars.value,
-      	maxDuration: maxDuration.value,
-      	maxSilence: maxSilence.value,
-    	})
+		const run = async () => {
+			const transcriber = await ensureTranscriber()
+			const nextTranscript = await transcriber.transcribe({
+				source: media.blob,
+				language: language(),
+				onTranscription: text => {
+					if (!error() && text.trim())
+						status(text)
+				},
+				onReport: ({progress}) => {
+					if (!error())
+						status(formatProgress(Math.round(progress), "Transcribing"))
+				}
+			})
+			const caption = context.omni.captions.make(nextTranscript, {
+				itemId: item.id,
+				start: item.start,
+				duration: item.duration,
+				maxChars: maxChars(),
+				maxDuration: maxDuration(),
+				maxSilence: maxSilence(),
+			})
     	insertCaption(caption)
     	status("Subtitles generated.")
     	context.session.$selectedItem(item.id)
@@ -190,7 +192,7 @@ export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoI
 		<label class="field-grid">
 			<span class="field-label">${label}</span>
 			<wa-number-input size="small" min="1" step=${step} max=${max ?? ""}
-				.value=${String(({maxChars, maxDuration, maxSilence})[key].value)}
+				.value=${String(({maxChars, maxDuration, maxSilence})[key]())}
 				@input=${(e: Event) => setCaptionConfig(key, Number(valueOf(e)))}
 			></wa-number-input>
 		</label>

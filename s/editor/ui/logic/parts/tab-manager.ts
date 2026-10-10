@@ -15,32 +15,32 @@ export class TabManager {
 		{id: "inspector"}
 	])
 
-	activeTabId = signal(this.tabs.value[0].id)
+	activeTabId = signal(this.tabs()[0].id)
 
 	switchTo(id: TabKind) {
-		this.activeTabId.value = id
+		this.activeTabId(id)
 	}
 
 	switchToByIndex(index: number) {
-		const tab = this.tabs.value[index]
+		const tab = this.tabs()[index]
 		if (tab)
-			this.activeTabId.value = tab.id
+			this.activeTabId(tab.id)
 	}
 
 	#getActiveIndex() {
-		return this.tabs.value.findIndex(t => t.id === this.activeTabId.value)
+		return this.tabs().findIndex(t => t.id === this.activeTabId())
 	}
 
 	next() {
 		const currentIndex = this.#getActiveIndex()
-		const nextIndex = (currentIndex + 1) % this.tabs.value.length
-		this.activeTabId.value = this.tabs.value[nextIndex].id
+		const nextIndex = (currentIndex + 1) % this.tabs().length
+		this.activeTabId(this.tabs()[nextIndex].id)
 	}
 
 	previous() {
 		const currentIndex = this.#getActiveIndex()
-		const prevIndex = (currentIndex - 1 + this.tabs.value.length) % this.tabs.value.length
-		this.activeTabId.value = this.tabs.value[prevIndex].id
+		const prevIndex = (currentIndex - 1 + this.tabs().length) % this.tabs().length
+		this.activeTabId(this.tabs()[prevIndex].id)
 	}
 }
 

@@ -49,7 +49,7 @@ export class Dragger {
 			snapshot: new DragSnapshot(
 				session.index,
 				clips,
-				session.$viewedItemId.value,
+				session.$viewedItemId(),
 			),
 			snapCandidates: this.positionMode ? positionSnapCandidates(session, clip, clips) : [],
 		}
@@ -88,7 +88,7 @@ export class Dragger {
 			ghost,
 		)
 
-		session.$drop.value = drop
+		session.$drop(drop)
 		session.canvas.scheduleDraw()
 	}
 
@@ -103,7 +103,7 @@ export class Dragger {
 
 	cancel(session: OmniSession) {
 		session.setGhostClip(null)
-		session.$drop.value = null
+		session.$drop(null)
 
 		this.#state = null
 		this.isDragging = false
@@ -154,7 +154,7 @@ export class Dragger {
 		session: OmniSession,
 		state: DragState,
 	) {
-		const drop = session.$drop.value
+		const drop = session.$drop()
 		const ghost = session.$ghostClip()
 
 		const desiredStart =
@@ -181,7 +181,7 @@ export class Dragger {
 			snapshot: state.snapshot,
 			movingId: state.clip.itemId,
 			desiredStart,
-			drop: session.$drop.value,
+			drop: session.$drop(),
 		})
 
 		new Proposal(session.timeline, overlay).commit()

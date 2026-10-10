@@ -15,7 +15,7 @@ export const InspectorTab = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
 	const session = context.session
 
-	const selectedItemId = session.$selectedItem.value
+	const selectedItemId = session.$selectedItem()
 	const selectedItem = session.index.getItemMaybe(selectedItemId)
 
 	const controls = (() => {

@@ -34,11 +34,11 @@ export const FiltersControls = shadow((context: EditorContext, item: FilterableI
 	const selectedFilterId = useSignal<Id | null>(attachedFilters[0]?.id ?? null)
 
 	const selectedFilter =
-		attachedFilters.find(f => f.id === selectedFilterId.value)
+		attachedFilters.find(f => f.id === selectedFilterId())
 		?? attachedFilters[0]
 		?? null
 
-	const selectFilter = (id: Id) => selectedFilterId.value = id
+	const selectFilter = (id: Id) => selectedFilterId(id)
 
 	const setFilterParams = (filter: Item.Filter, path: Path, value: any) => {
 		const next = deep.clone(filter.params ?? Schema.meta(filter).defaultParams)
@@ -71,7 +71,7 @@ export const FiltersControls = shadow((context: EditorContext, item: FilterableI
 			})
 		})
 
-		selectedFilterId.value = filter.id
+		selectedFilterId(filter.id)
 	}
 
 	const removeFilter = async (filterId: Id) => {
@@ -84,8 +84,8 @@ export const FiltersControls = shadow((context: EditorContext, item: FilterableI
 			remove(state, filterId)
 		})
 
-		if (selectedFilterId.value === filterId)
-			selectedFilterId.value = remaining[0]?.id ?? null
+		if (selectedFilterId() === filterId)
+			selectedFilterId(remaining[0]?.id ?? null)
 	}
 
 	const setEnabled = (filter: Item.Filter, enabled: boolean) => {

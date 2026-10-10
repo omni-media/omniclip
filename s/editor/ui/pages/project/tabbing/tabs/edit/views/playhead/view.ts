@@ -10,7 +10,7 @@ export const Playhead = shadow((context: EditorContext) => {
 	const session = context.session
 
 	return html`
-		<div class="playhead" style="left: ${session.$playhead.value}px">
+		<div class="playhead" style="left: ${session.$playhead()}px">
 			${playheadSvg}
 			<div class="line"></div>
 		</div>

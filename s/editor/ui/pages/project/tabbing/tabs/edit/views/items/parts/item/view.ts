@@ -19,8 +19,8 @@ export const TimelineItem = shadow((
 	const session = context.session
 
 	const visualWidth = session.viewport.durationToWidth(ms(item.duration ?? 0))
-	const setViewedItem = () => session.$viewedItemId.value = item.id
-	const setSelectedItem = () => session.$selectedItem.value = item.id
+	const setViewedItem = () => session.$viewedItemId(item.id)
+	const setSelectedItem = () => session.$selectedItem(item.id)
 
 	return html`
 		<div

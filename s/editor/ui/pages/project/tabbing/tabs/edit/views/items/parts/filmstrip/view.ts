@@ -1,7 +1,9 @@
+
 import {html} from "lit"
-import {shadow, useCss, useMount, useOnce, useSignal, useOpPromise} from "@e280/sly"
+import {waitGot} from "@e280/strata"
 import {Filmstrip, Item} from "@omnimedia/omnitool"
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {shadow, useCss, useMount, useSignal, useWait} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../../../../../../../../theme.css.js"
@@ -35,7 +37,7 @@ export const FilmstripView = shadow((
 		return clone
 	}
 
-	const op = useOpPromise<Filmstrip>(
+	const filmstrip = useWait(() =>
 		Filmstrip.init("/assets/temp/gl.mp4", {
 			frequency: 1,
 			onPlaceholders: times => {
@@ -54,8 +56,6 @@ export const FilmstripView = shadow((
 		})
 	)
 
-	const filmstrip = op.isLoading ? op.wait : op.require()
-
 	const update = async () => {
 		const viewportStart = session.viewport.visibleStart()
 		const viewportEnd = session.viewport.visibleEnd()
@@ -63,7 +63,7 @@ export const FilmstripView = shadow((
 		const visibleClipEnd = Math.min(clip.start + clip.duration, viewportEnd)
 
 		if (visibleClipStart < visibleClipEnd)
-			(await filmstrip).update({
+			waitGot(await filmstrip.result).update({
 				range: [
 					(visibleClipStart - clip.start) / 1000,
 					(visibleClipEnd - clip.start) / 1000,
@@ -72,12 +72,11 @@ export const FilmstripView = shadow((
 			})
 	}
 
-	useOnce(async () => update())
-
 	useMount(() => {
+		update()
 		const dispose1 = session.viewport.$zoom.on(update)
-		const dispose2 = session.viewport.$scrollLeft.on(async () => update())
-		const dispose3 = session.viewport.$width.on(async () => update())
+		const dispose2 = session.viewport.$scrollLeft.on(update)
+		const dispose3 = session.viewport.$width.on(update)
 		return () => {
 			dispose1()
 			dispose2()

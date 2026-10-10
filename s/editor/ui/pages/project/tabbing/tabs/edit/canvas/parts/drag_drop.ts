@@ -17,7 +17,7 @@ export class CanvasDragDrop {
 	})
 
 	#dragzone = this.dnd.dragzone(() => this.#data)
-	#dropzone = this.dnd.dropzone(() => this.canvas.deps.session.$drop.value!)
+	#dropzone = this.dnd.dropzone(() => this.canvas.deps.session.$drop()!)
 
 	constructor(private canvas: TimelineCanvas) {}
 
@@ -52,7 +52,7 @@ export class CanvasDragDrop {
 			this.#dropzone.dragover(event)
 			event.dataTransfer.dropEffect = "copy"
 		} else
-			this.dnd.$droppy.value = undefined
+			this.dnd.$droppy(undefined)
 	}
 
 	dragleave = (event: DragEvent) => {
@@ -73,7 +73,7 @@ export class CanvasDragDrop {
 	}
 
 	#setTarget(target: DropIntent | null) {
-		this.canvas.deps.session.$drop.value = target
+		this.canvas.deps.session.$drop(target)
 		this.canvas.scheduleDraw()
 	}
 }

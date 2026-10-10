@@ -66,10 +66,10 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 		useOnce(() => refreshStorage())
 
 		const set = (key: keyof Settings, value: string) => {
-			const next = {...selected.value, [key]: value}
+			const next = {...selected(), [key]: value}
 			if (key === 'aspectRatio')
   			next.resolution = getResolutions(value)[0]?.value
-			selected.value = next
+			selected(next)
 		}
 
 		const renderSelect = (
@@ -81,14 +81,14 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 				<span>${label}</span>
 				<wa-select
 					size=small
-					value=${selected.value[key]}
+					value=${selected()[key]}
 					@change=${(e: Event) =>
 						set(key, (e.target as HTMLSelectElement).value)}
 				>
 					${options.map(o => html`
 						<wa-option
 							value=${o.value}
-							selected=${selected.value[key] === o.value}
+							selected=${selected()[key] === o.value}
 						>
 							${o.label}
 						</wa-option>
@@ -144,7 +144,7 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 
 						<section class="video">
 							<div class="section-label">VIDEO</div>
-							${renderSelect('Resolution', 'resolution', getResolutions(selected.value.aspectRatio))}
+							${renderSelect('Resolution', 'resolution', getResolutions(selected().aspectRatio))}
 							${renderSelect('Drop frame', 'dropFrame', settings.dropFrame.options)}
 							${renderSelect('Aspect Ratio', 'aspectRatio', aspectRatioOptions)}
 							${renderSelect('Timebase', 'timebase', settings.timebase.options)}
@@ -160,9 +160,9 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 						<section class="model-storage">
 							<div class="section-label">AI MODEL STORAGE</div>
 							${renderModelStorage(
-								storage.value,
-								storageError.value,
-								removing.value,
+								storage(),
+								storageError(),
+								removing(),
 								removeModel,
 							)}
 						</section>
@@ -182,7 +182,7 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 
 					<wa-button
 						variant="neutral"
-						@click=${() => modal.resolve(selected.value)}
+						@click=${() => modal.resolve(selected())}
 					>
 						Apply
 					</wa-button>

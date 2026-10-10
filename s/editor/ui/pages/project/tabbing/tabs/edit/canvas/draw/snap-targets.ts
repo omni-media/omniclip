@@ -29,7 +29,7 @@ export function drawSnapTargets(canvas: TimelineCanvas) {
 		ctx.restore()
 	}
 
-	const drop = canvas.deps.session.$drop.value
+	const drop = canvas.deps.session.$drop()
 	if (drop) {
 		ctx.save()
 		ctx.strokeStyle = externalDrag

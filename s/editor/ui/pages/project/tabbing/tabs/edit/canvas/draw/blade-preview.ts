@@ -5,7 +5,7 @@ import type {TimelineCanvas} from "../canvas.js"
 export function drawBladePreview(canvas: TimelineCanvas) {
 
 	const blade = () => {
-		const preview = canvas.$previews.blade.value
+		const preview = canvas.$previews.blade()
 		if (preview === null)
 			return null
 

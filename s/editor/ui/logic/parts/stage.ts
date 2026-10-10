@@ -77,7 +77,7 @@ export class Stage {
 	 * Recalculates kimura bounds and redraws its wireframe
 	 **/
 	refresh() {
-		const id = this.session.$selectedItem.value
+		const id = this.session.$selectedItem()
 		const object = id && this.compositor.getActiveObject(id)
 
 		if (object)
@@ -184,8 +184,8 @@ export class Stage {
 		transform: Transform,
 	) {
 		const nextAnimation = cloneAnimation(animation.anims.transform as TransformAnimation)
-		const laneStart = this.session.index.getItemLaneStart(item.id, this.session.$viewedItemId.value)
-		const localTime = Math.min(item.duration, Math.max(0, this.session.$playhead.value - laneStart))
+		const laneStart = this.session.index.getItemLaneStart(item.id, this.session.$viewedItemId())
+		const localTime = Math.min(item.duration, Math.max(0, this.session.$playhead() - laneStart))
 
 		for (const {path} of ANIMATION_CHANNELS)
 			setAnimationKeyframe(nextAnimation, path, transform, localTime)

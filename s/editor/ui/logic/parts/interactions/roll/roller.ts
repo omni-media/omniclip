@@ -46,7 +46,7 @@ export class Roller {
 		this.#state = {
 			leftItem: session.index.getItem(leftId),
 			rightItem: session.index.getItem(rightId),
-			boundaryTime: session.index.getItemLaneStart(rightId, session.$viewedItemId.value),
+			boundaryTime: session.index.getItemLaneStart(rightId, session.$viewedItemId()),
 		}
 		session.setGhostClip(null)
 		session.setTrimPreviewOffsetPx(0)
@@ -79,7 +79,7 @@ export class Roller {
 		if (!this.#state)
 			return
 
-		session.$proposal.value?.commit()
+		session.$proposal()?.commit()
 
 		this.cancel(session)
 	}

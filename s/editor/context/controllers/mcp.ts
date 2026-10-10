@@ -16,9 +16,9 @@ export class McpController {
 	setEnabled(enabled: boolean) {
 		this.#stop?.()
 		this.#stop = undefined
-		this.$enabled.value = enabled
+		this.$enabled(enabled)
 		if (enabled)
-			this.#stop = connectMcp(this.editor, this.$port.value, status => this.$status.value = status)
+			this.#stop = connectMcp(this.editor, this.$port(), status => this.$status(status))
 	}
 
 	dispose() {

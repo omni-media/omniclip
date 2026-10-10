@@ -73,7 +73,7 @@ export const ItemControlTabs = light((props: {
 		{id: "effects" as const, label: "Effects", content: props.effects},
 		...(props.ai ? [{id: "ai" as const, label: "AI", content: props.ai}] : []),
 	]
-	const active = tabs.find(tab => tab.id === activeTab.value) ?? tabs[0]
+	const active = tabs.find(tab => tab.id === activeTab()) ?? tabs[0]
 
 	return html`
 		<div class="control-tabs">
@@ -82,7 +82,7 @@ export const ItemControlTabs = light((props: {
 					<button
 						class="control-tab"
 						?data-active=${tab.id === active.id}
-						@click=${() => activeTab.value = tab.id}
+						@click=${() => activeTab(tab.id)}
 					>
 						${tab.label}
 					</button>

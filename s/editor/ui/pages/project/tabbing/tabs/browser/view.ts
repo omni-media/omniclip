@@ -101,20 +101,20 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 	})
 
 	const setQuery = (event: InputEvent) => {
-		query.value = (event.target as HTMLInputElement).value
+		query((event.target as HTMLInputElement).value)
 	}
 
 	const setDuration = (event: InputEvent) => {
 		const next = Number((event.target as HTMLInputElement).value)
 		if (Number.isFinite(next))
-			duration.value = next
+			duration(next)
 	}
 
 	const dragTransition = (event: DragEvent, transition: Transition) => {
 		const canvas = context.session.canvas
 		canvas.dragDrop.start(event, {
 			targets: transitionDropTargets(canvas),
-			drop: ({targetId}) => context.session.applyTransitionAt(transition.name, duration.value, targetId),
+			drop: ({targetId}) => context.session.applyTransitionAt(transition.name, duration(), targetId),
 		})
 	}
 
@@ -135,14 +135,14 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 		}
 
 		context.session.appendItem(text)
-		const start = context.session.index.getItemLaneStart(text.id, context.session.$viewedItemId.value)
+		const start = context.session.index.getItemLaneStart(text.id, context.session.$viewedItemId())
 		context.session.seekPlayhead(start)
 		context.session.viewport.revealTime(start)
 	}
 
 	const renderTabButton = (id: BrowserTab, label: string, icon: unknown) => html`
-		<button class="browser-tab" ?data-active=${activeTab.value === id}
-			@click=${() => activeTab.value = id}>
+		<button class="browser-tab" ?data-active=${activeTab() === id}
+			@click=${() => activeTab(id)}>
 			${icon}
 			<span>${label}</span>
 		</button>
@@ -170,7 +170,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 	`)
 
 	const renderTransitions = () => {
-		const selected = context.session.index.getItemMaybe<Item.Transition>(context.session.$selectedItem.value)
+		const selected = context.session.index.getItemMaybe<Item.Transition>(context.session.$selectedItem())
 
 		return html`
 			<div class="browser-controls">
@@ -200,7 +200,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 
 			<div class="transition-grid">
 				${TRANSITIONS
-					.filter(transition => transition.label.toLowerCase().includes(query.value.trim().toLowerCase()))
+					.filter(transition => transition.label.toLowerCase().includes(query().trim().toLowerCase()))
 					.map(transition => html`
 					<button class="transition-card"
 						draggable="true"
@@ -208,7 +208,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 						title=${transition.label}
 						@dragstart=${(event: DragEvent) => dragTransition(event, transition)}
 						@dragend=${context.session.canvas.dragDrop.end}
-						@click=${() => context.session.applyTransitionToSelection(transition.name, duration.value)}>
+						@click=${() => context.session.applyTransitionToSelection(transition.name, duration())}>
 						<div class="transition-preview" aria-hidden="true"></div>
 						<div class="transition-name">${transition.label}</div>
 						<div class="transition-meta">${duration()} ms</div>

@@ -67,15 +67,15 @@ export const Github = shadow(() => {
 				return response.json()
 			})
 			.then(data => {
-				stats.value = {
+				stats({
 					stars: formatCount(data.stargazers_count ?? 0),
 					forks: formatCount(data.forks_count ?? 0),
 					issues: `${data.open_issues_count ?? 0} open`,
 					loading: false,
-				}
+				})
 			})
 			.catch(() => {
-				stats.value = fallbackStats
+				stats(fallbackStats)
 			})
 
 		fetch("https://api.github.com/repos/omni-media/omniclip/commits?per_page=3", {signal: controller.signal})
@@ -88,19 +88,20 @@ export const Github = shadow(() => {
 				if (!Array.isArray(data) || data.length === 0)
 					throw new Error("empty")
 
-				commits.value = data.map(commit => ({
+				commits(data.map(commit => ({
 					hash: (commit.sha ?? "").slice(0, 7),
 					message: (commit.commit?.message ?? "(no message)").split("\n")[0].slice(0, 72),
 					author: (commit.commit?.author?.name ?? "").split(" ")[0],
 					time: commit.commit?.author?.date ? timeAgo(commit.commit.author.date) : "",
 					url: commit.html_url ?? `${repoUrl}/commits`,
-				}))
+				})))
 			})
-			.catch(() => githubError.value = true)
+			.catch(() => githubError(true))
 
 		return () => controller.abort()
 	})
 
+	const recentCommits = commits()
 	return html`
 		<section class="gh-widget">
 			<div class="gh-head">
@@ -109,18 +110,18 @@ export const Github = shadow(() => {
 					<a href=${repoUrl} target="_blank" rel="noreferrer">omni-media/omniclip</a>
 				</div>
 				<div class="gh-stats">
-					<span><b class=${stats.value.loading ? "loading" : ""}>${stats.value.stars}</b> stars</span>
-					<span><b class=${stats.value.loading ? "loading" : ""}>${stats.value.forks}</b> forks</span>
-					<span><b class=${stats.value.loading ? "loading" : ""}>${stats.value.issues}</b> issues</span>
+					<span><b class=${stats().loading ? "loading" : ""}>${stats().stars}</b> stars</span>
+					<span><b class=${stats().loading ? "loading" : ""}>${stats().forks}</b> forks</span>
+					<span><b class=${stats().loading ? "loading" : ""}>${stats().issues}</b> issues</span>
 				</div>
 			</div>
 
 			<div class="gh-commits-label">Recent commits</div>
 			<ul class="gh-commits">
-				${githubError.value ? html`
+				${githubError() ? html`
 					<li class="gh-empty">couldn't reach github, probably rate-limited</li>
-				` : commits.value
-					? commits.value.map(commit => html`
+				` : recentCommits
+					? recentCommits.map(commit => html`
 						<li>
 							<a class="gh-sha" href=${commit.url} target="_blank" rel="noreferrer">${commit.hash}</a>
 							<span class="gh-msg">${commit.message}</span>

@@ -30,8 +30,8 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 		.map(id => index.getItemMaybe<Item.Animation>(id))
 		.find(animation => animation?.anims.transform)
 
-	const playhead = context.session.$playhead.value
-	const laneStart = context.session.index.getItemLaneStart(item.id, context.session.$viewedItemId.value)
+	const playhead = context.session.$playhead()
+	const laneStart = context.session.index.getItemLaneStart(item.id, context.session.$viewedItemId())
 	const localTime = clamp(playhead - laneStart, 0, item.duration)
 
 	const animation = animationItem?.anims.transform
@@ -104,7 +104,7 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 
 	const updateScale = (value: number, axis: 0 | 1) => {
 		const nextScale = [...scale] as [number, number]
-		if (preserveAspectRatio.value)
+		if (preserveAspectRatio())
 			nextScale[1 - axis] *= value / (scale[axis] || value || 1)
 		nextScale[axis] = value
 		updateTransform([position, nextScale, rotation])
@@ -183,11 +183,11 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 					<button
 						type="button"
 						class="scale-link"
-						aria-pressed=${preserveAspectRatio.value}
+						aria-pressed=${preserveAspectRatio()}
 						@click=${toggleAspectRatioLock}
-						title=${preserveAspectRatio.value ? "Unlink scale" : "Link scale"}
+						title=${preserveAspectRatio() ? "Unlink scale" : "Link scale"}
 					>
-						<wa-icon name=${preserveAspectRatio.value ? "link" : "link-slash"}></wa-icon>
+						<wa-icon name=${preserveAspectRatio() ? "link" : "link-slash"}></wa-icon>
 					</button>
 					<div class="input-group">
 						<wa-number-input

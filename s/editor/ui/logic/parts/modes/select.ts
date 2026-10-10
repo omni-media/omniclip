@@ -44,7 +44,7 @@ export const selectTool = tool("select", (session) => {
 				moving = session.canvas.getBox(containerId)
 			}
 
-			session.$selectedItem.value = moving?.itemId ?? clip?.itemId ?? null
+			session.$selectedItem(moving?.itemId ?? clip?.itemId ?? null)
 
 			if (moving)
 				dragger.start(moving, point, session)

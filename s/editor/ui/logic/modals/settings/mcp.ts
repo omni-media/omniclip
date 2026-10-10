@@ -17,7 +17,7 @@ export const McpSettings = shadow((context: EditorContext) => {
 
 	const notice = useSignal('')
 	const mcp = context.mcp
-	const port = mcp.$port.value
+	const port = mcp.$port()
 	const command = [
 		'codex mcp add omniclip',
 		location.origin !== 'http://127.0.0.1:3000' && `--env OMNICLIP_ORIGIN=${location.origin}`,
@@ -30,34 +30,34 @@ export const McpSettings = shadow((context: EditorContext) => {
 		const value = Number(input.value)
 
 		if (Number.isInteger(value) && value >= 1 && value <= 65535) {
-			mcp.$port.value = value
-			notice.value = ''
+			mcp.$port(value)
+			notice('')
 		} else {
 			input.value = String(port)
-			notice.value = 'Use a port between 1 and 65535.'
+			notice('Use a port between 1 and 65535.')
 		}
 	}
 
 	const copyCommand = async () => {
 		try {
 			await navigator.clipboard.writeText(command)
-			notice.value = 'Setup command copied.'
+			notice('Setup command copied.')
 		} catch {
-			notice.value = 'Could not copy. Select the command above instead.'
+			notice('Could not copy. Select the command above instead.')
 		}
 	}
 
 	return html`
 		<section>
 			<wa-switch
-				.checked=${mcp.$enabled.value}
+				.checked=${mcp.$enabled()}
 				@change=${(event: Event) =>
 					mcp.setEnabled((event.currentTarget as HTMLInputElement).checked)}
 			>
 				Allow local MCP access
 			</wa-switch>
 
-			<p role="status">Status: ${mcp.$status.value}</p>
+			<p role="status">Status: ${mcp.$status()}</p>
 
 			<p>
 				Allows your connected agent to inspect media and edit this project.
@@ -71,7 +71,7 @@ export const McpSettings = shadow((context: EditorContext) => {
 				max="65535"
 				size="small"
 				.value=${String(port)}
-				?disabled=${mcp.$enabled.value}
+				?disabled=${mcp.$enabled()}
 				@change=${changePort}
 			></wa-input>
 
@@ -86,7 +86,7 @@ export const McpSettings = shadow((context: EditorContext) => {
 				Copy setup command
 			</wa-button>
 
-			<p role="status">${notice.value}</p>
+			<p role="status">${notice()}</p>
 		</section>
 	`
 })

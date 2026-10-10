@@ -1,5 +1,5 @@
-
-import {derived, signal} from "@e280/strata"
+import {microbounce} from "@e280/stz"
+import {afterEffect, derived, signal} from "@e280/strata"
 import {visualAnimations} from "@omnimedia/omnitool"
 import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
 import type {Transform, TransformAnimation} from "@omnimedia/omnitool/x/timeline/types.js"
@@ -68,22 +68,22 @@ export class OmniSession {
 		this.stage = new Stage(this)
 		this.playback = new Playback(this.deps.player)
 		this.#index = derived(() => new Index(deps.strata.timeline.state as TimelineFile))
-		this.$viewedItemId.value = deps.strata.timeline.state.rootId
+		this.$viewedItemId(deps.strata.timeline.state.rootId)
 
 		this.viewport.$width.on(this.#updateMinZoom)
-		this.deps.strata.timeline.lens(s => s).on(() => {
+		this.deps.strata.timeline.lens(s => s).on(microbounce(() => {
 			if (!this.#index().getItemMaybe(this.$viewedItemId()))
 				this.$viewedItemId(this.timeline.state.rootId)
 			this.#updateMinZoom()
-			this.$playhead.value = ms(Math.min(this.$playhead.value, this.viewedDuration()))
-		})
+			this.$playhead(ms(Math.min(this.$playhead(), this.viewedDuration())))
+		}))
 
 		const $activePlayhead = derived(() =>
 			this.playback.$isPlaying()
 				? this.$playhead()
 				: this.$ghostPlayhead() ?? this.$playhead()
 		)
-		$activePlayhead.on(time => {
+		afterEffect($activePlayhead, time => {
 			if (!this.playback.$isPlaying())
 				this.playback.seek(time)
 		})
@@ -95,11 +95,11 @@ export class OmniSession {
 	reconcile() {
 		const index = this.#index()
 
-		if (!index.getItemMaybe(this.$viewedItemId.value))
-			this.$viewedItemId.value = this.timeline.state.rootId
+		if (!index.getItemMaybe(this.$viewedItemId()))
+			this.$viewedItemId(this.timeline.state.rootId)
 
-		if (!index.getItemMaybe(this.$selectedItem.value))
-			this.$selectedItem.value = null
+		if (!index.getItemMaybe(this.$selectedItem()))
+			this.$selectedItem(null)
 
 		this.clearProposal()
 		this.canvas.clearPreviews()
@@ -121,7 +121,7 @@ export class OmniSession {
 	}
 
 	get index() {
-		return this.$proposal.value?.index ?? this.#index()
+		return this.$proposal()?.index ?? this.#index()
 	}
 
 	async redo() {
@@ -136,11 +136,11 @@ export class OmniSession {
 	}
 
 	setProposal(proposal: Proposal | null) {
-		this.$proposal.value = proposal
+		this.$proposal(proposal)
 	}
 
 	clearProposal() {
-		this.$proposal.value = null
+		this.$proposal(null)
 	}
 
 	/** Append to the currently viewed timeline container. */
@@ -151,7 +151,7 @@ export class OmniSession {
 			childrenIds: [...parent.childrenIds, item.id],
 		})
 
-		this.$selectedItem.value = item.id
+		this.$selectedItem(item.id)
 		this.playback.seek(this.$playhead())
 	}
 
@@ -195,12 +195,12 @@ export class OmniSession {
 			})
 		})
 
-		this.$selectedItem.value = copy.id
+		this.$selectedItem(copy.id)
 		this.canvas.scheduleDraw()
 	}
 
 	applyTransitionToSelection(name: TransitionName, duration: number) {
-		const selected = this.index.getItemMaybe(this.$selectedItem.value)
+		const selected = this.index.getItemMaybe(this.$selectedItem())
 		if (!selected)
 			return false
 
@@ -251,7 +251,7 @@ export class OmniSession {
 			update(s, parent.id, {childrenIds})
 		})
 
-		this.$selectedItem.value = created.id
+		this.$selectedItem(created.id)
 		this.canvas.scheduleDraw()
 		return true
 	}
@@ -267,7 +267,7 @@ export class OmniSession {
 
 	#updateTransition(id: Id, name: TransitionName, duration: number) {
 		this.timeline.mutate(s => update(s, id, {name, duration}))
-		this.$selectedItem.value = id
+		this.$selectedItem(id)
 		this.canvas.scheduleDraw()
 		return true
 	}
@@ -277,15 +277,15 @@ export class OmniSession {
 	}
 
 	setGhostClip(ghostClip: TimelineClipBox | null) {
-		this.$ghostClip.value = ghostClip
+		this.$ghostClip(ghostClip)
 	}
 
 	setTrimPreviewOffsetPx(offset: number) {
-		this.$trimPreviewOffsetPx.value = offset
+		this.$trimPreviewOffsetPx(offset)
 	}
 
 	setMode(mode: Tool) {
-		const isSame = mode(this).id === this.activeMode.value.id
+		const isSame = mode(this).id === this.activeMode().id
 		if(isSame) {
 			this.activeMode(selectTool(this))
 		}
@@ -293,18 +293,18 @@ export class OmniSession {
 			this.activeMode(mode(this))
 		}
 		this.canvas.clearPreviews()
-		this.canvas.switchCursor(this.activeMode.value.id)
+		this.canvas.switchCursor(this.activeMode().id)
 		this.canvas.scheduleDraw()
 	}
 
 	seekPlayhead(time: Ms) {
 		this.playback.pause()
-		this.$playhead.set(ms(Math.min(Math.max(0, time), this.viewedDuration())))
-		this.$ghostPlayhead.set(null)
+		this.$playhead(ms(Math.min(Math.max(0, time), this.viewedDuration())))
+		this.$ghostPlayhead(null)
 	}
 
 	setGhostPlayhead(time: Ms | null) {
-		this.$ghostPlayhead.set(time)
+		this.$ghostPlayhead(time)
 	}
 
 	clearGhostPlayhead() {
@@ -312,7 +312,7 @@ export class OmniSession {
 	}
 
 	viewedDuration() {
-		return computeItemDuration(this.$viewedItemId.value, this.deps.strata.timeline.state)
+		return computeItemDuration(this.$viewedItemId(), this.deps.strata.timeline.state)
 	}
 
 	#computeMinZoom() {
@@ -390,7 +390,7 @@ export class OmniSession {
 
 	stepPlayheadFrame(direction: -1 | 1) {
 		const frameDuration = 1000 / this.deps.strata.settings.state.timebase
-		const currentFrame = this.$playhead.value / frameDuration
+		const currentFrame = this.$playhead() / frameDuration
 
 		const nextFrame = direction > 0
 			? Math.floor(currentFrame) + 1
@@ -401,11 +401,11 @@ export class OmniSession {
 	}
 
 	getPlayheadInMs() {
-		return this.$playhead.value
+		return this.$playhead()
 	}
 
 	playheadViewportX() {
-		return this.viewport.timeToViewportX(this.$playhead.value)
+		return this.viewport.timeToViewportX(this.$playhead())
 	}
 
 	zoomAnchor() {
@@ -420,7 +420,7 @@ export class OmniSession {
 	}
 
 	splitSelectedItemAtTime(time: Ms) {
-		const clipId = this.$selectedItem.value
+		const clipId = this.$selectedItem()
 		if (clipId === null)
 			return
 
@@ -435,7 +435,7 @@ export class OmniSession {
 			if (!parent)
 				return
 
-			const offset = ms(time - this.index.getItemLaneStart(clipId, this.$viewedItemId.value))
+			const offset = ms(time - this.index.getItemLaneStart(clipId, this.$viewedItemId()))
 			if (offset <= 0 || offset >= clip.duration)
 				return
 
@@ -472,13 +472,13 @@ export class OmniSession {
 		})
 
 		this.canvas.clearPreviews()
-		this.$selectedItem.value = null
+		this.$selectedItem(null)
 	}
 
 	trimClip(clipId: Id, time: Ms, edge: 'start' | 'end') {
 		this.timeline.mutate(state => {
 			const clip = this.index.getItem<Idx.Clip>(clipId)
-			const laneStart = this.index.getItemLaneStart(clipId, this.$viewedItemId.value)
+			const laneStart = this.index.getItemLaneStart(clipId, this.$viewedItemId())
 			const mediaDuration = this.deps.resolveMedia(clip)?.duration
 			update(state, clipId, trim(clip, edge, time - laneStart, mediaDuration))
 		})
@@ -504,8 +504,8 @@ export class OmniSession {
 			})
 		})
 
-		if (this.$selectedItem.value === clipId)
-			this.$selectedItem.value = null
+		if (this.$selectedItem() === clipId)
+			this.$selectedItem(null)
 		this.canvas.scheduleDraw()
 	}
 }

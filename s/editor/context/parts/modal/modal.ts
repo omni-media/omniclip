@@ -11,7 +11,7 @@ export class ModalManager {
 	constructor(private context: EditorContext) {}
 
 	get active() {
-		return this.#active.value
+		return this.#active()
 	}
 
 	openModal<Result>(modal: ModalDefinition<Result>) {
@@ -21,7 +21,7 @@ export class ModalManager {
 		const deferred = defer<Result | undefined>()
 
 		const close = () => {
-			this.#active.value = null
+			this.#active(null)
 		}
 
 		const finish = once((fn: () => void) => {
@@ -35,11 +35,11 @@ export class ModalManager {
 			cancel: () => finish(() => deferred.resolve(undefined)),
 		}
 
-		this.#active.value = {
+		this.#active({
 			label: modal.label,
 			body: modal.render(this.context, controls),
 			cancel: controls.cancel,
-		}
+		})
 
 		return deferred.promise
 	}

@@ -32,15 +32,15 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 	}
 	const openDetails = (event: Event, id: string) => {
 		event.stopPropagation()
-		drawerProjectId.value = id
+		drawerProjectId(id)
 	}
 
 	return spinner(projects(), projects => {
 		const featuredProject = [...projects].sort((a, b) => b.editedRank - a.editedRank)[0]
 		const filteredProjects = projects
-			.filter(project => project.title.toLowerCase().includes(search.value.trim().toLowerCase()))
+			.filter(project => project.title.toLowerCase().includes(search().trim().toLowerCase()))
 			.sort((a, b) => {
-				switch (sort.value) {
+				switch (sort()) {
 					case 'name':
 						return a.title.localeCompare(b.title)
 					case 'duration':
@@ -50,7 +50,7 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 				}
 			})
 
-		const drawerProject = projects.find(project => project.id === drawerProjectId.value)
+		const drawerProject = projects.find(project => project.id === drawerProjectId())
 
 		return html`
 			<div class="project-hub">
@@ -66,8 +66,8 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 					<label class="search">
 						<span></span>
 						<input
-							.value=${search.value}
-							@input=${(event: InputEvent) => search.value = (event.target as HTMLInputElement).value}
+							.value=${search()}
+							@input=${(event: InputEvent) => search((event.target as HTMLInputElement).value)}
 							placeholder="Search projects..."
 						/>
 					</label>
@@ -94,8 +94,8 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 								<label class="sort">
 									<span>Sort</span>
 									<select
-										.value=${sort.value}
-										@change=${(event: Event) => sort.value = (event.target as HTMLSelectElement).value as SortMode}
+										.value=${sort()}
+										@change=${(event: Event) => sort((event.target as HTMLSelectElement).value as SortMode)}
 									>
 										${Object.entries(sortLabels).map(([value, label]) => html`
 											<option value=${value}>${label}</option>
@@ -104,14 +104,14 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 								</label>
 
 								<div class="view-toggle">
-									<button title="Grid view" ?data-active=${viewMode.value === 'grid'} @click=${() => viewMode.value = 'grid'}>▦</button>
-									<button title="List view" ?data-active=${viewMode.value === 'list'} @click=${() => viewMode.value = 'list'}>☷</button>
+									<button title="Grid view" ?data-active=${viewMode() === 'grid'} @click=${() => viewMode('grid')}>▦</button>
+									<button title="List view" ?data-active=${viewMode() === 'list'} @click=${() => viewMode('list')}>☷</button>
 								</div>
 							</div>
 						</header>
 
 						${filteredProjects.length
-							? ProjectGrid(filteredProjects, openProject, openDetails, viewMode.value)
+							? ProjectGrid(filteredProjects, openProject, openDetails, viewMode())
 							: html`
 								<section class="empty-state">
 									<h2>No projects found</h2>
@@ -135,7 +135,7 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 					? ProjectDetailsDrawer(
 							drawerProject,
 							openProject,
-							() => drawerProjectId.value = null
+							() => drawerProjectId(null)
 						)
 					: null
 				}

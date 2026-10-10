@@ -25,7 +25,7 @@ const itemMenu = shadow((context: EditorContext, item: Item.Any) => {
 
 
 export function renderItemMenu(context: EditorContext) {
-	const viewedItemId = context.session.$viewedItemId.value
+	const viewedItemId = context.session.$viewedItemId()
 	const timeline = context.strata.timeline.state
 	const itemsMap = new Map(timeline.items.map(item => [item.id, item]))
 	const viewedItem = itemsMap.get(viewedItemId)

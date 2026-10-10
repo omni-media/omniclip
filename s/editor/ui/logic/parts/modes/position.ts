@@ -9,7 +9,7 @@ export const positionTool = tool("position", (session) => {
 	return {
 		pointerdown: ({clip, point}) => {
 			const moving = clip && Idx.isClip(clip.kind) ? clip : null
-			session.$selectedItem.value = moving?.itemId ?? clip?.itemId ?? null
+			session.$selectedItem(moving?.itemId ?? clip?.itemId ?? null)
 
 			if (moving)
 				dragger.start(moving, point, session)

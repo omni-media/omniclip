@@ -9,13 +9,13 @@ export const bladeTool = tool("blade", (session) => ({
 		session.splitClipAt(clip.itemId, time)
 	},
 	pointermove: ({clip, inRuler, time}) => {
-		session.canvas.$previews.blade.value = !inRuler && clip
+		session.canvas.$previews.blade(!inRuler && clip
 			? {time, clipId: clip.itemId}
-			: null
+			: null)
 		session.canvas.scheduleDraw()
 	},
 	pointerleave: () => {
-		session.canvas.$previews.blade.value = null
+		session.canvas.$previews.blade(null)
 		session.canvas.scheduleDraw()
 	},
 }))

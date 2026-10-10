@@ -38,8 +38,8 @@ export const KeyframesControls = shadow((context: EditorContext, item: Item.Text
 		</wa-details>
 	`
 
-	const laneStart = index.getItemLaneStart(item.id, context.session.$viewedItemId.value)
-	const localTime = clamp(context.session.$playhead.value - laneStart, 0, item.duration)
+	const laneStart = index.getItemLaneStart(item.id, context.session.$viewedItemId())
+	const localTime = clamp(context.session.$playhead() - laneStart, 0, item.duration)
 	const animation = animationItem?.anims.transform
 
 	const transform = animation

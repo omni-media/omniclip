@@ -12,9 +12,9 @@ export const TabBar = shadow((manager: TabManager) => {
 
 	return html`
 		<nav>
-			${repeat(manager.tabs.value, tab => tab.id, tab => html`
+			${repeat(manager.tabs(), tab => tab.id, tab => html`
 				<button
-					?data-active=${tab.id === manager.activeTabId.value}
+					?data-active=${tab.id === manager.activeTabId()}
 					@click=${() => manager.switchTo(tab.id)}>
 					${tab.id}
 				</button>

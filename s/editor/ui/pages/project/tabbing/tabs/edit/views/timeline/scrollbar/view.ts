@@ -41,7 +41,7 @@ export const TimelineScrollbar = shadow((
 			const redraw = () => {
 				const {maxScroll, maxThumbX, thumbWidth} = scrollMetrics()
 				if (maxScroll <= 0) {
-					thumbState({...thumbState.value, hidden: true})
+					thumbState({...thumbState(), hidden: true})
 					return
 				}
 
@@ -107,8 +107,8 @@ export const TimelineScrollbar = shadow((
 		<div class="timeline-scrollbar">
 			<div
 				class="timeline-scrollbar-thumb"
-				?hidden=${thumbState.value.hidden}
-				style="width: ${thumbState.value.width}px; transform: translateX(${thumbState.value.x}px)"
+				?hidden=${thumbState().hidden}
+				style="width: ${thumbState().width}px; transform: translateX(${thumbState().x}px)"
 			></div>
 		</div>
 	`

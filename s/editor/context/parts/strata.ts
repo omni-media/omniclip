@@ -1,3 +1,4 @@
+import {microbounce} from "@e280/stz"
 
 import {Kv, StorageDriver} from '@e280/kv'
 import {Prism, Chrono, Vault, LocalStore} from '@e280/strata'
@@ -92,7 +93,7 @@ export class Strata {
 	}
 
 	listen() {
-		this.#stopChanges = this.trunk.on(this.save)
+		this.#stopChanges = this.trunk.on(microbounce(this.save))
 		this.#stopStorage = this.store.onStorageEvent(() => this.vault.load())
 	}
 

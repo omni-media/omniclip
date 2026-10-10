@@ -50,31 +50,34 @@ export const shortcutsModal = (): ModalDefinition<void> => ({
 		const revision = useSignal(0)
 
 		const cancelEdit = () => {
-			editingId.value = null
-			pending.value = null
-			conflict.value = null
+			editingId(null)
+			pending(null)
+			conflict(null)
 		}
 
 		const startEdit = (id: TimelineAction) => {
-			editingId.value = id
-			pending.value = null
-			conflict.value = null
+			editingId(id)
+			pending(null)
+			conflict(null)
 		}
 
 		const finishEdit = () => {
 			cancelEdit()
-			revision.value += 1
+			revision(revision() + 1)
 		}
 
 		const commitEdit = async (id: TimelineAction, combo: ShortcutCombo, replace = false) => {
-			if (replace && conflict.value)
-				await ctx.keybindings.setBinding(conflict.value.id, unassignedBinding)
+			const conflicting = conflict()
+			if (replace && conflicting)
+				await ctx.keybindings.setBinding(conflicting.id, unassignedBinding)
 			await ctx.keybindings.setBinding(id, combo.atom)
 			finishEdit()
 		}
 
 		useMount(() => dom.events(window, {keydown: [{capture: true}, (event: KeyboardEvent) => {
-			if (!editingId.value) return
+			const id = editingId()
+			const combo = pending()
+			if (!id) return
 
 			if (event.key === "Escape") {
 				event.preventDefault()
@@ -83,10 +86,10 @@ export const shortcutsModal = (): ModalDefinition<void> => ({
 				return
 			}
 
-			if (event.key === "Enter" && pending.value && !conflict.value) {
+			if (event.key === "Enter" && combo && !conflict()) {
 				event.preventDefault()
 				event.stopPropagation()
-				commitEdit(editingId.value, pending.value)
+				commitEdit(id, combo)
 				return
 			}
 
@@ -95,23 +98,23 @@ export const shortcutsModal = (): ModalDefinition<void> => ({
 
 			event.preventDefault()
 			event.stopPropagation()
-			pending.value = next
-			conflict.value = shortcutCommands.find(command =>
-				command.id !== editingId.value
+			pending(next)
+			conflict(shortcutCommands.find(command =>
+				command.id !== editingId()
 				&& atomHasSignature(ctx.keybindings.getBinding(command.id), next.signature)
-			) ?? null
+			) ?? null)
 		}]}))
 
 		const filteredCommands = () => {
-			const scoped = activeTab.value === "all"
+			const scoped = activeTab() === "all"
 				? shortcutCommands
-				: shortcutCommands.filter(c => c.group === activeTab.value)
+				: shortcutCommands.filter(c => c.group === activeTab())
 			return scoped.filter(c =>
-				commandMatches(c, ctx.keybindings.getBinding(c.id), query.value)
+				commandMatches(c, ctx.keybindings.getBinding(c.id), query())
 			)
 		}
 
-		revision.value
+		revision()
 		const commands = filteredCommands()
 
 		return html`
@@ -124,9 +127,9 @@ export const shortcutsModal = (): ModalDefinition<void> => ({
 							appearance="filled"
 							with-clear
 							placeholder="Search commands..."
-							.value=${query.value}
-							@input=${(e: InputEvent) => query.value = (e.target as HTMLInputElement).value}
-							@wa-clear=${() => query.value = ""}
+							.value=${query()}
+							@input=${(e: InputEvent) => query((e.target as HTMLInputElement).value)}
+							@wa-clear=${() => query("")}
 						>
 							<wa-icon slot="start" name="magnifying-glass"></wa-icon>
 						</wa-input>
@@ -139,8 +142,8 @@ export const shortcutsModal = (): ModalDefinition<void> => ({
 
 				<wa-tab-group
 					class="tabs"
-					active=${activeTab.value}
-					@wa-tab-show=${(e: CustomEvent<{name: TabId}>) => activeTab.value = e.detail.name}
+					active=${activeTab()}
+					@wa-tab-show=${(e: CustomEvent<{name: TabId}>) => activeTab(e.detail.name)}
 				>
 					${allTabs.map(tab => html`
 						<wa-tab panel=${tab.id}>${tab.label}</wa-tab>
@@ -153,18 +156,18 @@ export const shortcutsModal = (): ModalDefinition<void> => ({
 						? shortcutGroups.map(group => renderGroup({
 							group,
 							commands,
-							showLabel: activeTab.value === "all",
+							showLabel: activeTab() === "all",
 							renderCommand: (command: ShortcutCommand) => {
 								const current = ctx.keybindings.getBinding(command.id)
 								return renderCommand({
 									command,
 									current,
-									pending: pending.value,
-									conflict: conflict.value,
+									pending: pending(),
+									conflict: conflict(),
 									onReset: async () => {
 										await ctx.keybindings.resetBinding(command.id)
-										if (editingId.value === command.id) cancelEdit()
-										revision.value += 1
+										if (editingId() === command.id) cancelEdit()
+										revision(revision() + 1)
 									},
 									onClear: async () => {
 										await ctx.keybindings.setBinding(command.id, unassignedBinding)
@@ -173,7 +176,7 @@ export const shortcutsModal = (): ModalDefinition<void> => ({
 									onCancel: cancelEdit,
 									onSave: combo => commitEdit(command.id, combo),
 									onReplace: combo => commitEdit(command.id, combo, true),
-									isEditing: editingId.value === command.id,
+									isEditing: editingId() === command.id,
 									onStartEdit: () => startEdit(command.id),
 									isModified: atomSignature(current) !== atomSignature(ctx.keybindings.getDefaultBinding(command.id))
 								})
@@ -182,8 +185,8 @@ export const shortcutsModal = (): ModalDefinition<void> => ({
 						: html`
 							<div class="empty">
 								<wa-icon name="magnifying-glass"></wa-icon>
-								<span>No commands match "${query.value}".</span>
-								<wa-button size="small" appearance="plain" @click=${() => query.value = ""}>Clear search</wa-button>
+								<span>No commands match "${query()}".</span>
+								<wa-button size="small" appearance="plain" @click=${() => query("")}>Clear search</wa-button>
 							</div>
 						`}
 				</div>

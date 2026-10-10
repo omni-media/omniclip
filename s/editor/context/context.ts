@@ -1,3 +1,4 @@
+import {microbounce} from "@e280/stz"
 
 import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 import {Kind, type TimelineFile} from "@omnimedia/omnitool"
@@ -28,16 +29,16 @@ export class EditorContext {
 		)
 
 		this.#stopPlaybackTick = requirements.controllers.player.playback.onTick.on(() => {
-			this.session.$playhead.value = ms(requirements.controllers.player.currentTime)
+			this.session.$playhead(ms(requirements.controllers.player.currentTime))
 		})
 
-		this.#stopTimelineSync = this.strata.timeline.lens(s => s).on(async state => {
+		this.#stopTimelineSync = this.strata.timeline.lens(s => s).on(microbounce(async state => {
 			this.assistant.bumpRevision()
 			const timeline = state as TimelineFile
 			this.strata.outliner.mutate(state => syncOutliner(state, timeline))
 			await this.controllers.player.update(timeline)
 			this.session.stage.refresh()
-		})
+		}))
 
 	}
 

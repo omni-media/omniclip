@@ -25,7 +25,7 @@ export const TimelineContextMenu = shadow((context: EditorContext) => {
 	const root = useShadow()
 	const session = context.session
 	const canvas = session.canvas
-	const selected = session.index.getItemMaybe(session.$selectedItem.value)
+	const selected = session.index.getItemMaybe(session.$selectedItem())
 	const container = !!selected && Idx.isStruct(selected)
 	const stack = !!selected && Idx.isStack(selected.kind)
 	const collapsed = stack && canvas.isStackCollapsed(selected.id)

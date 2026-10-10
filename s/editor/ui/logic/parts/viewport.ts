@@ -12,23 +12,23 @@ export class Viewport {
 	constructor(readonly pixelsPerMillisecond: number) {}
 
 	get zoom() {
-		return this.$zoom.value
+		return this.$zoom()
 	}
 
 	get scrollLeft() {
-		return this.$scrollLeft.value
+		return this.$scrollLeft()
 	}
 
 	get width() {
-		return this.$width.value
+		return this.$width()
 	}
 
 	get height() {
-		return this.$height.value
+		return this.$height()
 	}
 
 	get minZoom() {
-		return this.$minZoom.value
+		return this.$minZoom()
 	}
 
 	get maxZoom() {
@@ -62,23 +62,23 @@ export class Viewport {
 	}
 
 	setSize(width: number, height: number) {
-		this.$width.value = width
-		this.$height.value = height
+		this.$width(width)
+		this.$height(height)
 	}
 
 	setMinZoom(minZoom: number) {
-		this.$minZoom.value = minZoom
+		this.$minZoom(minZoom)
 		if (this.zoom < minZoom)
 			this.setZoom(minZoom)
 	}
 
 	setScrollLeft(scrollLeft: number) {
-		this.$scrollLeft.value = Math.max(0, scrollLeft)
+		this.$scrollLeft(Math.max(0, scrollLeft))
 	}
 
 	setZoom(zoom: number) {
 		const clamped = Math.max(this.minZoom, Math.min(this.maxZoom, zoom))
-		this.$zoom.value = Math.round(clamped * 1000) / 1000
+		this.$zoom(Math.round(clamped * 1000) / 1000)
 	}
 
 	adjustZoom(delta: number) {

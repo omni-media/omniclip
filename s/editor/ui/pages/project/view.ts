@@ -2,7 +2,7 @@
 import {html} from "lit"
 
 import {waitSelect} from "@e280/strata"
-import {ErrorDisplay, shadow, useCss, useMount, useSignal, useWait} from "@e280/sly"
+import {ErrorDisplay, shadow, useCss, useSignal, useWait} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import loadingCss from "./loading.css.js"
@@ -35,7 +35,8 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 	const context = useWait(async() =>
 		await Strata.hasProject(projectId)
 			? EditorContext.setup(projectId)
-			: null
+			: null,
+		context => context?.dispose()
 	)
 	return waitSelect(context(), {
 		pending: ProjectLoading,
@@ -44,15 +45,14 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 		if (!context)
 			return ProjectNotFoundPage(router, projectId)
 
-		useMount(() => () => context.dispose())
 		const assistantOpen = useSignal(false)
 
 		const manager = context.tabs
 
-		const isEditTabActive = manager.activeTabId.value === "edit"
-		const isOutlinerTabActive = manager.activeTabId.value === "outliner"
-		const isInspectorTabActive = manager.activeTabId.value === "inspector"
-		const isExportTabActive = manager.activeTabId.value === "export"
+		const isEditTabActive = manager.activeTabId() === "edit"
+		const isOutlinerTabActive = manager.activeTabId() === "outliner"
+		const isInspectorTabActive = manager.activeTabId() === "inspector"
+		const isExportTabActive = manager.activeTabId() === "export"
 
 		const openSettings = async () => {
 			const settings = await context.modals.openModal(settingsModal())
@@ -71,7 +71,7 @@ export const ProjectPage = shadow((router: AppRouter, projectId: string) => {
 
 					<div class=right>
 						<wa-button
-							@click=${() => assistantOpen.value = true}
+							@click=${() => assistantOpen(true)}
 							class=assistant size="small">
 							<span slot="start" class="assistant-mark" aria-hidden="true">✦</span>
 							<span class="assistant-label">Ask AI</span>

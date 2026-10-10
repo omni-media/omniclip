@@ -70,24 +70,26 @@ export const BackgroundRemoverControls = shadow((context: EditorContext, item: I
 	}
 
 	const ensureRemover = async () => {
-		if (remover.value)
-			return remover.value
+		const existing = remover()
+		if (existing)
+			return existing
 
-		remover.value = await makeBgRemover({
+		const next = await makeBgRemover({
 			workerUrl: bgRemoverWorkerPath,
 			spec: {
 				...defaultBgRemoverSpec(),
-				model: model.value,
-				device: device.value,
-				dtype: dtype.value,
+				model: model(),
+				device: device(),
+				dtype: dtype(),
 			},
 			onLoading: ({progress}) => {
-				if (!error.value)
+				if (!error())
 					status(formatProgress(Math.round(progress), "Loading background model"))
 			}
 		})
+		remover(next)
 
-		return remover.value
+		return next
 	}
 
 	const removeBackground = async () => {

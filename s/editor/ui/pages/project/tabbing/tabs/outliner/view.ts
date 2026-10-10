@@ -20,9 +20,9 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	const items = context.strata.timeline.state.items
 
 	const handleItemClick = (id: Id) => {
-		context.session.$selectedItem.value = id
+		context.session.$selectedItem(id)
 		context.session.seekPlayhead(ms(context.session.index
-			.getItemLaneStart(id, context.session.$viewedItemId.value)
+			.getItemLaneStart(id, context.session.$viewedItemId())
 		))
 	}
 
@@ -36,7 +36,7 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	const isStarred = (id: Id) => outliner.state.items.find(({itemId}) => itemId === id)?.starred
 
 	const matchesSearch = (item: Item.Any) => {
-		const term = searchTerm.value.trim().toLowerCase()
+		const term = searchTerm().trim().toLowerCase()
 		if (!term)
 			return true
 
@@ -48,7 +48,7 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	const renderItemRow = (item: Item.Any) => {
 		return renderOutlinerItemRow({
 			item,
-			selected: context.session.$selectedItem.value === item.id,
+			selected: context.session.$selectedItem() === item.id,
 			starred: !!isStarred(item.id),
 			onSelect: handleItemClick,
 			onToggleStar: toggleStar,
@@ -71,7 +71,7 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 			</nav>
 
 			<div class="search-bar">
-				<input type="text" placeholder="Search items..." .value=${searchTerm.value} @input=${(e: any) => searchTerm(e.target.value)}>
+				<input type="text" placeholder="Search items..." .value=${searchTerm()} @input=${(e: any) => searchTerm(e.target.value)}>
 			</div>
 
 			<div class="tab-panels">

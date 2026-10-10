@@ -36,7 +36,7 @@ export const ExportTab = shadow((context: EditorContext) => {
 					${repeat(starredItemDetails, item => item.id, item => html`
 						<button
 							class="item-card"
-							?data-selected=${item.id === selectedItemId.value}
+							?data-selected=${item.id === selectedItemId()}
 							@click=${() => selectedItemId(item.id)}
 						>
 							<span class="label">${itemLabels.get(item.id) || `Item ${item.id}`}</span>
@@ -81,9 +81,9 @@ export const ExportTab = shadow((context: EditorContext) => {
 							<span>Exporting... ${progress}%</span>
 						</div>
 					` : html`
-						<button class="export-button" @click=${handleExport} ?disabled=${selectedItemId.value === null}>
+						<button class="export-button" @click=${handleExport} ?disabled=${selectedItemId() === null}>
 							${exportSvg}
-							<span>Export "${itemLabels.get(selectedItemId.value!) || `Item ${selectedItemId.value!}`}"</span>
+							<span>Export "${itemLabels.get(selectedItemId()!) || `Item ${selectedItemId()!}`}"</span>
 						</button>
 					`}
 				</div>

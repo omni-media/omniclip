@@ -46,34 +46,34 @@ export const exportModal = (timeline: TimelineFile): ModalDefinition<ExportResul
 		const setQuality = (e: Event) => {
 			const target = e.target as HTMLSelectElement
 			const quality = target.value as ExportBitrate
-			selectedQuality.value = quality
+			selectedQuality(quality)
 
 			const preset = qualityOptions.find(o => o.value === quality)
 			if (preset)
-				bitrate.value = preset.kbps
+				bitrate(preset.kbps)
 		}
 
 		const setBitrate = (e: Event) => {
 			const target = e.target as HTMLSelectElement
-			bitrate.value = +target.value
+			bitrate(+target.value)
 		}
 
 		const setCodec = (e: Event) => {
 			const target = e.target as HTMLSelectElement
 			const codec = target.value as ExportCodec
-			selectedCodec.value = codec
-			selectedFormat.value = codecSupportedFormats[codec][0]
+			selectedCodec(codec)
+			selectedFormat(codecSupportedFormats[codec][0])
 		}
 
 		const setFormat = (e: Event) => {
 			const target = e.target as HTMLSelectElement
-			selectedFormat.value = target.value as ExportFormat
+			selectedFormat(target.value as ExportFormat)
 		}
 
 		const duration = ctx.session.index.getItemDuration(timeline.rootId)
 
 		const estimateFileSize = () => {
-			const size = ((+bitrate.value / 1000) * (duration / 1000)) / 8
+			const size = ((+bitrate() / 1000) * (duration / 1000)) / 8
 			return size.toFixed(1)
 		}
 
@@ -104,13 +104,13 @@ export const exportModal = (timeline: TimelineFile): ModalDefinition<ExportResul
 					<div class="label">Codec</div>
 					<wa-select
 						size="small"
-						value=${selectedCodec.value}
+						value=${selectedCodec()}
 						@change=${setCodec}
 					>
 						${codecOptions.map(option => html`
 							<wa-option
 								value=${option.value}
-								selected=${option.value === selectedCodec.value}
+								selected=${option.value === selectedCodec()}
 							>
 								${option.label}
 							</wa-option>
@@ -120,13 +120,13 @@ export const exportModal = (timeline: TimelineFile): ModalDefinition<ExportResul
 					<div class="label">Format</div>
 						<wa-select
 							size="small"
-							value=${selectedFormat.value}
+							value=${selectedFormat()}
 							@change=${setFormat}
 						>
-						${codecSupportedFormats[selectedCodec.value].map(format => html`
+						${codecSupportedFormats[selectedCodec()].map(format => html`
 							<wa-option
 								value=${format}
-								selected=${format === selectedFormat.value}
+								selected=${format === selectedFormat()}
 							>
 								${format.toUpperCase()}
 							</wa-option>
@@ -137,20 +137,20 @@ export const exportModal = (timeline: TimelineFile): ModalDefinition<ExportResul
 					<div class="label">Bit rate</div>
 					<wa-select
 						size="small"
-						value=${selectedQuality.value}
+						value=${selectedQuality()}
 						@change=${setQuality}
 					>
 						${qualityOptions.map(option => html`
 							<wa-option
 								value=${option.value}
-								selected=${option.value === selectedQuality.value}
+								selected=${option.value === selectedQuality()}
 							>
 								${getQualityLabel(option)}
 							</wa-option>
 						`)}
 					</wa-select>
 
-					${selectedQuality.value === "custom"
+					${selectedQuality() === "custom"
 						? html`
 								<div class=label></div>
 								<wa-input
@@ -159,7 +159,7 @@ export const exportModal = (timeline: TimelineFile): ModalDefinition<ExportResul
 									label="Kbps"
 									type=number
 									min=0
-									value=${String(bitrate.value)}
+									value=${String(bitrate())}
 									size=small
 								>
 								</wa-input>`
@@ -187,9 +187,9 @@ export const exportModal = (timeline: TimelineFile): ModalDefinition<ExportResul
 							class="export-button"
 							variant="neutral"
 							@click=${() => modal.resolve({
-								codec: selectedCodec.value,
-								bitrate: bitrate.value,
-								format: selectedFormat.value
+								codec: selectedCodec(),
+								bitrate: bitrate(),
+								format: selectedFormat()
 							})}
 						>
 							Export

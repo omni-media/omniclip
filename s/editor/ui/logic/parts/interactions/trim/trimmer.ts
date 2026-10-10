@@ -38,7 +38,7 @@ export class Trimmer {
 		this.#state = {
 			edge,
 			item,
-			laneStart: session.index.getItemLaneStart(clip.itemId, session.$viewedItemId.value),
+			laneStart: session.index.getItemLaneStart(clip.itemId, session.$viewedItemId()),
 			prev: Idx.isTransition(item) ? session.index.getItemMaybe<Idx.Clip>(siblings?.[idx - 1]) : undefined,
 			next: Idx.isTransition(item) ? session.index.getItemMaybe<Idx.Clip>(siblings?.[idx + 1]) : undefined,
 		}
@@ -78,7 +78,7 @@ export class Trimmer {
 		if (!this.#state)
 			return
 
-		session.$proposal.value?.commit()
+		session.$proposal()?.commit()
 
 		this.cancel(session)
 	}

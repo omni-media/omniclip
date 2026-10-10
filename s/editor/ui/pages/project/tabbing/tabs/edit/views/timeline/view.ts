@@ -108,7 +108,7 @@ export const TimelineArea = shadow((context: EditorContext) => {
 
 		const path = () => {
 			const items: Item.Any[] = []
-			let item = session.index.getItemMaybe(session.$viewedItemId.value)
+			let item = session.index.getItemMaybe(session.$viewedItemId())
 			while (item) {
 				items.unshift(item)
 				item = session.index.getParent(item.id)

@@ -90,7 +90,7 @@ export class TimelineCanvas {
 
 	clearPreviews() {
 		for(const preview in this.$previews) {
-			this.$previews[preview as keyof typeof this.$previews].value = null
+			this.$previews[preview as keyof typeof this.$previews](null)
 		}
 	}
 
@@ -132,7 +132,7 @@ export class TimelineCanvas {
 	get contentWidth() {
 		const stableExtent = ms(Math.max(
 			this.duration,
-			this.deps.session.$playhead.value,
+			this.deps.session.$playhead(),
 		))
 
 		if (this.viewport.zoom !== this.#lastZoom) {
@@ -246,11 +246,11 @@ export class TimelineCanvas {
 	}
 
 	selectedItemId() {
-		return this.deps.session.$selectedItem.value
+		return this.deps.session.$selectedItem()
 	}
 
 	getViewedItem() {
-		return this.deps.session.index.getItem<Idx.Struct>(this.deps.session.$viewedItemId.value)
+		return this.deps.session.index.getItem<Idx.Struct>(this.deps.session.$viewedItemId())
 	}
 
 	timebase(): Fps {
@@ -258,16 +258,16 @@ export class TimelineCanvas {
 	}
 
 	playheadX() {
-		return this.viewport.timeToX(this.deps.session.$playhead.value)
+		return this.viewport.timeToX(this.deps.session.$playhead())
 	}
 
 	ghostPlayheadX() {
-		const time = this.deps.session.$ghostPlayhead.value
+		const time = this.deps.session.$ghostPlayhead()
 		return time === null ? null : this.viewport.timeToX(time)
 	}
 
 	trimPreviewOffsetPx() {
-		return this.deps.session.$trimPreviewOffsetPx.value
+		return this.deps.session.$trimPreviewOffsetPx()
 	}
 
 	get timeline() {
@@ -307,7 +307,7 @@ export class TimelineCanvas {
 		this.deps.session.setGhostPlayhead(time)
 		this.scheduleDraw()
 
-		this.deps.session.activeMode.value.pointerdown?.({
+		this.deps.session.activeMode().pointerdown?.({
 			event, time, clip, point, inRuler
 		})
 	}
@@ -321,7 +321,7 @@ export class TimelineCanvas {
 		this.deps.session.setGhostPlayhead(time)
 		this.scheduleDraw()
 
-		this.deps.session.activeMode.value.pointermove?.({
+		this.deps.session.activeMode().pointermove?.({
 			event, time, clip, point, inRuler
 		})
 	}
@@ -335,7 +335,7 @@ export class TimelineCanvas {
 		const inRuler = point.y <= metrics.rulerHeight
 		const clip = inRuler ? null : this.clipAt(point.x, point.y)
 
-		this.deps.session.activeMode.value.pointerup?.({
+		this.deps.session.activeMode().pointerup?.({
 			event, time, clip, point, inRuler
 		})
 	}
@@ -349,7 +349,7 @@ export class TimelineCanvas {
 		this.deps.session.clearGhostPlayhead()
 		this.scheduleDraw()
 
-		this.deps.session.activeMode.value.pointerleave?.({
+		this.deps.session.activeMode().pointerleave?.({
 			event, time, clip, point, inRuler
 		})
 	}
@@ -359,7 +359,7 @@ export class TimelineCanvas {
 		const inRuler = point.y <= metrics.rulerHeight
 		const clip = inRuler ? null : this.clipAt(point.x, point.y)
 
-		this.deps.session.activeMode.value.doubleclick?.({
+		this.deps.session.activeMode().doubleclick?.({
 			event: event as PointerEvent,
 			time: this.#pointerToMs(event as PointerEvent),
 			clip, point, inRuler

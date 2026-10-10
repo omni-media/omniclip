@@ -35,8 +35,8 @@ export const AnimationsControls = shadow((context: EditorContext, item: PresetIt
 		exit:  {preset: exitPreset,  duration: exitDuration,  animId: exitAnimId},
 	}
 
-	const syncAnimIds = (enterId = enterAnimId.value, exitId = exitAnimId.value, ...staleIds: (Id | null)[]) => {
-		const owned = new Set([enterAnimId.value, exitAnimId.value, ...staleIds].filter((id): id is Id => id != null))
+	const syncAnimIds = (enterId = enterAnimId(), exitId = exitAnimId(), ...staleIds: (Id | null)[]) => {
+		const owned = new Set([enterAnimId(), exitAnimId(), ...staleIds].filter((id): id is Id => id != null))
 		tool.set<PresetItem>(item.id, {
 			animationIds: [
 				...(item.animationIds ?? []).filter(id => !owned.has(id)),
@@ -47,17 +47,17 @@ export const AnimationsControls = shadow((context: EditorContext, item: PresetIt
 
 	const applySlot = (direction: PresetDirection, preset: PresetChoice, duration: number, offset: number) => {
 		const {animId} = presetSignals[direction]
-		const prevId = animId.value
-		animId.value = preset === "none"
+		const prevId = animId()
+		animId(preset === "none"
 			? null
 			: tool.animate.presets[preset].make({
 				duration: Math.min(duration, item.duration),
 				offset,
-			}).id
+			}).id)
 
 		syncAnimIds(
-			direction === "enter" ? animId.value : enterAnimId.value,
-			direction === "exit"  ? animId.value : exitAnimId.value,
+			direction === "enter" ? animId() : enterAnimId(),
+			direction === "exit"  ? animId() : exitAnimId(),
 			prevId,
 		)
 
@@ -67,29 +67,31 @@ export const AnimationsControls = shadow((context: EditorContext, item: PresetIt
 
 	const applyPresets = (enter: PresetChoice, exit: PresetChoice, prev: PresetChoice[] = []) => {
 		if (enter !== "none" || prev[0] !== "none")
-			applySlot("enter", enter, enterDuration.value, 0)
+			applySlot("enter", enter, enterDuration(), 0)
 
 		if (exit !== "none" || prev[1] !== "none")
-			applySlot("exit", exit, exitDuration.value, Math.max(0, item.duration - exitDuration.value))
+			applySlot("exit", exit, exitDuration(), Math.max(0, item.duration - exitDuration()))
 	}
 
 	const choosePreset = (direction: PresetDirection, preset: PresetChoice) => {
-		const prev = [enterPreset.value, exitPreset.value]
-		presetSignals[direction].preset.value = preset
-		applyPresets(enterPreset.value, exitPreset.value, prev)
+		const prev = [enterPreset(), exitPreset()]
+		presetSignals[direction].preset(preset)
+		applyPresets(enterPreset(), exitPreset(), prev)
 	}
 
 	const setDuration = (direction: PresetDirection, event: Event) => {
 		const {duration} = presetSignals[direction]
 		const n = Number(valueOf(event))
-		duration.value = Number.isFinite(n)
+		duration(Number.isFinite(n)
 			? Math.round(Math.min(maxDuration, Math.max(0.1, n)) * 1000)
-			: duration.value
-		applyPresets(enterPreset.value, exitPreset.value)
+			: duration())
+		applyPresets(enterPreset(), exitPreset())
 	}
 
 	const renderMode = (direction: PresetDirection) => {
-		const {preset: {value: active}, duration: {value: duration}} = presetSignals[direction]
+		const signals = presetSignals[direction]
+		const active = signals.preset()
+		const duration = signals.duration()
 		return html`
 			<div class="animation-mode">
 				<div class="mode-heading ${direction}">${direction}</div>

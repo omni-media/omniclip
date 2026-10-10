@@ -43,7 +43,7 @@ export const exportProgressModal = (
 						onProgress: render => {
 							if (aborted)
 								throw new Error("Export cancelled.")
-							if (progress.value.phase !== "rendering")
+							if (progress().phase !== "rendering")
 								return
 
 							progress({phase: "rendering", render})
@@ -73,9 +73,9 @@ export const exportProgressModal = (
 		})
 
 		return renderExportProgress(
-			progress.value,
+			progress(),
 			canvas,
-			() => modal.resolve(progress.value.phase === "complete"),
+			() => modal.resolve(progress().phase === "complete"),
 		)
 	})()
 })

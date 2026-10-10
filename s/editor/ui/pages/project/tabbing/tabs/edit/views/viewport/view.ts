@@ -61,8 +61,9 @@ export const TimelineViewport = shadow((context: EditorContext) => {
 		}
 
 		resize(settings.resolution)
-		const dispose = context.strata.settings
-			.on(s => resize(s.resolution))
+		const dispose = context.strata.settings.on(settings =>
+			resize(settings.resolution)
+		)
 		return () => dispose()
 	})
 
