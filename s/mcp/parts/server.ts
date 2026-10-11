@@ -59,7 +59,7 @@ export function createMcpServer(bridge: EditorBridge, vision: Vision) {
 	}
 
 	for (const {name, ...tool} of editorTools) {
-		server.registerTool(name, tool, async (input, {signal}) => ({
+		server.registerTool(name, tool, async (input: EditorToolInput, {signal}: {signal: AbortSignal}): Promise<CallToolResult> => ({
 			content: [{
 				type: 'text',
 				text: JSON.stringify(await executeEditorTool(name, input, signal))
