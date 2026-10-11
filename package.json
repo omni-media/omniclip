@@ -72,7 +72,7 @@
 		"@huggingface/transformers": "^4.2.0",
 		"@modelcontextprotocol/sdk": "^1.32.1",
 		"@omnimedia/kimura": "^1.0.5-10",
-		"@omnimedia/omnitool": "^1.1.0-140",
+		"@omnimedia/omnitool": "^1.1.0-141",
 		"@pixi/colord": "^2.9.6",
 		"@zip.js/zip.js": "^2.7.62",
 		"ai": "^7.0.137",
