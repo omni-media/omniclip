@@ -12,8 +12,8 @@
 		"omniclipmcp": "x/mcp/index.js"
 	},
 	"scripts": {
-		"build": "run-s _clean _coi _ln _tsc _scute",
-		"build-netlify": "run-s _clean _tsc _copy-assets _scute _copy-node-modules",
+		"build": "run-s _clean _coi _ln _tsc _copy-styles _scute",
+		"build-netlify": "run-s _clean _tsc _copy-assets _copy-styles _scute",
 		"watch": "octo 'scute -wv' 'tsc -w' 'node --watch x/tests.test.js' 'node --watch --env-file-if-exists=.env x/server/index.js'",
 		"server": "node --env-file-if-exists=.env x/server/index.js",
 		"test": "node x/tests.test.js",
@@ -23,11 +23,10 @@
 		"_scute": "scute -v",
 		"_coi": "cp node_modules/coi-serviceworker/coi-serviceworker.js x/",
 		"_copy-assets": "cp -r assets x/",
-		"_copy-node-modules": "cp -r node_modules x/",
-		"_ln": "run-s _ln-s _ln-assets _ln-nm",
+		"_copy-styles": "cp -r node_modules/@awesome.me/webawesome/dist-cdn/styles x/editor/webawesome",
+		"_ln": "run-s _ln-s _ln-assets",
 		"_ln-s": "ln -s \"$(realpath s)\" x/s",
-		"_ln-assets": "ln -s \"$(realpath assets)\" x/assets",
-		"_ln-nm": "ln -s \"$(realpath node_modules)\" x/node_modules"
+		"_ln-assets": "ln -s \"$(realpath assets)\" x/assets"
 	},
 	"author": "zenkyuv",
 	"license": "MIT",
@@ -58,7 +57,7 @@
 		"@benev/slate": "^0.3.10",
 		"@benev/tact": "^0.1.1",
 		"@e280/kv": "^0.1.2",
-		"@e280/quay": "^0.0.0-21",
+		"@e280/quay": "^0.0.0-23",
 		"@e280/renraku": "^0.6.0-17",
 		"@e280/shiny": "^0.1.0",
 		"@e280/sly": "^0.4.8",

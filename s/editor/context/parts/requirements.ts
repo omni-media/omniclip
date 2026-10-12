@@ -14,7 +14,7 @@ export type Requirements = Awaited<ReturnType<typeof setupRequirements>>
 export async function setupRequirements(projectId: string) {
 	const strata = await Strata.setup(projectId)
 	const tabs = new TabManager()
-	const cellar = await Cellar.opfs("files")
+	const cellar = await Cellar.opfs("files", "/editor/workers/cellar.worker.bundle.min.js")
 	const driver = await Driver.setup({workerUrl: "/editor/workers/driver.worker.bundle.min.js"})
 	const project = new Omni(driver)
 

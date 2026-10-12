@@ -7,7 +7,7 @@ import {Strata} from "../parts/strata.js"
 
 export class CargoController {
 	static async setup(strata: Strata, cellar: Cellar, project: Omni) {
-		const editorLibrary = await MediaLibrary.open(`omniclip`)
+		const editorLibrary = await MediaLibrary.open(`omniclip`, "/editor/workers/cellar.worker.bundle.min.js")
 		const projectLibrary = await editorLibrary.scope(strata.projectId)
 		return new this(strata, cellar, project, projectLibrary, editorLibrary)
 	}
