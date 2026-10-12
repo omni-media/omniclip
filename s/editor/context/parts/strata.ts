@@ -1,21 +1,21 @@
 import {microbounce} from "@e280/stz"
 
-import {Kv, StorageDriver} from '@e280/kv'
+import {Kv, StorageMagazine} from '@e280/kv'
 import {Prism, Chrono, Vault, LocalStore} from '@e280/strata'
 
 import {makeDefaultState, State} from './state.js'
 
 export class Strata {
-	static storageScope = 'omniclip:project'
+	static storageScope = ['omniclip', 'project']
 	static storageVersion = 1
 
 	static #projects(storage: Storage = window.localStorage) {
-		return new Kv<{version: number, state: State}>(new StorageDriver(storage))
-			.scope(this.storageScope)
+		return new Kv<{version: number, state: State}>(new StorageMagazine(storage))
+			.scope(...this.storageScope)
 	}
 
 	static storageKey(projectId: string) {
-		return `${this.storageScope}:${projectId}`
+		return `${this.storageScope.join('.')}:${projectId}`
 	}
 
 	static async listProjectIds(storage: Storage = window.localStorage) {
