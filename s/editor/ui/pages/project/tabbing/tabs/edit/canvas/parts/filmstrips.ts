@@ -1,6 +1,5 @@
 
-import {Filmstrip, Id} from "@omnimedia/omnitool"
-import {ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Filmstrip, Id, ms} from "@omnimedia/omnitool"
 
 import {metrics, styles} from "../draw/styles.js"
 import type {TimelineCanvas} from "../canvas.js"

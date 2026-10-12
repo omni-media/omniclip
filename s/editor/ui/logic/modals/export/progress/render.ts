@@ -1,6 +1,6 @@
 
 import {html} from "lit"
-import type {ExportProgress as RenderProgress} from "@omnimedia/omnitool/x/timeline/renderers/export/produce.js"
+import type {ExportProgress as RenderProgress} from "@omnimedia/omnitool"
 
 export type ExportProgress = {
 	phase: "rendering" | "saving" | "complete" | "error"

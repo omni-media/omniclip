@@ -1,5 +1,5 @@
 
-import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {ms, Ms} from "@omnimedia/omnitool"
 
 import {Idx} from "../../index.js"
 import type {OmniSession} from "../../../session.js"

@@ -1,7 +1,6 @@
 import {microbounce} from "@e280/stz"
 
-import {ms} from "@omnimedia/omnitool/x/units/ms.js"
-import {Kind, type TimelineFile} from "@omnimedia/omnitool"
+import {ms, Kind, type TimelineFile} from "@omnimedia/omnitool"
 
 import {syncOutliner} from "./parts/outliner.js"
 import {prepareViews} from "../ui/views/views.js"

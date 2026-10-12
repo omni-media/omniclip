@@ -1,8 +1,7 @@
 
 import {html} from "lit"
 import {waitGot} from "@e280/strata"
-import {Filmstrip, Item} from "@omnimedia/omnitool"
-import {ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Filmstrip, Item, ms} from "@omnimedia/omnitool"
 import {shadow, useCss, useMount, useSignal, useWait} from "@e280/sly"
 
 import styleCss from "./style.css.js"

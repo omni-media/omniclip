@@ -1,7 +1,5 @@
 
-import type {Id} from "@omnimedia/omnitool"
-import {Waveform} from "@omnimedia/omnitool/x/timeline/parts/waveform/waveform.js"
-import type {WaveformTileData, WaveformTileRenderInput} from "@omnimedia/omnitool/x/timeline/parts/waveform/parts/types.js"
+import {type Id, Waveform, type WaveformTileData, type WaveformTileRenderInput} from "@omnimedia/omnitool"
 
 import {metrics, styles} from "../draw/styles.js"
 import type {TimelineCanvas} from "../canvas.js"

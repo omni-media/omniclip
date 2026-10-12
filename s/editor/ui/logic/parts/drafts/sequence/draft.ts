@@ -1,5 +1,4 @@
-import {Id, Item} from "@omnimedia/omnitool"
-import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Id, Item, Ms} from "@omnimedia/omnitool"
 
 import {TimelineDraft} from "../timeline.js"
 import {normalize as normalizeItems} from "./normalize.js"

@@ -13,7 +13,7 @@ export const LANGUAGES = [
 ] as const
 
 export const transcriberWorkerPath = new URL(
-	"/node_modules/@omnimedia/omnitool/x/features/speech/transcribe/worker.bundle.min.js",
+	"/editor/workers/transcriber.worker.bundle.min.js",
 	import.meta.url
 )
 

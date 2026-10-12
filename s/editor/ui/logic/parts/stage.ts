@@ -1,10 +1,8 @@
 
 import {signal} from "@e280/strata"
 import {Kimura} from "@omnimedia/kimura"
-import {Id, Item, Kind, TimelineFile} from "@omnimedia/omnitool"
+import {Id, Item, Kind, TimelineFile, type Driver, mat6ToTransform, type Transform, type TransformAnimation} from "@omnimedia/omnitool"
 import {Container, FederatedPointerEvent, Ticker} from "pixi.js"
-import {mat6ToTransform} from "@omnimedia/omnitool/x/timeline/utils/matrix.js"
-import type {Transform, TransformAnimation} from "@omnimedia/omnitool/x/timeline/types.js"
 
 import {OmniSession} from "../session.js"
 import {add, update} from "./mutate.js"
@@ -20,7 +18,7 @@ type StageItem = Idx.VideoItem | Item.Text
 export class Stage {
 	kimura
 
-	compositor
+	compositor: Driver["compositor"]
 	#viewerZoom = 1
 	#ticker = new Ticker()
 	#active: {id: Id, object: Container} | null = null

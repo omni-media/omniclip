@@ -1,6 +1,5 @@
 
-import {Id, Kind} from "@omnimedia/omnitool"
-import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Id, Kind, Ms} from "@omnimedia/omnitool"
 
 export type ClipBox = {
 	itemId: Id

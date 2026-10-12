@@ -1,5 +1,5 @@
 
-import {Ms} from '@omnimedia/omnitool/x/units/ms.js'
+import {Ms} from '@omnimedia/omnitool'
 
 import {formatTime} from "../../../../../../utils/format-time.js"
 

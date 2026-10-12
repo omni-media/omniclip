@@ -1,6 +1,5 @@
 
-import {Item, visualAnimations} from '@omnimedia/omnitool'
-import type {Keyframes, Transform, TransformAnimation} from '@omnimedia/omnitool/x/timeline/types.js'
+import {Item, visualAnimations, type Keyframes, type Transform, type TransformAnimation} from "@omnimedia/omnitool"
 
 export {clamp} from '../../../../../utils/math.js'
 

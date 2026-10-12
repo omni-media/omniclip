@@ -1,6 +1,5 @@
 
-import {Ms, ms} from "@omnimedia/omnitool/x/units/ms.js"
-import {Kind} from "@omnimedia/omnitool"
+import {Ms, ms, Kind} from "@omnimedia/omnitool"
 
 import {Idx} from "../../index.js"
 import {roll} from "./parts/action.js"

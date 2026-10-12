@@ -1,7 +1,6 @@
 
 import {Index} from "../../../index.js"
-import {Id} from "@omnimedia/omnitool"
-import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Id, ms, Ms} from "@omnimedia/omnitool"
 
 export interface SnapBounds { start: Ms; end: Ms }
 

@@ -1,5 +1,5 @@
 
-import {Ms} from '@omnimedia/omnitool/x/units/ms.js'
+import {Ms} from '@omnimedia/omnitool'
 
 export function formatTime(time: Ms, options: {milliseconds?: boolean} = {}) {
 	const totalSeconds = time / 1000

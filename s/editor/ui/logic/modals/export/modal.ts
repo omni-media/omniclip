@@ -1,8 +1,7 @@
 
 import {html} from "lit"
-import {TimelineFile} from "@omnimedia/omnitool"
+import {TimelineFile, Ms} from "@omnimedia/omnitool"
 import {shadow, useCss, useSignal} from "@e280/sly"
-import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import styleCss from "./style.css.js"
 import {exportProgressModal} from "./progress/modal.js"

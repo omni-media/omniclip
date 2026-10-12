@@ -1,6 +1,5 @@
 
-import {Fps} from '@omnimedia/omnitool/x/units/fps.js'
-import {ms} from '@omnimedia/omnitool/x/units/ms.js'
+import {Fps, ms} from "@omnimedia/omnitool"
 
 export const tickSteps = (timebase: Fps) => [
 	{major: ms(1000), minor: ms(1000 / timebase)},

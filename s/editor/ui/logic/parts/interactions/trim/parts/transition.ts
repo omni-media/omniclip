@@ -1,6 +1,5 @@
 
-import {Id, Item, Resource} from "@omnimedia/omnitool"
-import {Ms, ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Id, Item, Resource, Ms, ms} from "@omnimedia/omnitool"
 
 import {trim} from "./action.js"
 import {Idx} from "../../../index.js"

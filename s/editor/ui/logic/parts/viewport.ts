@@ -1,6 +1,6 @@
 
 import {signal} from '@e280/strata'
-import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
+import {ms, Ms} from '@omnimedia/omnitool'
 
 export class Viewport {
 	$zoom = signal(1)

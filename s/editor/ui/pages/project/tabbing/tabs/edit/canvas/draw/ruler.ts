@@ -1,5 +1,5 @@
 
-import {ms} from '@omnimedia/omnitool/x/units/ms.js'
+import {ms} from '@omnimedia/omnitool'
 
 import {metrics, styles} from "./styles.js"
 import type {TimelineCanvas} from "../canvas.js"

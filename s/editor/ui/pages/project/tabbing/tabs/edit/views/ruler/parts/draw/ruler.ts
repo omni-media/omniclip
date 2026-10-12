@@ -1,6 +1,5 @@
 
-import {ms} from '@omnimedia/omnitool/x/units/ms.js'
-import {fps} from '@omnimedia/omnitool/x/units/fps.js'
+import {ms, fps} from "@omnimedia/omnitool"
 
 import {tickSteps} from "../constants.js"
 import {drawMajorTick} from "./major-tick.js"

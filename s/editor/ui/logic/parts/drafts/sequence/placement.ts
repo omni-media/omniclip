@@ -1,5 +1,4 @@
-import {Id, Item, Kind} from "@omnimedia/omnitool"
-import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Id, Item, Kind, ms, Ms} from "@omnimedia/omnitool"
 
 import {Idx, Index} from "../../index.js"
 import {itemDuration, splitItem, withRange} from "../utils.js"

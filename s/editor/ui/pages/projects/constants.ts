@@ -1,5 +1,5 @@
 
-import {computeItemDuration} from '@omnimedia/omnitool/x/timeline/renderers/parts/handy.js'
+import {computeItemDuration} from '@omnimedia/omnitool'
 
 import {Strata} from '../../../context/parts/strata.js'
 

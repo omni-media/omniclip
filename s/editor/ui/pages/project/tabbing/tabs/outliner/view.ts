@@ -1,9 +1,8 @@
 
 import {html} from "lit"
 import {repeat} from "lit/directives/repeat.js"
-import {Id, Item, Kind} from "@omnimedia/omnitool"
+import {Id, Item, Kind, ms} from "@omnimedia/omnitool"
 import {shadow, useCss, useSignal} from "@e280/sly"
-import {ms} from "@omnimedia/omnitool/x/units/ms.js"
 
 import styleCss from "./style.css.js"
 import {when} from "lit/directives/when.js"

@@ -1,5 +1,5 @@
 
-import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Ms} from "@omnimedia/omnitool"
 
 import {OmniSession} from "../../session.js"
 import {TimelineClipBox} from "../../../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"

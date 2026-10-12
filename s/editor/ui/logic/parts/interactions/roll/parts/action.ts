@@ -1,6 +1,5 @@
 
-import {Kind} from "@omnimedia/omnitool"
-import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Kind, ms, Ms} from "@omnimedia/omnitool"
 
 import {Idx} from "../../../index.js"
 import {getBounds} from "../../../bounds.js"

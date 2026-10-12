@@ -1,6 +1,5 @@
 
-import {Fps} from '@omnimedia/omnitool/x/units/fps.js'
-import {Ms} from '@omnimedia/omnitool/x/units/ms.js'
+import {Fps, Ms} from "@omnimedia/omnitool"
 
 export function drawMinorTick (
 	ctx: CanvasRenderingContext2D,

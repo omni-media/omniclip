@@ -2,9 +2,7 @@
 import {dom} from '@e280/sly'
 import {pub} from '@e280/stz'
 import {signal} from '@e280/strata'
-import {fps, Fps} from '@omnimedia/omnitool/x/units/fps.js'
-import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
-import {Driver, Id, Item, Kind, Resource, VideoPlayer} from '@omnimedia/omnitool'
+import {fps, Fps, ms, Ms, Driver, Id, Item, Kind, Resource, VideoPlayer} from "@omnimedia/omnitool"
 
 import {drawClips} from './draw/clip.js'
 import {drawRuler} from './draw/ruler.js'

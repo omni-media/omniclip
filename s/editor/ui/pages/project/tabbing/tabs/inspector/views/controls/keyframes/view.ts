@@ -1,9 +1,7 @@
 
 import {html} from 'lit'
 import {shadow, useCss} from '@e280/sly'
-import {Item} from '@omnimedia/omnitool'
-import {ms} from '@omnimedia/omnitool/x/units/ms.js'
-import {resolveTransformAnimation} from '@omnimedia/omnitool/x/timeline/utils/anim.js'
+import {Item, ms, resolveTransformAnimation} from "@omnimedia/omnitool"
 
 import styleCss from './style.css.js'
 import {controlsStyles} from '../styles.css.js'

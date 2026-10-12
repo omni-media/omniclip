@@ -1,7 +1,6 @@
 import {shadow, useCss} from "@e280/sly"
 import {html, TemplateResult} from "lit"
-import {Item} from "@omnimedia/omnitool"
-import {ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Item, ms} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
 import {DirectiveResult} from "lit/directive.js"

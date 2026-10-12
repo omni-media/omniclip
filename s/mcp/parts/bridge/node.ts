@@ -6,7 +6,7 @@ import type {WebSocket} from 'ws'
 import {guarantee, hex} from '@e280/stz'
 import websocket from '@fastify/websocket'
 import {mkdtemp, rm, writeFile} from 'node:fs/promises'
-import {connect, Messenger, wire, type Remote} from '@e280/renraku'
+import {connect, Messenger, wire} from '@e280/renraku'
 import Fastify, {type FastifyReply, type FastifyRequest} from 'fastify'
 
 import type {TimelinePatch} from '../../../iso/timeline.js'
@@ -20,7 +20,7 @@ type MediaRequest = FastifyRequest<{Params: {id: string}}>
 export class EditorBridge {
 	#server = Fastify()
 	#directory = ''
-	#editor?: Remote<EditorRpc>
+	#editor?: EditorRpc
 	#disconnected = new AbortController()
 	#uploads = new Set<string>()
 	#media = new Map<string, Promise<ProvidedMedia>>()
@@ -138,7 +138,7 @@ export class EditorBridge {
 	}
 
 	async #callEditor<T>(
-		execute: (editor: Remote<EditorRpc>, id: string) => Promise<T>,
+		execute: (editor: EditorRpc, id: string) => Promise<T>,
 		signal?: AbortSignal,
 		id = hex.random(16)
 	) {

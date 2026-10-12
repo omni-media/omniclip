@@ -1,8 +1,6 @@
 
 import {need} from '@e280/stz'
-import {ms, Ms} from '@omnimedia/omnitool/x/units/ms.js'
-import {Id, Item, Kind, TimelineFile} from '@omnimedia/omnitool'
-import {computeItemDuration} from '@omnimedia/omnitool/x/timeline/renderers/parts/handy.js'
+import {ms, Ms, Id, Item, Kind, TimelineFile, computeItemDuration} from "@omnimedia/omnitool"
 
 export namespace Idx {
 	export type Text = Item.Text & {start?: number}

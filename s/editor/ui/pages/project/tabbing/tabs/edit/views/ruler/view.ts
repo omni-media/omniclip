@@ -1,7 +1,7 @@
 
 import {html} from "lit"
 import {dom, shadow, useCss, useMount, useOnce, useRendered, useShadow, useWake} from "@e280/sly"
-import {ms, Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {ms, Ms} from "@omnimedia/omnitool"
 
 import styleCss from "./style.css.js"
 import {drawRuler} from "./parts/draw/ruler.js"

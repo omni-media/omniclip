@@ -1,5 +1,4 @@
-import {Id, Item, Kind} from "@omnimedia/omnitool"
-import {Ms} from "@omnimedia/omnitool/x/units/ms.js"
+import {Id, Item, Kind, Ms} from "@omnimedia/omnitool"
 
 import {Index} from "../../index.js"
 import {replaceChild} from "../../operations/operations.js"
