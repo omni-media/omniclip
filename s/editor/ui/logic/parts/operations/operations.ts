@@ -1,5 +1,5 @@
 
-import {Id, Item, Ms} from "@omnimedia/omnitool"
+import {Id, Item, Ms, TimelineFile} from "@omnimedia/omnitool"
 
 import {Idx, Index} from "../index.js"
 import {getBounds} from "../bounds.js"
@@ -92,3 +92,28 @@ export const ownedReferences = (item: Item.Any) => [
 	...("animationIds" in item ? item.animationIds ?? [] : []),
 	...("filterIds" in item ? item.filterIds ?? [] : []),
 ]
+
+export function removeTree(state: TimelineFile, rootId: Id) {
+	const items = new Map(state.items.map(item => [item.id, item]))
+	const removed = new Set<Id>()
+	const references = new Set<Id>()
+	const visit = (id: Id) => {
+		const item = items.get(id)
+		if (!item || removed.has(id)) return
+		removed.add(id)
+		for (const reference of ownedReferences(item))
+			references.add(reference)
+		if (Idx.isStruct(item))
+			item.childrenIds.forEach(visit)
+	}
+	visit(rootId)
+
+	// Keep referenced records still used by surviving items.
+	for (const item of state.items)
+		if (!removed.has(item.id))
+			for (const reference of ownedReferences(item))
+				references.delete(reference)
+
+	state.items = state.items.filter(item => !removed.has(item.id) && !references.has(item.id))
+}
+

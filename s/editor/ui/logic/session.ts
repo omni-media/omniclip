@@ -22,7 +22,7 @@ import {resizeTransition} from "./parts/interactions/trim/parts/transition.js"
 import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
 import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
 import {TimelineClipBox} from "../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
-import {copyClip, ownedReferences, replaceChild, splitClip, wrapChild} from "./parts/operations/operations.js"
+import {copyClip, removeTree, replaceChild, splitClip, wrapChild} from "./parts/operations/operations.js"
 import {
 	cloneAnimation,
 	hasAnyKeyframes,
@@ -532,15 +532,12 @@ export class OmniSession {
 			if (Idx.isTransition(item))
 				this.#applyTransitionResize(state, item, 0, parent.childrenIds, parent.childrenIds.indexOf(clipId))
 
-			for (const id of [clipId, ...ownedReferences(item)])
-				remove(state, id)
+			removeTree(state, clipId)
 			update(state, parent.id, {
 				childrenIds: parent.childrenIds.filter(childId => childId !== clipId)
 			})
 		})
 
-		if (this.$selectedItem() === clipId)
-			this.$selectedItem(null)
-		this.canvas.scheduleDraw()
+		this.reconcile()
 	}
 }
