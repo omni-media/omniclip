@@ -34,7 +34,7 @@ export function createEditorSession(editor: EditorContext, origin: string) {
 		read_project_context: async () => context(),
 
 		create_item: async () => ({
-			id: editor.omni.getId()
+			id: editor.session.getId()
 		}),
 
 		cancel: async id => {

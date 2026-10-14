@@ -57,7 +57,7 @@ export const FiltersControls = shadow((context: EditorContext, item: FilterableI
 	const addFilter = async (key: FilterKey) => {
 		const def = filters[key]
 		const filter: Item.Filter = {
-			id: context.omni.getId(),
+			id: context.session.getId(),
 			kind: Kind.Filter,
 			type: def.type,
 			params: Schema.defaultParams(def.schema),

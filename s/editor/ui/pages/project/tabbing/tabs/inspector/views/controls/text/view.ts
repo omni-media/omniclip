@@ -34,7 +34,7 @@ export type TextDetailsProps = {
 export const TextControls = shadow((context: EditorContext, item: Item.Text) => {
 	useCss(themeCss, controlsStyles, itemControlTabsCss, styleCss)
 
-	const tool = context.omni
+	const session = context.session
 	const options = TEXT_STYLE_OPTIONS
 	const defaults = TEXT_STYLE_DEFAULTS
 
@@ -46,7 +46,7 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text) => 
 					id="content-input"
 					class="text-input"
 					.value=${item.content}
-					@input=${(e: any) => tool.set<Item.Text>(item.id, {content: e.target.value})}
+					@input=${(e: any) => session.edit(o => o.set<Item.Text>(item.id, {content: e.target.value}))}
 				></textarea>
 			</div>
 
@@ -80,7 +80,7 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text) => 
 	}
 
 	const otherControls = renderOtherControls()
-	const styleItem = tool.require<Item.TextStyle>(item.styleId)
+	const styleItem = session.index.getItemMaybe<Item.TextStyle>(item.styleId)
 
 	if(!styleItem) {
 		const textControls = renderTextControls({style: defaults, options, update: () => {}})
@@ -89,10 +89,10 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text) => 
 				properties: html`
 					<div>
 						<button
-							@click=${() => {
-								const style = tool.textStyle({})
-								tool.set<Item.Text>(item.id, {styleId: style.id})
-							}}
+							@click=${() => session.edit(o => {
+								const style = o.textStyle({})
+								o.set<Item.Text>(item.id, {styleId: style.id})
+							})}
 							class=create-styles
 						>
 							create styles ${addSvg}
@@ -114,7 +114,7 @@ export const TextControls = shadow((context: EditorContext, item: Item.Text) => 
 	const textControls = renderTextControls({
 		style: {...defaults, ...(style ?? {})},
 		options,
-		update: (style) => tool.set<Item.TextStyle>(styleItem.id, {style: {...styleItem.style, ...style}})
+		update: (style) => session.edit(o => o.set<Item.TextStyle>(styleItem.id, {style: {...styleItem.style, ...style}}))
 	})
 
 	return html`

@@ -26,7 +26,7 @@ export const createAssistantToolkit = (
 	create_item: {
 		...editorTools.create_item,
 		type: "frontend",
-		execute: () => ({id: context.omni.getId()}),
+		execute: () => ({id: context.session.getId()}),
 		renderText: {
 			running: () => activity("Preparing a new item", "running"),
 			complete: ({result}: {result?: {id: string}}) =>

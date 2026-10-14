@@ -89,7 +89,7 @@ export class PositionEdit {
 		const {session, snapshot, movingId} = this.position
 
 		const gap: Item.Gap = {
-			id: session.deps.omnitool.getId(),
+			id: session.getId(),
 			kind: Kind.Gap,
 			duration: snapshot.index.getItemDuration(movingId),
 		}
@@ -111,7 +111,7 @@ export class PositionEdit {
 		drop: DropIntent,
 	) {
 		const {session, movingId} = this.position
-		const getId = () => session.deps.omnitool.getId()
+		const getId = () => session.getId()
 
 		const overlay = overlayFromDropIntent({
 			drop,
@@ -170,7 +170,7 @@ export class PositionEdit {
 		at: Ms,
 	) {
 		const {session, movingId} = this.position
-		const getId = () => session.deps.omnitool.getId()
+		const getId = () => session.getId()
 
 		const positioned = new SequenceDraft(draft, sequence.id, getId).place(
 			movingId,
@@ -192,7 +192,7 @@ export class PositionEdit {
 		if (stack.kind !== Kind.Stack)
 			return new Map()
 
-		const getId = () => session.deps.omnitool.getId()
+		const getId = () => session.getId()
 
 		const overlay = positionStackChild(
 			stack,

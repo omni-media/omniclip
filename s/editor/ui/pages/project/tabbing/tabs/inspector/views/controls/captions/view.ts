@@ -19,7 +19,6 @@ import binSvg from "../../../../../../../../icons/gravity-ui/bin.svg.js"
 import {EditorContext} from "../../../../../../../../../context/context.js"
 import speechToTextSvg from "../../../../../../../../icons/speech-to-text.svg.js"
 import {renderCaptionStyleControls, renderTranscriptPreview} from "./renderers.js"
-import {replaceChild} from "../../../../../../../../logic/parts/operations/operations.js"
 import {AI_DEVICES, AI_DTYPES, AiDevice, AiDtype, formatProgress} from "../../../constants.js"
 import {CaptionConfigKey, LANGUAGES, Transcriber, TranscriberModel, transcriberModels, transcriberWorkerPath} from "./constants.js"
 
@@ -33,7 +32,7 @@ import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoItem | Idx.AudioItem) => {
 	useCss(controlsStyles, textStyleCss, aiControlStyles, styleCss)
 
-	const tool = context.omni
+	const session = context.session
 	const index = context.session.index
 	const existingCaption = index.queryItem<Item.Caption>(
 		c => c.kind === Kind.Caption && c.itemId === item.id
@@ -82,7 +81,7 @@ export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoI
 
 	const updateCaption = (patch: Partial<Item.Caption>) => {
 		if (existingCaption)
-			tool.set(existingCaption.id, patch)
+			session.edit(o => o.set(existingCaption.id, patch))
 	}
 
 	const setCaptionConfig = (key: CaptionConfigKey, value: number) => {
@@ -92,7 +91,7 @@ export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoI
 	}
 
 	const updateStyle = (item: Item.TextStyle, style: TextStyleOptions) =>
-		tool.set(item.id, {style: {...item.style, ...style}})
+		session.edit(o => o.set(item.id, {style: {...item.style, ...style}}))
 
 	const ensureTranscriber = async () => {
 		const existing = transcriber()
@@ -116,18 +115,6 @@ export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoI
 		transcriber(next)
 
 		return next
-	}
-
-	const insertCaption = (caption: Item.Caption) => {
-		const parent = context.session.index.getParent(item.id)
-		if (parent?.kind === Kind.Stack)
-			tool.set(parent.id, {childrenIds: [caption.id, ...parent.childrenIds]})
-		else {
-			const stack = context.omni.stack(caption, item)
-			if (parent)
-				tool.set(parent.id, {childrenIds: replaceChild(parent.childrenIds, item.id, [stack.id])})
-			else context.strata.timeline.mutate(s => s.rootId = stack.id)
-		}
 	}
 
 	const generate = async () => {
@@ -158,15 +145,11 @@ export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoI
 						status(formatProgress(Math.round(progress), "Transcribing"))
 				}
 			})
-			const caption = context.omni.captions.make(nextTranscript, {
-				itemId: item.id,
-				start: item.start,
-				duration: item.duration,
+			session.createCaption(item, nextTranscript, {
 				maxChars: maxChars(),
 				maxDuration: maxDuration(),
 				maxSilence: maxSilence(),
 			})
-    	insertCaption(caption)
     	status("Subtitles generated.")
     	context.session.$selectedItem(item.id)
   	}

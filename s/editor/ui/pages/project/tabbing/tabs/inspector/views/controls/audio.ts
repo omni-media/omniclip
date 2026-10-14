@@ -71,7 +71,7 @@ export function AudioProperties(context: EditorContext, item: Idx.AudioItem) {
 	const volume = Math.round(gain * 100)
 
 	const setVolume = (value: number) =>
-		context.omni.set<Idx.AudioItem>(item.id, {gain: Math.max(0, value) / 100})
+		context.session.edit(o => o.set<Idx.AudioItem>(item.id, {gain: Math.max(0, value) / 100}))
 
 	return html`
 		<div class="controls-group">

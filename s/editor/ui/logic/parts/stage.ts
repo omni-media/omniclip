@@ -1,8 +1,9 @@
 
 import {signal} from "@e280/strata"
 import {Kimura} from "@omnimedia/kimura"
-import {Id, Item, Kind, TimelineFile, type Driver, mat6ToTransform, type Transform, type TransformAnimation} from "@omnimedia/omnitool"
+import {transform as makeTransform} from "@omnimedia/omnitool"
 import {Container, FederatedPointerEvent, Ticker} from "pixi.js"
+import {Id, Item, Kind, TimelineFile, type Driver, mat6ToTransform, type Transform, type TransformAnimation} from "@omnimedia/omnitool"
 
 import {OmniSession} from "../session.js"
 import {add, update} from "./mutate.js"
@@ -149,7 +150,7 @@ export class Stage {
 
 	#saveTransform(state: TimelineFile, itemId: Id, transform: Transform, crop: Item.Spatial["crop"]) {
 		const item = this.session.index.getItem<StageItem>(itemId)
-		const spatialId = item.spatialId ?? this.session.deps.omnitool.getId()
+		const spatialId = item.spatialId ?? this.session.getId()
 		const spatial = this.session.index.getItemMaybe<Item.Spatial>(spatialId)
 		const animation = (item.animationIds ?? [])
 			.map(id => this.session.index.getItemMaybe<Item.Animation>(id))
@@ -161,7 +162,7 @@ export class Stage {
 				id: spatialId,
 				enabled: true,
 				kind: Kind.Spatial,
-				transform: animation ? this.session.deps.omnitool.transform() : transform
+				transform: animation ? makeTransform() : transform
 			})
 		else if (animation)
 			update(state, spatialId, {crop, enabled: true})

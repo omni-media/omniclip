@@ -1,5 +1,5 @@
 import {Cellar} from "@e280/quay"
-import {Driver, O, Omni, TimelineFile} from "@omnimedia/omnitool"
+import {Driver, Omni, TimelineFile} from "@omnimedia/omnitool"
 
 import {Strata} from "./strata.js"
 import {hydrateProject} from "./hydration.js"
@@ -22,17 +22,8 @@ export async function setupRequirements(projectId: string) {
 	await hydrateProject(cargo.projectLibrary, project, cellar, strata)
 
 	const player = await project.playback(strata.timeline.state as TimelineFile)
-	const omni = new O({
-		get timeline() {
-			return strata.timeline.state
-		},
-		set timeline(p: TimelineFile) {
-			strata.timeline.mutate(state => Object.assign(state, p))
-		}
-	})
 	const session = new OmniSession({
 		strata,
-		omnitool: omni,
 		player,
 		driver,
 		resolveMedia: item => "mediaHash" in item
@@ -41,5 +32,5 @@ export async function setupRequirements(projectId: string) {
 	})
 	const controllers = {cargo, player, assistant: new AssistantController(session)}
 	const keybindings = await Keybindings.setup(session)
-	return {strata, controllers, tabs, keybindings, omni, project, driver, session}
+	return {strata, controllers, tabs, keybindings, project, driver, session}
 }

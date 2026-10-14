@@ -128,7 +128,7 @@ export const BackgroundRemoverControls = shadow((context: EditorContext, item: I
 				})
 			})
 
-			context.omni.set(item.id, {mediaHash: removed.datafile.checksum.hash})
+			context.session.edit(o => o.set(item.id, {mediaHash: removed.datafile.checksum.hash}))
 			await context.strata.metadata.mutate(metadata => {
 				metadata.items = [
 					...metadata.items.filter(entry => entry.itemId !== item.id),

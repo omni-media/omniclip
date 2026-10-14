@@ -45,7 +45,6 @@ export class EditorContext {
 	get strata() { return this.requirements.strata }
 	get controllers() { return this.requirements.controllers }
 	get assistant() {return this.controllers.assistant}
-	get omni() { return this.requirements.omni }
 	get project() { return this.requirements.project }
 	get driver() { return this.requirements.driver }
 	get tabs() {return this.requirements.tabs}

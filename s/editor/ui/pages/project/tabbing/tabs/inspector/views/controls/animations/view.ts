@@ -3,6 +3,7 @@ import {html} from "lit"
 import {shadow, useCss, useSignal} from "@e280/sly"
 import {
 	Id,
+	O,
 	animationPresets
 } from "@omnimedia/omnitool"
 
@@ -19,7 +20,6 @@ import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 export const AnimationsControls = shadow((context: EditorContext, item: PresetItem) => {
 	useCss(controlsStyles, filterStyleCss, styleCss)
 
-	const tool = context.omni
 	const defaultDuration = animationPresets.fadeIn.defaults.duration
 	const maxDuration = Math.max(0.1, item.duration / 1000)
 
@@ -35,7 +35,7 @@ export const AnimationsControls = shadow((context: EditorContext, item: PresetIt
 		exit:  {preset: exitPreset,  duration: exitDuration,  animId: exitAnimId},
 	}
 
-	const syncAnimIds = (enterId = enterAnimId(), exitId = exitAnimId(), ...staleIds: (Id | null)[]) => {
+	const syncAnimIds = (tool: O, enterId = enterAnimId(), exitId = exitAnimId(), ...staleIds: (Id | null)[]) => {
 		const owned = new Set([enterAnimId(), exitAnimId(), ...staleIds].filter((id): id is Id => id != null))
 		tool.set<PresetItem>(item.id, {
 			animationIds: [
@@ -45,7 +45,7 @@ export const AnimationsControls = shadow((context: EditorContext, item: PresetIt
 		})
 	}
 
-	const applySlot = (direction: PresetDirection, preset: PresetChoice, duration: number, offset: number) => {
+	const applySlot = (tool: O, direction: PresetDirection, preset: PresetChoice, duration: number, offset: number) => {
 		const {animId} = presetSignals[direction]
 		const prevId = animId()
 		animId(preset === "none"
@@ -56,21 +56,24 @@ export const AnimationsControls = shadow((context: EditorContext, item: PresetIt
 			}).id)
 
 		syncAnimIds(
+			tool,
 			direction === "enter" ? animId() : enterAnimId(),
 			direction === "exit"  ? animId() : exitAnimId(),
 			prevId,
 		)
 
 		if (prevId != null)
-			context.strata.timeline.mutate(state => remove(state, prevId))
+			remove(tool.timeline, prevId)
 	}
 
 	const applyPresets = (enter: PresetChoice, exit: PresetChoice, prev: PresetChoice[] = []) => {
-		if (enter !== "none" || prev[0] !== "none")
-			applySlot("enter", enter, enterDuration(), 0)
+		context.session.edit(tool => {
+			if (enter !== "none" || prev[0] !== "none")
+				applySlot(tool, "enter", enter, enterDuration(), 0)
 
-		if (exit !== "none" || prev[1] !== "none")
-			applySlot("exit", exit, exitDuration(), Math.max(0, item.duration - exitDuration()))
+			if (exit !== "none" || prev[1] !== "none")
+				applySlot(tool, "exit", exit, exitDuration(), Math.max(0, item.duration - exitDuration()))
+		})
 	}
 
 	const choosePreset = (direction: PresetDirection, preset: PresetChoice) => {

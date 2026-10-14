@@ -44,7 +44,7 @@ export const CompositingControls = shadow((context: EditorContext, item: Idx.Vid
 		if (alpha === 1) return
 
 		const filter: Item.Filter<"AlphaFilter"> = {
-			id: context.omni.getId(),
+			id: context.session.getId(),
 			kind: Kind.Filter,
 			type: "AlphaFilter",
 			params: {alpha},

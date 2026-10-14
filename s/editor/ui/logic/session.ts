@@ -1,5 +1,8 @@
-import {microbounce} from "@e280/stz"
+
+import {hex, microbounce} from "@e280/stz"
+import type {Transcription} from "@omnimedia/omnitool"
 import {afterEffect, derived, signal} from "@e280/strata"
+import {anim, transform as makeTransform} from "@omnimedia/omnitool"
 import {visualAnimations, ms, Ms, type Transform, type TransformAnimation, computeItemDuration, ContainerItem, Driver, Id, Item, Kind, O, Resource, TimelineFile, TransitionName, VideoPlayer} from "@omnimedia/omnitool"
 
 import {Stage} from "./parts/stage.js"
@@ -48,7 +51,6 @@ export class OmniSession {
 
 	constructor(public deps: {
 		strata: Strata,
-		omnitool: O,
 		player: VideoPlayer,
 		driver: Driver,
 		resolveMedia: (item: Item.Any) => Resource.Media | null,
@@ -106,6 +108,18 @@ export class OmniSession {
 		return this.deps.strata.timeline
 	}
 
+	getId() { return hex.random(16) }
+
+	/** Apply one synchronous, undoable edit using Omnitool's sugar. */
+	edit<T>(change: (omni: O) => T): T {
+		return this.timeline.mutate(state => {
+			const omni = new O({timeline: state as TimelineFile})
+			const result = change(omni)
+			Object.assign(state, omni.timeline)
+			return result
+		})
+	}
+
 	async commitPatch(patch: TimelinePatch) {
 		const timeline = applyTimelinePatch(this.timeline.state as TimelineFile, patch)
 		await this.timeline.mutate(state => Object.assign(state, timeline, {audio: timeline.audio}))
@@ -140,15 +154,37 @@ export class OmniSession {
 	}
 
 	/** Append to the currently viewed timeline container. */
-	appendItem(item: Item.Any) {
+	appendItem<T extends Item.Any>(create: (omni: O) => T): T {
 		const parent = this.index.getItem<ContainerItem>(this.$viewedItemId())
-
-		this.deps.omnitool.set<typeof parent>(parent.id, {
-			childrenIds: [...parent.childrenIds, item.id],
+		const item = this.edit(omni => {
+			const item = create(omni)
+			omni.set<typeof parent>(parent.id, {
+				childrenIds: [...parent.childrenIds, item.id],
+			})
+			return item
 		})
 
 		this.$selectedItem(item.id)
 		this.playback.seek(this.$playhead())
+		return item
+	}
+
+	createCaption(item: Idx.VideoItem | Idx.AudioItem, transcript: Transcription, options: Parameters<O["captions"]["make"]>[1]) {
+		return this.edit(omni => {
+			const caption = omni.captions.make(transcript, {
+				...options, itemId: item.id, start: item.start, duration: item.duration,
+			})
+			const parent = this.index.getParent(item.id)
+			if (parent?.kind === Kind.Stack)
+				omni.set<typeof parent>(parent.id, {childrenIds: [caption.id, ...parent.childrenIds]})
+			else {
+				const stack = omni.stack(caption, item)
+				if (parent)
+					omni.set<typeof parent>(parent.id, {childrenIds: replaceChild(parent.childrenIds, item.id, [stack.id])})
+				else omni.state.timeline = {...omni.timeline, rootId: stack.id}
+			}
+			return caption
+		})
 	}
 
 	/** Wraps item with new container. */
@@ -158,7 +194,7 @@ export class OmniSession {
 			return
 
 		const container: Idx.Struct = {
-			id: this.deps.omnitool.getId(),
+			id: this.getId(),
 			kind: type === "stack" ? Kind.Stack : Kind.Sequence,
 			childrenIds: [itemId],
 		}
@@ -180,7 +216,7 @@ export class OmniSession {
 		const {copy, items} = copyClip(
 			item as Idx.Clip,
 			this.index,
-			() => this.deps.omnitool.getId(),
+			() => this.getId(),
 		)
 
 		this.timeline.mutate(state => {
@@ -239,12 +275,14 @@ export class OmniSession {
 	}
 
 	#createTransition(parent: Item.Sequence, index: number, name: TransitionName, duration: number) {
-		const created = this.deps.omnitool.transition[name](duration)
-		this.timeline.mutate(s => {
+		const created = this.edit(omni => {
+			const created = omni.transition[name](duration)
+			const s = omni.timeline
 			const childrenIds = [...parent.childrenIds]
 			childrenIds.splice(index, 0, created.id)
 			this.#applyTransitionResize(s, {...created, duration: 0}, duration, childrenIds, index)
 			update(s, parent.id, {childrenIds})
+			return created
 		})
 
 		this.$selectedItem(created.id)
@@ -331,17 +369,18 @@ export class OmniSession {
 		transform: Transform,
 		mutateAnimation: (draft: TransformAnimation) => void,
 	) {
-		const spatial = this.index.getItemMaybe<SpatialLike>(item.spatialId) ?? this.deps.omnitool.spatial()
-		const animation = (item.animationIds ?? [])
-			.map(id => this.index.getItemMaybe<Item.Animation>(id))
-			.find(animation => animation?.anims.transform)
-		const draft = animation?.anims.transform
-			? cloneAnimation(animation.anims.transform)
-			: this.deps.omnitool.anim.transform(visualAnimations.transform.defaultTerp, [])
+		this.edit(omni => {
+			const spatial = this.index.getItemMaybe<SpatialLike>(item.spatialId) ?? omni.spatial()
+			const animation = (item.animationIds ?? [])
+				.map(id => this.index.getItemMaybe<Item.Animation>(id))
+				.find(animation => animation?.anims.transform)
+			const draft = animation?.anims.transform
+				? cloneAnimation(animation.anims.transform)
+				: anim.transform(visualAnimations.transform.defaultTerp, [])
 
-		mutateAnimation(draft)
+			mutateAnimation(draft)
 
-		this.timeline.mutate(state => {
+			const state = omni.timeline
 			if (item.spatialId !== spatial.id)
 				update(state, item.id, {spatialId: spatial.id})
 
@@ -353,7 +392,7 @@ export class OmniSession {
 					})
 				}
 				else {
-					const animationId = this.deps.omnitool.getId()
+					const animationId = this.getId()
 					add(state, {
 						id: animationId,
 						kind: Kind.Animation,
@@ -364,7 +403,7 @@ export class OmniSession {
 						animationIds: [...(item.animationIds ?? []), animationId],
 					})
 				}
-				update(state, spatial.id, {transform: this.deps.omnitool.transform()})
+				update(state, spatial.id, {transform: makeTransform()})
 				return
 			}
 
@@ -435,7 +474,7 @@ export class OmniSession {
 			if (offset <= 0 || offset >= clip.duration)
 				return
 
-			const id = () => this.deps.omnitool.getId()
+			const id = () => this.getId()
 			const leftId = id()
 			const rightId = id()
 			const {left, right} = splitClip(clip, leftId, rightId, offset)

@@ -196,7 +196,7 @@ export class Dragger {
 			drop,
 			index: state.snapshot.index,
 			movingId: state.clip.itemId,
-			newContainerId: session.deps.omnitool.getId(),
+			newContainerId: session.getId(),
 		})
 
 		if (overlay)

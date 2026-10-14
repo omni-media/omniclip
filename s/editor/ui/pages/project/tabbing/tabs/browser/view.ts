@@ -2,7 +2,7 @@
 import {html} from "lit"
 import {keyed} from "lit/directives/keyed.js"
 import {shadow, useCss, useOnce, useSignal} from "@e280/sly"
-import {Datafile, Item, Media, type Transition} from "@omnimedia/omnitool"
+import {Datafile, Item, Media, O, transform, type Transition} from "@omnimedia/omnitool"
 import {components as quayComponents, dom, type MediaFormat, type MediaLibrary} from "@e280/quay"
 
 import styleCss from "./style.css.js"
@@ -28,17 +28,14 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 	const mediaScope = useSignal<"project" | "all">("project")
 	const duration = useSignal(DEFAULT_TRANSITION_DURATION)
 
-	const makeItems = (format: MediaFormat, media: Media) => {
+	const makeItem = (omni: O, format: Exclude<MediaFormat, "other">, media: Media) => {
 		const label = media.datafile.filename
 		switch (format) {
-			case "video": return [
-				media.hasAudio
-					? context.omni.clip(media, {label})
-					: context.omni.video(media, {label}),
-			]
-			case "image": return [context.omni.image(media, {label})]
-			case "audio": return [context.omni.audio(media, {label})]
-			case "other": return []
+			case "video": return media.hasAudio
+				? omni.clip(media, {label})
+				: omni.video(media, {label})
+			case "image": return omni.image(media, {label})
+			case "audio": return omni.audio(media, {label})
 		}
 	}
 
@@ -47,6 +44,9 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 		event.stopPropagation()
 
 		if (!item.isKind("file"))
+			return
+		const format = item.specimen.format
+		if (format === "other")
 			return
 
 		const hash = item.specimen.hash!
@@ -61,8 +61,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			}),
 		})
 
-		for (const clip of makeItems(item.specimen.format, media))
-			context.session.appendItem(clip)
+		context.session.appendItem(omni => makeItem(omni, format, media))
 	}
 
 	const removeMedia = async(event: Event, item: MediaItem, library: MediaLibrary) => {
@@ -119,22 +118,23 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 	}
 
 	const addTextPreset = (preset: TextPreset) => {
-		const text = context.omni.text(preset.content, {
-			duration: DEFAULT_TEXT_DURATION,
-			label: preset.label,
-			styles: preset.styles,
+		const text = context.session.appendItem(omni => {
+			const text = omni.text(preset.content, {
+				duration: DEFAULT_TEXT_DURATION,
+				label: preset.label,
+				styles: preset.styles,
+			})
+
+			if (preset.relativePosition) {
+				const [width, height] = context.strata.settings.state.resolution.split("x").map(Number)
+				const [x, y] = preset.relativePosition
+				const spatial = omni.spatial(transform({
+					position: [width * x, height * y],
+				}))
+				omni.set<Item.Text>(text.id, {spatialId: spatial.id})
+			}
+			return text
 		})
-
-		if (preset.relativePosition) {
-			const [width, height] = context.strata.settings.state.resolution.split("x").map(Number)
-			const [x, y] = preset.relativePosition
-			const spatial = context.omni.spatial(context.omni.transform({
-				position: [width * x, height * y],
-			}))
-			context.omni.set<Item.Text>(text.id, {spatialId: spatial.id})
-		}
-
-		context.session.appendItem(text)
 		const start = context.session.index.getItemLaneStart(text.id, context.session.$viewedItemId())
 		context.session.seekPlayhead(start)
 		context.session.viewport.revealTime(start)

@@ -1,12 +1,11 @@
 
 import {html} from 'lit'
 import {shadow, useCss} from '@e280/sly'
-import {Item, Kind, type Transform, resolveTransformAnimation} from "@omnimedia/omnitool"
+import {Item, type Transform, resolveTransformAnimation, transform} from "@omnimedia/omnitool"
 
 import styleCss from './style.css.js'
 import {controlsStyles} from '../styles.css.js'
 import type {Idx} from '../../../../../../../../logic/parts/index.js'
-import {add, update} from '../../../../../../../../logic/parts/mutate.js'
 import keyframesSvg from '../../../../../../../../icons/keyframes.svg.js'
 import {EditorContext} from '../../../../../../../../../context/context.js'
 import rotateSvg from '../../../../../../../../icons/material-design-icons/rotate.svg.js'
@@ -18,9 +17,8 @@ import "@awesome.me/webawesome/dist/components/number-input/number-input.js"
 export const TransformControls = shadow((context: EditorContext, item: Item.Text | Idx.VideoItem | Item.Image) => {
 	useCss(controlsStyles, styleCss)
 
-	const tool = context.omni
+	const session = context.session
 	const index = context.session.index
-	const timeline = context.session.timeline
 	const spatial = index.getItemMaybe<SpatialLike>(item.spatialId)
 	const preserveAspectRatio = context.session.stage.$preserveAspectRatio
 
@@ -36,7 +34,7 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 
 	const [position, scale, rotation] = spatial
 		? animation ? resolveTransformAnimation(localTime, animation) : spatial.transform
-		: tool.transform()
+		: transform()
 
 	const hasKeyframeAtTime = (property: AnimatableProperty) =>
 		!!animation && getTrack(animation, property).some(([time]) => time === localTime)
@@ -53,7 +51,7 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 			return
 
 		if (!animation) {
-			tool.set<Item.Spatial>(spatial.id, {transform: next})
+			session.edit(o => o.set<Item.Spatial>(spatial.id, {transform: next}))
 			return
 		}
 
@@ -65,22 +63,14 @@ export const TransformControls = shadow((context: EditorContext, item: Item.Text
 
 	const onEnableTransform = (e: Event) => {
 		const target = e.target as HTMLInputElement
-		if(target.checked) {
-			if(!spatial) {
-				timeline.mutate(state => {
-					const spatialId = tool.getId()
-					add(state, {
-						id: spatialId,
-						kind: Kind.Spatial,
-						transform: tool.transform(),
-						enabled: true,
-					})
-					update(state, item.id, {spatialId})
-				})
-			} else tool.set(spatial.id, {enabled: true})
-		} else if(spatial) {
-			tool.set(spatial.id, {enabled: false})
-		}
+		if (!target.checked && !spatial) return
+		session.edit(o => {
+			if (!spatial) {
+				const created = o.spatial()
+				o.set(item.id, {spatialId: created.id})
+				o.set(created.id, {enabled: true})
+			} else o.set(spatial.id, {enabled: target.checked})
+		})
 	}
 
 	const renderKeyframeToggle = (property: AnimatableProperty) => html`
