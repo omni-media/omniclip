@@ -59,7 +59,6 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 						<img class="logo-mark" src="/assets/logo/omni.png" alt="" />
 						<span class="brand-copy">
 							<strong>omniclip</strong>
-							<span>VIDEO STUDIO</span>
 						</span>
 					</a>
 
@@ -86,7 +85,6 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 					<section class="project-library">
 						<header class="section-header">
 							<div class="section-heading">
-								<span class="eyebrow">Project library</span>
 								<h2>Your projects <small>${filteredProjects.length}</small></h2>
 							</div>
 
@@ -118,15 +116,6 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 									<p>Create a new project or try a different search.</p>
 								</section>
 							`}
-					</section>
-
-					<section class="creator-banner">
-						<div>
-							<span class="eyebrow">New edit</span>
-							<h2>Turn your next idea into a finished cut.</h2>
-							<p>Start with an empty timeline and build with Omniclip’s flexible media primitives.</p>
-						</div>
-						<button class="banner-button" @click=${createProject}>${addSvg}<span>Create project</span></button>
 					</section>
 
 				</main>

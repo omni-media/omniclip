@@ -10,7 +10,8 @@ export function FeaturedProject(
 	openDetails: (event: Event, id: string) => void,
 ) {
 	return html`
-		<section class="featured-project" style="background-image: url('${project.thumbnail}')">
+		<section class="featured-project">
+			<img class="featured-thumbnail" src=${project.thumbnail} alt="" />
 			<div class="featured-copy">
 				<span class="eyebrow">Continue editing</span>
 				<h1>${project.title}</h1>
