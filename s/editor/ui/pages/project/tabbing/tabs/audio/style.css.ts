@@ -10,6 +10,8 @@ export default css`@layer view {
 	height: 100%;
 	background: #0f0f0f;
 	color: #ddd;
+	font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+	text-shadow: none;
 }
 
 .master-row {
@@ -23,7 +25,7 @@ export default css`@layer view {
 	strong {
 		color: #ddd;
 		font-size: var(--font-size-xs);
-		font-weight: 650;
+		font-weight: 500;
 	}
 }
 
@@ -31,9 +33,9 @@ export default css`@layer view {
 	width: 28px;
 	height: 24px;
 	padding: 0;
-	border: 1px solid #2c2c2c;
-	border-radius: 5px;
-	background: #1d1d1d;
+	border: 1px solid #ffffff0a;
+	border-radius: 7px;
+	background: #222;
 	color: #a2a2a2;
 	font: inherit;
 	font-size: var(--font-size-xs);
@@ -65,8 +67,8 @@ export default css`@layer view {
 
 	output {
 		display: block;
-		font-size: 1rem;
-		font-weight: 700;
+		font-size: 0.95rem;
+		font-weight: 500;
 		letter-spacing: -0.02em;
 		line-height: 1;
 		font-variant-numeric: tabular-nums;
@@ -76,9 +78,7 @@ export default css`@layer view {
 		display: block;
 		margin-top: 3px;
 		color: #777;
-		font-size: 0.55rem;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
+		font-size: 0.65rem;
 	}
 }
 
@@ -86,7 +86,7 @@ export default css`@layer view {
 	display: grid;
 	flex: 1;
 	min-height: 10em;
-	grid-template-columns: 24px 18px 1fr;
+	grid-template-columns: 24px 20px 1fr;
 	gap: 6px;
 }
 
@@ -95,8 +95,8 @@ wa-slider {
 	width: 24px;
 	height: calc(100% - 40px);
 	--track-size: 4px;
-	--thumb-width: 24px;
-	--thumb-height: 12px;
+	--thumb-width: 22px;
+	--thumb-height: 14px;
 
 	&::part(slider), &::part(track) {
 		height: 100%;
@@ -104,8 +104,7 @@ wa-slider {
 
 	&::part(track) {
 		border-radius: 99px;
-		background: #0d0d0d;
-		box-shadow: inset 0 0 0 1px #ffffff08;
+		background: #242424;
 	}
 
 	&::part(indicator) {
@@ -113,12 +112,10 @@ wa-slider {
 	}
 
 	&::part(thumb) {
-		border: 1px solid #969696;
-		border-radius: 3px;
-		background:
-			linear-gradient(#0000 calc(50% - 0.5px), #777 0 calc(50% + 0.5px), #0000 0),
-			#d3d3d3;
-		box-shadow: 0 2px 7px #0007;
+		border: 1px solid #ffffff24;
+		border-radius: 5px;
+		background: #c4c8cd;
+		box-shadow: 0 1px 3px #0004;
 	}
 }
 
@@ -126,92 +123,45 @@ wa-slider {
 	position: relative;
 	margin: 20px 0;
 	overflow: hidden;
-	border-radius: 5px;
-	background: #0d0d0d;
-	box-shadow: inset 0 0 0 1px #ffffff09;
+	border-radius: 7px;
+	background: #191919;
 }
 
 .meter-level {
 	position: absolute;
 	inset: 3px;
-	border-radius: 3px;
-	background: linear-gradient(to top, #20915b 0 66.67%, #d3ad3e 66.67% 83.33%, #c94e45 83.33%);
+	border-radius: 4px;
+	background: linear-gradient(to top, #46ad87 0%, #73be92 60%, #d5bd70 80%, #db7773 100%);
 
 	&::before {
 		content: "";
 		position: absolute;
 		inset: 0 0 auto;
 		height: calc(100% - var(--level));
-		background: #0d0d0d;
+		background: #191919;
 		transition: height 0.16s ease;
-	}
-
-	&::after {
-		content: "";
-		position: absolute;
-		inset: calc(100% - var(--level)) -1px auto;
-		height: 2px;
-		border-radius: 2px;
-		background: #ddd;
-		opacity: 0.9;
-		transition: top 0.16s ease;
 	}
 }
 
 .scale {
 	position: relative;
 	margin: 20px 0;
-	color: #666;
-	font-size: 0.5rem;
+	color: #858585;
+	font-size: 0.6rem;
 	font-variant-numeric: tabular-nums;
 
 	span {
 		position: absolute;
+		left: 0;
 		right: 0;
 		bottom: var(--position);
 		transform: translateY(50%);
+		text-align: right;
 		white-space: nowrap;
-
-		&::before {
-			content: "";
-			position: absolute;
-			right: 18px;
-			top: 50%;
-			width: 5px;
-			height: 1px;
-			background: #333;
-		}
-
 		&[data-zero] {
 			color: #bbb;
-			font-weight: 700;
-
-			&::before {
-				width: 8px;
-				background: #777;
-			}
+			font-weight: 500;
 		}
-	}
-}
-
-footer {
-	display: grid;
-	gap: 5px;
-	margin-top: 2px;
-	padding-top: 10px;
-	color: #777;
-	font-size: 0.55rem;
-
-	span {
-		display: flex;
-		justify-content: space-between;
-		gap: 6px;
-	}
-
-	strong {
-		color: #aaa;
-		font-weight: 600;
-		font-variant-numeric: tabular-nums;
 	}
 }
 

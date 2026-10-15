@@ -17,6 +17,7 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	const searchTerm = useSignal("")
 	const outliner = context.strata.outliner
 	const items = context.strata.timeline.state.items
+	const selectedItemId = context.session.$selectedItem()
 
 	const handleItemClick = (id: Id) => {
 		context.session.$selectedItem(id)
@@ -47,7 +48,7 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 	const renderItemRow = (item: Item.Any) => {
 		return renderOutlinerItemRow({
 			item,
-			selected: context.session.$selectedItem() === item.id,
+			selected: selectedItemId === item.id,
 			starred: !!isStarred(item.id),
 			onSelect: handleItemClick,
 			onToggleStar: toggleStar,
@@ -78,10 +79,6 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 					${when(starredItemsFiltered.length > 0, () => html`
 						<div class="section">
 							<h4 class="section-title">Starred Items</h4>
-							<div class="item-list-header">
-								<span>Name</span>
-								<span>Duration</span>
-							</div>
 							<div class="item-list">
 								${repeat(starredItemsFiltered as Item.Any[], item => item.id, renderItemRow)}
 							</div>
@@ -89,11 +86,6 @@ export const OutlinerTab = shadow((context: EditorContext) => {
 					`)}
 
 					<div class="section">
-						<h4 class="section-title">All Items</h4>
-						<div class="item-list-header">
-								<span>Name</span>
-								<span>Duration</span>
-							</div>
 						<div class="item-list">
 							${repeat(otherItemsFiltered as Item.Any[], item => item.id, renderItemRow)}
 						</div>

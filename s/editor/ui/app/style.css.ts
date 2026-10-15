@@ -54,8 +54,10 @@ export default css`@layer view {
 
 [view="shiny-drawer"]::part(slate) {
 	background: #151515;
-	border-right: 1px solid #101010;
-	box-shadow: 10px 0 24px rgb(0 0 0 / 0.25);
+	border-bottom-right-radius: 12px;
+	overflow: hidden;
+	border-right: 1px solid #ffffff08;
+	box-shadow: 8px 0 28px rgb(0 0 0 / 0.2);
 }
 
 [view="shiny-drawer"]::part(blanket) {
@@ -67,10 +69,12 @@ export default css`@layer view {
 nav {
 	display: flex;
 	flex-direction: column;
-	gap: 0.25em;
-	padding: 0.75em;
+	gap: 4px;
+	padding: 14px;
 	background: #151515;
+	font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 	font-size: var(--font-size-s);
+	text-shadow: none;
 }
 
 nav h2 {
@@ -78,12 +82,12 @@ nav h2 {
 	align-items: center;
 	justify-content: space-between;
 	gap: 0.75em;
-	margin-bottom: 0.35em;
-	padding: 0.25em 0.15em 0.6em 0.45em;
+	margin-bottom: 8px;
+	padding: 2px 4px 12px 10px;
 	color: #d8d8d8;
-	border-bottom: 1px solid #252525;
+	border-bottom: 1px solid #ffffff08;
 	font-size: var(--font-size-s);
-	font-weight: 600;
+	font-weight: 500;
 }
 
 .drawer-close {
@@ -95,28 +99,30 @@ nav h2 {
 	color: #aaa;
 	background: transparent;
 	border: none;
-	border-radius: 0.18em;
+	border-radius: 7px;
 	cursor: pointer;
 	font: inherit;
 	line-height: 1;
+	transition: background 140ms ease, color 140ms ease;
 }
 
 .drawer-close:hover {
 	color: #e8e8e8;
-	background: #333;
+	background: #252525;
 }
 
 nav a {
-	padding: 0.5em 0.6em;
+	padding: 10px;
 	color: #aaa;
-	border-radius: 0.25em;
+	border-radius: 7px;
 	text-decoration: none;
+	transition: background 140ms ease, color 140ms ease;
 }
 
 nav a:hover,
 nav a.active {
 	color: #e8e8e8;
-	background: #2b2b2b;
+	background: #252525;
 	text-decoration: none;
 }
 

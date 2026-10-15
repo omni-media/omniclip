@@ -145,6 +145,7 @@ export default css`@layer view {
 
 quay-dropzone {
 	display: block;
+	isolation: isolate;
 	min-height: 5em;
 	border-radius: 7px;
 	background: #161616;

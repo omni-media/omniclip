@@ -82,6 +82,10 @@ export default css`
 		font-size: var(--font-size-xs);
 	}
 
+	.model-row wa-button::part(label) {
+		line-height: 1;
+	}
+
 	.storage-status, .storage-summary {
 		font-size: var(--font-size-xs);
 	}

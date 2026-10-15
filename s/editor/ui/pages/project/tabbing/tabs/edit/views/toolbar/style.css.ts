@@ -10,7 +10,7 @@ export default css`@layer view {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 0.22em 0.75em;
+	padding: 0.35em 0.75em;
 }
 
 .toolbar > * {
@@ -178,13 +178,27 @@ button svg {
 }
 
 .timecode {
-	min-width: 7.5em;
-	padding: 0 0.45em;
+	display: flex;
+	align-items: center;
+	gap: 0.65em;
+	font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 	font-variant-numeric: tabular-nums;
-	font-size: var(--font-size-s);
-	line-height: 1.65em;
-	color: #cfcfcf;
+	font-size: calc(var(--font-size-xs) + 1px);
+	white-space: nowrap;
+	line-height: 1.9em;
 	text-align: center;
+	text-shadow: none;
+}
+
+.timecode-current {
+	padding: 0 0.45em;
+	border-radius: 0.6em;
+	background: #303030;
+	color: #cfcfcf;
+}
+
+.timecode-duration {
+	color: #888;
 }
 
 .zoom-controls {

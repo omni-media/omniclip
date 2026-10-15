@@ -29,7 +29,6 @@ export default css`
 .text-style-controls {
 	display: flex;
 	flex-direction: column;
-	gap: 0.55em;
 }
 
 .text-input {

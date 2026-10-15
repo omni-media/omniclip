@@ -3,7 +3,7 @@ import {html} from "lit"
 import type {TextDetailsProps} from "../view.js"
 
 export const renderFontDetails = ({style, options, update}: TextDetailsProps) => html`
-	<wa-details open summary="Font" icon-placement="start">
+	<wa-details summary="Font" icon-placement="start">
 		<div class="cnt">
 			<label>Size</label>
 			<input

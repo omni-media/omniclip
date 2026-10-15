@@ -6,11 +6,11 @@ import {shadow, useCss, useMount, useSignal} from "@e280/sly"
 import styleCss from "./style.css.js"
 import themeCss from "../../../../../../theme.css.js"
 import {EditorContext} from "../../../../../../context/context.js"
-import {dbFromGain, gainFromDb, maximumGainDb, meterHeight, minimumGainDb, sliderDbFromGain} from "../mixer/utils.js"
+import {gainFromDb, maximumGainDb, meterHeight, minimumGainDb, sliderDbFromGain} from "../mixer/utils.js"
 
 import "@awesome.me/webawesome/dist/components/slider/slider.js"
 
-const scale = [12, 6, 0, -6, -12, -24, -36, -48, -60]
+const scale = [12, 0, -12, -24, -36, -48, -60]
 
 export const AudioPanel = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
@@ -56,7 +56,6 @@ export const AudioPanel = shadow((context: EditorContext) => {
 	})
 
 	const signal = muted() ? 0 : peak() * gainFromDb(level())
-	const peakDb = dbFromGain(signal)
 	const meter = meterHeight(signal)
 
 	return html`
@@ -96,10 +95,6 @@ export const AudioPanel = shadow((context: EditorContext) => {
 					`)}
 				</div>
 			</div>
-
-			<footer>
-				<span>Peak <strong>${peakDb} dBFS</strong></span>
-			</footer>
 		</div>
 	`
 })

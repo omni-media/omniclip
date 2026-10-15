@@ -115,6 +115,7 @@ export default css`@layer view {
 }
 
 .section-title {
+	text-shadow: none;
 	color: #8f8f8f;
 	font-size: calc(var(--font-size-xs) - 1px);
 	font-weight: 600;
@@ -124,20 +125,8 @@ export default css`@layer view {
 .item-list {
 	display: flex;
 	flex-direction: column;
+	gap: 3px;
 }
-
-.item-list-header {
-	display: grid;
-	grid-template-columns: 0.7em 1.5em minmax(0, 1fr) 4.8em 1.8em;
-	gap: 0.5em;
-	padding: 0.2em 0.5em;
-	color: #777;
-	font-size: calc(var(--font-size-xs) - 1px);
-	text-transform: uppercase;
-}
-
-.item-list-header span:nth-child(1) { grid-column: 3; }
-.item-list-header span:nth-child(2) { grid-column: 4; }
 
 .item-row {
 	display: grid;
@@ -146,6 +135,7 @@ export default css`@layer view {
 	gap: 0.5em;
 	min-height: 30px;
 	padding: 0 0.5em;
+	border-radius: 5px;
 	background: transparent;
 	cursor: pointer;
 	transition: background 0.12s ease, color 0.12s ease;
@@ -156,15 +146,14 @@ export default css`@layer view {
 }
 
 .item-row[data-selected] {
-	background: #303030;
-	box-shadow: inset 2px 0 0 #8b8b8b;
+	background: #282828;
 }
 
 .color-swatch {
 	width: 0.45em;
 	height: 1.2em;
-	border-radius: 1px;
-	background: #6d7788;
+	border-radius: 2px;
+	background: #4c535e;
 }
 
 .icon {

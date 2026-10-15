@@ -8,6 +8,7 @@ import {formatTime} from "../../../../utils/format-time.js"
 import themeCss from "../../../../../../../../theme.css.js"
 import binSvg from "../../../../../../../icons/gravity-ui/bin.svg.js"
 import playSvg from "../../../../../../../icons/gravity-ui/play.svg.js"
+import stepForwardSvg from "../../../../../../../icons/step-forward.svg.js"
 import {EditorContext} from "../../../../../../../../context/context.js"
 import pauseSvg from "../../../../../../../icons/gravity-ui/pause.svg.js"
 import scissorsSvg from "../../../../../../../icons/gravity-ui/scissors.svg.js"
@@ -141,7 +142,12 @@ export const Toolbar = shadow((context: EditorContext) => {
 
 			<div class="toolbar-section center">
 				<div class="timecode">
-					${formatTime(session.$playhead(), {milliseconds: true})}
+					<span class="timecode-current" aria-label="Current time">
+						${formatTime(session.$playhead(), {milliseconds: true})}
+					</span>
+					<span class="timecode-duration" aria-label="Total duration">
+						/ ${formatTime(session.viewedDuration(), {milliseconds: true})}
+					</span>
 				</div>
 				<div class="button-group transport-controls">
 					<button
@@ -150,7 +156,7 @@ export const Toolbar = shadow((context: EditorContext) => {
 						title="Play Reverse (J)"
 						?data-active=${isPlaying && rate < 0}
 					>
-						${playSvg}
+						${stepForwardSvg}
 						<span>${isPlaying && rate < 0 ? `${Math.abs(rate)}x` : ""}</span>
 					</button>
 					<button
@@ -166,7 +172,7 @@ export const Toolbar = shadow((context: EditorContext) => {
 						title="Play Forward (L)"
 						?data-active=${isPlaying && rate > 0}
 					>
-						${playSvg}
+						${stepForwardSvg}
 						<span>${isPlaying && rate > 0 ? `${rate}x` : ""}</span>
 					</button>
 				</div>

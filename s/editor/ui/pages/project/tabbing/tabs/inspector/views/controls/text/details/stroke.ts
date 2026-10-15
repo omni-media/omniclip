@@ -19,7 +19,7 @@ export const renderStrokeDetails = ({style, update}: TextDetailsProps) => {
 	}
 
 	return html`
-		<wa-details open summary="Stroke" icon-placement="start">
+		<wa-details summary="Stroke" icon-placement="start">
 			<div class="cnt">
 				<label>Color</label>
 				<input

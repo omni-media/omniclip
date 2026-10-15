@@ -66,6 +66,8 @@ export default css`@layer view {
 	}
 
 	.export::part(base) {
+		padding: 0 0.45em;
+		border-radius: 0.5em;
 		color: #1d2940;
 		background: linear-gradient(135deg, #fff, #dbe5f7);
 		font-weight: 600;

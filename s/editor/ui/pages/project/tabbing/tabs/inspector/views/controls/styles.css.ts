@@ -3,7 +3,7 @@ import {css} from "lit"
 export const controlsStyles = css`
 
 .controls-group {
-	padding: 1em 1.1em;
+	padding: 1em 0.5em;
 	border-bottom: 1px solid var(--inspector-divider);
 }
 
@@ -62,11 +62,12 @@ wa-slider::part(thumb) {
 
 wa-details {
 	--spacing: 0.85em;
+	--wa-panel-border-radius: 0;
 }
 
 wa-details::part(base) {
 	border: 0;
-	border-radius: 9px;
+	border-radius: 0px;
 	background: var(--inspector-surface);
 	overflow: hidden;
 }

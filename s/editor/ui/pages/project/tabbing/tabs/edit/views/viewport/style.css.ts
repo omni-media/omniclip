@@ -16,6 +16,7 @@ export default css`@layer view {
 }
 
 .viewer-header {
+	text-shadow: none;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -48,30 +49,38 @@ export default css`@layer view {
 }
 
 .viewer-zoom-dropdown::part(menu) {
-	padding: 0.75em;
+	min-width: 140px;
+	padding: 6px;
 	color: #d3d3d3;
-	background: #1d1d1d;
-	border: 1px solid #101010;
+	background: #151515;
+	border: none;
+	border-radius: 7px;
+	box-shadow: 0 0.6em 1.8em #000a;
+	font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+	text-shadow: none;
 }
 
 .viewer-zoom-menu {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75em;
+	gap: 8px;
 }
 
 .viewer-zoom-menu-title {
-	font-size: var(--font-size-xs);
+	padding: 4px 8px 0;
+	font-size: calc(var(--font-size-xs) - 1px);
+	font-weight: 500;
 	color: #8f8f8f;
 	font-variant-numeric: tabular-nums;
 	text-transform: uppercase;
-	letter-spacing: 0.04em;
+	letter-spacing: 0.02em;
 }
 
 .viewer-zoom-slider {
-	--track-size: 0.32em;
-	--thumb-width: 0.85em;
-	--thumb-height: 0.85em;
+	margin: 0 8px;
+	--track-size: 3px;
+	--thumb-width: 10px;
+	--thumb-height: 10px;
 }
 
 .viewer-zoom-slider::part(slider) {
@@ -79,15 +88,25 @@ export default css`@layer view {
 }
 
 .viewer-zoom-slider::part(track) {
-	background: #0f0f0f;
+	border-radius: 99px;
+	background: #292929;
 }
 
 .viewer-zoom-slider::part(indicator) {
-	background: #4e5a69;
+	border-radius: 99px;
+	background: #777;
 }
 
 .viewer-zoom-slider::part(thumb) {
-	background: #d3d3d3;
+	background: #c4c8cd;
+	border: none;
+	border-radius: 50%;
+	box-shadow: none;
+	transition: background 140ms ease;
+}
+
+.viewer-zoom-slider:hover::part(thumb) {
+	background: #e0e3e7;
 }
 
 .viewer-zoom-presets {
@@ -97,13 +116,16 @@ export default css`@layer view {
 }
 
 .viewer-zoom-presets wa-dropdown-item {
-	padding: 0.35em 0.6em;
+	padding: 7px 8px;
+	border-radius: 5px;
 	color: #d3d3d3;
 	font-size: var(--font-size-xs);
+	line-height: 1.2;
+	transition: background 140ms ease;
 }
 
 .viewer-zoom-presets wa-dropdown-item:hover {
-	background: #2b2b2b;
+	background: #2d2d2d;
 }
 
 .viewer-zoom-presets wa-dropdown-item::part(label) {
