@@ -1,6 +1,7 @@
 
 import type {OmniSession} from "../../ui/logic/session.js"
 import type {TimelinePatch, TimelinePatchResult} from "../../../iso/timeline.js"
+import {projectSettingsUpdateParameters, type ProjectSettingsUpdate} from "../../../iso/settings.js"
 
 type AssistantEdit = {
 	id: string
@@ -21,6 +22,11 @@ export class AssistantController {
 
 	bumpRevision() {
 		this.#revision += 1
+	}
+
+	updateProjectSettings = (input: ProjectSettingsUpdate) => {
+		const settings = projectSettingsUpdateParameters.parse(input)
+		this.session.deps.strata.settings.mutate(state => Object.assign(state, settings))
 	}
 
 	patchTimeline = async(patch: TimelinePatch): Promise<TimelinePatchResult> => {

@@ -57,6 +57,7 @@ export class EditorContext {
 		return {
 			timeline,
 			projectId: this.strata.projectId,
+			settings: {...this.strata.settings.state},
 			timelineRevision: this.assistant.revision,
 			playhead: this.session.$playhead(),
 			viewedItemId: this.session.$viewedItemId(),

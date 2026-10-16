@@ -1,9 +1,14 @@
 import * as z from "zod"
 import {timelinePatchParameters} from "./schema.js"
+import {projectSettingsUpdateParameters} from "../settings.js"
 
 export const emptyParameters = z.strictObject({})
 
 export const editorTools = {
+	update_settings: {
+		description: "Update project settings when the user requests it. Supply only fields to change; other settings are preserved. When changing canvas format, supply both resolution and its matching aspectRatio. This changes canvas settings, not clip transforms or timing. Returns the updated project context. Settings are saved separately from timeline undo history.",
+		parameters: projectSettingsUpdateParameters,
+	},
 	create_item: {
 		description: "Create one opaque ID for a new timeline item. Call this before adding, duplicating, or splitting an item; never invent item IDs.",
 		parameters: emptyParameters,

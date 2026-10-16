@@ -9,11 +9,26 @@ import {editorTools} from "../../../../../../iso/assistant/tools.js"
 import type {TimelinePatchResult} from "../../../../../../iso/timeline.js"
 
 import type {SkillCall} from "../../../../../../iso/assistant/schema.js"
+import type {AssistantContext} from "../../../../../../iso/assistant/types.js"
+import type {ProjectSettingsUpdate} from "../../../../../../iso/settings.js"
 
 export const createAssistantToolkit = (
 	context: EditorContext,
 	reasoningEffort: ReasoningEffort,
 ): Toolkit => defineToolkit({
+	update_settings: {
+		...editorTools.update_settings,
+		type: "frontend",
+		execute: (settings: ProjectSettingsUpdate) => {
+			context.assistant.updateProjectSettings(settings)
+			return context.getAssistantContext()
+		},
+		renderText: {
+			running: () => activity("Updating project settings", "running"),
+			complete: ({result}: {result?: AssistantContext}) =>
+				resultActivity(result, "Project settings updated", "Could not update project settings"),
+		},
+	},
 	read_skill: {
 		type: "backend",
 		renderText: {

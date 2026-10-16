@@ -37,7 +37,8 @@ Install the shared [Omniclip skill](skills/omniclip/SKILL.md) by copying its `om
 
 | Tool | Purpose |
 | --- | --- |
-| `read_project_context` | Current timeline, revision, selection, playhead, source metadata and kind names |
+| `read_project_context` | Project settings, current timeline, revision, selection, playhead, source metadata and kind names |
+| `update_settings` | Update specified project settings and return fresh context; separate from timeline undo history |
 | `create_item` | New opaque timeline item ID |
 | `patch_timeline` | Existing atomic patch implementation; returns fresh context on success or revision mismatch |
 | `provide_media` | Original source copied to a local temporary file, once per content hash |

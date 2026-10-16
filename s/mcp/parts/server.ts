@@ -8,6 +8,7 @@ import {EditorBridge} from './bridge/node.js'
 import type {connectVision} from './vision.js'
 import {mcpInstructions} from './instructions.js'
 import type {TimelinePatch} from '../../iso/timeline.js'
+import type {ProjectSettingsUpdate} from '../../iso/settings.js'
 
 type Vision = Awaited<ReturnType<typeof connectVision>>
 type EditorToolInput = Infer<typeof editorTools[number]['inputSchema']>
@@ -31,6 +32,8 @@ export function createMcpServer(bridge: EditorBridge, vision: Vision) {
 				return bridge.editor[name]()
 			case 'patch_timeline':
 				return bridge.patch(args as TimelinePatch, signal)
+			case 'update_settings':
+				return bridge.editor.update_settings(args as ProjectSettingsUpdate)
 			case 'audio_analyze':
 				throw new Error('Audio analysis is not implemented yet.')
 			case 'provide_media': {

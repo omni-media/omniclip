@@ -2,6 +2,9 @@
 import {hex} from "@e280/stz"
 import {chronicle, Chronicle} from "@e280/strata"
 import {Id, Kind, TimelineFile} from "@omnimedia/omnitool"
+import type {Settings} from "../../../iso/settings.js"
+
+export type {Settings} from "../../../iso/settings.js"
 
 export type Tag = {
 	id: Id
@@ -13,16 +16,6 @@ export type OutlinerItem = {
 	itemId: Id
 	tagIds: Id[]
 	starred: boolean
-}
-
-export type Settings = {
-	resolution: string
-	timebase: number
-	dropFrame: boolean
-	aspectRatio: "16:9" | "9:16" | "1:1" | "3:2" | "4:3" | "21:9"
-	colorSpace: "rec709" | "displayp3" | "rec2020"
-	sampleRate: "48000" | "44100" | "96000"
-	channels: "stereo" | "mono" | "5.1 Surround"
 }
 
 export type ItemMetadata = {

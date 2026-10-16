@@ -32,6 +32,10 @@ export function createEditorSession(editor: EditorContext, origin: string) {
 
 	const fns: EditorRpc = {
 		read_project_context: async () => context(),
+		update_settings: async settings => {
+			editor.assistant.updateProjectSettings(settings)
+			return context()
+		},
 
 		create_item: async () => ({
 			id: editor.session.getId()
