@@ -19,13 +19,14 @@ export function clearUploadProgress(toolCallId: string) {
 	for (const listener of listeners) listener()
 }
 
-export function useUploadProgress(toolCallId: string) {
+export function useUploadProgress(toolCallId: string, fallback = initialProgress) {
 	return useSyncExternalStore(
 		listener => {
 			listeners.add(listener)
 			return () => listeners.delete(listener)
 		},
-		() => messages.get(toolCallId) ?? initialProgress,
+		() => messages.get(toolCallId) ?? fallback,
+		() => fallback,
 	)
 }
 

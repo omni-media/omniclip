@@ -394,6 +394,11 @@ button:hover:not(:disabled) {
 	font-size: 0.76rem;
 }
 
+.tool-activity {
+	display: grid;
+	gap: 0.3rem;
+}
+
 .thought-group summary,
 .tool-group summary {
 	display: flex;

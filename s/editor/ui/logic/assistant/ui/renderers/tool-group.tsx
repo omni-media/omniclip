@@ -4,6 +4,7 @@ import {createContext, useContext, useEffect, useState, type ReactNode} from "re
 import {CheckCircle2Icon, ChevronRightIcon, CircleXIcon, Undo2Icon} from "lucide-react"
 
 import type {EditorContext} from "../../../../../context/context.js"
+import {useUploadProgress} from "../toolkit/video/progress.js"
 
 const AssistantEditor = createContext<EditorContext | undefined>(undefined)
 
@@ -13,9 +14,8 @@ export const AssistantEditorProvider = ({context, children}: {
 }) =>
 	<AssistantEditor.Provider value={context}>{children}</AssistantEditor.Provider>
 
-const TimelineEdit = ({indices, active}: {
+const TimelineEdit = ({indices}: {
 	indices: readonly number[]
-	active: boolean
 }) => {
 	const context = useContext(AssistantEditor)!
 
@@ -41,9 +41,9 @@ const TimelineEdit = ({indices, active}: {
 		}
 	}, [assistantEditId, context, turnRunning])
 
-	if (!assistantEditId) return null
+	if (!assistantEditId || turnRunning) return null
 
-	const canUndo = complete && !active && !undone && context.assistant.canUndo(assistantEditId)
+	const canUndo = complete && !undone && context.assistant.canUndo(assistantEditId)
 	const undo = async () => {
 		if (await context.assistant.undo(assistantEditId))
 			setUndone(true)
@@ -57,10 +57,15 @@ const TimelineEdit = ({indices, active}: {
 	</div>
 }
 
-const ToolStatus = ({active, failed}: {active: boolean; failed: boolean}) => {
-	if (active) return <span className="thinking-shimmer">Working</span>
-	if (failed) return <><CircleXIcon className="activity-failed" /><span>Failed</span></>
-	return <><CheckCircle2Icon className="activity-done" /><span>Done</span></>
+const ToolStatus = ({active, failed, label, count}: {
+	active: boolean
+	failed: boolean
+	label: string
+	count: number
+}) => {
+	if (failed) return <><CircleXIcon className="activity-failed" /><span>Some steps failed</span></>
+	if (active) return <span className="thinking-shimmer">{label}</span>
+	return <><CheckCircle2Icon className="activity-done" /><span>Completed · {count} {count === 1 ? "step" : "steps"}</span></>
 }
 
 export const ToolGroup = ({failed, indices, children}: {
@@ -68,24 +73,32 @@ export const ToolGroup = ({failed, indices, children}: {
 	indices: readonly number[]
 	children: ReactNode
 }) => {
-	const active = useAuiState(({message, thread}) =>
-		message.isLast && thread.isRunning && message.parts.at(-1)?.type !== "text"
-	)
+	const parts = useAuiState(({message}) => message.parts)
+	const turnRunning = useAuiState(({message, thread}) => message.isLast && thread.isRunning)
+	const tools = indices.map(index => parts[index]).filter(part => part?.type === "tool-call")
+	const active = turnRunning && indices.includes(parts.length - 1)
+	const hasFailed = failed || tools.some(tool => tool.isError || (
+		typeof tool.result === "object" && tool.result !== null &&
+		"success" in tool.result && tool.result.success === false
+	))
+	const count = tools.filter(tool => tool.toolName !== "create_item" || tool.isError).length
+	const lastTool = tools.at(-1)
+	const label = useUploadProgress(lastTool?.toolCallId ?? "", "Working…")
 
-	return <details
-		className="tool-group"
-		data-running={active || undefined}
-		data-failed={failed || undefined}
-		open={active || failed}
-	>
-		<summary>
-			<ToolStatus active={active} failed={failed} />
-			<ChevronRightIcon />
-		</summary>
-		<div className="tool-content">
-			{children}
-			<TimelineEdit indices={indices} active={active} />
-		</div>
-	</details>
+	return <div className="tool-activity">
+		{(count > 0 || active || hasFailed) && <details
+			className="tool-group"
+			data-running={active || undefined}
+			data-failed={hasFailed || undefined}
+			open={hasFailed}
+		>
+			<summary>
+				<ToolStatus active={active} failed={hasFailed} label={label} count={count} />
+				<ChevronRightIcon />
+			</summary>
+			<div className="tool-content">{children}</div>
+		</details>}
+		<TimelineEdit indices={indices} />
+	</div>
 }
 

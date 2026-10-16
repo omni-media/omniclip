@@ -43,9 +43,9 @@ export const createAssistantToolkit = (
 		type: "frontend",
 		execute: () => ({id: context.session.getId()}),
 		renderText: {
-			running: () => activity("Preparing a new item", "running"),
+			running: () => null,
 			complete: ({result}: {result?: {id: string}}) =>
-				resultActivity(result, "New item ready", "Could not prepare an item"),
+				result?.id ? null : activity("Could not prepare an item", "failed"),
 		},
 	},
 	...videoTools(context, reasoningEffort),
