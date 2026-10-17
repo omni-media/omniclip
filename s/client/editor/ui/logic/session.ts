@@ -1,0 +1,543 @@
+
+import {hex, microbounce} from "@e280/stz"
+import type {Transcription} from "@omnimedia/omnitool"
+import {afterEffect, derived, signal} from "@e280/strata"
+import {anim, transform as makeTransform} from "@omnimedia/omnitool"
+import {visualAnimations, ms, Ms, type Transform, type TransformAnimation, computeItemDuration, ContainerItem, Driver, Id, Item, Kind, O, Resource, TimelineFile, TransitionName, VideoPlayer} from "@omnimedia/omnitool"
+
+import {Stage} from "./parts/stage.js"
+import {Tool} from "./parts/modes/tool.js"
+import {Idx, Index} from "./parts/index.js"
+import {Viewport} from "./parts/viewport.js"
+import {Playback} from "./parts/playback.js"
+import {selectTool} from "./parts/modes/select.js"
+import {Strata} from "../../context/parts/strata.js"
+import {add, remove, update} from "./parts/mutate.js"
+import {Proposal} from "./parts/proposal/proposal.js"
+import {applyTimelinePatch} from "./timeline/patch.js"
+import type {TimelinePatch} from "../../../../iso/timeline.js"
+import {trim} from "./parts/interactions/trim/parts/action.js"
+import type {DropIntent} from "./parts/interactions/drag/parts/intent.js"
+import {resizeTransition} from "./parts/interactions/trim/parts/transition.js"
+import {TimelineCanvas} from "../pages/project/tabbing/tabs/edit/canvas/canvas.js"
+import {PIXELS_PER_MILLISECOND} from "../pages/project/tabbing/tabs/edit/constants.js"
+import {TimelineClipBox} from "../pages/project/tabbing/tabs/edit/canvas/draw/clip.js"
+import {copyClip, removeTree, replaceChild, splitClip, wrapChild} from "./parts/operations/operations.js"
+import {
+	cloneAnimation,
+	hasAnyKeyframes,
+	type SpatialLike,
+} from "../pages/project/tabbing/tabs/inspector/views/controls/keyframes/utils.js"
+
+export class OmniSession {
+	#index
+
+	$playhead = signal<Ms>(ms(0))
+	$ghostPlayhead = signal<Ms | null>(null)
+
+	$selectedItem = signal<Id | null>(null)
+	$viewedItemId = signal<Id>("")
+	$proposal = signal<Proposal | null>(null)
+	$ghostClip = signal<TimelineClipBox | null>(null)
+	$trimPreviewOffsetPx = signal(0)
+	$drop = signal<DropIntent | null>(null)
+
+	viewport = new Viewport(PIXELS_PER_MILLISECOND)
+
+	canvas
+	stage
+	playback
+	activeMode = signal(selectTool(this))
+
+	constructor(public deps: {
+		strata: Strata,
+		player: VideoPlayer,
+		driver: Driver,
+		resolveMedia: (item: Item.Any) => Resource.Media | null,
+	}) {
+		this.canvas = new TimelineCanvas({
+			session: this,
+			timeline: this.deps.strata.timeline,
+			player: this.deps.player,
+			driver: this.deps.driver,
+			settings: this.deps.strata.settings,
+			resolveMedia: this.deps.resolveMedia,
+		})
+		this.stage = new Stage(this)
+		this.playback = new Playback(this.deps.player)
+		this.#index = derived(() => new Index(deps.strata.timeline.state as TimelineFile))
+		this.$viewedItemId(deps.strata.timeline.state.rootId)
+
+		this.viewport.$width.on(this.#updateMinZoom)
+		this.deps.strata.timeline.lens(s => s).on(microbounce(() => {
+			if (!this.#index().getItemMaybe(this.$viewedItemId()))
+				this.$viewedItemId(this.timeline.state.rootId)
+			this.#updateMinZoom()
+			this.$playhead(ms(Math.min(this.$playhead(), this.viewedDuration())))
+		}))
+
+		const $activePlayhead = derived(() =>
+			this.playback.$isPlaying()
+				? this.$playhead()
+				: this.$ghostPlayhead() ?? this.$playhead()
+		)
+		afterEffect($activePlayhead, time => {
+			if (!this.playback.$isPlaying())
+				this.playback.seek(time)
+		})
+	}
+
+	/**
+	 * After undo/redo reconcile session state
+	 * */
+	reconcile() {
+		const index = this.#index()
+
+		if (!index.getItemMaybe(this.$viewedItemId()))
+			this.$viewedItemId(this.timeline.state.rootId)
+
+		if (!index.getItemMaybe(this.$selectedItem()))
+			this.$selectedItem(null)
+
+		this.clearProposal()
+		this.canvas.clearPreviews()
+		this.canvas.scheduleDraw()
+	}
+
+	get timeline() {
+		return this.deps.strata.timeline
+	}
+
+	getId() { return hex.random(16) }
+
+	/** Apply one synchronous, undoable edit using Omnitool's sugar. */
+	edit<T>(change: (omni: O) => T): T {
+		return this.timeline.mutate(state => {
+			const omni = new O({timeline: state as TimelineFile})
+			const result = change(omni)
+			Object.assign(state, omni.timeline)
+			return result
+		})
+	}
+
+	async commitPatch(patch: TimelinePatch) {
+		const timeline = applyTimelinePatch(this.timeline.state as TimelineFile, patch)
+		await this.timeline.mutate(state => Object.assign(state, timeline, {audio: timeline.audio}))
+		this.reconcile()
+	}
+
+	timelineFrom(rootId: Id = this.timeline.state.rootId): TimelineFile {
+		return {...this.timeline.state, rootId}
+	}
+
+	get index() {
+		return this.$proposal()?.index ?? this.#index()
+	}
+
+	async redo() {
+		await this.timeline.redo()
+		this.reconcile()
+	}
+
+	async undo() {
+		//TODO: undo does not undo rotation correctly
+		await this.timeline.undo()
+		this.reconcile()
+	}
+
+	setProposal(proposal: Proposal | null) {
+		this.$proposal(proposal)
+	}
+
+	clearProposal() {
+		this.$proposal(null)
+	}
+
+	/** Append to the currently viewed timeline container. */
+	appendItem<T extends Item.Any>(create: (omni: O) => T): T {
+		const parent = this.index.getItem<ContainerItem>(this.$viewedItemId())
+		const item = this.edit(omni => {
+			const item = create(omni)
+			omni.set<typeof parent>(parent.id, {
+				childrenIds: [...parent.childrenIds, item.id],
+			})
+			return item
+		})
+
+		this.$selectedItem(item.id)
+		this.playback.seek(this.$playhead())
+		return item
+	}
+
+	createCaption(item: Idx.VideoItem | Idx.AudioItem, transcript: Transcription, options: Parameters<O["captions"]["make"]>[1]) {
+		return this.edit(omni => {
+			const caption = omni.captions.make(transcript, {
+				...options, itemId: item.id, start: item.start, duration: item.duration,
+			})
+			const parent = this.index.getParent(item.id)
+			if (parent?.kind === Kind.Stack)
+				omni.set<typeof parent>(parent.id, {childrenIds: [caption.id, ...parent.childrenIds]})
+			else {
+				const stack = omni.stack(caption, item)
+				if (parent)
+					omni.set<typeof parent>(parent.id, {childrenIds: replaceChild(parent.childrenIds, item.id, [stack.id])})
+				else omni.state.timeline = {...omni.timeline, rootId: stack.id}
+			}
+			return caption
+		})
+	}
+
+	/** Wraps item with new container. */
+	wrapItem(itemId: Id, type: "stack" | "sequence") {
+		const parent = this.index.getParent(itemId)
+		if (!parent)
+			return
+
+		const container: Idx.Struct = {
+			id: this.getId(),
+			kind: type === "stack" ? Kind.Stack : Kind.Sequence,
+			childrenIds: [itemId],
+		}
+
+		this.timeline.mutate(state => {
+			add(state, container)
+			update(state, parent.id, wrapChild(parent, itemId, container))
+		})
+
+		this.$selectedItem(container.id)
+	}
+
+	duplicateClip(itemId: Id) {
+		const item = this.index.getItemMaybe(itemId)
+		const parent = this.index.getParent(itemId)
+		if (!item || !parent || !Idx.isClip(item.kind))
+			return
+
+		const {copy, items} = copyClip(
+			item as Idx.Clip,
+			this.index,
+			() => this.getId(),
+		)
+
+		this.timeline.mutate(state => {
+			for (const item of items)
+				add(state, item)
+			update(state, parent.id, {
+				childrenIds: replaceChild(parent.childrenIds, itemId, [itemId, copy.id]),
+			})
+		})
+
+		this.$selectedItem(copy.id)
+		this.canvas.scheduleDraw()
+	}
+
+	applyTransitionToSelection(name: TransitionName, duration: number) {
+		const selected = this.index.getItemMaybe(this.$selectedItem())
+		if (!selected)
+			return false
+
+		const parent = this.index.getParent(selected.id)
+		if (parent?.kind !== Kind.Sequence)
+			return false
+
+		if (Idx.isTransition(selected))
+			return this.#updateTransition(selected.id, name, duration)
+
+		const childIndex = parent.childrenIds.indexOf(selected.id)
+		if (!this.isVisualItem(selected) || childIndex === -1)
+			return false
+
+		const [prev, next] = [-1, 1].map(d => this.index.getItemMaybe(parent.childrenIds[childIndex + d]))
+		const transition = [prev, next].find((s): s is Item.Transition => !!s && Idx.isTransition(s))
+		if (transition)
+			return this.#updateTransition(transition.id, name, duration)
+
+		const index = this.isVisualItem(next) ? childIndex + 1 : this.isVisualItem(prev) ? childIndex : -1
+		if (index === -1)
+			return false
+		return this.#createTransition(parent, index, name, duration)
+	}
+
+	applyTransitionAt(name: TransitionName, duration: number, targetId: Id) {
+		const target = this.index.getItemMaybe(targetId)
+		if (!target)
+			return false
+		if (Idx.isTransition(target))
+			return this.#updateTransition(target.id, name, duration)
+
+		const parent = this.index.getParent(target.id)
+		const index = parent?.childrenIds.indexOf(target.id) ?? -1
+		const previous = parent && this.index.getItemMaybe(parent.childrenIds[index - 1])
+		if (parent?.kind !== Kind.Sequence || !this.isVisualItem(previous) || !this.isVisualItem(target))
+			return false
+
+		return this.#createTransition(parent, index, name, duration)
+	}
+
+	#createTransition(parent: Item.Sequence, index: number, name: TransitionName, duration: number) {
+		const created = this.edit(omni => {
+			const created = omni.transition[name](duration)
+			const s = omni.timeline
+			const childrenIds = [...parent.childrenIds]
+			childrenIds.splice(index, 0, created.id)
+			this.#applyTransitionResize(s, {...created, duration: 0}, duration, childrenIds, index)
+			update(s, parent.id, {childrenIds})
+			return created
+		})
+
+		this.$selectedItem(created.id)
+		this.canvas.scheduleDraw()
+		return true
+	}
+
+	#applyTransitionResize(state: TimelineFile, transition: Item.Transition, duration: number, childrenIds: readonly Id[], index: number) {
+		const prev = this.index.getItemMaybe<Idx.Clip>(childrenIds[index - 1])
+		const next = this.index.getItemMaybe<Idx.Clip>(childrenIds[index + 1])
+		const overlay = resizeTransition(transition, duration, prev, next, this.deps.resolveMedia)
+
+		for (const [id, item] of overlay)
+			update(state, id, item)
+	}
+
+	#updateTransition(id: Id, name: TransitionName, duration: number) {
+		this.timeline.mutate(s => update(s, id, {name, duration}))
+		this.$selectedItem(id)
+		this.canvas.scheduleDraw()
+		return true
+	}
+
+	isVisualItem(item: Item.Any | undefined): item is Idx.VideoItem | Item.Image | Item.Text | Item.Caption {
+		return [Kind.Video, Kind.Clip, Kind.Image, Kind.Text, Kind.Caption].includes(item?.kind as Kind)
+	}
+
+	setGhostClip(ghostClip: TimelineClipBox | null) {
+		this.$ghostClip(ghostClip)
+	}
+
+	setTrimPreviewOffsetPx(offset: number) {
+		this.$trimPreviewOffsetPx(offset)
+	}
+
+	setMode(mode: Tool) {
+		const isSame = mode(this).id === this.activeMode().id
+		if(isSame) {
+			this.activeMode(selectTool(this))
+		}
+		else {
+			this.activeMode(mode(this))
+		}
+		this.canvas.clearPreviews()
+		this.canvas.switchCursor(this.activeMode().id)
+		this.canvas.scheduleDraw()
+	}
+
+	seekPlayhead(time: Ms) {
+		this.playback.pause()
+		this.$playhead(ms(Math.min(Math.max(0, time), this.viewedDuration())))
+		this.$ghostPlayhead(null)
+	}
+
+	setGhostPlayhead(time: Ms | null) {
+		this.$ghostPlayhead(time)
+	}
+
+	clearGhostPlayhead() {
+		this.setGhostPlayhead(null)
+	}
+
+	viewedDuration() {
+		return computeItemDuration(this.$viewedItemId(), this.deps.strata.timeline.state)
+	}
+
+	#computeMinZoom() {
+		const duration = this.viewedDuration()
+		const width = this.viewport.width
+		const timelineFill = 0.5
+		const zoom = duration && width
+			? width * timelineFill / (duration * this.viewport.pixelsPerMillisecond)
+			: 0.2
+
+		return Math.min(1, zoom)
+	}
+
+	#updateMinZoom = () => {
+		this.viewport.setMinZoom(this.#computeMinZoom())
+	}
+
+	updateTransformAnimation(
+		item: Item.Text | Idx.VideoItem | Item.Image,
+		transform: Transform,
+		mutateAnimation: (draft: TransformAnimation) => void,
+	) {
+		this.edit(omni => {
+			const spatial = this.index.getItemMaybe<SpatialLike>(item.spatialId) ?? omni.spatial()
+			const animation = (item.animationIds ?? [])
+				.map(id => this.index.getItemMaybe<Item.Animation>(id))
+				.find(animation => animation?.anims.transform)
+			const draft = animation?.anims.transform
+				? cloneAnimation(animation.anims.transform)
+				: anim.transform(visualAnimations.transform.defaultTerp, [])
+
+			mutateAnimation(draft)
+
+			const state = omni.timeline
+			if (item.spatialId !== spatial.id)
+				update(state, item.id, {spatialId: spatial.id})
+
+			if (hasAnyKeyframes(draft)) {
+				if (animation) {
+					update(state, animation.id, {
+						anims: {...animation.anims, transform: draft},
+						enabled: true
+					})
+				}
+				else {
+					const animationId = this.getId()
+					add(state, {
+						id: animationId,
+						kind: Kind.Animation,
+						anims: {transform: draft},
+						enabled: true,
+					})
+					update(state, item.id, {
+						animationIds: [...(item.animationIds ?? []), animationId],
+					})
+				}
+				update(state, spatial.id, {transform: makeTransform()})
+				return
+			}
+
+			if (animation) {
+				const {transform: _removed, ...anims} = animation.anims
+				if (Object.keys(anims).length)
+					update(state, animation.id, {anims})
+				else {
+					remove(state, animation.id)
+					update(state, item.id, {
+						animationIds: (item.animationIds ?? []).filter(id => id !== animation.id),
+					})
+				}
+			}
+
+			update(state, spatial.id, {transform})
+		})
+	}
+
+	stepPlayheadFrame(direction: -1 | 1) {
+		const frameDuration = 1000 / this.deps.strata.settings.state.timebase
+		const currentFrame = this.$playhead() / frameDuration
+
+		const nextFrame = direction > 0
+			? Math.floor(currentFrame) + 1
+			: Math.ceil(currentFrame) - 1
+		const time = ms(Math.max(0, Math.min(this.deps.player.duration, nextFrame * frameDuration)))
+
+		this.seekPlayhead(time)
+	}
+
+	getPlayheadInMs() {
+		return this.$playhead()
+	}
+
+	playheadViewportX() {
+		return this.viewport.timeToViewportX(this.$playhead())
+	}
+
+	zoomAnchor() {
+		const x = this.playheadViewportX()
+		return x >= 0 && x <= this.viewport.width
+			? x
+			: this.viewport.width / 2
+	}
+
+	splitAtPlayhead() {
+		return this.splitSelectedItemAtTime(this.getPlayheadInMs())
+	}
+
+	splitSelectedItemAtTime(time: Ms) {
+		const clipId = this.$selectedItem()
+		if (clipId === null)
+			return
+
+		this.splitClipAt(clipId, time)
+	}
+
+	splitClipAt(clipId: Id, time: Ms) {
+		this.timeline.mutate(state => {
+			const clip = this.index.getItem<Idx.Clip>(clipId)
+			const parent = this.index.getParent(clipId)
+
+			if (!parent)
+				return
+
+			const offset = ms(time - this.index.getItemLaneStart(clipId, this.$viewedItemId()))
+			if (offset <= 0 || offset >= clip.duration)
+				return
+
+			const id = () => this.getId()
+			const leftId = id()
+			const rightId = id()
+			const {left, right} = splitClip(clip, leftId, rightId, offset)
+			const {items} = copyClip(
+				right,
+				this.index,
+				id,
+				right.id,
+			)
+			add(state, left)
+			for (const item of items)
+				add(state, item)
+			remove(state, clipId)
+
+			if (parent.kind === Kind.Sequence) {
+				update(state, parent.id, {
+					childrenIds: replaceChild(parent.childrenIds, clipId, [leftId, rightId])
+				})
+				return
+			}
+
+			const seqId = id()
+			const sequence: Item.Sequence = {
+				id: seqId,
+				kind: Kind.Sequence,
+				childrenIds: [leftId, rightId],
+			}
+			add(state, sequence)
+			update(state, parent.id, wrapChild(parent, clipId, sequence))
+		})
+
+		this.canvas.clearPreviews()
+		this.$selectedItem(null)
+	}
+
+	trimClip(clipId: Id, time: Ms, edge: 'start' | 'end') {
+		this.timeline.mutate(state => {
+			const clip = this.index.getItem<Idx.Clip>(clipId)
+			const laneStart = this.index.getItemLaneStart(clipId, this.$viewedItemId())
+			const mediaDuration = this.deps.resolveMedia(clip)?.duration
+			update(state, clipId, trim(clip, edge, time - laneStart, mediaDuration))
+		})
+	}
+
+	deleteClip(clipId: Id | null) {
+		if (clipId === null)
+			return
+
+		this.timeline.mutate(state => {
+			const parent = this.index.getParent(clipId)
+			if (!parent)
+				return
+
+			const item = this.index.getItem<Item.Any>(clipId)
+			if (Idx.isTransition(item))
+				this.#applyTransitionResize(state, item, 0, parent.childrenIds, parent.childrenIds.indexOf(clipId))
+
+			removeTree(state, clipId)
+			update(state, parent.id, {
+				childrenIds: parent.childrenIds.filter(childId => childId !== clipId)
+			})
+		})
+
+		this.reconcile()
+	}
+}
