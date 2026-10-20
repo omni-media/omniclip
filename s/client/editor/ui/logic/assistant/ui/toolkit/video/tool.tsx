@@ -32,8 +32,8 @@ export const videoTools = (context: EditorContext, reasoningEffort: ReasoningEff
 					progress => setUploadProgress(toolCallId, "Uploading video context", progress),
 				)
 				const parts = await video.provide()
-				const mediaContext = parts.map(({fileName, start, end}, index) =>
-					`Part ${index + 1}/${parts.length}: ${fileName} (${start.toFixed(2)}s–${end.toFixed(2)}s)`
+				const mediaContext = parts.map(({path, start, end}, index) =>
+					`Part ${index + 1}/${parts.length}: ${path} (${start.toFixed(2)}s–${end.toFixed(2)}s)`
 				).join("\n")
 				return new ToolResponse({
 					result: {parts},
@@ -54,11 +54,11 @@ export const videoTools = (context: EditorContext, reasoningEffort: ReasoningEff
 	},
 	inspect_video: {
 		type: "frontend",
-		description: "Ask the cloud model to inspect video context previously prepared with provide_selected_video. Call it immediately after that tool, using its fileName and a precise question about the source video.",
-		execute: async ({fileName, prompt}) => {
+		description: "Ask the cloud model to inspect video context previously prepared with provide_selected_video. Call it immediately after that tool, using its path and a precise question about the source video.",
+		execute: async ({path, prompt}) => {
 			const {analysis} = await mediaAnalysis.inspectVideo({
 				prompt,
-				fileName,
+				path,
 				reasoningEffort
 			}).catch(error => {
 				console.error("Video inspection failed", error)
@@ -70,7 +70,7 @@ export const videoTools = (context: EditorContext, reasoningEffort: ReasoningEff
 			})
 		},
 		parameters: z.strictObject({
-			fileName: z.string().describe("The fileName returned by provide_selected_video."),
+			path: z.string().describe("The path returned by provide_selected_video."),
 			prompt: z.string().describe("The precise question to answer about the selected video."),
 		}),
 		renderText: {

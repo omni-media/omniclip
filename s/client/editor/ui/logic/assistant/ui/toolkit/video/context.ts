@@ -22,10 +22,10 @@ export class VideoContext {
 	* before providing to keep it within cloud model limits
 	* */
 	async provide() {
-		const manifestFileName = `${this.#prefix}/complete.json`
+		const manifestPath = `${this.#prefix}/complete.json`
 		const uploaded = await mediaAnalysis.getUploadedParts({
 			projectId: this.projectId,
-			fileName: manifestFileName,
+			path: manifestPath,
 		})
 		if (uploaded) return uploaded
 
@@ -33,24 +33,24 @@ export class VideoContext {
 		const splitter = new MediaSplitter(this.source)
 
 		for await (const {blob, start, end} of splitter.split()) {
-			const fileName = `${this.#prefix}/${start}s-${end}s.mp4`
-			await this.#upload(blob, fileName)
+			const path = `${this.#prefix}/${start}s-${end}s.mp4`
+			await this.#upload(blob, path)
 			this.#uploaded += blob.size
-			parts.push({fileName, start, end})
+			parts.push({path, start, end})
 		}
 
-		await this.#upload(new Blob([JSON.stringify(parts)], {type: "application/json"}), manifestFileName)
+		await this.#upload(new Blob([JSON.stringify(parts)], {type: "application/json"}), manifestPath)
 		return parts
 	}
 
 	get #prefix() {
-		return `analysis/${this.projectId}/${this.mediaHash}`
+		return `${this.projectId}/${this.mediaHash}`
 	}
 
-	async #upload(source: Blob, fileName: string) {
+	async #upload(source: Blob, path: string) {
 		const target = await mediaAnalysis.uploadTarget({
 			projectId: this.projectId,
-			fileName,
+			path,
 		})
 		await new Promise<void>((resolve, reject) => {
 			const request = new XMLHttpRequest()

@@ -6,6 +6,8 @@
 /bin
 /assets/temp
 /.env
+/.env.local
 
 # Local Netlify folder
 .netlify
+.neon

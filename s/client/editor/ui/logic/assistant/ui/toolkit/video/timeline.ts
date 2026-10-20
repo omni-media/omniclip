@@ -56,9 +56,9 @@ export async function inspectTimeline(
 
 		const analyses: TimelineAnalysis[] = []
 
-		for (const {fileName, start, end} of parts) {
+		for (const {path, start, end} of parts) {
 			const {analysis} = await mediaAnalysis.inspectVideo({
-				fileName,
+				path,
 				prompt,
 				reasoningEffort
 			})

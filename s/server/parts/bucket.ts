@@ -19,26 +19,36 @@ export class R2Bucket {
 		},
 	})
 
-	async createUploadTarget(fileName: string): Promise<UploadTarget> {
+	forUser(userId: string) {
+		const key = (path: string) => `analysis/${userId}/${path}`
+		return {
+			key,
+			createUploadTarget: (path: string) => this.#createUploadTarget(key(path)),
+			downloadUrl: (path: string) => this.#downloadUrl(key(path)),
+			getJson: <Value>(path: string) => this.#getJson<Value>(key(path)),
+		}
+	}
+
+	async #createUploadTarget(key: string): Promise<UploadTarget> {
 		const uploadUrl = await getSignedUrl(this.#client, new PutObjectCommand({
 			Bucket: this.#bucket,
-			Key: fileName,
+			Key: key,
 		}), {expiresIn: 3600})
 		return {uploadUrl}
 	}
 
-	downloadUrl(fileName: string) {
+	#downloadUrl(key: string) {
 		return getSignedUrl(this.#client, new GetObjectCommand({
 			Bucket: this.#bucket,
-			Key: fileName,
+			Key: key,
 		}), {expiresIn: 3600})
 	}
 
-	async getJson<Value>(fileName: string): Promise<Value | undefined> {
+	async #getJson<Value>(key: string): Promise<Value | undefined> {
 		try {
 			const result = await this.#client.send(new GetObjectCommand({
 				Bucket: this.#bucket,
-				Key: fileName,
+				Key: key,
 			}))
 			return JSON.parse(await result.Body!.transformToString()) as Value
 		}
@@ -49,11 +59,11 @@ export class R2Bucket {
 		}
 	}
 
-	async deleteMany(fileNames: string[]) {
-		if (!fileNames.length) return
+	async deleteMany(keys: string[]) {
+		if (!keys.length) return
 		const result = await this.#client.send(new DeleteObjectsCommand({
 			Bucket: this.#bucket,
-			Delete: {Objects: fileNames.map(Key => ({Key})), Quiet: true},
+			Delete: {Objects: keys.map(Key => ({Key})), Quiet: true},
 		}))
 		if (result.Errors?.length)
 			throw new Error(`Could not delete ${result.Errors.length} temporary uploads`)

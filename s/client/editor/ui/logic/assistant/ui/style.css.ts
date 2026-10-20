@@ -64,9 +64,29 @@ export default css`@layer view {
 	overflow: hidden;
 }
 
-.assistant-panel[data-fullscreen] {
+.assistant-panel[data-fullscreen][data-signed-in] {
 	grid-template-columns: 240px minmax(0, 1fr);
 }
+
+.cloud-sign-in {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	padding: 24px;
+	text-align: center;
+}
+
+.cloud-sign-in p { color: var(--assistant-muted); font-size: 0.85rem; }
+.cloud-sign-in a {
+	padding: 10px 20px;
+	border-radius: 7px;
+	color: var(--assistant-text);
+	background: var(--assistant-raised);
+	text-decoration: none;
+}
+.cloud-sign-in a:hover { background: var(--assistant-border-hover); }
 
 .assistant-panel[data-fullscreen] header {
 	cursor: default;

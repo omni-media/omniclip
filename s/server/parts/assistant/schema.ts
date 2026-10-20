@@ -1,24 +1,35 @@
 import * as z from "zod"
 import {reasoningEfforts} from "./types.js"
+import {projectId} from "../../../iso/schemas/session.js"
 
-const sourceName = z.string().startsWith("analysis/")
+const sourcePath = z.string().min(1)
 
 export const fileRequest = z.object({
-	projectId: z.string().min(1),
-	fileName: sourceName,
+	projectId,
+	path: sourcePath,
+}).refine(request => request.path.startsWith(`${request.projectId}/`), {
+	message: "Upload does not belong to this project",
+	path: ["path"],
 })
 
 export const videoRequest = z.object({
-	fileName: sourceName,
+	path: sourcePath,
 	prompt: z.string(),
 	reasoningEffort: z.enum(reasoningEfforts),
 })
 
 export const uploadedParts = z.array(z.object({
-	fileName: sourceName,
+	path: sourcePath,
 	start: z.number().nonnegative(),
 	end: z.number().nonnegative(),
 }).refine(part => part.end >= part.start))
+
+export function uploadedPartsFor(path: string) {
+	const prefix = path.slice(0, path.lastIndexOf("/") + 1)
+	return uploadedParts.refine(parts => parts.every(part => part.path.startsWith(prefix)), {
+		message: "Uploaded part does not belong to this source",
+	})
+}
 
 export const modelResponse = z.object({
 	choices: z.array(z.object({
