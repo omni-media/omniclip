@@ -1,6 +1,6 @@
 
 import {html} from 'lit'
-import {shadow, useCss, useOnce, useSignal} from '@e280/sly'
+import {shadow, useCss, useHost, useOnce, useRender, useSignal} from '@e280/sly'
 
 import styleCss from './style.css.js'
 import modalCss from '../../../../context/parts/modal/modal.css.js'
@@ -23,7 +23,7 @@ import '@awesome.me/webawesome/dist/components/button/button.js'
 import '@awesome.me/webawesome/dist/components/option/option.js'
 import '@awesome.me/webawesome/dist/components/select/select.js'
 
-export const settingsModal = (): ModalDefinition<Settings> => ({
+export const settingsModal = (section?: "mcp"): ModalDefinition<Settings> => ({
 	label: html`
 		<div>
 			<wa-icon name="gear"></wa-icon>
@@ -33,6 +33,8 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 
 	render: (ctx, modal) => shadow(() => {
 		useCss(modalCss, styleCss)
+		const host = useHost()
+		const render = useRender()
 
 		const storageError = useSignal("")
 		const removing = useSignal<string | null>(null)
@@ -63,7 +65,22 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 			}
 		}
 
-		useOnce(() => refreshStorage())
+		const revealMcp = () => {
+			const target = host.shadowRoot!.querySelector<HTMLElement>('#mcp')!
+			target.focus({preventScroll: true})
+			target.scrollIntoView({block: 'start', behavior: 'instant'})
+			if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
+				target.animate({backgroundColor: ['#303030', 'transparent']}, {duration: 1600})
+		}
+
+		useOnce(async() => {
+			await refreshStorage()
+			if (section !== "mcp")
+				return
+			await render()
+			if (host.isConnected)
+				revealMcp()
+		})
 
 		const set = (key: keyof Settings, value: string) => {
 			const next = {...selected(), [key]: value}
@@ -167,7 +184,7 @@ export const settingsModal = (): ModalDefinition<Settings> => ({
 							)}
 						</section>
 
-						<section>
+						<section id="mcp" class="mcp-settings" tabindex="-1" aria-label="MCP settings">
 							<div class="section-label">MCP</div>
 							${McpSettings(ctx)}
 						</section>

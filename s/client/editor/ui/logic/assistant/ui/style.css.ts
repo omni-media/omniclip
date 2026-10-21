@@ -79,6 +79,17 @@ export default css`@layer view {
 }
 
 .cloud-sign-in p { color: var(--assistant-muted); font-size: 0.85rem; }
+.cloud-sign-in .mcp-link {
+	padding: 0;
+	color: var(--assistant-text);
+	font: inherit;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+.cloud-sign-in .mcp-link:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
+}
 .cloud-sign-in a {
 	padding: 10px 20px;
 	border-radius: 7px;

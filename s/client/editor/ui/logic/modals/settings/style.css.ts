@@ -24,6 +24,12 @@ export default css`
 		text-transform: uppercase;
 	}
 
+	.mcp-settings {
+		scroll-margin-top: 12px;
+		border-radius: 6px;
+	}
+	.mcp-settings:focus { outline: 1px solid #454545; outline-offset: 6px; }
+
 	.field {
 		display: grid;
 		grid-template-columns: 7.8em minmax(0, 1fr);

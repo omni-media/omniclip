@@ -11,6 +11,7 @@ import {ThreadSidebar} from "./renderers/threads.js"
 import {ChatComposer} from "./renderers/composer.js"
 import {useProjectHeartbeat} from "./parts/heartbeat.js"
 import {MediaSplitter} from "./toolkit/video/splitter.js"
+import {settingsModal} from "../../modals/settings/modal.js"
 import {AssistantEditorProvider} from "./renderers/tool-group.js"
 import type {EditorContext} from "../../../../context/context.js"
 import {AssistantMessage, UserMessage} from "./renderers/messages.js"
@@ -39,6 +40,12 @@ export function AssistantChat({context, onClose}: {
 		effort={reasoningEffort}
 		onEffortChange={setReasoningEffort}
 	/>
+
+	const openMcpSettings = async() => {
+		const settings = await context.modals.openModal(settingsModal("mcp"))
+		if (settings)
+			context.strata.settings.mutate(state => Object.assign(state, settings))
+	}
 
 	const renderThread = () => <>
 		<ThreadPrimitive.Root className="thread">
@@ -75,7 +82,10 @@ export function AssistantChat({context, onClose}: {
 
 	const renderSignIn = () => <div className="cloud-sign-in">
 		<strong>{auth.isPending ? "Checking your session…" : "Sign in to use cloud AI"}</strong>
-		<p>Editing and local tools don’t require an account.</p>
+		<p>
+			Or connect your own AI agent through{" "}
+			<button type="button" className="mcp-link" onClick={openMcpSettings}>local MCP</button>.
+		</p>
 		{!auth.isPending && <a href="#/account">Sign in</a>}
 	</div>
 
