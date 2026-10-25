@@ -7,8 +7,8 @@ import {editorTools} from './tools.js'
 import {EditorBridge} from './bridge/node.js'
 import type {connectVision} from './vision.js'
 import {mcpInstructions} from './instructions.js'
-import type {TimelinePatch} from '../../../iso/timeline.js'
-import type {ProjectSettingsUpdate} from '../../../iso/settings.js'
+import type {TimelinePatch} from '@omnimedia/omniso/timeline'
+import type {ProjectSettingsUpdate} from '@omnimedia/omniso/settings'
 
 type Vision = Awaited<ReturnType<typeof connectVision>>
 type EditorToolInput = Infer<typeof editorTools[number]['inputSchema']>

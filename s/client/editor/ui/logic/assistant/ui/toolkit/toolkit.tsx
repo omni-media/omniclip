@@ -1,16 +1,15 @@
 
+import {editorTools} from "@omnimedia/omniso/assistant/tools"
 import {defineToolkit, type Toolkit} from "@assistant-ui/react"
+import type {SkillCall} from "@omnimedia/omniso/assistant/schema"
+import type {TimelinePatchResult} from "@omnimedia/omniso/timeline"
+import type {ProjectSettingsUpdate} from "@omnimedia/omniso/settings"
+import type {AssistantContext} from "@omnimedia/omniso/assistant/types"
 
 import {videoTools} from "./video/tool.js"
 import {ReasoningEffort} from "../parts/runtime.js"
 import {activity, resultActivity} from "./activity.js"
 import type {EditorContext} from "../../../../../context/context.js"
-import {editorTools} from "../../../../../../../iso/assistant/tools.js"
-import type {TimelinePatchResult} from "../../../../../../../iso/timeline.js"
-
-import type {SkillCall} from "../../../../../../../iso/assistant/schema.js"
-import type {AssistantContext} from "../../../../../../../iso/assistant/types.js"
-import type {ProjectSettingsUpdate} from "../../../../../../../iso/settings.js"
 
 export const createAssistantToolkit = (
 	context: EditorContext,

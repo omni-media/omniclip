@@ -1,5 +1,6 @@
 
 import {html} from 'lit'
+import type {Settings} from "@omnimedia/omniso/settings"
 import {shadow, useCss, useHost, useOnce, useRender, useSignal} from '@e280/sly'
 
 import styleCss from './style.css.js'
@@ -17,7 +18,6 @@ import {
 } from '../../models/storage.js'
 import {ModalDefinition} from '../../../../context/parts/modal/types.js'
 
-import {Settings} from '../../../../context/parts/state.js'
 import '@awesome.me/webawesome/dist/components/icon/icon.js'
 import '@awesome.me/webawesome/dist/components/button/button.js'
 import '@awesome.me/webawesome/dist/components/option/option.js'

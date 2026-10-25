@@ -1,7 +1,7 @@
 
+import {bridgePort} from '@omnimedia/omniso/mcp/protocol'
 import {connect, makeEndpoint, Messenger, wire} from '@e280/renraku'
 
-import {bridgePort} from '../../iso/mcp/protocol.js'
 import {createEditorSession} from './session.js'
 import type {EditorContext} from '../editor/context/context.js'
 

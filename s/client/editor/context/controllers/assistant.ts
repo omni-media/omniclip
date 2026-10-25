@@ -1,7 +1,7 @@
 
 import type {OmniSession} from "../../ui/logic/session.js"
-import type {TimelinePatch, TimelinePatchResult} from "../../../../iso/timeline.js"
-import {projectSettingsUpdateParameters, type ProjectSettingsUpdate} from "../../../../iso/settings.js"
+import type {TimelinePatch, TimelinePatchResult} from "@omnimedia/omniso/timeline"
+import {projectSettingsUpdateParameters, type ProjectSettingsUpdate} from "@omnimedia/omniso/settings"
 
 type AssistantEdit = {
 	id: string

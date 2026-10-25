@@ -1,11 +1,11 @@
 
 import {css, html} from 'lit'
 import {shadow, useCss, useSignal} from '@e280/sly'
+import {bridgePort} from '@omnimedia/omniso/mcp/protocol'
 
 import '@awesome.me/webawesome/dist/components/input/input.js'
 import '@awesome.me/webawesome/dist/components/switch/switch.js'
 import type {EditorContext} from '../../../../context/context.js'
-import {bridgePort} from '../../../../../../iso/mcp/protocol.js'
 
 export const McpSettings = shadow((context: EditorContext) => {
 	useCss(css`

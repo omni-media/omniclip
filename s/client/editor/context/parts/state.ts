@@ -1,10 +1,8 @@
 
 import {hex} from "@e280/stz"
 import {chronicle, Chronicle} from "@e280/strata"
+import type {Settings} from "@omnimedia/omniso/settings"
 import {Id, Kind, TimelineFile} from "@omnimedia/omnitool"
-import type {Settings} from "../../../../iso/settings.js"
-
-export type {Settings} from "../../../../iso/settings.js"
 
 export type Tag = {
 	id: Id

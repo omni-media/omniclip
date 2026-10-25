@@ -1,11 +1,11 @@
 
 import {ms, fps} from "@omnimedia/omnitool"
+import type {Settings} from "@omnimedia/omniso/settings"
 
 import {tickSteps} from "../constants.js"
 import {drawMajorTick} from "./major-tick.js"
 import {drawMinorTick} from "./minor-tick.js"
 import {Viewport} from "../../../../../../../../../logic/parts/viewport.js"
-import {Settings} from '../../../../../../../../../../context/parts/state.js'
 
 export function drawRuler (
 	ctx: CanvasRenderingContext2D,

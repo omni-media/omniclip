@@ -1,7 +1,7 @@
 
 import {queue} from '@e280/stz'
-import type {EditorRpc} from '../../iso/mcp/protocol.js'
-import type {TimelinePatch} from '../../iso/timeline.js'
+import type {EditorRpc} from '@omnimedia/omniso/mcp/protocol'
+import type {TimelinePatch} from '@omnimedia/omniso/timeline'
 import type {EditorContext} from '../editor/context/context.js'
 
 export function createEditorSession(editor: EditorContext, origin: string) {

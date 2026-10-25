@@ -2,7 +2,7 @@
 import {signal} from '@e280/strata'
 
 import type {EditorContext} from '../context.js'
-import {bridgePort} from '../../../../iso/mcp/protocol.js'
+import {bridgePort} from '@omnimedia/omniso/mcp/protocol'
 import {connectMcp, type McpStatus} from '../../../mcp/connect.js'
 
 export class McpController {

@@ -1,6 +1,7 @@
 
 import * as z from "zod"
 import {ToolResponse} from "assistant-stream"
+import {emptyParameters} from "@omnimedia/omniso/assistant/tools"
 import {defineToolkit, type ToolCallMessagePartProps, type Toolkit} from "@assistant-ui/react"
 
 import {TimelineAnalysis} from "./types.js"
@@ -9,7 +10,6 @@ import {ReasoningEffort} from "../../parts/runtime.js"
 import {activity, resultActivity} from "../activity.js"
 import {mediaAnalysis, VideoContext} from "./context.js"
 import type {EditorContext} from "../../../../../../context/context.js"
-import {emptyParameters} from "../../../../../../../../iso/assistant/tools.js"
 import {clearUploadProgress, setProgressMessage, setUploadProgress, useUploadProgress} from "./progress.js"
 
 export const videoTools = (context: EditorContext, reasoningEffort: ReasoningEffort): Toolkit => defineToolkit({

@@ -12,7 +12,6 @@
 		"allowSyntheticDefaultImports": true,
 		"esModuleInterop": true,
 		"sourceMap": true,
-		"declaration": true,
 		"skipLibCheck": true,
 		"types": ["node", "@types/wicg-file-system-access", "@types/dom-webcodecs"]
 	},

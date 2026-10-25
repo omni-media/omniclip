@@ -1,6 +1,6 @@
 
 import * as z from "zod"
-import {editorTools as sharedEditorTools, emptyParameters} from "../../../iso/assistant/tools.js"
+import {editorTools as sharedEditorTools, emptyParameters} from "@omnimedia/omniso/assistant/tools"
 
 const itemInput = z.strictObject({
 	itemId: z.string().describe("An existing media item ID from read_project_context."),

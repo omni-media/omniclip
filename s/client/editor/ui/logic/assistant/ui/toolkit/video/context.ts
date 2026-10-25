@@ -1,11 +1,10 @@
 
 import {httpRemote} from "@e280/renraku"
+import type {UploadedPart, MediaAnalysisApi} from "@omnimedia/omniso/api"
 
 import {MediaSplitter} from "./splitter.js"
-import {UploadedPart} from "../../../../../../../../server/parts/assistant/types.js"
-import type {MediaAnalysisApi} from "../../../../../../../../server/parts/assistant/analysis.js"
 
-export const mediaAnalysis = httpRemote<MediaAnalysisApi>("/api/analyze", {timeout: 60_000})
+export const mediaAnalysis = httpRemote<MediaAnalysisApi>("/api/analyze", {timeout: Infinity})
 
 export class VideoContext {
 	#uploaded = 0

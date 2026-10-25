@@ -1,7 +1,7 @@
 import {useEffect} from "react"
 import {httpRemote} from "@e280/renraku"
 
-import type {CleanupApi} from "../../../../../../../server/parts/cleanup.js"
+import type {CleanupApi} from "@omnimedia/omniso/api"
 
 const heartbeatInterval = 60_000
 const cleanup = httpRemote<CleanupApi>("/api/session/heartbeat", {timeout: 60_000})

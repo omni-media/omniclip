@@ -1,6 +1,7 @@
-import type {TimelineFile} from "@omnimedia/omnitool"
 
-import type {TimelinePatch} from "../../../../../iso/timeline.js"
+import type {TimelineFile} from "@omnimedia/omnitool"
+import type {TimelinePatch} from "@omnimedia/omniso/timeline"
+
 import {validateTimeline} from "./validate.js"
 
 const itemIndex = (timeline: TimelineFile, id: string) => {

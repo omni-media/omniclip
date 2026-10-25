@@ -6,7 +6,7 @@ import {StdioServerTransport} from '@modelcontextprotocol/sdk/server/stdio.js'
 import {connectVision} from './parts/vision.js'
 import {createMcpServer} from './parts/server.js'
 import {EditorBridge} from './parts/bridge/node.js'
-import {bridgePort} from '../../iso/mcp/protocol.js'
+import {bridgePort} from '@omnimedia/omniso/mcp/protocol'
 
 const origin = process.env.OMNICLIP_ORIGIN ?? 'http://127.0.0.1:3000'
 const port = Number(process.env.OMNICLIP_MCP_PORT ?? bridgePort)

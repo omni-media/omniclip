@@ -1,12 +1,12 @@
 import {microbounce} from "@e280/stz"
 
 import {ms, Kind, type TimelineFile} from "@omnimedia/omnitool"
+import type {AssistantContext} from "@omnimedia/omniso/assistant/types"
 
 import {syncOutliner} from "./parts/outliner.js"
 import {prepareViews} from "../ui/views/views.js"
 import {McpController} from "./controllers/mcp.js"
 import {ModalManager} from "./parts/modal/modal.js"
-import type {AssistantContext} from "../../../iso/assistant/types.js"
 import {Requirements, setupRequirements} from "./parts/requirements.js"
 
 export class EditorContext {

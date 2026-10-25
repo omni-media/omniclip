@@ -9,10 +9,10 @@ import {mkdtemp, rm, writeFile} from 'node:fs/promises'
 import {connect, Messenger, wire} from '@e280/renraku'
 import Fastify, {type FastifyReply, type FastifyRequest} from 'fastify'
 
-import type {TimelinePatch} from '../../../../iso/timeline.js'
-import {bridgePort, type EditorRpc} from '../../../../iso/mcp/protocol.js'
-import type {MediaInfo} from '../../../../iso/assistant/types.js'
-import {abortable} from '../../../../iso/abortable.js'
+import type {TimelinePatch} from '@omnimedia/omniso/timeline'
+import {bridgePort, type EditorRpc} from '@omnimedia/omniso/mcp/protocol'
+import type {MediaInfo} from '@omnimedia/omniso/assistant/types'
+import {abortable} from '@omnimedia/omniso/abortable'
 
 type ProvidedMedia = MediaInfo & {path: string}
 type MediaRequest = FastifyRequest<{Params: {id: string}}>
