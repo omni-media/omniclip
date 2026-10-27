@@ -353,6 +353,10 @@ button:hover:not(:disabled) {
 	margin: 0;
 }
 
+.welcome-fullscreen .credit-notice {
+	margin-bottom: 0.75rem;
+}
+
 .starter-prompts {
 	display: flex;
 	flex-wrap: wrap;
@@ -622,9 +626,63 @@ button:hover:not(:disabled) {
 	min-width: 0;
 }
 
+.credit-notice {
+	margin: 0 0.75rem;
+	text-align: center;
+	color: var(--assistant-muted);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.credit-notice a {
+	color: var(--assistant-text);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.starter-prompt:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.credit-balance {
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	font-family: inherit;
+	grid-column: 2;
+	justify-self: end;
+	padding: 2px 4px;
+	color: var(--assistant-muted);
+	font-size: 12px;
+	line-height: 1.2;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.credit-balance:hover { color: var(--assistant-text); text-decoration: underline; }
+.credit-balance:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; }
+
+.credit-popover { --max-width: min(280px, calc(100vw - 32px)); }
+.credit-popover::part(body) {
+	padding: 16px;
+	border: 1px solid var(--assistant-border);
+	border-radius: 10px;
+	background: var(--assistant-surface);
+	color: var(--assistant-text);
+	box-shadow: 0 8px 28px #0006;
+}
+.credit-breakdown { font-size: 12px; line-height: 1.6; }
+.credit-breakdown > strong { font-size: 15px; font-weight: 500; }
+.credit-breakdown dl { display: grid; gap: 8px; margin: 14px 0; }
+.credit-breakdown dl > div { display: flex; justify-content: space-between; gap: 24px; }
+.credit-breakdown dt, .credit-breakdown p { color: var(--assistant-muted); }
+.credit-breakdown dd { margin: 0; font-variant-numeric: tabular-nums; }
+.credit-breakdown p { margin: 8px 0; }
+.credit-breakdown a { display: inline-block; margin-top: 6px; color: var(--assistant-text); text-decoration: underline; text-underline-offset: 3px; }
+
 form {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) auto;
+	grid-template-columns: minmax(0, 1fr) auto auto;
 	align-items: center;
 	gap: 0.45rem;
 	margin: 0.75rem;
@@ -667,6 +725,12 @@ textarea:focus {
 	outline: none;
 }
 
+textarea:disabled,
+.thinking-effort button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
 .thinking-effort {
 	grid-column: 1;
 	justify-self: start;
@@ -707,7 +771,7 @@ textarea:focus {
 
 .send {
 	display: grid;
-	grid-column: 2;
+	grid-column: 3;
 	justify-self: end;
 	place-items: center;
 	width: 2rem;

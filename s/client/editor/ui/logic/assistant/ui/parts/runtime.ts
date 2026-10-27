@@ -7,9 +7,10 @@ import {
 	useAui,
 	useRemoteThreadListRuntime
 } from '@assistant-ui/react'
+import {useChatRuntime} from '@assistant-ui/ai-sdk'
 import {lastAssistantMessageIsCompleteWithToolCalls} from 'ai'
-import {AssistantChatTransport, useChatRuntime} from '@assistant-ui/ai-sdk'
 
+import {createChatTransport} from '../../../api.js'
 import {createAssistantToolkit} from '../toolkit/toolkit.js'
 import type {EditorContext} from '../../../../../context/context.js'
 import {createLocalHistoryAdapter, createThreadListAdapter} from './persistence.js'
@@ -22,13 +23,10 @@ export function useProjectChatRuntime(
 ) {
 	const prefix = `omniclip:assistant:${context.strata.projectId}:`
 
-	const transport = useMemo(() => new AssistantChatTransport({
-		api: '/api/assistant',
-		body: () => ({
-			context: context.getAssistantContext(),
-			reasoningEffort
-		})
-	}), [context, reasoningEffort])
+	const transport = useMemo(() => createChatTransport(() => ({
+		context: context.getAssistantContext(),
+		reasoningEffort
+	})), [context, reasoningEffort])
 
 	const threadListAdapter = useMemo(
 		() => createThreadListAdapter(prefix),

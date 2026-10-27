@@ -16,7 +16,7 @@ const DIRECTORY_NAME = 'omniclip-analysis'
 
 /**
  * Splits source media into temporary parts for cloud analysis.
- * Each part stays below Qwen's two-hour and two-gigabyte limits, with a 1.9 GB margin.
+ * Each part stays within the cloud service's two-hour and 1.9 GB upload caps.
  * Parts are remuxed into OPFS one at a time, uploaded by the caller, then deleted.
  * It is fast because it transmux instead re-encode.
  */

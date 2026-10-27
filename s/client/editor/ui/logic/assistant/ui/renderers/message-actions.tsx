@@ -1,9 +1,12 @@
 
+import {createContext, useContext} from "react"
 import {ActionBarPrimitive, AuiIf, useMessageTiming} from "@assistant-ui/react"
 import {CheckIcon, CopyIcon, RefreshCwIcon, Volume2Icon, VolumeXIcon} from "lucide-react"
 
 const seconds = (milliseconds: number | undefined) =>
 	milliseconds === undefined ? "—" : `${(milliseconds / 1000).toFixed(2)}s`
+
+export const ChatCreditsContext = createContext(false)
 
 const MessageTiming = () => {
 	const timing = useMessageTiming()
@@ -20,16 +23,18 @@ const MessageTiming = () => {
 	return <span className="message-timing" title={title}>{seconds(timing.totalStreamTime)}</span>
 }
 
-export const MessageActions = () => <ActionBarPrimitive.Root className="message-actions" hideWhenRunning autohide="not-last">
-	<ActionBarPrimitive.Copy title="Copy response">
-		<AuiIf condition={state => state.message.isCopied}><CheckIcon /></AuiIf>
-		<AuiIf condition={state => !state.message.isCopied}><CopyIcon /></AuiIf>
-	</ActionBarPrimitive.Copy>
+export const MessageActions = () => {
+	const hasCredits = useContext(ChatCreditsContext)
+	return <ActionBarPrimitive.Root className="message-actions" hideWhenRunning autohide="not-last">
+		<ActionBarPrimitive.Copy title="Copy response">
+			<AuiIf condition={state => state.message.isCopied}><CheckIcon /></AuiIf>
+			<AuiIf condition={state => !state.message.isCopied}><CopyIcon /></AuiIf>
+		</ActionBarPrimitive.Copy>
 
-	<ActionBarPrimitive.Speak title="Read aloud"><Volume2Icon /></ActionBarPrimitive.Speak>
-	<ActionBarPrimitive.StopSpeaking title="Stop reading"><VolumeXIcon /></ActionBarPrimitive.StopSpeaking>
+		<ActionBarPrimitive.Speak title="Read aloud"><Volume2Icon /></ActionBarPrimitive.Speak>
+		<ActionBarPrimitive.StopSpeaking title="Stop reading"><VolumeXIcon /></ActionBarPrimitive.StopSpeaking>
 
-	<ActionBarPrimitive.Reload title="Regenerate"><RefreshCwIcon /></ActionBarPrimitive.Reload>
-	<MessageTiming />
-</ActionBarPrimitive.Root>
-
+		<ActionBarPrimitive.Reload title="Regenerate" disabled={!hasCredits}><RefreshCwIcon /></ActionBarPrimitive.Reload>
+		<MessageTiming />
+	</ActionBarPrimitive.Root>
+}

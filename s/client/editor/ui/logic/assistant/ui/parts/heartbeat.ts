@@ -1,15 +1,12 @@
 import {useEffect} from "react"
-import {httpRemote} from "@e280/renraku"
-
-import type {CleanupApi} from "@omnimedia/omniso/api"
+import {cleanupClient} from "../../../api.js"
 
 const heartbeatInterval = 60_000
-const cleanup = httpRemote<CleanupApi>("/api/session/heartbeat", {timeout: 60_000})
 
 export function useProjectHeartbeat(projectId: string, enabled: boolean) {
 	useEffect(() => {
 		if (!enabled) return
-		const heartbeat = () => cleanup.heartbeat({projectId})
+		const heartbeat = () => cleanupClient.heartbeat({projectId}).catch(() => {})
 
 		void heartbeat()
 		const interval = setInterval(() => void heartbeat(), heartbeatInterval)

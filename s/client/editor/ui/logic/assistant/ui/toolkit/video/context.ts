@@ -1,10 +1,8 @@
 
-import {httpRemote} from "@e280/renraku"
-import type {UploadedPart, MediaAnalysisApi} from "@omnimedia/omniso/api"
+import type {UploadedPart} from "@omnimedia/omniso/api"
 
 import {MediaSplitter} from "./splitter.js"
-
-export const mediaAnalysis = httpRemote<MediaAnalysisApi>("/api/analyze", {timeout: Infinity})
+import {mediaAnalysisClient} from "../../../../api.js"
 
 export class VideoContext {
 	#uploaded = 0
@@ -22,7 +20,7 @@ export class VideoContext {
 	* */
 	async provide() {
 		const manifestPath = `${this.#prefix}/complete.json`
-		const uploaded = await mediaAnalysis.getUploadedParts({
+		const uploaded = await mediaAnalysisClient.getUploadedParts({
 			projectId: this.projectId,
 			path: manifestPath,
 		})
@@ -47,7 +45,7 @@ export class VideoContext {
 	}
 
 	async #upload(source: Blob, path: string) {
-		const target = await mediaAnalysis.uploadTarget({
+		const target = await mediaAnalysisClient.uploadTarget({
 			projectId: this.projectId,
 			path,
 		})

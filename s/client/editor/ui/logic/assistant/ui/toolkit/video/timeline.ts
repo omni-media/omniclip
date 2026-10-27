@@ -1,6 +1,7 @@
 
+import {VideoContext} from './context.js'
 import {ReasoningEffort} from '../../parts/runtime.js'
-import {VideoContext, mediaAnalysis} from './context.js'
+import {mediaAnalysisClient} from '../../../../api.js'
 import {TimelineAnalysis, TimelineVideo} from './types.js'
 import type {EditorContext} from '../../../../../../context/context.js'
 
@@ -57,7 +58,7 @@ export async function inspectTimeline(
 		const analyses: TimelineAnalysis[] = []
 
 		for (const {path, start, end} of parts) {
-			const {analysis} = await mediaAnalysis.inspectVideo({
+			const {analysis} = await mediaAnalysisClient.inspectVideo({
 				path,
 				prompt,
 				reasoningEffort

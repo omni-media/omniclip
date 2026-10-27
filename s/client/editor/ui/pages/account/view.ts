@@ -1,74 +1,58 @@
 
 import {html} from "lit"
-import {shadow, useCss, useName, useSignal} from "@e280/sly"
+import {shadow, useCss, useName} from "@e280/sly"
 
 import styleCss from "./style.css.js"
+import {renderBilling} from "./billing.js"
+import {useCloudAccess} from "./access.js"
 import themeCss from "../../../theme.css.js"
-import {$auth, authClient} from "../../logic/auth.js"
+import {useAccountActions} from "./actions.js"
 
 export const AccountPage = shadow(() => {
 	useName("account")
 	useCss(themeCss, styleCss)
-	const busy = useSignal(false)
-	const error = useSignal("")
-	const state = $auth()
-	const user = state.data?.user
-	const oauthError = new URLSearchParams(location.search).has("error")
 
-	const submit = async() => {
-		busy(true)
-		error("")
-		try {
-			const result = user
-				? await authClient.signOut()
-				: await authClient.signIn.social({
-					provider: "google",
-					callbackURL: `${location.origin}${location.pathname}${location.hash}`,
-					errorCallbackURL: `${location.origin}/editor/#/account`,
-				})
-			if (result.error) error(result.error.message ?? "Sign-in failed. Please try again.")
-		}
-		catch {
-			error("Could not reach the server. Please try again.")
-		}
-		finally {
-			busy(false)
-		}
-	}
+	const {auth: state, billing} = useCloudAccess()
+	const user = state.data?.user
+	const {busy, error, manageBilling, submit} = useAccountActions(!!user)
+	const oauthError = new URLSearchParams(location.search).has("error")
 
 	const renderSession = () => {
 		if (state.isPending)
 			return html`<p role="status">Checking your session…</p>`
 
-		const action = user ? "Sign out" : "Continue with Google"
+		if (user) return html`
+			<section class="identity" aria-label="Signed-in account">
+				<div><p class="eyebrow">Signed in as</p><p class="email">${user.email}</p></div>
+				<button class="quiet" type="button" ?disabled=${busy()} @click=${submit}>Sign out</button>
+			</section>
+		`
 		return html`
-			<p>${user ? user.email : "Continue with Google to use cloud AI."}</p>
-			<button type="button" ?disabled=${busy()} @click=${submit}>
-				${busy() ? "Please wait…" : action}
+			<p>Continue with Google to use cloud AI.</p>
+			<button class="primary" type="button" ?disabled=${busy()} @click=${submit}>
+				${busy() ? "Please wait…" : "Continue with Google"}
 			</button>
-			${user ? html`<a href="#/projects">Open projects</a>` : null}
+			<p class="free-note">Editing, exports, and local MCP are always free.</p>
 		`
 	}
 
-	const renderError = () => {
-		let message = error()
-		if (!message && state.error)
-			message = "Could not check your session. Please refresh to retry."
-		if (!message && oauthError)
-			message = "Google sign-in was not completed. Please try again."
-
-		return message ? html`<p class="error" role="alert">${message}</p>` : null
-	}
+	const message = error()
+		|| (billing.error && "Could not load your subscription. Please refresh to retry.")
+		|| (state.error && "Could not check your session. Please refresh to retry.")
+		|| (oauthError && "Google sign-in was not completed. Please try again.")
 
 	return html`
-		<header theme=topper></header>
 		<main>
-			<section class="account-card">
-				<h1>${user ? "Your account" : "Sign in to Omniclip"}</h1>
+			<div class="account-page">
+				<header class="page-heading">
+					<a href="#/projects">← Back to projects</a>
+					<h1>${user ? "Your account" : "Sign in to Omniclip"}</h1>
+				</header>
 				${renderSession()}
-				${renderError()}
+				${user ? renderBilling({billing, busy: busy(), manageBilling}) : null}
+				${message ? html`<p class="error" role="alert">${message}</p>` : null}
 				<p class="note">Projects and media stay in this browser. Signing in does not upload them.</p>
-			</section>
+			</div>
 		</main>
 	`
 })

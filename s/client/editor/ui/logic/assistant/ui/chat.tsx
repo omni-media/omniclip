@@ -1,10 +1,10 @@
 
 import {useEffect, useState} from "react"
-import {useStore} from "better-auth/react"
+import {billing} from "@omnimedia/omniso/billing"
 import {AssistantRuntimeProvider, AuiIf, ThreadPrimitive} from "@assistant-ui/react"
 
-import {authClient} from "../../auth.js"
 import {useChatPanel} from "./parts/panel.js"
+import {useCloudAccess} from "./parts/access.js"
 import {ChatHeader} from "./renderers/header.js"
 import {starterPrompts} from "./parts/starter.js"
 import {ThreadSidebar} from "./renderers/threads.js"
@@ -12,6 +12,7 @@ import {ChatComposer} from "./renderers/composer.js"
 import {useProjectHeartbeat} from "./parts/heartbeat.js"
 import {MediaSplitter} from "./toolkit/video/splitter.js"
 import {settingsModal} from "../../modals/settings/modal.js"
+import {ChatCreditsContext} from "./renderers/message-actions.js"
 import {AssistantEditorProvider} from "./renderers/tool-group.js"
 import type {EditorContext} from "../../../../context/context.js"
 import {AssistantMessage, UserMessage} from "./renderers/messages.js"
@@ -21,14 +22,12 @@ export function AssistantChat({context, onClose}: {
 	context: EditorContext
 	onClose: () => void
 }) {
-	const auth = useStore(authClient.useSession)
-	const signedIn = !!auth.data
-
 	const panel = useChatPanel(onClose)
 	const {panelRef, minimized, fullscreen} = panel
 	const [threadSearch, setThreadSearch] = useState("")
 	const [reasoningEffort, setReasoningEffort] = useState<ReasoningEffort>("xhigh")
 	const {runtime, config} = useProjectChatRuntime(context, reasoningEffort)
+	const {auth, signedIn, balance, billingError} = useCloudAccess(runtime)
 
 	useProjectHeartbeat(context.strata.projectId, signedIn)
 	useEffect(() => {
@@ -36,9 +35,10 @@ export function AssistantChat({context, onClose}: {
 	}, [signedIn, runtime])
 	useEffect(() => {MediaSplitter.clearTemporaryMedia()}, [])
 
-	const composer = <ChatComposer
+	const composer = balance && <ChatComposer
 		effort={reasoningEffort}
 		onEffortChange={setReasoningEffort}
+		status={balance}
 	/>
 
 	const openMcpSettings = async() => {
@@ -63,6 +63,7 @@ export function AssistantChat({context, onClose}: {
 									key={title}
 									className="starter-prompt"
 									prompt={prompt}
+									disabled={!balance || balance.monthly + balance.purchased < billing.chatCredits}
 									send>
 									{title}
 								</ThreadPrimitive.Suggestion>,
@@ -71,7 +72,9 @@ export function AssistantChat({context, onClose}: {
 					</div>
 				</AuiIf>
 
-				<ThreadPrimitive.Messages components={{UserMessage, AssistantMessage}} />
+				<ChatCreditsContext.Provider value={!!balance && balance.monthly + balance.purchased >= billing.chatCredits}>
+					<ThreadPrimitive.Messages components={{UserMessage, AssistantMessage}} />
+				</ChatCreditsContext.Provider>
 			</ThreadPrimitive.Viewport>
 		</ThreadPrimitive.Root>
 
@@ -80,13 +83,19 @@ export function AssistantChat({context, onClose}: {
 		</AuiIf>
 	</>
 
-	const renderSignIn = () => <div className="cloud-sign-in">
-		<strong>{auth.isPending ? "Checking your session…" : "Sign in to use cloud AI"}</strong>
-		<p>
-			Or connect your own AI agent through{" "}
-			<button type="button" className="mcp-link" onClick={openMcpSettings}>local MCP</button>.
-		</p>
-		{!auth.isPending && <a href="#/account">Sign in</a>}
+	const accessTitle = () => {
+		if (!signedIn)
+			return auth.isPending ? "Checking your session…" : "Sign in to use cloud AI"
+		if (billingError)
+			return "Could not load your subscription"
+		return balance ? "Subscribe to use cloud AI" : "Checking your subscription…"
+	}
+
+	const accessNotice = <div className="cloud-sign-in">
+		<strong>{accessTitle()}</strong>
+		<p>Or connect your own AI agent through{" "}
+			<button type="button" className="mcp-link" onClick={openMcpSettings}>local MCP</button>.</p>
+		{(signedIn || !auth.isPending) && <a href="#/account">{signedIn ? "Open account" : "Sign in"}</a>}
 	</div>
 
 	return <AssistantRuntimeProvider runtime={runtime} config={config}>
@@ -105,7 +114,7 @@ export function AssistantChat({context, onClose}: {
 				<div className="chat-view">
 					<ChatHeader panel={panel} />
 
-					{signedIn ? renderThread() : renderSignIn()}
+					{signedIn && balance?.active ? renderThread() : accessNotice}
 				</div>
 			</aside>
 		</AssistantEditorProvider>

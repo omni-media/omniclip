@@ -4,11 +4,12 @@ import {ToolResponse} from "assistant-stream"
 import {emptyParameters} from "@omnimedia/omniso/assistant/tools"
 import {defineToolkit, type ToolCallMessagePartProps, type Toolkit} from "@assistant-ui/react"
 
+import {VideoContext} from "./context.js"
 import {TimelineAnalysis} from "./types.js"
 import {inspectTimeline} from "./timeline.js"
+import {mediaAnalysisClient} from "../../../../api.js"
 import {ReasoningEffort} from "../../parts/runtime.js"
 import {activity, resultActivity} from "../activity.js"
-import {mediaAnalysis, VideoContext} from "./context.js"
 import type {EditorContext} from "../../../../../../context/context.js"
 import {clearUploadProgress, setProgressMessage, setUploadProgress, useUploadProgress} from "./progress.js"
 
@@ -56,7 +57,7 @@ export const videoTools = (context: EditorContext, reasoningEffort: ReasoningEff
 		type: "frontend",
 		description: "Ask the cloud model to inspect video context previously prepared with provide_selected_video. Call it immediately after that tool, using its path and a precise question about the source video.",
 		execute: async ({path, prompt}) => {
-			const {analysis} = await mediaAnalysis.inspectVideo({
+			const {analysis} = await mediaAnalysisClient.inspectVideo({
 				prompt,
 				path,
 				reasoningEffort
