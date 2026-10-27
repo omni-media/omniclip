@@ -13,14 +13,12 @@ export const AboutPage = shadow(() => {
 	const version = useOnce(() => getMetaVersion())
 
 	return html`
-		<header theme=topper></header>
-
 		<section theme=paddy>
 			<img alt="" src="/assets/logo/omni.avif"/>
 			<h2>
 				<strong>Omniclip</strong>
 				<small>v${version}</small>
 			</h2>
-		<section>
+		</section>
 	`
 })

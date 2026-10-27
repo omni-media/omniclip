@@ -21,6 +21,7 @@ export default css`@layer view {
 	min-height: 36px;
 	background: #0f0f0f;
 	border-bottom: 0;
+	padding-left: 76px;
 }
 
 .right {
@@ -178,6 +179,8 @@ wa-split-panel::part(divider) {
  * BIG MODE: Activated on larger screens
  */
 @media (min-width: 1024px) {
+	.project-page > header { padding-left: 160px; }
+
 	.project-page > header .tab-bar {
 		display: none;
 	}

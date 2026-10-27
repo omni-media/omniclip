@@ -55,13 +55,6 @@ export const ProjectsPage = (router: AppRouter) => shadow(() => {
 		return html`
 			<div class="project-hub">
 				<header class="topbar">
-					<a class="brand" href=${router.href.home()}>
-						<img class="logo-mark" src="/assets/logo/omni.png" alt="" />
-						<span class="brand-copy">
-							<strong>omniclip</strong>
-						</span>
-					</a>
-
 					<label class="search">
 						<span></span>
 						<input

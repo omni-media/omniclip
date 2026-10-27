@@ -11,8 +11,6 @@ export const ProjectNotFoundPage = shadow((router: AppRouter, projectId: string)
 	useCss(themeCss, styleCss)
 
 	return html`
-		<header theme=topper></header>
-
 		<section class="project-not-found">
 			<h1>Project not found</h1>
 			<p>No local project exists with id "${projectId}". It may have been deleted, renamed, or opened from an old link.</p>

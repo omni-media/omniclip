@@ -29,11 +29,18 @@ export const EditorApp = (router: AppRouter) => shadowElement(() => {
 
 	return ShinyDrawer.with({
 		props: [{button: true, control: drawer}],
-		attrs: {"data-projects": router.$hash() === "projects"},
+		attrs: {
+			"data-projects": router.$hash() === "projects",
+		},
 		children: html`
-			<svg slot="button" width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-				<path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-			</svg>
+			<span slot="button" class="navigation-trigger" title="Open navigation">
+			<span class="navigation-label">Open navigation</span>
+			<span class="editor-menu-brand" aria-hidden="true">
+				<img src="/assets/logo/omni.png" alt="" />
+				<span>Omniclip</span>
+				<svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+			</span>
+			</span>
 
 			<nav>
 				<h2>

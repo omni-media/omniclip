@@ -9,7 +9,7 @@ export default css`@layer view {
 	align-items: center;
 	justify-content: center;
 	gap: 0.8em;
-	min-height: calc(100vh - 2.5em);
+	min-height: 100dvh;
 	padding: 2em;
 	text-align: center;
 	color: #cfd6e0;

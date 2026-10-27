@@ -41,41 +41,20 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 	top: 0;
 	z-index: 5;
 	display: grid;
-	grid-template-columns: minmax(190px, 1fr) minmax(240px, 430px) minmax(290px, 1fr);
+	grid-template-columns: minmax(0, 430px) minmax(0, 1fr);
 	align-items: center;
 	gap: 1em;
 	min-height: 58px;
 	padding: 0.55em max(1em, calc((100% - 1200px) / 2));
-	padding-left: max(3.25em, calc((100% - 1200px) / 2));
+	padding-left: max(160px, calc((100% - 1200px) / 2));
 	border-bottom: 1px solid var(--border);
 	background: #0f0f0f;
 }
 
-.brand, .controls, .library-controls, .featured-actions,
+.controls, .library-controls, .featured-actions,
 .featured-meta, .metadata {
 	display: flex;
 	align-items: center;
-}
-
-.brand {
-	gap: 0.65em;
-	width: max-content;
-	color: inherit;
-	text-decoration: none;
-}
-.brand:hover { text-decoration: none; }
-.logo-mark { width: 30px; height: 30px; object-fit: contain; }
-.brand-copy {
-	display: grid;
-	gap: 0.18em;
-	line-height: 1;
-
-	strong {
-		color: #ddd;
-		font-size: var(--font-size-m);
-		font-weight: 500;
-		letter-spacing: -0.02em;
-	}
 }
 
 .search, .sort, .view-toggle, .topbar-button {
@@ -532,7 +511,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 }
 
 @media (max-width: 1050px) {
-	.topbar { grid-template-columns: auto minmax(220px, 1fr) auto; }
+	.topbar { grid-template-columns: minmax(0, 1fr) auto; }
 	.topbar-button:not(.primary) span { display: none; }
 	.project-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
@@ -549,10 +528,10 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 
 @media (max-width: 560px) {
 	.topbar {
-		grid-template-columns: auto minmax(0, 1fr) auto;
+		grid-template-columns: minmax(0, 1fr) auto;
 		gap: 0.5em;
 		padding: 0.65em;
-		padding-left: 3.25em;
+		padding-left: 76px;
 		background: #0f0f0f;
 	}
 	.topbar-button.primary {

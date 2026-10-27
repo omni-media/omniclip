@@ -22,26 +22,30 @@ export default css`@layer view {
 }
 
 [view="shiny-drawer"]::part(button) {
-	top: calc((40px - var(--button-size)) / 2);
+	top: 6px;
+	width: auto;
+	height: 28px;
 	margin-left: 0.5em;
 	display: grid;
 	place-items: center;
-	padding: 0;
+	padding: 0 7px;
 	color: #777;
 	background: transparent;
-	border-radius: 0;
+	border-radius: 5px;
 	opacity: 1;
 	transition: background 0.12s ease, color 0.12s ease;
 }
 
 [view="shiny-drawer"][data-projects]::part(button) {
-	top: calc((58px - var(--button-size)) / 2);
+	top: 15px;
 }
 
 [view="shiny-drawer"]::part(button):hover {
 	color: #aaa;
-	background: transparent;
+	background: #ffffff09;
 }
+
+[view="shiny-drawer"]::part(button):focus-visible { outline: 2px solid #89b6ff; outline-offset: 2px; }
 
 [view="shiny-drawer"]:state(opened)::part(button) {
 	display: none;
@@ -64,6 +68,16 @@ export default css`@layer view {
 	z-index: 10;
 	background: rgb(0 0 0 / 0.35);
 	backdrop-filter: none;
+}
+
+.navigation-trigger { display: flex; align-items: center; }
+.navigation-label { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.editor-menu-brand { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #d5d5d5; }
+.editor-menu-brand img { width: 22px; height: 22px; object-fit: contain; }
+.editor-menu-brand > svg { margin-left: 2px; color: #888; }
+
+@media (max-width: 1023px) {
+	.editor-menu-brand > span { display: none; }
 }
 
 nav {
