@@ -1,13 +1,16 @@
 
 import {html} from "lit"
 import {keyed} from "lit/directives/keyed.js"
-import {shadow, useCss, useOnce, useSignal} from "@e280/sly"
+import {shadow, useCss, useOnce, useSignal, useMount} from "@e280/sly"
 import {Datafile, Item, Media, O, transform, type Transition} from "@omnimedia/omnitool"
 import {components as quayComponents, dom, type MediaFormat, type MediaLibrary} from "@e280/quay"
 
 import styleCss from "./style.css.js"
 import {setupMediaGroup} from "./setup.js"
+import {MediaSearch} from "./search/controller.js"
 import themeCss from "../../../../../../theme.css.js"
+import aiSearchCss from "./renderers/search/style.css.js"
+import {createAiSearch} from "./renderers/search/renderer.js"
 import {type MediaItem} from "./views/media-item-preview/view.js"
 import textSvg from "../../../../../icons/gravity-ui/text.svg.js"
 import transitionSvg from "../../../../../icons/transition.svg.js"
@@ -19,9 +22,11 @@ import {BrowserTab, DEFAULT_TEXT_DURATION, DEFAULT_TRANSITION_DURATION, MEDIA_GR
 dom.register(quayComponents, {soft: true})
 
 export const BrowserTabPanel = shadow((context: EditorContext) => {
-	useCss(themeCss, styleCss)
+	useCss(themeCss, aiSearchCss, styleCss)
 
 	const cargo = context.controllers.cargo
+	const aiSearch = useOnce(() => new MediaSearch([cargo.projectLibrary, cargo.editorLibrary]))
+	useMount(() => () => aiSearch.dispose())
 
 	const query = useSignal("")
 	const activeTab = useSignal<BrowserTab>("media")
@@ -82,6 +87,8 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 		}
 
 		await library.delete(item)
+		if (hash && library === cargo.editorLibrary)
+			await aiSearch.removeIndex(hash)
 	}
 
 	useOnce(() => {
@@ -150,16 +157,30 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 
 	const renderMediaPath = () => html`
 		<nav class="media-path" aria-label="Media location">
-			<button ?data-current=${mediaScope() === "all"} @click=${() => mediaScope("all")}>Library</button>
+			<button ?data-current=${mediaScope() === "all"} @click=${() => selectMediaScope("all")}>Library</button>
 			<span>/</span>
-			<button ?data-current=${mediaScope() === "project"} @click=${() => mediaScope("project")}>Project</button>
+			<button ?data-current=${mediaScope() === "project"} @click=${() => selectMediaScope("project")}>Project</button>
 		</nav>
 	`
+
+	const selectedLibrary = () => mediaScope() === "project" ? cargo.projectLibrary : cargo.editorLibrary
+	const selectMediaScope = (scope: "project" | "all") => {
+		mediaScope(scope)
+		aiSearch.select(scope === "project" ? cargo.projectLibrary : cargo.editorLibrary)
+	}
+
+	const renderAiSearch = createAiSearch(aiSearch)
 
 	const renderMedia = () => keyed(mediaScope(), html`
 		<div class="media-bin" group=${`${MEDIA_GROUP}-${mediaScope()}`}>
 			<div class="media-toolbar">
-				<quay-searchbar></quay-searchbar>
+				<div class="search media-search">
+					<input type="search" aria-label="Search media"
+						placeholder=${aiSearch.enabled() ? "Describe your media…" : "Search media…"}
+						.value=${selectedLibrary().searchText()}
+						@input=${(event: InputEvent) => selectedLibrary().searchText((event.target as HTMLInputElement).value)}>
+					${renderAiSearch()}
+				</div>
 				<quay-filter></quay-filter>
 				<quay-sort></quay-sort>
 			</div>

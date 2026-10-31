@@ -97,8 +97,6 @@ export default css`@layer view {
 	--quay-accent: #777;
 	--quay-radius: 7px;
 	--sl-font-size-small: var(--font-size-xs);
-	--quay-browser-thumb-width: 112px;
-	--quay-browser-thumb-height: 64px;
 }
 
 .media-path {
@@ -365,3 +363,4 @@ quay-browser {
 }
 
 }`
+

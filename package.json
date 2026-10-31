@@ -63,6 +63,7 @@
 		"@ffmpeg/util": "^0.12.2",
 		"@floating-ui/dom": "^1.7.1",
 		"@huggingface/transformers": "^4.2.0",
+		"@mediapipe/tasks-retrieval": "1.1.1",
 		"@modelcontextprotocol/sdk": "^1.32.1",
 		"@omnimedia/kimura": "^1.0.5-11",
 		"@omnimedia/omniso": "^0.1.1-0",
