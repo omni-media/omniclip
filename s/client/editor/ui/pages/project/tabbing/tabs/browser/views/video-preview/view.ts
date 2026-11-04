@@ -16,21 +16,6 @@ export const VideoPreview = shadow((options: VideoPreviewOptions) => {
 	useCss(styleCss)
 
 	const video = useOnce(() => document.createElement("video"))
-	let load: Promise<void> | undefined
-
-	const loadVideo = () => {
-		if (load)
-			return load
-
-		load = (async() => {
-			const cask = await options.library.cellar.load(options.hash)
-			const file = new Blob([cask.file], {type: options.mime})
-			video.src = URL.createObjectURL(file)
-		})()
-
-		return load
-	}
-
 	const pointerenter = () => video.play()
 
 	const pointerleave = () => {
@@ -39,18 +24,23 @@ export const VideoPreview = shadow((options: VideoPreviewOptions) => {
 	}
 
 	useMount(() => {
+		let disposed = false
 		video.muted = true
 		video.loop = true
 		video.playsInline = true
 		video.preload = "metadata"
 		video.setAttribute("aria-label", options.label)
 		const detach = dom.events(video, {pointerenter, pointerleave})
-		loadVideo()
+		void options.library.cellar.load(options.hash).then(cask => {
+			if (disposed) return
+			video.src = URL.createObjectURL(new Blob([cask.file], {type: options.mime}))
+		}).catch(error => console.error("Could not load media preview", error))
 
 		return () => {
+			disposed = true
 			detach()
-			if (video.src)
-				URL.revokeObjectURL(video.src)
+			if (video.src) URL.revokeObjectURL(video.src)
+			video.removeAttribute("src")
 		}
 	})
 
