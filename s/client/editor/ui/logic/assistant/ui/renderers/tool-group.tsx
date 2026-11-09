@@ -1,4 +1,5 @@
 
+import {reactBindings} from "@e280/strata"
 import {useAuiState} from "@assistant-ui/react"
 import {createContext, useContext, useEffect, useState, type ReactNode} from "react"
 import {CheckCircle2Icon, ChevronRightIcon, CircleXIcon, Undo2Icon} from "lucide-react"
@@ -7,6 +8,7 @@ import type {EditorContext} from "../../../../../context/context.js"
 import {useUploadProgress} from "../toolkit/video/progress.js"
 
 const AssistantEditor = createContext<EditorContext | undefined>(undefined)
+const {useTracked} = reactBindings({useEffect, useState})
 
 export const AssistantEditorProvider = ({context, children}: {
 	context: EditorContext
@@ -25,7 +27,7 @@ const TimelineEdit = ({indices}: {
 	const turnRunning = useAuiState(state => state.message.isLast && state.thread.isRunning)
 
 	const assistantEditId = useAuiState(state => {
-		for (const index of indices) {
+		for (const index of indices.toReversed()) {
 			const part = state.message.parts[index]
 			if (part?.type !== "tool-call") continue
 			const result = part.result as {assistantEditId?: string} | undefined
@@ -41,6 +43,7 @@ const TimelineEdit = ({indices}: {
 		}
 	}, [assistantEditId, context, turnRunning])
 
+	useTracked(() => context.assistant.revision)
 	if (!assistantEditId || turnRunning) return null
 
 	const canUndo = complete && !undone && context.assistant.canUndo(assistantEditId)

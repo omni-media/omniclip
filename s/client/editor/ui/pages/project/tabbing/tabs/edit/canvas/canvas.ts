@@ -19,6 +19,7 @@ import {Idx} from '../../../../../../logic/parts/index.js'
 import {OmniSession} from '../../../../../../logic/session.js'
 import {Strata} from '../../../../../../../context/parts/strata.js'
 import {ToolName} from '../../../../../../logic/parts/modes/tool.js'
+import type {Tags} from '../../../../../../../context/parts/tags/tags.js'
 
 type EditCanvasDeps = {
 	session: OmniSession
@@ -41,6 +42,7 @@ export class TimelineCanvas {
 	$collapsedStacks = signal<ReadonlySet<Id>>(new Set())
 	#contentExtent = ms(0)
 	#lastZoom = 0
+	#tags?: Tags
 
 	#raf = 0
 
@@ -162,6 +164,7 @@ export class TimelineCanvas {
 	}
 
 	draw() {
+		this.#tags = this.deps.session.organization.tags(this.index)
 		this.clips = layout(this)
 		this.spacer.style.width = `${this.contentWidth}px`
 		this.#resize()
@@ -245,6 +248,10 @@ export class TimelineCanvas {
 
 	selectedItemId() {
 		return this.deps.session.$selectedItem()
+	}
+
+	itemColor(itemId: Id) {
+		return this.#tags?.color(itemId)
 	}
 
 	getViewedItem() {

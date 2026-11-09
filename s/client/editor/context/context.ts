@@ -3,7 +3,6 @@ import {microbounce} from "@e280/stz"
 import {ms, Kind, type TimelineFile} from "@omnimedia/omnitool"
 import type {AssistantContext} from "@omnimedia/omniso/assistant/types"
 
-import {syncOutliner} from "./parts/outliner.js"
 import {prepareViews} from "../ui/views/views.js"
 import {McpController} from "./controllers/mcp.js"
 import {ModalManager} from "./parts/modal/modal.js"
@@ -20,22 +19,19 @@ export class EditorContext {
 	mcp = new McpController(this)
 
 	#stopPlaybackTick
-	#stopTimelineSync
+	#stopEditSync
 
 	constructor(private requirements: Requirements) {
-		this.strata.outliner.mutate(state =>
-			syncOutliner(state, this.strata.timeline.state as TimelineFile)
-		)
+		this.strata.syncOutliner()
 
 		this.#stopPlaybackTick = requirements.controllers.player.playback.onTick.on(() => {
 			this.session.$playhead(ms(requirements.controllers.player.currentTime))
 		})
 
-		this.#stopTimelineSync = this.strata.timeline.lens(s => s).on(microbounce(async state => {
+		this.#stopEditSync = this.strata.edit.lens(s => s).on(microbounce(async state => {
+			this.strata.syncOutliner()
 			this.assistant.bumpRevision()
-			const timeline = state as TimelineFile
-			this.strata.outliner.mutate(state => syncOutliner(state, timeline))
-			await this.controllers.player.update(timeline)
+			await this.controllers.player.update(state.timeline)
 			this.session.stage.refresh()
 		}))
 
@@ -75,7 +71,7 @@ export class EditorContext {
 	dispose = () => {
 		this.mcp.dispose()
 		this.#stopPlaybackTick()
-		this.#stopTimelineSync()
+		this.#stopEditSync()
 		this.strata.dispose()
 		this.controllers.cargo.dispose()
 		this.requirements.keybindings.dispose()

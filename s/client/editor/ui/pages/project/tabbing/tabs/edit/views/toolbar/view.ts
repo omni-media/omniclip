@@ -115,10 +115,10 @@ export const Toolbar = shadow((context: EditorContext) => {
 					</wa-dropdown>
 				</div>
 				<div class="button-group">
-					<button @click=${context.undo} ?disabled=${context.strata.timeline.undoable === 0}>
+					<button @click=${context.undo} ?disabled=${context.strata.edit.undoable === 0}>
 						${undoSvg}
 					</button>
-					<button @click=${context.redo} ?disabled=${context.strata.timeline.redoable === 0}>
+					<button @click=${context.redo} ?disabled=${context.strata.edit.redoable === 0}>
 						${redoSvg}
 					</button>
 				</div>

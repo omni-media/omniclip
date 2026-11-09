@@ -2,12 +2,13 @@
 import {ms, Ms} from "@omnimedia/omnitool"
 
 import {Idx} from "../../index.js"
-import type {OmniSession} from "../../../session.js"
 import {DragSnapshot} from "./parts/snapshot.js"
 import {resolveDropIntent} from "./parts/intent.js"
-import {Proposal} from "../../proposal/proposal.js"
-import {overlayFromDropIntent} from "./parts/overlay.js"
+import type {OmniSession} from "../../../session.js"
 import {getSnapCandidates, snap} from "./parts/snappy.js"
+import {Proposal, type Overlay} from "../../proposal/proposal.js"
+import type {Rules} from "../../../../../context/parts/rules/rules.js"
+import {dropDestination, overlayFromDropIntent} from "./parts/overlay.js"
 import {
 	isPositionDropBlocked,
 	overlayFromPosition,
@@ -23,10 +24,12 @@ type Point = {
 const SNAP_THRESHOLD_PX = 8
 
 type DragState = {
+	rules: Rules
 	clip: TimelineClipBox
 	startPoint: Point
 	snapshot: DragSnapshot
 	snapCandidates: Ms[]
+	blockedByRules: boolean
 }
 
 export class Dragger {
@@ -52,6 +55,8 @@ export class Dragger {
 				session.$viewedItemId(),
 			),
 			snapCandidates: this.positionMode ? positionSnapCandidates(session, clip, clips) : [],
+			rules: session.organization.rules(session.index),
+			blockedByRules: false,
 		}
 	}
 
@@ -104,6 +109,8 @@ export class Dragger {
 	cancel(session: OmniSession) {
 		session.setGhostClip(null)
 		session.$drop(null)
+		if (this.isDragging && !this.positionMode)
+			session.canvas.switchCursor("select")
 
 		this.#state = null
 		this.isDragging = false
@@ -120,15 +127,26 @@ export class Dragger {
 		ghost: TimelineClipBox,
 	) {
 		const {clip, snapshot} = state
-
 		const resolvedDrop = resolveDropIntent(
 			snapshot,
 			clip.itemId,
 			ghost,
 		)
 
-		if (!this.positionMode)
+		const destination = resolvedDrop && dropDestination(snapshot.index, resolvedDrop)
+		const container = destination?.container ?? destination?.targetParent
+		state.blockedByRules = !!resolvedDrop && (
+			!container || !state.rules.allowsItem(container.id, clip.itemId)
+		)
+		if (state.blockedByRules) {
+			session.canvas.canvas.style.cursor = "not-allowed"
+			return null
+		}
+
+		if (!this.positionMode) {
+			session.canvas.canvas.style.cursor = "default"
 			return resolvedDrop
+		}
 
 		const preview = {
 			snapshot,
@@ -154,6 +172,10 @@ export class Dragger {
 		session: OmniSession,
 		state: DragState,
 	) {
+		// A null drop can still mean a position change, so keep blocked drops separate.
+		if (state.blockedByRules)
+			return
+
 		const drop = session.$drop()
 		const ghost = session.$ghostClip()
 
@@ -184,7 +206,7 @@ export class Dragger {
 			drop: session.$drop(),
 		})
 
-		new Proposal(session.timeline, overlay).commit()
+		commitOverlay(session, overlay)
 	}
 
 	#commitDrop(
@@ -200,8 +222,14 @@ export class Dragger {
 		})
 
 		if (overlay)
-			new Proposal(session.timeline, overlay).commit()
+			commitOverlay(session, overlay)
 	}
+}
+
+function commitOverlay(session: OmniSession, overlay: Overlay) {
+	const proposal = new Proposal(session.timeline, overlay)
+	if (session.organization.rules(proposal.index).valid())
+		proposal.commit()
 }
 
 function dragOffset(start: Point, current: Point) {

@@ -1,5 +1,5 @@
 
-import {Chrono} from "@e280/strata"
+import type {LensLike} from "@e280/strata"
 import {Id, Item, TimelineFile} from "@omnimedia/omnitool"
 
 import {Index} from "../index.js"
@@ -16,7 +16,7 @@ export class Proposal {
 	index: Index
 
 	constructor(
-		public source: Chrono<TimelineFile>,
+		public source: LensLike<TimelineFile>,
 		public overlay: Overlay,
 	) {
 		const baseState = source.state

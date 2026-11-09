@@ -3,7 +3,6 @@ import {html} from "lit"
 
 import {ProjectPreview} from "../constants.js"
 import {TimelineStrip} from "./timeline.js"
-import starSvg from "../../../icons/gravity-ui/star.svg.js"
 
 export function ProjectCard(
 	project: ProjectPreview,
@@ -20,7 +19,6 @@ export function ProjectCard(
 			<div class="project-body">
 				<div class="project-title">
 					<h2>${project.title}</h2>
-					${project.favorite ? html`<span class="favorite">${starSvg}</span>` : null}
 				</div>
 
 				<div class="metadata">

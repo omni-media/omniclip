@@ -3,6 +3,7 @@ import {microbounce} from "@e280/stz"
 import {Kv, StorageMagazine} from '@e280/kv'
 import {Prism, Chrono, Vault, LocalStore} from '@e280/strata'
 
+import {syncOutliner} from './outliner.js'
 import {makeDefaultState, State} from './state.js'
 
 export class Strata {
@@ -68,8 +69,15 @@ export class Strata {
 	settings = this.trunk.lens(s => s.settings)
 	files = this.trunk.lens(s => s.files)
 	metadata = this.trunk.lens(s => s.metadata)
-	timeline = new Chrono(64, this.trunk.lens(state => state.timeline))
-	outliner = this.trunk.lens(s => s.outliner)
+	edit = new Chrono(64, this.trunk.lens(state => state.edit))
+	timeline = this.edit.lens(state => state.timeline)
+	outliner = this.edit.lens(state => state.outliner)
+	#outlinerSync = this.trunk.lens(state => state.edit.present.outliner)
+
+	/** Reconcile item metadata without recording a separate user edit. */
+	syncOutliner() {
+		this.#outlinerSync.mutate(state => syncOutliner(state, this.timeline.state))
+	}
 
 	constructor(
 		public projectId: string,

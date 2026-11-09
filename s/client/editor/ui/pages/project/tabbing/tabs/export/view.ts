@@ -1,27 +1,24 @@
+
 import {html} from "lit"
-import {shadow, useCss, useSignal} from "@e280/sly"
 import {Kind} from "@omnimedia/omnitool"
 import {repeat} from "lit/directives/repeat.js"
+import {shadow, useCss, useSignal} from "@e280/sly"
 
 import styleCss from "./style.css.js"
 import themeCss from "../../../../../../theme.css.js"
+import {Idx} from "../../../../../logic/parts/index.js"
 import {EditorContext} from "../../../../../../context/context.js"
+import {itemLabel} from "../../../../../logic/utils/item-label.js"
 import exportSvg from "../../../../../icons/gravity-ui/export.svg.js"
 
 export const ExportTab = shadow((context: EditorContext) => {
 	useCss(themeCss, styleCss)
 
-	const {timeline, outliner} = context.strata
-
-	// const {starredItems, itemLabels} = viewState.state
-	// const {isExporting, progress} = exportState.state
-
-	const starredItems = outliner.state.items.filter(item => item.starred)
-	const selectedItemId = useSignal(outliner.state.items[0]?.itemId ?? null)
-	const itemLabels = new Map([[starredItems[0]?.itemId, "example.mp4"]])
-
+	const {timeline} = context.strata
+	const selectedItemId = useSignal(timeline.state.rootId)
 	const itemsMap = new Map(timeline.state.items.map(i => [i.id, i]))
-	const starredItemDetails = starredItems.map(({itemId}) => itemsMap.get(itemId)!).filter(Boolean)
+	const items = timeline.state.items.filter(item => Idx.isStruct(item) || Idx.isClip(item.kind))
+	const selectedItem = itemsMap.get(selectedItemId())
 
 	const progress = 0
 	const isExporting = false
@@ -31,20 +28,20 @@ export const ExportTab = shadow((context: EditorContext) => {
 	return html`
 		<div class="export-container">
 			<div class="panel items-panel">
-				<h4>⭐ Starred Items</h4>
+				<h4>Timeline items</h4>
 				<div class="list">
-					${repeat(starredItemDetails, item => item.id, item => html`
+					${repeat(items, item => item.id, item => html`
 						<button
 							class="item-card"
 							?data-selected=${item.id === selectedItemId()}
 							@click=${() => selectedItemId(item.id)}
 						>
-							<span class="label">${itemLabels.get(item.id) || `Item ${item.id}`}</span>
+							<span class="label">${itemLabel(item)}</span>
 							<span class="kind">${Kind[item.kind]}</span>
 						</button>
 					`)}
-					${starredItemDetails.length === 0 ? html`
-						<p class="empty-state">No starred items. Star an item in the Outliner to export it.</p>
+					${items.length === 0 ? html`
+						<p class="empty-state">No timeline items.</p>
 					` : null}
 				</div>
 			</div>
@@ -81,9 +78,9 @@ export const ExportTab = shadow((context: EditorContext) => {
 							<span>Exporting... ${progress}%</span>
 						</div>
 					` : html`
-						<button class="export-button" @click=${handleExport} ?disabled=${selectedItemId() === null}>
+						<button class="export-button" @click=${handleExport} ?disabled=${!selectedItem}>
 							${exportSvg}
-							<span>Export "${itemLabels.get(selectedItemId()!) || `Item ${selectedItemId()!}`}"</span>
+							<span>Export "${selectedItem ? itemLabel(selectedItem) : "item"}"</span>
 						</button>
 					`}
 				</div>

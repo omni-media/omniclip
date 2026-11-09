@@ -338,13 +338,6 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 		white-space: nowrap;
 	}
 }
-.favorite {
-	display: grid;
-	place-items: center;
-	color: var(--accent);
-
-	svg { width: 1em; height: 1em; fill: currentColor; }
-}
 .metadata {
 	gap: 0.35em;
 	margin-top: 0.38em;

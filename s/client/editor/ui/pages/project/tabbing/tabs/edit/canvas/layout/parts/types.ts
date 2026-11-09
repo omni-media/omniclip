@@ -6,6 +6,7 @@ export type ClipBox = {
 	depth: number
 	kind: Kind
 	label: string
+	color?: string
 	start: Ms
 	duration: Ms
 	x: number

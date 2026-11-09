@@ -1,11 +1,14 @@
 
 import {Science, test, expect} from "@e280/science"
+
+import organizationTest from "./client/editor/context/parts/tests.test.js"
 import operationsTest from "./client/editor/ui/logic/parts/operations/operations.test.js"
 
 await Science.run({
 	"addition works": test(async() => {
 		expect(2 + 2).is(4)
 	}),
-	operationsTest
+	operationsTest,
+	organizationTest
 })
 

@@ -81,6 +81,7 @@ export const TimelineArea = shadow((context: EditorContext) => {
 			session.$selectedItem.on(timelineCanvas.scheduleDraw),
 			session.$viewedItemId.on(timelineCanvas.scheduleDraw),
 			context.strata.timeline.lens(s => s).on(timelineCanvas.scheduleDraw),
+			context.strata.outliner.on(timelineCanvas.scheduleDraw),
 			context.strata.settings.on(timelineCanvas.scheduleDraw),
 		]
 

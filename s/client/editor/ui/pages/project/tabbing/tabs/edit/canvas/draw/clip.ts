@@ -69,15 +69,16 @@ function drawLabel(
 }
 
 function drawContainer(canvas: TimelineCanvas, clip: TimelineClipBox) {
+	const color = clip.color ?? styles.containerFill
 	if (canvas.isStackCollapsed(clip.itemId)) {
 		roundedRect(canvas.ctx, clip.x, clip.y, clip.width, clip.height, metrics.clipRadius)
-		canvas.ctx.fillStyle = styles.containerFill
+		canvas.ctx.fillStyle = color
 		canvas.ctx.fill()
-		drawLabel(canvas, clip, metrics.labelHeight, styles.containerFill, `▸ ${clip.label}`)
+		drawLabel(canvas, clip, metrics.labelHeight, color, `▸ ${clip.label}`)
 		if (itemDisabled(canvas, clip.itemId))
 			drawDisabledOverlay(canvas.ctx, clip)
 	}
-	drawOutline(canvas, clip, styles.containerStroke)
+	drawOutline(canvas, clip, clip.color ?? styles.containerStroke)
 }
 
 function drawOutline(
@@ -120,7 +121,7 @@ export function drawClip(canvas: TimelineCanvas, clip: TimelineClipBox) {
 		return
 
 	const ctx = canvas.ctx
-	const color = itemColor(clip.kind)
+	const color = clip.color ?? itemColor(clip.kind)
 
 	const labelHeight = Math.min(metrics.labelHeight, clip.height)
 	const contentBox = {

@@ -29,7 +29,8 @@ export function makeClipBox(
 		duration,
 		itemId: item.id,
 		kind: item.kind,
-		label: itemLabel(item)
+		label: itemLabel(item),
+		color: canvas.itemColor(item.id),
 	}
 }
 

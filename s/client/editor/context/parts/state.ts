@@ -4,17 +4,8 @@ import {chronicle, Chronicle} from "@e280/strata"
 import type {Settings} from "@omnimedia/omniso/settings"
 import {Id, Kind, TimelineFile} from "@omnimedia/omnitool"
 
-export type Tag = {
-	id: Id
-	name: string
-	color: string
-}
-
-export type OutlinerItem = {
-	itemId: Id
-	tagIds: Id[]
-	starred: boolean
-}
+import type {Tag, TagAssignment} from "./tags/types.js"
+import type {Rule, RuleAssignment} from "./rules/types.js"
 
 export type ItemMetadata = {
 	itemId: Id
@@ -25,18 +16,26 @@ export type Metadata = {
 	items: ItemMetadata[]
 }
 
+export type OutlinerState = {
+	tags: Tag[]
+	tagAssignments: TagAssignment[]
+	rules: Rule[]
+	ruleAssignments: RuleAssignment[]
+}
+
+export type EditState = {
+	timeline: TimelineFile
+	outliner: OutlinerState
+}
+
 export type State = {
 	updatedAt: number
 	files: {
 		hashes: string[]
 	}
 	metadata: Metadata
-	timeline: Chronicle<TimelineFile>
+	edit: Chronicle<EditState>
 	settings: Settings
-	outliner: {
-		tags: Tag[]
-		items: OutlinerItem[]
-	}
 }
 const makeDefaultTimeline = (withRoot = false): TimelineFile => {
 	const rootId = hex.random(16)
@@ -59,11 +58,15 @@ export const makeDefaultState = (withRoot = false): State => ({
 	metadata: {
 		items: []
 	},
-	timeline: chronicle(makeDefaultTimeline(withRoot)),
-	outliner: {
-		tags: [],
-		items: []
-	},
+	edit: chronicle({
+		timeline: makeDefaultTimeline(withRoot),
+		outliner: {
+			tags: [],
+			tagAssignments: [],
+			rules: [],
+			ruleAssignments: []
+		},
+	}),
 	settings: {
 		dropFrame: true,
 		timebase: 30,

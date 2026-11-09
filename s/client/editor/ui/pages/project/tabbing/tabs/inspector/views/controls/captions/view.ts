@@ -121,6 +121,13 @@ export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoI
   	if (generating() || existingCaption)
 			return
 
+		const parent = session.index.getParent(item.id)
+		if (parent && !session.organization.rules().allowsUntaggedKind(parent.id, Kind.Caption)) {
+			error("This structure's rules do not allow subtitles.")
+			status("")
+			return
+		}
+
   	const media = context.session.deps.resolveMedia(item)
   	if (!media) {
 			error("Selected item has no media source.")
@@ -145,11 +152,19 @@ export const CaptionsControls = shadow((context: EditorContext, item: Idx.VideoI
 						status(formatProgress(Math.round(progress), "Transcribing"))
 				}
 			})
-			session.createCaption(item, nextTranscript, {
+
+			const caption = session.createCaption(item, nextTranscript, {
 				maxChars: maxChars(),
 				maxDuration: maxDuration(),
 				maxSilence: maxSilence(),
 			})
+
+			if (!caption) {
+				error("This structure's rules do not allow subtitles.")
+				status("")
+				return
+			}
+
     	status("Subtitles generated.")
     	context.session.$selectedItem(item.id)
   	}

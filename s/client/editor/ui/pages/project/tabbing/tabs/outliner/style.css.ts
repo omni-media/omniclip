@@ -3,6 +3,62 @@ import {css} from "lit"
 
 export default css`@layer view {
 
+wa-tab-group {
+	display: block;
+	min-height: 0;
+	overflow: auto;
+	--indicator-color: transparent;
+	--track-width: 0;
+
+	&::part(tabs) {
+		width: 100%;
+		box-sizing: border-box;
+		height: 32px;
+		gap: 0.15em;
+		padding: 0.2em;
+		border: 0;
+		border-radius: 7px;
+		background: #191919;
+	}
+
+	&::part(nav) {
+		margin: 0.2em 0.4em;
+	}
+}
+
+wa-tab {
+	flex: 1;
+	color: #aaa;
+	font-weight: inherit;
+	border-block-end: 0;
+	margin-block-end: 0;
+
+	&::part(tab) {
+		display: flex;
+		justify-content: center;
+		height: 100%;
+		box-sizing: border-box;
+		padding: 0 0.7em;
+		border-radius: 5px;
+		font-size: var(--font-size-xs);
+		transition: background 0.12s ease, color 0.12s ease;
+	}
+
+	&:hover::part(tab) {
+		color: #e8e8e8;
+		background: #222;
+	}
+
+	&[data-active]::part(tab) {
+		color: #e8e8e8;
+		background: #2a2a2a;
+	}
+}
+
+wa-tab-panel {
+	--padding: 0;
+}
+
 :host {
 	display: flex;
 	flex-direction: column;
@@ -11,201 +67,5 @@ export default css`@layer view {
 	color: #cfcfcf;
 }
 
-.search-bar {
-	padding: 0.75em;
-	border-bottom: 1px solid #101010;
-	background: #0f0f0f;
-}
-
-.search-bar input {
-	width: 100%;
-	height: 32px;
-	padding: 0 0.65em;
-	background: #161616;
-	border: 1px solid transparent;
-	border-radius: 7px;
-	color: #d3d3d3;
-	font-family: inherit;
-	font-size: var(--font-size-xs);
-	transition: background 0.12s ease, border-color 0.12s ease;
-}
-
-.search-bar input::placeholder {
-	color: #777;
-}
-
-.search-bar input:focus {
-	outline: none;
-	border-color: #3a3a3a;
-}
-
-.outliner-tabs {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-}
-
-.outliner-tabs > input[type="radio"] {
-	display: none;
-}
-
-.tab-bar {
-	display: flex;
-	height: 32px;
-	gap: 0.15em;
-	margin: 0.2em 0.4em;
-	padding: 0.2em;
-	border-radius: 7px;
-	background: #191919;
-}
-
-.tab-bar label {
-	display: flex;
-	flex: 1;
-	align-items: center;
-	justify-content: center;
-	padding: 0 0.7em;
-	color: #aaa;
-	background: transparent;
-	border-radius: 5px;
-	font-size: var(--font-size-xs);
-	cursor: pointer;
-	transition: background 0.12s ease, color 0.12s ease;
-}
-
-.tab-bar label:hover {
-	color: #e8e8e8;
-	background: #222;
-}
-
-.outliner-tabs > input#tab-clips:checked ~ .tab-bar label[for="tab-clips"],
-.outliner-tabs > input#tab-tags:checked ~ .tab-bar label[for="tab-tags"] {
-	color: #e8e8e8;
-	background: #2a2a2a;
-}
-
-.tab-panels {
-	flex: 1;
-	padding: 0.75em;
-	overflow: auto;
-}
-
-.tab-panel {
-	display: none;
-}
-
-.outliner-tabs > input#tab-clips:checked ~ .tab-panels #clips-panel,
-.outliner-tabs > input#tab-tags:checked ~ .tab-panels #tags-panel {
-	display: flex;
-	flex-direction: column;
-	gap: 0.85em;
-}
-
-.placeholder {
-	color: #8f8f8f;
-	font-size: var(--font-size-xs);
-	text-align: center;
-	padding: 2em;
-}
-
-.section {
-	display: flex;
-	flex-direction: column;
-	gap: 0.45em;
-}
-
-.section-title {
-	text-shadow: none;
-	color: #8f8f8f;
-	font-size: calc(var(--font-size-xs) - 1px);
-	font-weight: 600;
-	text-transform: uppercase;
-}
-
-.item-list {
-	display: flex;
-	flex-direction: column;
-	gap: 3px;
-}
-
-.item-row {
-	display: grid;
-	grid-template-columns: 0.7em 1.5em minmax(0, 1fr) 4.8em 1.8em;
-	align-items: center;
-	gap: 0.5em;
-	min-height: 30px;
-	padding: 0 0.5em;
-	border-radius: 5px;
-	background: transparent;
-	cursor: pointer;
-	transition: background 0.12s ease, color 0.12s ease;
-}
-
-.item-row:hover {
-	background: #242424;
-}
-
-.item-row[data-selected] {
-	background: #282828;
-}
-
-.color-swatch {
-	width: 0.45em;
-	height: 1.2em;
-	border-radius: 2px;
-	background: #4c535e;
-}
-
-.icon {
-	display: flex;
-	align-items: center;
-	color: #9a9a9a;
-}
-
-.icon svg {
-	width: 1em;
-	height: 1em;
-}
-
-.label {
-	color: #d0d0d0;
-	font-size: var(--font-size-xs);
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-.duration {
-	color: #8f8f8f;
-	font-size: var(--font-size-xs);
-	justify-self: end;
-}
-
-.star-button {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: none;
-	border: none;
-	color: #777;
-	padding: 0;
-	border-radius: 3px;
-	cursor: pointer;
-	transition: color 0.12s ease, background 0.12s ease;
-}
-
-.star-button:hover {
-	background: #333;
-	color: #d5d5d5;
-}
-
-.star-button svg {
-	width: 1em;
-	height: 1em;
-}
-
-.star-button[data-starred] {
-	color: #d4b663;
-}
-
 }`
+

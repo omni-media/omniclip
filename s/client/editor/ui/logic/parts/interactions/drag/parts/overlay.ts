@@ -18,18 +18,16 @@ type Overlay = Map<Id, Item.Any | null>
 
 export function overlayFromDropIntent({index, movingId, newContainerId, drop}: OverlayFromDropIntentOpts) {
 	const sourceParent = index.getParent(movingId)
-	const targetParent = index.getParent(drop.targetId)
-	if (!sourceParent || !targetParent)
+	const destination = dropDestination(index, drop)
+	if (!sourceParent || !destination)
 		return null
 
 	const insertBefore = drop.edge === "left" || drop.edge === "top"
-	const desiredKind = drop.edge === "left" || drop.edge === "right" ? Kind.Sequence : Kind.Stack
-	const targetItem = index.getItem(drop.targetId)
-	const destination = existingContainer(targetItem, targetParent, desiredKind)
+	const {targetParent, container, kind} = destination
 
-	const overlay = destination
-		? moveIntoContainer({sourceParent, container: destination, movingId, drop, insertBefore})
-		: wrapIntoNewContainer({targetParent, movingId, newContainerId, drop, insertBefore, kind: desiredKind})
+	const overlay = container
+		? moveIntoContainer({sourceParent, container, movingId, drop, insertBefore})
+		: wrapIntoNewContainer({targetParent, movingId, newContainerId, drop, insertBefore, kind})
 
 	if (!overlay)
 		return null
@@ -57,6 +55,15 @@ function moveIntoContainer(opts: {
 		return null
 
 	return new Map([[container.id, {...container, childrenIds}]])
+}
+
+export function dropDestination(index: Index, drop: DropIntent) {
+	const targetParent = index.getParent(drop.targetId)
+	if (!targetParent) return null
+	const target = index.getItem(drop.targetId)
+	const kind: Kind.Sequence | Kind.Stack = drop.edge === "left" || drop.edge === "right" ? Kind.Sequence : Kind.Stack
+	const container = existingContainer(target, targetParent, kind)
+	return {targetParent, container, kind}
 }
 
 function existingContainer(

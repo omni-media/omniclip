@@ -23,7 +23,6 @@ export type ProjectPreview = {
 	fps: string
 	edited: string
 	editedRank: number
-	favorite?: boolean
 	timeline: number[]
 	tags: string[]
 	description: string
@@ -40,7 +39,7 @@ const fallbackThumbnails = [
 
 export async function loadProjectPreviews() {
 	return (await Strata.loadProjects())
-		.filter(project => project.state.timeline.present.items.length > 0)
+		.filter(project => project.state.edit.present.timeline.items.length > 0)
 		.map((project, index) => deriveProjectPreview(project, index))
 }
 
@@ -49,12 +48,13 @@ function deriveProjectPreview(
 	index: number,
 ): ProjectPreview {
 	const {id, state} = project
-	const timeline = state.timeline.present
+	const {timeline, outliner} = state.edit.present
 	const durationSeconds = Math.round(computeItemDuration(timeline.rootId, timeline) / 1000)
-	const tags = state.outliner.tags.map(tag => tag.name)
+	const tags = outliner.tags.map(tag => tag.label)
 
 	return {
 		id,
+		tags,
 		title: titleFromId(id),
 		thumbnail: fallbackThumbnails[index % fallbackThumbnails.length],
 		duration: formatDuration(durationSeconds),
@@ -64,9 +64,7 @@ function deriveProjectPreview(
 		fps: `${state.settings.timebase}fps`,
 		edited: formatRelativeEdit(state.updatedAt),
 		editedRank: state.updatedAt ?? 0,
-		favorite: state.outliner.items.some(item => item.starred),
 		timeline: deriveTimelineStrip(timeline.items.length),
-		tags,
 		description: `${timeline.items.length} timeline items in a local Omniclip project.`
 	}
 }

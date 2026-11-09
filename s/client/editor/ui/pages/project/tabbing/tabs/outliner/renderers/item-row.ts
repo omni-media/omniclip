@@ -1,61 +1,54 @@
 
 import {html} from "lit"
-import {Id, Item, Kind} from "@omnimedia/omnitool"
+import {Item, Kind} from "@omnimedia/omnitool"
 
-import {itemLabel} from "../../../../../../logic/utils/item-label.js"
+import imageSvg from "../../../../../../icons/image.svg.js"
 import textSvg from "../../../../../../icons/gravity-ui/text.svg.js"
-import starSvg from "../../../../../../icons/gravity-ui/star.svg.js"
+import {itemLabel} from "../../../../../../logic/utils/item-label.js"
 import stackSvg from "../../../../../../icons/gravity-ui/bars.svg.js"
+import captionsSvg from "../../../../../../icons/speech-to-text.svg.js"
+import audioSvg from "../../../../../../icons/gravity-ui/volume.svg.js"
 import sequenceSvg from "../../../../../../icons/gravity-ui/timeline.svg.js"
-import starFillSvg from "../../../../../../icons/gravity-ui/star-fill.svg.js"
 import videoPlayerSvg from "../../../../../../icons/carbon-icons/video-player.svg.js"
 
 function renderIcon(kind: Kind) {
 	switch (kind) {
 		case Kind.Stack: return stackSvg
 		case Kind.Sequence: return sequenceSvg
-		case Kind.Video: return videoPlayerSvg
+		case Kind.Video:
 		case Kind.Clip: return videoPlayerSvg
+		case Kind.Audio: return audioSvg
 		case Kind.Text: return textSvg
+		case Kind.Caption: return captionsSvg
+		case Kind.Image: return imageSvg
 		default: return html`?`
 	}
 }
 
+function renderRuleHint(kinds?: readonly Kind[]) {
+	if (!kinds?.length) return html`<span></span>`
+
+	const hint = `Accepted kinds: ${kinds.map(kind => Kind[kind]).join(", ")}`
+	return html`<span class="scope-icon" title=${hint} aria-label=${hint}>${kinds.map(renderIcon)}</span>`
+}
+
 export function renderItemRow(props: {
 	item: Item.Any
-	selected: boolean
-	starred: boolean
-	onSelect: (id: Id) => void
-	onToggleStar: (id: Id) => void
+	color?: string
+	durationMs: number
+	acceptedKinds?: readonly Kind[]
+	onToggleExpand?: () => void
 }) {
-	const {item, selected, starred, onSelect, onToggleStar} = props
-	const duration = (item as any).duration ? `${((item as any).duration / 1000).toFixed(2)}s` : "-"
-
-	const select = () => onSelect(item.id)
-
-	const toggleStar = (event: Event) => {
-		event.stopPropagation()
-		onToggleStar(item.id)
-	}
+	const {item, color, durationMs, acceptedKinds, onToggleExpand} = props
+	const duration = `${(durationMs / 1000).toFixed(2)}s`
 
 	return html`
-		<div
-			class="item-row"
-			?data-selected=${selected}
-			@click=${select}
-		>
-			<span class="color-swatch"></span>
+		<div class="item-row" @click=${onToggleExpand}>
+			<span class="color-swatch" style=${color ? `background-color: ${color}` : ""}></span>
 			<span class="icon">${renderIcon(item.kind)}</span>
 			<span class="label">${itemLabel(item)}</span>
+			${renderRuleHint(acceptedKinds)}
 			<span class="duration">${duration}</span>
-
-			<button
-				class="star-button"
-				?data-starred=${starred}
-				@click=${toggleStar}
-			>
-				${starred ? starFillSvg : starSvg}
-			</button>
 		</div>
 	`
 }

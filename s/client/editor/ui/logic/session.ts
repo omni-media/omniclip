@@ -12,9 +12,12 @@ import {Viewport} from "./parts/viewport.js"
 import {Playback} from "./parts/playback.js"
 import {selectTool} from "./parts/modes/select.js"
 import {Strata} from "../../context/parts/strata.js"
+import {Organization} from "./parts/organization.js"
 import {add, remove, update} from "./parts/mutate.js"
 import {Proposal} from "./parts/proposal/proposal.js"
 import {applyTimelinePatch} from "./timeline/patch.js"
+import {copyTags} from "../../context/parts/tags/ops.js"
+import {ruleConflictMessage} from "./utils/rule-conflict.js"
 import type {TimelinePatch} from "@omnimedia/omniso/timeline"
 import {trim} from "./parts/interactions/trim/parts/action.js"
 import type {DropIntent} from "./parts/interactions/drag/parts/intent.js"
@@ -43,6 +46,7 @@ export class OmniSession {
 	$drop = signal<DropIntent | null>(null)
 
 	viewport = new Viewport(PIXELS_PER_MILLISECOND)
+	organization = new Organization(this)
 
 	canvas
 	stage
@@ -121,7 +125,11 @@ export class OmniSession {
 	}
 
 	async commitPatch(patch: TimelinePatch) {
-		const timeline = applyTimelinePatch(this.timeline.state as TimelineFile, patch)
+		const previous = this.timeline.state as TimelineFile
+		const timeline = applyTimelinePatch(previous, patch)
+		const conflict = ruleConflictMessage(this.organization.rules(new Index(timeline)))
+		if (conflict)
+			throw new Error(conflict)
 		await this.timeline.mutate(state => Object.assign(state, timeline, {audio: timeline.audio}))
 		this.reconcile()
 	}
@@ -135,13 +143,13 @@ export class OmniSession {
 	}
 
 	async redo() {
-		await this.timeline.redo()
+		await this.deps.strata.edit.redo()
 		this.reconcile()
 	}
 
 	async undo() {
 		//TODO: undo does not undo rotation correctly
-		await this.timeline.undo()
+		await this.deps.strata.edit.undo()
 		this.reconcile()
 	}
 
@@ -154,15 +162,19 @@ export class OmniSession {
 	}
 
 	/** Append to the currently viewed timeline container. */
-	appendItem<T extends Item.Any>(create: (omni: O) => T): T {
+	appendItem<T extends Item.Any>(create: (omni: O) => T): T | null {
 		const parent = this.index.getItem<ContainerItem>(this.$viewedItemId())
-		const item = this.edit(omni => {
-			const item = create(omni)
-			omni.set<typeof parent>(parent.id, {
-				childrenIds: [...parent.childrenIds, item.id],
-			})
-			return item
+		const state = this.timeline.state as TimelineFile
+		const draft = {...state, items: [...state.items]}
+		const omni = new O({timeline: draft})
+		const item = create(omni)
+		if (!this.organization.rules(new Index(omni.timeline)).allowsItem(parent.id, item.id))
+			return null
+
+		omni.set<typeof parent>(parent.id, {
+			childrenIds: [...parent.childrenIds, item.id],
 		})
+		this.timeline.mutate(state => Object.assign(state, omni.timeline))
 
 		this.$selectedItem(item.id)
 		this.playback.seek(this.$playhead())
@@ -170,11 +182,14 @@ export class OmniSession {
 	}
 
 	createCaption(item: Idx.VideoItem | Idx.AudioItem, transcript: Transcription, options: Parameters<O["captions"]["make"]>[1]) {
+		const parent = this.index.getParent(item.id)
+		if (parent && !this.organization.rules().allowsUntaggedKind(parent.id, Kind.Caption))
+			return null
+
 		return this.edit(omni => {
 			const caption = omni.captions.make(transcript, {
 				...options, itemId: item.id, start: item.start, duration: item.duration,
 			})
-			const parent = this.index.getParent(item.id)
 			if (parent?.kind === Kind.Stack)
 				omni.set<typeof parent>(parent.id, {childrenIds: [caption.id, ...parent.childrenIds]})
 			else {
@@ -219,7 +234,8 @@ export class OmniSession {
 			() => this.getId(),
 		)
 
-		this.timeline.mutate(state => {
+		this.deps.strata.edit.mutate(({timeline: state, outliner}) => {
+			copyTags(outliner, itemId, [copy.id])
 			for (const item of items)
 				add(state, item)
 			update(state, parent.id, {
@@ -239,7 +255,6 @@ export class OmniSession {
 		const parent = this.index.getParent(selected.id)
 		if (parent?.kind !== Kind.Sequence)
 			return false
-
 		if (Idx.isTransition(selected))
 			return this.#updateTransition(selected.id, name, duration)
 
@@ -270,7 +285,6 @@ export class OmniSession {
 		const previous = parent && this.index.getItemMaybe(parent.childrenIds[index - 1])
 		if (parent?.kind !== Kind.Sequence || !this.isVisualItem(previous) || !this.isVisualItem(target))
 			return false
-
 		return this.#createTransition(parent, index, name, duration)
 	}
 
@@ -463,7 +477,7 @@ export class OmniSession {
 	}
 
 	splitClipAt(clipId: Id, time: Ms) {
-		this.timeline.mutate(state => {
+		this.deps.strata.edit.mutate(({timeline: state, outliner}) => {
 			const clip = this.index.getItem<Idx.Clip>(clipId)
 			const parent = this.index.getParent(clipId)
 
@@ -484,6 +498,7 @@ export class OmniSession {
 				id,
 				right.id,
 			)
+			copyTags(outliner, clipId, [leftId, rightId])
 			add(state, left)
 			for (const item of items)
 				add(state, item)

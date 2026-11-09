@@ -11,9 +11,8 @@ export default css`@layer view {
 	--inspector-text: #e7e7e7;
 	--inspector-muted: #9d9d9d;
 	--inspector-divider: rgb(255 255 255 / 6%);
-	display: flex;
-	flex-direction: column;
-	height: 100%;
+	display: block;
+	flex: none;
 	background: var(--inspector-bg);
 	color: var(--inspector-text);
 }
@@ -27,17 +26,6 @@ export default css`@layer view {
 	color: var(--inspector-muted);
 	font-size: var(--font-size-xs);
 	text-align: center;
-}
-
-.inspector {
-	display: flex;
-	flex-direction: column;
-	height: 100%;
-}
-
-.panel-content {
-	flex: 1;
-	overflow-y: auto;
 }
 
 }`

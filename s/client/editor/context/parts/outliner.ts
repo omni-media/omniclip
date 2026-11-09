@@ -1,21 +1,11 @@
 
-import {TimelineFile} from "@omnimedia/omnitool"
+import type {TimelineFile} from "@omnimedia/omnitool"
 
-import {State} from "./state.js"
+import type {OutlinerState} from "./state.js"
 
-export function syncOutliner(outliner: State["outliner"], timeline: TimelineFile) {
-	const existing = new Map(outliner.items.map(item => [item.itemId, item]))
-
-	outliner.items = timeline.items.map(item => {
-		const meta = existing.get(item.id)
-		if (meta)
-			return meta
-
-		return {
-			itemId: item.id,
-			starred: false,
-			tagIds: []
-		}
-	})
+export function syncOutliner(outliner: OutlinerState, timeline: TimelineFile) {
+	const ids = new Set(timeline.items.map(item => item.id))
+	outliner.tagAssignments = outliner.tagAssignments.filter(assignment => ids.has(assignment.itemId))
+	outliner.ruleAssignments = outliner.ruleAssignments.filter(assignment => ids.has(assignment.itemId))
 }
 

@@ -1,4 +1,6 @@
 
+import {signal} from "@e280/strata"
+
 import type {OmniSession} from "../../ui/logic/session.js"
 import type {TimelinePatch, TimelinePatchResult} from "@omnimedia/omniso/timeline"
 import {projectSettingsUpdateParameters, type ProjectSettingsUpdate} from "@omnimedia/omniso/settings"
@@ -12,16 +14,16 @@ type AssistantEdit = {
 
 export class AssistantController {
 	#edit: AssistantEdit | undefined
-	#revision = 0
+	#revision = signal(0)
 
 	constructor(private session: OmniSession) {}
 
 	get revision() {
-		return this.#revision
+		return this.#revision()
 	}
 
 	bumpRevision() {
-		this.#revision += 1
+		this.#revision(this.#revision() + 1)
 	}
 
 	updateProjectSettings = (input: ProjectSettingsUpdate) => {
@@ -36,7 +38,7 @@ export class AssistantController {
 
 			await this.session.commitPatch(patch)
 
-			if (!this.#edit || this.#edit.complete)
+			if (!this.#edit || this.#edit.complete || this.#edit.revision !== patch.baseRevision)
 				this.#edit = {
 					id: crypto.randomUUID(),
 					patches: 0,

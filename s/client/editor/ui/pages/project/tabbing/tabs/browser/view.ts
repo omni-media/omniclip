@@ -66,7 +66,10 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			}),
 		})
 
-		context.session.appendItem(omni => makeItem(omni, format, media))
+		// TODO: should be toast instead
+		const added = context.session.appendItem(omni => makeItem(omni, format, media))
+		if (!added)
+			alert("This structure's rules do not allow that media type.")
 	}
 
 	const removeMedia = async(event: Event, item: MediaItem, library: MediaLibrary) => {
@@ -81,6 +84,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			"mediaHash" in item && item.mediaHash === hash
 		)
 
+		// TODO: should be toast instead
 		if (inUse) {
 			alert("Remove clips using this media before removing it from the bin.")
 			return
@@ -142,6 +146,11 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			}
 			return text
 		})
+		// TODO: should be toast instead
+		if (!text) {
+			alert("This structure's rules do not allow text items.")
+			return
+		}
 		const start = context.session.index.getItemLaneStart(text.id, context.session.$viewedItemId())
 		context.session.seekPlayhead(start)
 		context.session.viewport.revealTime(start)

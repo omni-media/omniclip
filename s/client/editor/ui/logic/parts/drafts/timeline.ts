@@ -1,4 +1,4 @@
-import {Chrono} from "@e280/strata"
+import type {LensLike} from "@e280/strata"
 import {Id, Item, TimelineFile} from "@omnimedia/omnitool"
 
 import {Idx, Index} from "../index.js"
@@ -9,7 +9,7 @@ export class TimelineDraft {
 	#proposal: Proposal
 
 	constructor(
-		public source: Chrono<TimelineFile>,
+		public source: LensLike<TimelineFile>,
 		initial: Overlay = new Map(),
 	) {
 		this.#overlay = initial
