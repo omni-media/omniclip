@@ -14,7 +14,7 @@ import pauseSvg from "../../../../../../../icons/gravity-ui/pause.svg.js"
 import scissorsSvg from "../../../../../../../icons/gravity-ui/scissors.svg.js"
 import redoSvg from "../../../../../../../icons/material-design-icons/redo.svg.js"
 import undoSvg from "../../../../../../../icons/material-design-icons/undo.svg.js"
-import {combosFromAtom} from "../../../../../../../logic/modals/shortcuts/utils.js"
+import {formatShortcut} from "../../../../../../../logic/modals/shortcuts/utils.js"
 import zoomInSvg from "../../../../../../../icons/material-design-icons/zoom-in.svg.js"
 import zoomOutSvg from "../../../../../../../icons/material-design-icons/zoom-out.svg.js"
 
@@ -39,10 +39,8 @@ export const Toolbar = shadow((context: EditorContext) => {
 	const canZoomIn = zoom < maxZoom
 	const activeTool = toolOptions.find(tool => tool.id === session.activeMode().id) ?? toolOptions[0]
 
-	const shortcutLabel = (action: typeof toolOptions[number]["shortcut"]) => {
-		return combosFromAtom(context.keybindings.getBinding(action))
-			.map(combo => combo.keys.join("+"))
-			.join(" / ")
+	const shortcutLabel = (action: typeof toolOptions[number]["id"]) => {
+		return formatShortcut(context.keybindings.getBinding(action))
 	}
 
 	const selectTool = ({detail}: CustomEvent) => {
@@ -94,7 +92,7 @@ export const Toolbar = shadow((context: EditorContext) => {
 						<button
 							slot="trigger"
 							class="tool-trigger"
-							title="${activeTool.label} Tool (${shortcutLabel(activeTool.shortcut)})"
+							title="${activeTool.label} Tool (${shortcutLabel(activeTool.id)})"
 							aria-label="Choose timeline tool; current tool is ${activeTool.label}"
 						>
 							<wa-icon name=${activeTool.icon}></wa-icon>
@@ -109,7 +107,7 @@ export const Toolbar = shadow((context: EditorContext) => {
 							>
 								<wa-icon slot="icon" name=${tool.icon}></wa-icon>
 								${tool.label} Tool
-								<kbd slot="details">${shortcutLabel(tool.shortcut)}</kbd>
+								<kbd slot="details">${shortcutLabel(tool.id)}</kbd>
 							</wa-dropdown-item>
 						`)}
 					</wa-dropdown>

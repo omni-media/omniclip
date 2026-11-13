@@ -48,7 +48,7 @@
 		"@assistant-ui/react": "^0.15.20",
 		"@awesome.me/webawesome": "^3.4.0",
 		"@benev/slate": "^0.3.10",
-		"@benev/tact": "^0.1.1",
+		"@benev/tact": "^0.4.0-17",
 		"@better-auth/stripe": "^1.7.13",
 		"@e280/kv": "^0.2.2",
 		"@e280/quay": "^0.0.0-26",

@@ -1,133 +1,116 @@
-import * as tact from "@benev/tact"
-import type {Atom} from "@benev/tact"
 
-import {bindings} from "./bindings.js"
-import {TimelineAction} from "./meta.js"
-import {OmniSession} from "../../../ui/logic/session.js"
-import {bladeTool} from "../../../ui/logic/parts/modes/blade.js"
-import {positionTool} from "../../../ui/logic/parts/modes/position.js"
-import {handTool} from "../../../ui/logic/parts/modes/hand.js"
-import {selectTool} from "../../../ui/logic/parts/modes/select.js"
+import {disposer} from "@e280/stz"
+import {effect} from "@e280/strata"
+import {Decoder, setupTact, type Input, type Inputs} from "@benev/tact"
+
+import {bindings, labels, type ToolAction} from "./bindings.js"
+import type {OmniSession} from "../../../ui/logic/session.js"
 import {zoomTool} from "../../../ui/logic/parts/modes/zoom.js"
-import {isEditableElement, prevent_default_browser_behavior} from "./prevent-default-hack.js"
+import {handTool} from "../../../ui/logic/parts/modes/hand.js"
+import {bladeTool} from "../../../ui/logic/parts/modes/blade.js"
+import {selectTool} from "../../../ui/logic/parts/modes/select.js"
+import {positionTool} from "../../../ui/logic/parts/modes/position.js"
+import {isEditableElement, preventBrowserShortcuts} from "./browser.js"
 
-const CUSTOM_PROFILE_LABEL = "Omniclip Custom"
+const tools = {select: selectTool, zoom: zoomTool, blade: bladeTool, position: positionTool, hand: handTool}
+const pressed = (input: Input) => input.value > 0 && input.was <= 0
+const setupInput = () => setupTact({
+	namespace: "omniclip-shortcuts",
+	maxPlayers: 1,
+	labels,
+	presets: {standard: {label: "Omniclip", bindings}},
+})
 
 export class Keybindings {
-	#running = false
 	#request = 0
-	#detach
+	#suspended = false
+	readonly controller
+	#cleanup = disposer()
+	#decoder = new Decoder(bindings)
+	#temporary?: Exclude<ToolAction, "select">
 
 	static async setup(session: OmniSession) {
-		const deck = await tact.Deck.load({
-			portCount: 1,
-			bindings,
-			kv: tact.localStorageKv(),
-		})
-		deck.hub.plug(new tact.PrimaryDevice())
-		const port = deck.hub.ports[0]
-		port.modes.add("timeline")
-		return new Keybindings(deck, session)
+		return new Keybindings(await setupInput(), session)
 	}
 
-	constructor(private deck: tact.Deck<typeof bindings>, private session: OmniSession) {
-		this.#detach = prevent_default_browser_behavior(deck)
-		this.#running = true
+	constructor(readonly tact: Awaited<ReturnType<typeof setupInput>>, private session: OmniSession) {
+		const {controller, source} = tact.mouseKeyboard()
+		this.controller = controller
+		const {controls} = tact.deck
+		const activateProfile = (key: string) => { void controls.assignments.assign(controller, key) }
+		activateProfile(controls.selectedProfileKey)
+		this.#cleanup.schedule(effect(() => controls.selectedProfileKey, activateProfile))
+		this.#cleanup.schedule(preventBrowserShortcuts(source, () => controller.bindings, () => this.#disabled()))
+		this.#cleanup.schedule(source.onSample(() => this.#poll()))
 		this.#loop()
 	}
 
 	dispose() {
-		this.#running = false
-		this.#detach()
-		if (this.#request)
-			cancelAnimationFrame(this.#request)
+		cancelAnimationFrame(this.#request)
+		this.#cleanup()
+		this.tact.dispose()
 	}
 
-	getBinding(action: TimelineAction) {
-		return this.deck.hub.ports[0].bindings.timeline[action]
+	suspend() {
+		this.#suspended = true
+		return () => { this.#suspended = false }
 	}
 
-	getDefaultBinding(action: TimelineAction) {
-		return this.deck.baseBindings.timeline[action]
+	getBinding(action: ToolAction) {
+		const {profiles, assignments} = this.tact.deck.controls
+		return profiles.get(assignments.assignedProfileKeyOf(this.controller)).bindings.tools[action]
 	}
 
-	async setBinding(action: TimelineAction, atom: Atom) {
-		const next = structuredClone(this.deck.hub.ports[0].bindings)
-		;(next.timeline as Record<TimelineAction, Atom>)[action] = atom
-		this.#replaceBindings(next)
-		await this.#persistBindings(next)
-	}
-
-	async resetBinding(action: TimelineAction) {
-		await this.setBinding(action, structuredClone(this.deck.baseBindings.timeline[action]))
-	}
-
-	async resetAll() {
-		const next = structuredClone(this.deck.baseBindings)
-		const profile = this.#profile
-		this.#replaceBindings(next)
-		await this.deck.db.assignPortProfile(0, null)
-		if (profile)
-			await this.deck.db.deleteProfile(profile.id)
-	}
-
-	#replaceBindings(next: typeof bindings) {
-		const previous = this.deck.hub.ports[0]
-		const port = new tact.Port(next)
-		port.devices.adds(...previous.devices)
-		port.modes.adds(...previous.modes)
-		this.deck.hub.ports[0] = port
-	}
-
-	async #persistBindings(next: typeof bindings) {
-		const profile = this.#profile
-		if (!profile) {
-			const profile = await this.deck.db.createProfile(CUSTOM_PROFILE_LABEL, next)
-			await this.deck.db.assignPortProfile(0, profile.id)
-			return
-		}
-
-		const catalog = this.deck.catalog.clone()
-		catalog.profiles.set(profile.id, {...profile, bindings: next})
-		catalog.portProfiles[0] = profile.id
-		await this.deck.db.save(catalog)
-	}
-
-	get #profile() {
-		return [...this.deck.catalog.profiles.values()]
-			.find(profile => profile.label === CUSTOM_PROFILE_LABEL)
+	#disabled() {
+		return this.#suspended || isEditableElement()
 	}
 
 	#loop = () => {
-		if (!this.#running) return
-
-		const [port] = this.deck.hub.poll()
-
-		if (port && !isEditableElement()) {
-			const {timeline} = port.actions
-			if (timeline.undo.down) this.session.undo()
-			if (timeline.redo.down) this.session.redo()
-			if (timeline.play_reverse.down) this.session.playback.shuttle(-1)
-			if (timeline.pause.down) this.session.playback.pause()
-			if (timeline.play_pause.down) this.session.playback.toggle()
-			if (timeline.play_forward.down) this.session.playback.shuttle(1)
-			if (timeline.step_backward.down) this.session.stepPlayheadFrame(-1)
-			if (timeline.step_forward.down) {this.session.stepPlayheadFrame(1)}
-			if (timeline.delete_clip.down) this.session.deleteClip(this.session.$selectedItem())
-			if (timeline.split_clip.down) this.session.splitAtPlayhead()
-			if (timeline.zoom_in.down) this.session.viewport.adjustZoomAt(this.session.playheadViewportX(), 0.1)
-			if (timeline.zoom_out.down) this.session.viewport.adjustZoomAt(this.session.playheadViewportX(), -0.1)
-			if (timeline.zoom_tool.down) this.session.setMode(zoomTool)
-			if (timeline.zoom_tool_temp.up) this.session.setMode(selectTool)
-			if (timeline.blade_tool.down) this.session.setMode(bladeTool)
-			if (timeline.blade_tool_temp.up) this.session.setMode(selectTool)
-			if (timeline.position_tool.down) this.session.setMode(positionTool)
-			if (timeline.position_tool_temp.up) this.session.setMode(selectTool)
-			if (timeline.hand_tool.down) this.session.setMode(handTool)
-			if (timeline.hand_tool_temp.up) this.session.setMode(selectTool)
-			if (timeline.select_tool.down) this.session.setMode(selectTool)
-		}
-
+		this.#poll()
 		this.#request = requestAnimationFrame(this.#loop)
 	}
+
+	#poll() {
+		const inputs = this.#decoder.decode(this.controller.encode())
+		this.#releaseTemporaryTool(inputs.tools)
+
+		if (!this.#disabled()) {
+			const playback = inputs.playback
+			const editing = inputs.editing
+			const timeline = inputs.timeline
+			if (pressed(editing.undo)) void this.session.undo()
+			if (pressed(editing.redo)) void this.session.redo()
+			if (pressed(playback.reverse)) this.session.playback.shuttle(-1)
+			if (pressed(playback.pause)) this.session.playback.pause()
+			if (pressed(playback.toggle)) this.session.playback.toggle()
+			if (pressed(playback.forward)) this.session.playback.shuttle(1)
+			if (pressed(timeline.previous)) this.session.stepPlayheadFrame(-1)
+			if (pressed(timeline.next)) this.session.stepPlayheadFrame(1)
+			if (pressed(editing.delete)) this.session.deleteClip(this.session.$selectedItem())
+			if (pressed(editing.split)) this.session.splitAtPlayhead()
+			if (pressed(timeline.zoom_in)) this.session.viewport.adjustZoomAt(this.session.playheadViewportX(), 0.1)
+			if (pressed(timeline.zoom_out)) this.session.viewport.adjustZoomAt(this.session.playheadViewportX(), -0.1)
+
+			this.#handleToolShortcuts(inputs.tools)
+		}
+	}
+
+	#releaseTemporaryTool(inputs: Inputs<typeof bindings.tools>) {
+		if (this.#temporary && !inputs[`${this.#temporary}_hold`].value) {
+			if (this.session.activeMode().id === this.#temporary)
+				this.session.setMode(selectTool)
+			this.#temporary = undefined
+		}
+	}
+
+	#handleToolShortcuts(inputs: Inputs<typeof bindings.tools>) {
+		for (const name of Object.keys(tools) as ToolAction[]) {
+			if (pressed(inputs[name])) this.session.setMode(tools[name])
+			if (name !== "select" && pressed(inputs[`${name}_hold`])) {
+				this.#temporary = name
+				this.session.setMode(tools[name])
+			}
+		}
+	}
 }
+

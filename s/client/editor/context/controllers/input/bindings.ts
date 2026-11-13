@@ -1,52 +1,74 @@
-import * as tact from "@benev/tact"
 
-// TODO: FIX TACT, MUTIPLE TIMING BINDS DONT WORK, NO EVENTS HAPPEN
-export const bindings = tact.asBindings({
+import {asBindings, type Expression} from "@benev/tact"
+
+// TODO: Restore shortcut descriptions, search, conflict prompts, and reset-all in Tact's UI.
+
+type Modifier = "ctrl" | "meta" | "shift" | "alt"
+const key = (code: string, ...mods: Modifier[]): Expression => ["*", ["mod", ...mods], code]
+const primary = (code: string, ...mods: Modifier[]): Expression =>
+	["max", key(code, "ctrl", ...mods), key(code, "meta", ...mods)]
+const tap = (code: string): Expression => ["*", ["mod"], ["taps", 1, 500, code]]
+const hold = (code: string): Expression => ["held", 500, key(code)]
+
+export const bindings = asBindings({
+	playback: {
+		reverse: key("KeyJ"),
+		pause: key("KeyK"),
+		toggle: key("Space"),
+		forward: key("KeyL"),
+	},
+	editing: {
+		undo: primary("KeyZ"),
+		redo: primary("KeyZ", "shift"),
+		delete: ["max", key("Backspace"), key("Delete")],
+		split: primary("KeyB"),
+	},
 	timeline: {
-		undo: [
-			"or",
-			["mods", "KeyZ", {ctrl: true}],
-			["mods", "KeyZ", {meta: true}],
-		],
-		redo: [
-			"or",
-			["mods", "KeyZ", {ctrl: true, shift: true}],
-			["mods", "KeyZ", {meta: true, shift: true}],
-		],
-		play_reverse: "KeyJ",
-		pause: "KeyK",
-		play_pause: "Space",
-		play_forward: "KeyL",
-		step_backward: "ArrowLeft",
-		step_forward: "ArrowRight",
-		delete_clip: ["or", "Backspace", "Delete"],
-		split_clip: [
-			"or",
-			["mods", "KeyB", {ctrl: true}],
-			["mods", "KeyB", {meta: true}]
-		],
-		zoom_in: [
-			"or",
-			["mods", "Equal", {ctrl: true}],
-			["mods", "Equal", {meta: true}],
-			["mods", "NumpadAdd", {ctrl: true}],
-			["mods", "NumpadAdd", {meta: true}]
-		],
-		zoom_out: [
-			"or",
-			["mods", "Minus", {ctrl: true}],
-			["mods", "Minus", {meta: true}],
-			["mods", "NumpadSubtract", {ctrl: true}],
-			["mods", "NumpadSubtract", {meta: true}]
-		],
-		zoom_tool: ["mods", "KeyZ", {}],
-		zoom_tool_temp: ["mods", ["code", "KeyZ", {timing: ["hold", 500]}], {}],
-		blade_tool: ["mods", "KeyB", {}],
-		blade_tool_temp: ["mods", ["code", "KeyB", {timing: ["hold", 500]}], {}],
-		position_tool: ["mods", "KeyP", {}],
-		position_tool_temp: ["mods", ["code", "KeyP", {timing: ["hold", 500]}], {}],
-		hand_tool: ["mods", "KeyH", {}],
-		hand_tool_temp: ["mods", ["code", "KeyH", {timing: ["hold", 500]}], {}],
-		select_tool: ["or", "Escape", ["mods", "KeyA", {}]]
+		previous: key("ArrowLeft"),
+		next: key("ArrowRight"),
+		zoom_in: ["max", primary("Equal"), primary("NumpadAdd")],
+		zoom_out: ["max", primary("Minus"), primary("NumpadSubtract")],
+	},
+	tools: {
+		select: ["max", key("Escape"), key("KeyA")],
+		zoom: tap("KeyZ"),
+		zoom_hold: hold("KeyZ"),
+		blade: tap("KeyB"),
+		blade_hold: hold("KeyB"),
+		position: tap("KeyP"),
+		position_hold: hold("KeyP"),
+		hand: tap("KeyH"),
+		hand_hold: hold("KeyH"),
 	},
 })
+
+export type ToolAction = Exclude<keyof typeof bindings.tools, `${string}_hold`>
+
+export const labels = {
+	playback: "Playback",
+	"playback.reverse": "Play Reverse",
+	"playback.pause": "Pause",
+	"playback.toggle": "Play / Pause",
+	"playback.forward": "Play Forward",
+	editing: "Editing",
+	"editing.undo": "Undo",
+	"editing.redo": "Redo",
+	"editing.delete": "Delete Selection",
+	"editing.split": "Split at Playhead",
+	timeline: "Timeline",
+	"timeline.previous": "Previous Frame",
+	"timeline.next": "Next Frame",
+	"timeline.zoom_in": "Zoom In",
+	"timeline.zoom_out": "Zoom Out",
+	tools: "Tools",
+	"tools.select": "Selection",
+	"tools.zoom": "Zoom",
+	"tools.zoom_hold": "Zoom (hold)",
+	"tools.blade": "Blade",
+	"tools.blade_hold": "Blade (hold)",
+	"tools.position": "Position",
+	"tools.position_hold": "Position (hold)",
+	"tools.hand": "Hand",
+	"tools.hand_hold": "Hand (hold)",
+}
+
