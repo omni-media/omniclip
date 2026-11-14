@@ -15,6 +15,14 @@ export const createAssistantToolkit = (
 	context: EditorContext,
 	reasoningEffort: ReasoningEffort,
 ): Toolkit => defineToolkit({
+	web_search: {
+		type: "backend",
+		renderText: {
+			running: () => activity("Searching the web…", "running"),
+			complete: ({result}: {result?: string}) =>
+				resultActivity(result, "Searched the web", "Web search failed"),
+		},
+	},
 	update_settings: {
 		...editorTools.update_settings,
 		type: "frontend",

@@ -86,7 +86,7 @@ export const ToolGroup = ({failed, indices, children}: {
 	))
 	const count = tools.filter(tool => tool.toolName !== "create_item" || tool.isError).length
 	const lastTool = tools.at(-1)
-	const label = useUploadProgress(lastTool?.toolCallId ?? "", "Working…")
+	const label = useUploadProgress(lastTool?.toolCallId ?? "", lastTool?.toolName === "web_search" ? "Searching the web…" : "Working…")
 
 	return <div className="tool-activity">
 		{(count > 0 || active || hasFailed) && <details
