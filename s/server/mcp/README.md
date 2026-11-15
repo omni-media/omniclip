@@ -43,7 +43,7 @@ Install the shared [Omniclip skill](skills/omniclip/SKILL.md) by copying its `om
 | `patch_timeline` | Existing atomic patch implementation; returns fresh context on success or revision mismatch |
 | `provide_media` | Original source copied to a local temporary file, once per content hash |
 | `video_info`, `video_analyze`, `video_watch`, `video_detail` | Video-vision metadata, structural analysis, images and targeted inspection |
-| `audio_analyze` | TODO placeholder; audio analysis is not implemented yet |
+| `audio_analyze` | Cloud audio analysis of an item or source range; requires a subscription and AI credits |
 
 Visual calls enforce `skip_audio: true`, images rather than Claude-specific frame descriptions, and transcription off in structural analysis. You can still inspect audio loudness/silence locally. No Whisper model is downloaded by this path. Frame cache settings follow the existing `~/.claude-video-vision/config.json` (`enable_index` is false by default); without indexing, detail calls need extraction segments. The adapter does not alter that global configuration.
 
@@ -53,7 +53,7 @@ Browser media is streamed to a private temporary directory, shared by items with
 
 ## Audio analysis
 
-`audio_analyze` is a TODO placeholder. It returns an explicit not-implemented error without uploading or analyzing audio. Visual tools and editing remain available.
+`audio_analyze(itemId, prompt, start?, end?)` uses the connected browser's signed-in account and the same cloud analysis endpoint as the built-in AI. An active subscription and sufficient AI credits are required; each analyzed part uses the existing media-analysis credit charge, refunded if that request fails. Video sources have their picture removed before upload. The default range is the item's trim; optional bounds and returned source offsets are seconds. Analysis timestamps are relative to each returned part. Effects, gain and the final timeline mix are not rendered.
 
 ## Verify
 

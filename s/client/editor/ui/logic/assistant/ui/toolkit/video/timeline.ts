@@ -1,8 +1,9 @@
 
-import {VideoContext} from './context.js'
+import {MediaContext} from './context.js'
+import {MediaSplitter} from './splitter.js'
 import {ReasoningEffort} from '../../parts/runtime.js'
 import {mediaAnalysisClient} from '../../../../api.js'
-import {TimelineAnalysis, TimelineVideo} from './types.js'
+import {TimelineAnalysis, TimelineSource} from './types.js'
 import type {EditorContext} from '../../../../../../context/context.js'
 
 export async function inspectTimeline(
@@ -11,25 +12,25 @@ export async function inspectTimeline(
 	reasoningEffort: ReasoningEffort,
 	onProgress: (message: string) => void
 ) {
-	const videos = timelineVideos(editor)
+	const items = timelineSources(editor)
 
-	if (!videos.length)
-		throw new Error('The timeline has no video sources to inspect.')
+	if (!items.length)
+		throw new Error('The timeline has no video or audio sources to inspect.')
 
-	const sources = [...new Map(videos.map(video => [video.mediaHash, video])).values()]
+	const sources = [...new Map(items.map(media => [media.mediaHash, media])).values()]
 	const inspected = new Map<string, TimelineAnalysis[]>()
 
 	let activeMediaHash: string
 
-	const prepare = (video: TimelineVideo, index: number) => {
-		const promise = new VideoContext(
+	const prepare = (media: TimelineSource, index: number) => {
+		const promise = new MediaContext(
 			editor.strata.projectId,
-			video.mediaHash,
-			video.source,
+			media.mediaHash,
+			new MediaSplitter(media.source, media.filename),
 			progress => {
-				if (video.mediaHash === activeMediaHash) {
+				if (media.mediaHash === activeMediaHash) {
 					onProgress(
-						`Providing video ${index + 1}/${sources.length} · ${Math.round(progress * 100)}%`
+						`Providing source ${index + 1}/${sources.length} · ${Math.round(progress * 100)}%`
 					)
 				}
 			}
@@ -42,10 +43,10 @@ export async function inspectTimeline(
 
 	let prepared = prepare(sources[0]!, 0)
 
-	for (const [index, video] of sources.entries()) {
-		activeMediaHash = video.mediaHash
+	for (const [index, media] of sources.entries()) {
+		activeMediaHash = media.mediaHash
 
-		const label = `video ${index + 1}/${sources.length}`
+		const label = `source ${index + 1}/${sources.length}`
 
 		onProgress(`Preparing ${label}`)
 		const parts = await prepared
@@ -58,40 +59,42 @@ export async function inspectTimeline(
 		const analyses: TimelineAnalysis[] = []
 
 		for (const {path, start, end} of parts) {
-			const {analysis} = await mediaAnalysisClient.inspectVideo({
+			const inspect = media.source.type.startsWith('audio/')
+				? mediaAnalysisClient.inspectAudio
+				: mediaAnalysisClient.inspectVideo
+			const {analysis} = await inspect({
 				path,
 				prompt,
 				reasoningEffort
 			})
 
 			analyses.push({
-				itemId: video.itemId,
-				mediaHash: video.mediaHash,
+				itemId: media.itemId,
+				mediaHash: media.mediaHash,
 				start,
 				end,
 				analysis
 			})
 		}
 
-		inspected.set(video.mediaHash, analyses)
+		inspected.set(media.mediaHash, analyses)
 	}
 
-	return videos.flatMap(video =>
-		inspected.get(video.mediaHash)!.map(analysis => ({
+	return items.flatMap(media =>
+		inspected.get(media.mediaHash)!.map(analysis => ({
 			...analysis,
-			itemId: video.itemId
+			itemId: media.itemId
 		}))
 	)
 }
 
-function timelineVideos(editor: EditorContext) {
+function timelineSources(editor: EditorContext) {
 	return Array.from(
 		editor.session.index.getMediaItems(editor.session.timeline.state.rootId),
-		item => ({
-			itemId: item.id,
-			mediaHash: item.mediaHash,
-			source: editor.project.resources.require(item.mediaHash).blob
-		})
-	).filter(video => video.source.type.startsWith('video/'))
+		item => {
+			const {blob: source, filename} = editor.project.resources.require(item.mediaHash)
+			return {itemId: item.id, mediaHash: item.mediaHash, source, filename}
+		}
+	).filter(media => /^(video|audio)\//.test(media.source.type))
 }
 

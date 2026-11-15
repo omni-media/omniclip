@@ -17,6 +17,7 @@ const references = (item: Item.Any) => ids(
 )
 
 export function validateTimeline(timeline: TimelineFile) {
+	// TODO: Use Omnitool validation for item shapes, transforms, animation tracks, and reference kinds.
 	const items = new Map<Id, TimelineFile["items"][number]>()
 	for (const item of timeline.items) {
 		if (!isId(item.id) || items.has(item.id))

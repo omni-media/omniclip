@@ -7,10 +7,11 @@ export type TimelineAnalysis = {
 	analysis: string
 }
 
-export type TimelineVideo = {
+export type TimelineSource = {
 	itemId: string
 	mediaHash: string
 	source: Blob
+	filename: string
 }
 
 export type MediaPart = {

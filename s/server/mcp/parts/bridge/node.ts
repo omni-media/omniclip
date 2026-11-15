@@ -9,10 +9,10 @@ import {mkdtemp, rm, writeFile} from 'node:fs/promises'
 import {connect, Messenger, wire} from '@e280/renraku'
 import Fastify, {type FastifyReply, type FastifyRequest} from 'fastify'
 
-import type {TimelinePatch} from '@omnimedia/omniso/timeline'
-import {bridgePort, type EditorRpc} from '@omnimedia/omniso/mcp/protocol'
-import type {MediaInfo} from '@omnimedia/omniso/assistant/types'
 import {abortable} from '@omnimedia/omniso/abortable'
+import type {TimelinePatch} from '@omnimedia/omniso/timeline'
+import type {MediaInfo} from '@omnimedia/omniso/assistant/types'
+import {bridgePort, type EditorRpc, type AudioAnalyzeRequest} from '@omnimedia/omniso/mcp/protocol'
 
 type ProvidedMedia = MediaInfo & {path: string}
 type MediaRequest = FastifyRequest<{Params: {id: string}}>
@@ -67,7 +67,11 @@ export class EditorBridge {
 	}
 
 	patch(patch: TimelinePatch, signal?: AbortSignal) {
-		return this.#callEditor((editor, id) => editor.patch_timeline(patch, id), signal)
+		return this.callEditor((editor, id) => editor.patch_timeline(patch, id), signal)
+	}
+
+	analyzeAudio(input: AudioAnalyzeRequest, signal: AbortSignal) {
+		return this.callEditor((editor, id) => editor.audio_analyze(input, id), signal, undefined, Infinity)
 	}
 
 	provide(mediaHash: string, signal?: AbortSignal) {
@@ -78,7 +82,7 @@ export class EditorBridge {
 			this.#uploads.add(id)
 
 			try {
-				const media = await this.#callEditor(
+				const media = await this.callEditor(
 					(editor, id) => editor.provide_media({
 						mediaHash,
 						uploadUrl: `http://127.0.0.1:${this.port}/media/${id}`
@@ -110,7 +114,7 @@ export class EditorBridge {
 
 		const {connection, remote} = wire({
 			connection: await connect(socket),
-			messenger: new Messenger<EditorRpc>(undefined, 120_000),
+			messenger: new Messenger<EditorRpc>(undefined, Infinity),
 		})
 		this.#editor = remote
 		this.#disconnected = new AbortController()
@@ -137,15 +141,18 @@ export class EditorBridge {
 		return reply.code(204).send()
 	}
 
-	async #callEditor<T>(
+	async callEditor<T>(
 		execute: (editor: EditorRpc, id: string) => Promise<T>,
 		signal?: AbortSignal,
-		id = hex.random(16)
+		id = hex.random(16),
+		timeout = 120_000,
 	) {
 		const editor = this.editor
-		const cancelSignal = signal
-			? AbortSignal.any([this.#disconnected.signal, signal])
-			: this.#disconnected.signal
+		const cancelSignal = AbortSignal.any([
+			this.#disconnected.signal,
+			...(signal ? [signal] : []),
+			...(timeout === Infinity ? [] : [AbortSignal.timeout(timeout)]),
+		])
 
 		cancelSignal.throwIfAborted()
 
@@ -154,3 +161,4 @@ export class EditorBridge {
 		})
 	}
 }
+

@@ -1,14 +1,15 @@
 
 import type {infer as Infer} from 'zod'
+import type {TimelinePatch} from '@omnimedia/omniso/timeline'
 import {McpServer} from '@modelcontextprotocol/sdk/server/mcp.js'
+import type {ProjectSettingsUpdate} from '@omnimedia/omniso/settings'
 import type {CallToolResult} from '@modelcontextprotocol/sdk/types.js'
+import type {AudioAnalyzeRequest} from '@omnimedia/omniso/mcp/protocol'
 
 import {editorTools} from './tools.js'
 import {EditorBridge} from './bridge/node.js'
 import type {connectVision} from './vision.js'
 import {mcpInstructions} from './instructions.js'
-import type {TimelinePatch} from '@omnimedia/omniso/timeline'
-import type {ProjectSettingsUpdate} from '@omnimedia/omniso/settings'
 
 type Vision = Awaited<ReturnType<typeof connectVision>>
 type EditorToolInput = Infer<typeof editorTools[number]['inputSchema']>
@@ -28,16 +29,17 @@ export function createMcpServer(bridge: EditorBridge, vision: Vision) {
 
 		switch (name) {
 			case 'read_project_context':
+				return bridge.callEditor(editor => editor.read_project_context(), signal)
 			case 'create_item':
-				return bridge.editor[name]()
+				return bridge.callEditor(editor => editor.create_item(), signal)
 			case 'patch_timeline':
 				return bridge.patch(args as TimelinePatch, signal)
 			case 'update_settings':
-				return bridge.editor.update_settings(args as ProjectSettingsUpdate)
+				return bridge.callEditor(editor => editor.update_settings(args as ProjectSettingsUpdate), signal)
 			case 'audio_analyze':
-				throw new Error('Audio analysis is not implemented yet.')
+				return bridge.analyzeAudio(args as AudioAnalyzeRequest, signal)
 			case 'provide_media': {
-				const context = await bridge.editor.read_project_context()
+				const context = await bridge.callEditor(editor => editor.read_project_context(), signal)
 				const item = context.timeline.items.find(item =>
 					'itemId' in args && item.id === args.itemId
 				)

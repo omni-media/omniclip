@@ -8,7 +8,7 @@ import {CallToolResultSchema, type Tool} from '@modelcontextprotocol/sdk/types.j
 const visualToolNames = new Set(['video_info', 'video_analyze', 'video_watch', 'video_detail'])
 const hiddenInputs = ['skip_audio', 'frame_mode', 'describer_model']
 const descriptionSuffix =
-	'Audio transcription is disabled; audio_analyze is not implemented yet. ' +
+	'These visual tools do not analyze audio; use audio_analyze for speech, music or sound events. ' +
 	'Inspect original sources and map their timestamps using read_project_context.'
 
 type JsonSchema = Parameters<typeof fromJSONSchema>[0]

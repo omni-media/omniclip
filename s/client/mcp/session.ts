@@ -1,5 +1,6 @@
 
 import {queue} from '@e280/stz'
+import {analyzeAudio} from './audio.js'
 import type {EditorRpc} from '@omnimedia/omniso/mcp/protocol'
 import type {TimelinePatch} from '@omnimedia/omniso/timeline'
 import type {EditorContext} from '../editor/context/context.js'
@@ -32,6 +33,7 @@ export function createEditorSession(editor: EditorContext, origin: string) {
 
 	const fns: EditorRpc = {
 		read_project_context: async () => context(),
+		audio_analyze: (input, id) => run(id, signal => analyzeAudio(editor, input, signal)),
 		update_settings: async settings => {
 			editor.assistant.updateProjectSettings(settings)
 			return context()
