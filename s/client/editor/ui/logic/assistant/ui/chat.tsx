@@ -1,14 +1,14 @@
 
 import {useEffect, useState} from "react"
-import {billing} from "@omnimedia/omniso/billing"
+import {ArrowDownIcon} from "lucide-react"
 import {AssistantRuntimeProvider, AuiIf, ThreadPrimitive} from "@assistant-ui/react"
 
 import {useChatPanel} from "./parts/panel.js"
 import {useCloudAccess} from "./parts/access.js"
 import {ChatHeader} from "./renderers/header.js"
-import {starterPrompts} from "./parts/starter.js"
 import {ThreadSidebar} from "./renderers/threads.js"
 import {ChatComposer} from "./renderers/composer.js"
+import {StarterPrompts} from "./renderers/starter.js"
 import {useProjectHeartbeat} from "./parts/heartbeat.js"
 import {MediaSplitter} from "./toolkit/video/splitter.js"
 import {settingsModal} from "../../modals/settings/modal.js"
@@ -24,10 +24,10 @@ export function AssistantChat({context, onClose}: {
 }) {
 	const panel = useChatPanel(onClose)
 	const {panelRef, minimized, fullscreen} = panel
-	const [threadSearch, setThreadSearch] = useState("")
 	const [reasoningEffort, setReasoningEffort] = useState<ReasoningEffort>("xhigh")
 	const {runtime, config} = useProjectChatRuntime(context, reasoningEffort)
 	const {auth, signedIn, balance, billingError} = useCloudAccess(runtime)
+	const hasCredits = !!balance && balance.monthly + balance.purchased > 0
 
 	useProjectHeartbeat(context.strata.projectId, signedIn)
 	useEffect(() => {
@@ -36,10 +36,12 @@ export function AssistantChat({context, onClose}: {
 	useEffect(() => {MediaSplitter.clearTemporaryMedia()}, [])
 
 	const composer = balance && <ChatComposer
+		context={context}
 		effort={reasoningEffort}
 		onEffortChange={setReasoningEffort}
 		status={balance}
 	/>
+	const suggestions = <StarterPrompts disabled={!hasCredits} />
 
 	const openMcpSettings = async() => {
 		const settings = await context.modals.openModal(settingsModal("mcp"))
@@ -56,30 +58,25 @@ export function AssistantChat({context, onClose}: {
 					<div className={fullscreen ? "welcome welcome-fullscreen" : "welcome"}>
 						<strong>How can I help you today?</strong>
 						{!fullscreen && <span>Ask about Omniclip and video editing.</span>}
+						{fullscreen && suggestions}
 						{fullscreen && composer}
-						{fullscreen && <div className="starter-prompts">
-							{starterPrompts.map(({title, prompt}) =>
-								<ThreadPrimitive.Suggestion
-									key={title}
-									className="starter-prompt"
-									prompt={prompt}
-									disabled={!balance || balance.monthly + balance.purchased < billing.chatCredits}
-									send>
-									{title}
-								</ThreadPrimitive.Suggestion>,
-							)}
-						</div>}
 					</div>
 				</AuiIf>
 
-				<ChatCreditsContext.Provider value={!!balance && balance.monthly + balance.purchased >= billing.chatCredits}>
+				<ChatCreditsContext.Provider value={hasCredits}>
 					<ThreadPrimitive.Messages components={{UserMessage, AssistantMessage}} />
 				</ChatCreditsContext.Provider>
+				<ThreadPrimitive.ScrollToBottom className="scroll-to-latest" aria-label="Scroll to latest message">
+					<ArrowDownIcon /> Latest messages
+				</ThreadPrimitive.ScrollToBottom>
 			</ThreadPrimitive.Viewport>
 		</ThreadPrimitive.Root>
 
 		<AuiIf condition={state => !fullscreen || !state.thread.isEmpty}>
-			{composer}
+			<div className="composer-shell">
+				{!fullscreen && <AuiIf condition={state => state.thread.isEmpty}>{suggestions}</AuiIf>}
+				{composer}
+			</div>
 		</AuiIf>
 	</>
 
@@ -106,10 +103,7 @@ export function AssistantChat({context, onClose}: {
 				data-fullscreen={fullscreen || undefined}
 				data-signed-in={signedIn || undefined}
 				data-minimized={minimized || undefined}>
-				{signedIn && fullscreen && <ThreadSidebar
-					search={threadSearch}
-					onSearchChange={setThreadSearch}
-				/>}
+				{signedIn && fullscreen && <ThreadSidebar />}
 
 				<div className="chat-view">
 					<ChatHeader panel={panel} />

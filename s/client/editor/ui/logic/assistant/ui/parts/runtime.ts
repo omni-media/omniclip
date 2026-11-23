@@ -15,7 +15,7 @@ import {createAssistantToolkit} from '../toolkit/toolkit.js'
 import type {EditorContext} from '../../../../../context/context.js'
 import {createLocalHistoryAdapter, createThreadListAdapter} from './persistence.js'
 
-export type ReasoningEffort = 'none' | 'low' | 'medium' | 'xhigh'
+export type ReasoningEffort = 'low' | 'medium' | 'xhigh'
 
 export function useProjectChatRuntime(
 	context: EditorContext,

@@ -4,6 +4,7 @@ import {billing} from "@omnimedia/omniso/billing"
 
 import type {BillingAction} from "./actions.js"
 import type {BillingData, Pricing} from "./access.js"
+import {formatCredits} from "../../logic/utils/credits.js"
 
 export function renderBilling({billing: data, busy, manageBilling}: {
 	billing: BillingData
@@ -39,11 +40,11 @@ export function renderBilling({billing: data, busy, manageBilling}: {
 				<p class="plan-meta">${proPrice ? `${proPrice} / month · ` : ""}${status.cancelAt ? "Access ends" : "Renews"} ${renewal}</p>
 				<div class="credit-balances" aria-label="Available credits">
 					<div class="credit-total">
-						<strong>${status.monthly + status.purchased}</strong>
+						<strong>${formatCredits(status.monthly + status.purchased)}</strong>
 						<span>Credits left</span>
 					</div>
-					<div><strong>${status.monthly}</strong><span>Monthly credits</span></div>
-					<div><strong>${status.purchased}</strong><span>Purchased credits</span></div>
+					<div><strong>${formatCredits(status.monthly)}</strong><span>Monthly credits</span></div>
+					<div><strong>${formatCredits(status.purchased)}</strong><span>Purchased credits</span></div>
 				</div>
 				<div class="plan-actions">
 					<button class="primary" ?disabled=${busy} @click=${() => manageBilling("credits")}>
@@ -64,7 +65,7 @@ export function renderBilling({billing: data, busy, manageBilling}: {
 				</ul>
 				${status.purchased ? html`
 					<p class="retained-credits">
-						Your ${status.purchased} purchased credits are available when you resubscribe.
+						Your ${formatCredits(status.purchased)} purchased credits are available when you resubscribe.
 					</p>
 				` : null}
 				<button class="primary subscribe" ?disabled=${busy} @click=${() => manageBilling("subscribe")}>
@@ -76,8 +77,7 @@ export function renderBilling({billing: data, busy, manageBilling}: {
 		<details class="credit-details">
 			<summary>How credits work</summary>
 			<dl>
-				<div><dt>AI chat</dt><dd>${billing.chatCredits} credit per request</dd></div>
-				<div><dt>Video analysis</dt><dd>${billing.videoCredits} credits per request</dd></div>
+				<div><dt>AI usage</dt><dd>Credits depend on model usage and web searches.</dd></div>
 				<div><dt>Monthly credits</dt><dd>Reset at renewal. Unused credits don’t roll over.</dd></div>
 				<div><dt>Purchased credits</dt><dd>Valid for 12 months. An active subscription is required to buy and use them.</dd></div>
 			</dl>

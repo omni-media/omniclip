@@ -1,14 +1,34 @@
 
 import {reactBindings} from "@e280/strata"
 import {useAuiState} from "@assistant-ui/react"
+import {CheckIcon, Undo2Icon} from "lucide-react"
 import {createContext, useContext, useEffect, useState, type ReactNode} from "react"
-import {CheckCircle2Icon, ChevronRightIcon, CircleXIcon, Undo2Icon} from "lucide-react"
 
-import type {EditorContext} from "../../../../../context/context.js"
+import {
+	isHiddenSuccessfulTool,
+	toolStatus,
+	type ToolOutcome,
+	type ToolState,
+} from "../toolkit/tool-state.js"
 import {useUploadProgress} from "../toolkit/video/progress.js"
+import {RunActivity} from "../components/elements/run-activity.js"
+import type {EditorContext} from "../../../../../context/context.js"
 
 const AssistantEditor = createContext<EditorContext | undefined>(undefined)
 const {useTracked} = reactBindings({useEffect, useState})
+
+function summarizeTools(tools: readonly ToolState[]) {
+	const outcomes = tools.map(tool => toolStatus(tool).outcome)
+	let outcome: ToolOutcome = "complete"
+	if (outcomes.includes("incomplete")) outcome = "incomplete"
+	if (outcomes.includes("cancelled")) outcome = "cancelled"
+	if (outcomes.includes("failed")) outcome = "failed"
+
+	const stepCount = tools.filter((tool, index) =>
+		outcomes[index] !== "complete" || !isHiddenSuccessfulTool(tool)
+	).length
+	return {outcome, stepCount}
+}
 
 export const AssistantEditorProvider = ({context, children}: {
 	context: EditorContext
@@ -52,55 +72,57 @@ const TimelineEdit = ({indices}: {
 			setUndone(true)
 	}
 
-	return <div className="tool-step tool-change">
-		<span>✓</span><span>Timeline updated</span>
+	return <div className="timeline-update">
+		<span>Timeline updated</span><CheckIcon aria-hidden="true" />
 		{canUndo && <button className="undo-changes" type="button" onClick={undo}>
 			<Undo2Icon />Undo changes
 		</button>}
 	</div>
 }
 
-const ToolStatus = ({active, failed, label, count}: {
-	active: boolean
-	failed: boolean
-	label: string
-	count: number
-}) => {
-	if (failed) return <><CircleXIcon className="activity-failed" /><span>Some steps failed</span></>
-	if (active) return <span className="thinking-shimmer">{label}</span>
-	return <><CheckCircle2Icon className="activity-done" /><span>Completed · {count} {count === 1 ? "step" : "steps"}</span></>
-}
-
-export const ToolGroup = ({failed, indices, children}: {
-	failed: boolean
+export const ToolGroup = ({indices, children}: {
 	indices: readonly number[]
 	children: ReactNode
 }) => {
 	const parts = useAuiState(({message}) => message.parts)
+	const [open, setOpen] = useState(false)
 	const turnRunning = useAuiState(({message, thread}) => message.isLast && thread.isRunning)
+
 	const tools = indices.map(index => parts[index]).filter(part => part?.type === "tool-call")
-	const active = turnRunning && indices.includes(parts.length - 1)
-	const hasFailed = failed || tools.some(tool => tool.isError || (
-		typeof tool.result === "object" && tool.result !== null &&
-		"success" in tool.result && tool.result.success === false
-	))
-	const count = tools.filter(tool => tool.toolName !== "create_item" || tool.isError).length
-	const lastTool = tools.at(-1)
-	const label = useUploadProgress(lastTool?.toolCallId ?? "", lastTool?.toolName === "web_search" ? "Searching the web…" : "Working…")
+	const {outcome, stepCount} = summarizeTools(tools)
+
+	const lastTool = tools.at(-1)!
+	const failed = outcome === "failed"
+	const active = turnRunning && indices.at(-1) === parts.length - 1
+	const fallbackLabel = lastTool.toolName === "web_search" ? "Searching the web…" : "Working…"
+	const label = useUploadProgress(lastTool.toolCallId, fallbackLabel)
+
+	useEffect(() => {
+		if (failed) setOpen(true)
+	}, [failed])
+
+	const status = active ? "running" : outcome === "failed" ? "error" : outcome
+	const statusLabel = ({
+		running: label,
+		error: "Some steps failed",
+		cancelled: "Stopped",
+		incomplete: "Some steps incomplete",
+		complete: `Completed · ${stepCount} ${stepCount === 1 ? "step" : "steps"}`,
+	})[status]
+	const showActivity = stepCount > 0 || active
 
 	return <div className="tool-activity">
-		{(count > 0 || active || hasFailed) && <details
-			className="tool-group"
+		{showActivity && <div
+			className="tool-group assistant-ui-elements"
 			data-running={active || undefined}
-			data-failed={hasFailed || undefined}
-			open={hasFailed}
-		>
-			<summary>
-				<ToolStatus active={active} failed={hasFailed} label={label} count={count} />
-				<ChevronRightIcon />
-			</summary>
-			<div className="tool-content">{children}</div>
-		</details>}
+			data-failed={failed || undefined}>
+			<RunActivity
+				status={status}
+				statusLabel={statusLabel}
+				entries={stepCount ? [{id: "tools", kind: "tool", label: "", content: children}] : []}
+				open={open}
+				onOpenChange={setOpen} />
+		</div>}
 		<TimelineEdit indices={indices} />
 	</div>
 }

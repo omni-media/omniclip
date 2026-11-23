@@ -19,7 +19,7 @@ export async function setupRequirements(projectId: string) {
 	const project = new Omni(driver)
 
 	const cargo = await CargoController.setup(strata, cellar, project)
-	await hydrateProject(cargo.projectLibrary, project, cellar, strata)
+	await hydrateProject(cargo, project, cellar, strata)
 
 	const player = await project.playback(strata.timeline.state as TimelineFile)
 	const session = new OmniSession({

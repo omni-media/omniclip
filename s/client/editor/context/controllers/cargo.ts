@@ -1,6 +1,6 @@
 
 import {collect} from "@e280/stz"
-import {Omni} from "@omnimedia/omnitool"
+import {Datafile, Omni} from "@omnimedia/omnitool"
 import {Cellar, MediaLibrary} from "@e280/quay"
 
 import {Strata} from "../parts/strata.js"
@@ -20,9 +20,25 @@ export class CargoController {
 		public editorLibrary: MediaLibrary
 	) {}
 
-	async loadMedia(hash: string) {
-		const cask = await this.projectLibrary.cellar.load(hash)
-		return cask.file
+	async loadMedia({hash, mime, label}: {hash: string; mime?: string | undefined; label: string}) {
+		const {file} = await this.editorLibrary.cellar.load(hash)
+		const {media} = await this.project.load({
+			media: Datafile.make(new Blob([file], {type: mime}), {filename: label, hash}),
+		})
+		return media
+	}
+
+	async resolveMedia(hash: string) {
+		try {
+			return this.project.resources.require(hash)
+		}
+		catch {
+			const item = this.editorLibrary.findByHash(hash)
+			if (!item) throw new Error("The media file is no longer in the library.")
+			const {mime, label} = item.specimen
+			await this.loadMedia({hash, mime, label})
+			return this.project.resources.require(hash)
+		}
 	}
 
 	async refresh() {

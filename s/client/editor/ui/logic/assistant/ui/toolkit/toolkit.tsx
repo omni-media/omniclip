@@ -6,8 +6,10 @@ import type {TimelinePatchResult} from "@omnimedia/omniso/timeline"
 import type {ProjectSettingsUpdate} from "@omnimedia/omniso/settings"
 import type {AssistantContext} from "@omnimedia/omniso/assistant/types"
 
+import {chooseOption} from "./choice.js"
 import {mediaToolkit} from "./video/tool.js"
 import {ReasoningEffort} from "../parts/runtime.js"
+import {ensureMedia} from "./video/ensure-media.js"
 import {activity, resultActivity} from "./activity.js"
 import type {EditorContext} from "../../../../../context/context.js"
 
@@ -15,6 +17,18 @@ export const createAssistantToolkit = (
 	context: EditorContext,
 	reasoningEffort: ReasoningEffort,
 ): Toolkit => defineToolkit({
+	choose_option: chooseOption,
+	read_project_context: {
+		...editorTools.read_project_context,
+		type: "frontend",
+		description: `${editorTools.read_project_context.description} A mentioned library file may be available even if it is not in this media list. Use probe_media with its mentioned media ID.`,
+		execute: () => context.getAssistantContext(),
+		renderText: {
+			running: () => activity("Reading project context", "running"),
+			complete: ({result}: {result?: AssistantContext}) =>
+				resultActivity(result, "Read project context", "Could not read project context"),
+		},
+	},
 	web_search: {
 		type: "backend",
 		renderText: {
@@ -59,7 +73,16 @@ export const createAssistantToolkit = (
 	patch_timeline: {
 		...editorTools.patch_timeline,
 		type: "frontend",
-		execute: context.assistant.patchTimeline,
+		execute: async patch => {
+			try {
+				if (patch.baseRevision === context.assistant.revision)
+					await ensureMedia(context, patch)
+			}
+			catch (error) {
+				return {success: false as const, error: error instanceof Error ? error.message : String(error)}
+			}
+			return context.assistant.patchTimeline(patch)
+		},
 		renderText: {
 			running: () => activity("Applying timeline changes", "running"),
 			complete: ({result}: {result?: TimelinePatchResult}) =>

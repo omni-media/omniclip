@@ -1,25 +1,18 @@
 
-import {Cellar, MediaLibrary} from "@e280/quay"
+import {Cellar} from "@e280/quay"
 import {Datafile, Kind, Omni} from "@omnimedia/omnitool"
 
 import {Strata} from "./strata.js"
+import type {CargoController} from "../controllers/cargo.js"
 
 export async function hydrateProject(
-	library: MediaLibrary,
+	cargo: CargoController,
 	omni: Omni,
 	cellar: Cellar,
 	strata: Strata
 ) {
-// hydrate omnitool using quay media
-	for await (const record of library.records()) {
-		const cask = await library.cellar.load(record.hash)
-		await omni.load({
-			media: Datafile.make(new Blob([cask.file], {type: record.mime}), {
-				filename: record.label,
-				hash: record.hash
-			}),
-		})
-	}
+	for await (const record of cargo.projectLibrary.records())
+		await cargo.loadMedia(record)
 
 	// hydrate saved bg remover images for omnitool to use
 	for (const meta of strata.trunk.get().metadata.items.filter(item => item.bgRemoved)) {

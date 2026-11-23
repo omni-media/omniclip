@@ -38,7 +38,9 @@ export const Assistant = shadow((context: EditorContext, open: Signal<boolean>) 
 	})
 
 	return html`
+		<link rel="stylesheet" href=${new URL("./assistant-ui.css", import.meta.url).href}>
 		<div
+			class="dark"
 			?hidden=${!open()}
 			${ref(container)}>
 		</div>

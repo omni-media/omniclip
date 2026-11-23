@@ -2,7 +2,7 @@
 import {html} from "lit"
 import {keyed} from "lit/directives/keyed.js"
 import {shadow, useCss, useOnce, useSignal, useMount} from "@e280/sly"
-import {Datafile, Item, Media, O, transform, type Transition} from "@omnimedia/omnitool"
+import {Item, Media, O, transform, type Transition} from "@omnimedia/omnitool"
 import {components as quayComponents, dom, type MediaFormat, type MediaLibrary} from "@e280/quay"
 
 import styleCss from "./style.css.js"
@@ -56,15 +56,8 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 
 		const hash = item.specimen.hash!
 		await cargo.projectLibrary.include(hash)
-		const file = await cargo.loadMedia(hash)
-
 		const {specimen: {mime, label}} = item
-		const {media} = await context.project.load({
-			media: Datafile.make(new Blob([file], {type: mime}), {
-				filename: label,
-				hash,
-			}),
-		})
+		const media = await cargo.loadMedia({hash, mime, label})
 
 		// TODO: should be toast instead
 		const added = context.session.appendItem(omni => makeItem(omni, format, media))

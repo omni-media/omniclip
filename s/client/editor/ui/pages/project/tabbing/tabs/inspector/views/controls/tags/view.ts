@@ -32,6 +32,7 @@ export const TagControls = shadow((context: EditorContext, itemId: Id) => {
 	const colorTag = tags.colorTag(itemId)
 	const assignedTags = assignedIds.map(id => need(tags.definitions, id))
 	const availableTags = [...tags.definitions.values()].filter(tag => !assignedIds.includes(tag.id))
+	const hasAvailableTags = availableTags.length > 0
 
 	const save = (ids: string[]) => {
 		error("")
@@ -54,9 +55,9 @@ export const TagControls = shadow((context: EditorContext, itemId: Id) => {
 		<h4 class="heading">Tags</h4>
 		${TagList({itemId, tags: assignedTags, colorTagId: colorTag?.id, save})}
 		<wa-select aria-label="Assign a tag" size="small"
-			placeholder=${availableTags.length ? "Assign a tag" : "All tags assigned"}
+			placeholder=${hasAvailableTags ? "Assign a tag" : "No tags to assign"}
 			.value=${""}
-			?disabled=${!availableTags.length}
+			?disabled=${!hasAvailableTags}
 			@change=${addTag}>
 			${repeat(availableTags, tag => `${tag.id}:${tag.label}`, tag => html`
 				<wa-option value=${tag.id}>${tag.label}</wa-option>

@@ -1,0 +1,41 @@
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@import "tw-animate-css";
+@import "tw-shimmer";
+@source "./elements";
+@source "./ui";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+	--color-background: var(--assistant-surface);
+	--color-foreground: var(--assistant-text);
+	--color-muted-foreground: var(--assistant-muted);
+	--color-border: var(--assistant-border);
+	--color-popover: var(--assistant-surface);
+	--color-popover-foreground: var(--assistant-text);
+	--color-muted: var(--assistant-raised);
+	--color-accent: var(--assistant-raised);
+	--color-accent-foreground: var(--assistant-text);
+	--color-input: var(--assistant-border);
+	--color-ring: var(--assistant-muted);
+	--color-destructive: #f28b82;
+}
+
+@layer base {
+	.assistant-ui-elements, .assistant-ui-elements * {
+		box-sizing: border-box;
+		border: 0 solid;
+	}
+	.assistant-ui-elements button {
+		font: inherit;
+		color: inherit;
+		background: transparent;
+		cursor: pointer;
+	}
+	.assistant-ui-elements [data-slot="run-activity"] ol {
+		list-style: none;
+		margin: 0;
+	}
+}

@@ -2,11 +2,7 @@
 import {Maximize2Icon, Minimize2Icon} from "lucide-react"
 import type {useChatPanel} from "../parts/panel.js"
 
-export function ChatHeader({
-	panel,
-}: {
-	panel: ReturnType<typeof useChatPanel>
-}) {
+export function ChatHeader({panel}: {panel: ReturnType<typeof useChatPanel>}) {
 	const {
 		fullscreen,
 		minimized,
@@ -19,7 +15,7 @@ export function ChatHeader({
 	return <header
 		title={fullscreen ? undefined : "Drag to move"}
 		{...dragHandlers}>
-		<strong><span>✦</span> Omniclip AI</strong>
+		{!fullscreen && <strong><span>✦</span> Omniclip AI</strong>}
 		<div>
 			{fullscreen
 				? <button
