@@ -31,7 +31,7 @@ In Settings → MCP, enable **Allow local MCP access**. The bridge port defaults
 
 The bridge binds **127.0.0.1 only** and accepts the exact editor origin configured by `OMNICLIP_ORIGIN` (default `http://127.0.0.1:3000`). There is no account authentication on this local connection. Do not expose the port remotely. For another app origin, set that environment variable on the MCP process; the browser URL and configured origin must match exactly. HTTPS-hosted browsers may restrict the local HTTP/WebSocket connection; use localhost for initial browser testing. Only one MCP process can bind a given port; running both clients simultaneously requires distinct `OMNICLIP_MCP_PORT` values and matching browser tabs.
 
-Install the shared [Omniclip skill](skills/omniclip/SKILL.md) by copying its `omniclip` folder into the client's skills directory (`.agents/skills` for Codex projects, `.claude/skills` for Claude Code projects). The MCP server also supplies essential instructions during initialization. It does not depend on Claude's slash commands, subagents or plugin installer. You do not need a second video-vision MCP registration.
+Install the [Omniclip MCP skill](skills/omniclip/SKILL.md) by copying its `omniclip` folder into the client's skills directory (`.agents/skills` for Codex projects, `.claude/skills` for Claude Code projects). The MCP server also supplies its tool instructions and the shared Omniclip editor guide during initialization. It does not depend on Claude's slash commands, subagents or plugin installer. You do not need a second video-vision MCP registration.
 
 ## Tools
 

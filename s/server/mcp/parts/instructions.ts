@@ -1,3 +1,8 @@
+
+import {readFileSync} from "node:fs"
+
+const skills = import.meta.resolve("@omnimedia/omniso/skills")
+const editorGuide = readFileSync(new URL(`${skills}/omniclip/SKILL.md`), "utf8")
 export const mcpInstructions = `Omniclip edits the project open in the connected browser tab.
 Read read_project_context before planning or editing. Its timelineRevision is authoritative: never invent a baseRevision. patch_timeline returns fresh context, including on failure.
 Current project settings are in context.settings. Use update_settings for requested resolution, aspect ratio, frame rate, timecode, color space or audio settings changes. Supply only changed fields; when changing canvas format, supply both resolution and a matching aspectRatio. This does not resize or reposition clips. The tool returns fresh context; settings are saved separately from timeline undo history. Only report success after the tool succeeds.
@@ -5,4 +10,6 @@ All editor timeline times, source start offsets, and durations are milliseconds.
 Use provide_media(itemId) to obtain an original source file for the visual tools. Shared sources have the same mediaHash/path, but distinct item IDs and trims. A source inspection does not describe the rendered edit.
 For visual questions, video_info gives metadata; video_analyze gives scene/motion hints; video_watch gives an overview; video_detail inspects relevant windows more densely. These tools return images to you, not to a separate vision model. Use frame_mode images (enforced). They do not transcribe audio. Their HH:MM:SS range parameters have whole-second precision; surround a sub-second event with a larger window and use a higher FPS. Do not claim frame-accurate timings from a sparse overview.
 For speech, music or sound events, use audio_analyze(itemId, prompt, start?, end?). It sends audio only to Omniclip's cloud model and requires the browser user's active subscription and AI credits. It defaults to the item's trim. Returned analyses have source start/end offsets in seconds; add each start to part-local analysis timestamps. It does not render effects, gain or the final mix.
-Only patch when the user asks for an edit. Get new IDs with create_item; replace existing items with their complete data and original IDs. Update affected containers when removing/reordering items. Only report success after a successful patch. Re-read context after disconnects or timeouts before retrying writes.`
+Only patch when the user asks for an edit. Get new IDs with create_item; replace existing items with their complete data and original IDs. Update affected containers when removing/reordering items. Only report success after a successful patch. Re-read context after disconnects or timeouts before retrying writes.
+
+${editorGuide}`
