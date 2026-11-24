@@ -5,7 +5,8 @@
 	"main": "x/index.js",
 	"files": [
 		"x",
-		"s"
+		"s",
+		"skills"
 	],
 	"type": "module",
 	"bin": {

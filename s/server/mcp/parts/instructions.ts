@@ -1,8 +1,8 @@
 
 import {readFileSync} from "node:fs"
 
-const skills = import.meta.resolve("@omnimedia/omniso/skills")
-const editorGuide = readFileSync(new URL(`${skills}/omniclip/SKILL.md`), "utf8")
+const editorGuide = readFileSync(new URL("../../../../skills/omniclip/SKILL.md", import.meta.url), "utf8")
+
 export const mcpInstructions = `Omniclip edits the project open in the connected browser tab.
 Read read_project_context before planning or editing. Its timelineRevision is authoritative: never invent a baseRevision. patch_timeline returns fresh context, including on failure.
 Current project settings are in context.settings. Use update_settings for requested resolution, aspect ratio, frame rate, timecode, color space or audio settings changes. Supply only changed fields; when changing canvas format, supply both resolution and a matching aspectRatio. This does not resize or reposition clips. The tool returns fresh context; settings are saved separately from timeline undo history. Only report success after the tool succeeds.
