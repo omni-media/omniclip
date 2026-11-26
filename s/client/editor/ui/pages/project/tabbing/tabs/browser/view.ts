@@ -1,6 +1,5 @@
 
 import {html} from "lit"
-import {keyed} from "lit/directives/keyed.js"
 import {shadow, useCss, useOnce, useSignal, useMount} from "@e280/sly"
 import {Item, Media, O, transform, type Transition} from "@omnimedia/omnitool"
 import {components as quayComponents, dom, type MediaFormat, type MediaLibrary} from "@e280/quay"
@@ -157,40 +156,56 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 		</button>
 	`
 
-	const renderMediaPath = () => html`
-		<nav class="media-path" aria-label="Media location">
-			<button ?data-current=${mediaScope() === "all"} @click=${() => selectMediaScope("all")}>Library</button>
-			<span>/</span>
-			<button ?data-current=${mediaScope() === "project"} @click=${() => selectMediaScope("project")}>Project</button>
-		</nav>
-	`
-
-	const selectedLibrary = () => mediaScope() === "project" ? cargo.projectLibrary : cargo.editorLibrary
-	const selectMediaScope = (scope: "project" | "all") => {
-		mediaScope(scope)
-		aiSearch.select(scope === "project" ? cargo.projectLibrary : cargo.editorLibrary)
-	}
-
 	const renderAiSearch = createAiSearch(aiSearch)
 
-	const renderMedia = () => keyed(mediaScope(), html`
-		<div class="media-bin" group=${`${MEDIA_GROUP}-${mediaScope()}`}>
-			<div class="media-toolbar">
-				<div class="search media-search">
-					<input type="search" aria-label="Search media"
-						placeholder=${aiSearch.enabled() ? "Describe your media…" : "Search media…"}
-						.value=${selectedLibrary().searchText()}
-						@input=${(event: InputEvent) => selectedLibrary().searchText((event.target as HTMLInputElement).value)}>
-					${renderAiSearch()}
-				</div>
-				<quay-filter></quay-filter>
-				<quay-sort></quay-sort>
+	const renderMediaTools = (scope: "project" | "all", library: MediaLibrary) => html`
+		<div class="media-toolbar">
+			<div class="search media-search" @focusin=${() => {
+				if (mediaScope() === scope) return
+				mediaScope(scope)
+				aiSearch.select(library)
+			}}>
+				<input type="search" aria-label="Search media"
+					placeholder=${aiSearch.enabled() && mediaScope() === scope ? "Describe your media…" : "Search media…"}
+					.value=${library.searchText()}
+					@input=${(event: InputEvent) => library.searchText((event.target as HTMLInputElement).value)}>
+				${renderAiSearch(`media-ai-search-${scope}`)}
 			</div>
-			<quay-dropzone group=${`${MEDIA_GROUP}-project`}></quay-dropzone>
-			${renderMediaPath()}
-			<quay-browser></quay-browser>
+			<quay-filter no-caret></quay-filter>
+			<quay-sort no-caret></quay-sort>
 		</div>
-	`)
+	`
+
+	const renderMediaLibrary = (library: MediaLibrary) => html`
+		<div class="media-library">
+			<div class="folder-toolbar">
+				<quay-breadcrumb></quay-breadcrumb>
+				<sl-tooltip class="media-tooltip" content="New folder">
+					<button class="new-folder" type="button" aria-label="New folder" @click=${() => {
+						const folder = library.trail.signal().at(-1) ?? library.config.root
+						void library.addFolder(folder).catch(error => alert(error instanceof Error ? error.message : String(error)))
+					}}><sl-icon name="folder-plus"></sl-icon></button>
+				</sl-tooltip>
+			</div>
+			<quay-browser tiles-only></quay-browser>
+		</div>
+	`
+
+	const renderMedia = () => html`
+		<div class="media-bin">
+			<sl-tooltip class="media-tooltip" content="Click to browse files">
+				<quay-dropzone group=${`${MEDIA_GROUP}-project`}></quay-dropzone>
+			</sl-tooltip>
+			<wa-details open summary="Project Bin" icon-placement="start" group=${`${MEDIA_GROUP}-project`}>
+				${renderMediaTools("project", cargo.projectLibrary)}
+				${renderMediaLibrary(cargo.projectLibrary)}
+			</wa-details>
+			<wa-details summary="All Media" icon-placement="start" group=${`${MEDIA_GROUP}-all`}>
+				${renderMediaTools("all", cargo.editorLibrary)}
+				${renderMediaLibrary(cargo.editorLibrary)}
+			</wa-details>
+		</div>
+	`
 
 	const renderTransitions = () => {
 		const selected = context.session.index.getItemMaybe<Item.Transition>(context.session.$selectedItem())
@@ -274,11 +289,13 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 
 	return html`
 		<div class="browser">
-			<nav class="browser-tabs">
-				${renderTabButton("media", "Media", folderSvg)}
-				${renderTabButton("transitions", "Transitions", transitionSvg)}
-				${renderTabButton("text", "Text", textSvg)}
-			</nav>
+			<div class="browser-header">
+				<nav class="browser-tabs">
+					${renderTabButton("media", "Media", folderSvg)}
+					${renderTabButton("transitions", "Transitions", transitionSvg)}
+					${renderTabButton("text", "Text", textSvg)}
+				</nav>
+			</div>
 
 			<div class="browser-body">
 				${renderBody()}

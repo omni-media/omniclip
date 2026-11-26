@@ -11,12 +11,14 @@ type SetupMediaGroupOptions = {
 }
 
 export function setupMediaGroup({group, library, onAdd, onRemove}: SetupMediaGroupOptions) {
-	library.config.renderPreview = item => MediaItemPreview({
-		item,
-		library,
-		onAdd: event => onAdd(event, item),
-		onRemove: event => onRemove(event, item),
-	})
+	library.config.renderPreview = item => item.isKind("folder")
+		? library.config.renderIcon(item, false)
+		: MediaItemPreview({
+			item,
+			library,
+			onAdd: event => onAdd(event, item),
+			onRemove: event => onRemove(event, item),
+		})
 
 	return brain.setGroup(group, library)
 }
