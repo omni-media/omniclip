@@ -87,14 +87,16 @@ export function createAiSearch(aiSearch: MediaSearch) {
 		`
 	}
 
-	const renderAiSearch = () => {
+	const renderAiSearch = (id: string) => {
 		const enabled = aiSearch.enabled()
 		return html`
-			<button id="media-ai-search" class="ai-search-toggle" title="AI media search"
-				aria-label="AI media search" aria-haspopup="dialog" ?data-active=${enabled}>
-				${sparklesSvg}
-			</button>
-			<wa-popover for="media-ai-search" placement="bottom-start">
+			<sl-tooltip class="media-tooltip" content="AI media search">
+				<button id=${id} class="ai-search-toggle"
+					aria-label="AI media search" aria-haspopup="dialog" ?data-active=${enabled}>
+					${sparklesSvg}
+				</button>
+			</sl-tooltip>
+			<wa-popover for=${id} placement="bottom-start">
 				${renderAiPanel(enabled)}
 			</wa-popover>
 		`
