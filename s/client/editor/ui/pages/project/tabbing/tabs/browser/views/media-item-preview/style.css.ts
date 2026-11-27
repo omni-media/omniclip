@@ -28,6 +28,10 @@ export default css`
 	font-size: 1.4rem;
 }
 
+.preview[data-audio] {
+	background: var(--media-control-background, #202020);
+}
+
 img {
 	display: block;
 	min-width: 0;

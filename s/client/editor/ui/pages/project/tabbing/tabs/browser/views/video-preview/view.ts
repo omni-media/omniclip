@@ -28,6 +28,7 @@ export const VideoPreview = shadow((options: VideoPreviewOptions) => {
 		video.muted = true
 		video.loop = true
 		video.playsInline = true
+		video.draggable = false
 		video.preload = "metadata"
 		video.setAttribute("aria-label", options.label)
 		const detach = dom.events(video, {pointerenter, pointerleave})

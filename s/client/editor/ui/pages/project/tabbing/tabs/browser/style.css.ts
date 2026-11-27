@@ -215,6 +215,7 @@ quay-dropzone {
 	}
 
 	.new-folder:hover { color: var(--quay-text); }
+
 }
 
 quay-browser {
@@ -229,9 +230,6 @@ quay-browser {
 
 	&::part(thumbnail) {
 		border-radius: 6px;
-	}
-
-	&::part(folder-thumbnail) {
 		background: var(--media-control-background);
 	}
 }
