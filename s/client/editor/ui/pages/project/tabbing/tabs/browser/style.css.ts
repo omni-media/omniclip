@@ -223,6 +223,10 @@ quay-browser {
 	border: 0;
 	background: transparent;
 
+	&::part(label) {
+		pointer-events: auto;
+	}
+
 	&::part(thumbnail) {
 		border-radius: 6px;
 	}
