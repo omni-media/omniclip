@@ -4,7 +4,7 @@ import {MediaLibrary} from "@e280/quay"
 import {shadow, useCss, useMount, useSignal} from "@e280/sly"
 
 import styleCss from "./style.css.js"
-import {type MediaDrag} from "../../setup.js"
+import {type MediaDrag} from "../../drag-drop.js"
 import {VideoPreview} from "../video-preview/view.js"
 
 export type MediaItem = Parameters<MediaLibrary["config"]["renderPreview"]>[0]
@@ -24,7 +24,7 @@ export const MediaItemPreview = shadow((options: MediaItemPreviewOptions) => {
 	const progress = useSignal(0)
 	const uploading = () => item.isKind("file") && !item.specimen.hash
 	const addable = item.isKind("file") && !!item.specimen.hash && item.specimen.format !== "other"
-	const dragzone = options.drag.dragzone(() => item)
+	const dragzone = options.drag.source(options.library, item)
 
 	const onDragStart = (event: DragEvent) => {
 		event.stopPropagation()

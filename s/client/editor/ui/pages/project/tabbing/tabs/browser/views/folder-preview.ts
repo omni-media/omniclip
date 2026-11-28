@@ -3,7 +3,7 @@ import {css, html} from "lit"
 import {shadow, useCss} from "@e280/sly"
 import {type MediaLibrary} from "@e280/quay"
 
-import {type MediaDrag} from "../setup.js"
+import {type MediaDrag} from "../drag-drop.js"
 import {type MediaItem} from "./media-item-preview/view.js"
 
 export const FolderPreview = shadow((library: MediaLibrary, item: MediaItem, drag: MediaDrag) => {
@@ -41,17 +41,12 @@ export const FolderPreview = shadow((library: MediaLibrary, item: MediaItem, dra
 		}
 	`)
 
-	const dropzone = drag.dropzone(() => item)
+	const dropzone = drag.target(library, () => item)
 	return html`
-		<div class="folder" ?data-hover=${drag.hovering === item}
-			@dragover=${(event: DragEvent) => {
-				if (drag.dragging)
-					dropzone.dragover(event)
-			}}
+		<div class="folder" ?data-hover=${dropzone.hovering}
+			@dragover=${dropzone.dragover}
 			@dragleave=${dropzone.dragleave}
-			@drop=${(event: DragEvent) => {
-				if (drag.dragging) dropzone.drop(event)
-			}}>
+			@drop=${dropzone.drop}>
 			<span class="count">${item.children.length}</span>
 			${library.config.renderIcon(item, false)}
 		</div>

@@ -151,6 +151,11 @@ export default css`@layer view {
 		padding: 0.5em;
 	}
 
+	&[data-drop-target]::part(details) {
+		outline: 1px solid var(--quay-accent);
+		outline-offset: -1px;
+	}
+
 }
 
 .media-toolbar {

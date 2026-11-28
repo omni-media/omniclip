@@ -6,6 +6,7 @@ import {components as quayComponents, dom, type MediaFormat, type MediaLibrary} 
 
 import styleCss from "./style.css.js"
 import {setupMediaGroup} from "./setup.js"
+import {MediaDrag} from "./drag-drop.js"
 import {MediaSearch} from "./search/controller.js"
 import themeCss from "../../../../../../theme.css.js"
 import aiSearchCss from "./renderers/search/style.css.js"
@@ -24,6 +25,9 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 	useCss(themeCss, aiSearchCss, styleCss)
 
 	const cargo = context.controllers.cargo
+	const mediaDrag = useOnce(() => new MediaDrag(cargo.editorLibrary, cargo.projectLibrary))
+	const projectFolder = () => cargo.projectLibrary.trail.signal().at(-1) ?? cargo.projectLibrary.config.root
+	const projectDrop = mediaDrag.target(cargo.projectLibrary, projectFolder, cargo.editorLibrary)
 	const aiSearch = useOnce(() => new MediaSearch([cargo.projectLibrary, cargo.editorLibrary]))
 	useMount(() => () => aiSearch.dispose())
 
@@ -91,12 +95,14 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 		setupMediaGroup({
 			group: `${MEDIA_GROUP}-project`,
 			library: cargo.projectLibrary,
+			drag: mediaDrag,
 			onAdd: addMedia,
 			onRemove: (event, item) => removeMedia(event, item, cargo.projectLibrary),
 		})
 		setupMediaGroup({
 			group: `${MEDIA_GROUP}-all`,
 			library: cargo.editorLibrary,
+			drag: mediaDrag,
 			onAdd: addMedia,
 			onRemove: (event, item) => removeMedia(event, item, cargo.editorLibrary),
 		})
@@ -176,7 +182,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 		</div>
 	`
 
-	const renderMediaLibrary = (library: MediaLibrary) => html`
+	const renderMediaLibrary = (library: MediaLibrary, drop?: ReturnType<MediaDrag["target"]>) => html`
 		<div class="media-library">
 			<div class="folder-toolbar">
 				<quay-breadcrumb></quay-breadcrumb>
@@ -187,7 +193,11 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 					}}><sl-icon name="folder-plus"></sl-icon></button>
 				</sl-tooltip>
 			</div>
-			<quay-browser tiles-only></quay-browser>
+			<quay-browser tiles-only
+				@dragover=${drop?.dragover}
+				@dragleave=${drop?.dragleave}
+				@drop=${drop?.drop}>
+			</quay-browser>
 		</div>
 	`
 
@@ -196,9 +206,10 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 			<sl-tooltip class="media-tooltip" content="Click to browse files">
 				<quay-dropzone group=${`${MEDIA_GROUP}-project`}></quay-dropzone>
 			</sl-tooltip>
-			<wa-details open summary="Project Bin" icon-placement="start" group=${`${MEDIA_GROUP}-project`}>
+			<wa-details open summary="Project Bin" icon-placement="start" group=${`${MEDIA_GROUP}-project`}
+				?data-drop-target=${projectDrop.hovering}>
 				${renderMediaTools("project", cargo.projectLibrary)}
-				${renderMediaLibrary(cargo.projectLibrary)}
+				${renderMediaLibrary(cargo.projectLibrary, projectDrop)}
 			</wa-details>
 			<wa-details summary="All Media" icon-placement="start" group=${`${MEDIA_GROUP}-all`}>
 				${renderMediaTools("all", cargo.editorLibrary)}
@@ -297,7 +308,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 				</nav>
 			</div>
 
-			<div class="browser-body">
+			<div class="browser-body" @dragover=${mediaDrag.autoScroll}>
 				${renderBody()}
 			</div>
 		</div>
