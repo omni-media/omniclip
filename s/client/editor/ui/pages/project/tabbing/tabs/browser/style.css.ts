@@ -206,7 +206,7 @@ quay-dropzone {
 	gap: 0.5em;
 	padding: 0.5em;
 
-	quay-breadcrumb { min-width: 0; }
+	> :first-child { min-width: 0; }
 
 	.new-folder {
 		display: grid;

@@ -7,6 +7,7 @@ import {components as quayComponents, dom, type MediaFormat, type MediaLibrary} 
 import styleCss from "./style.css.js"
 import {setupMediaGroup} from "./setup.js"
 import {MediaDrag} from "./drag-drop.js"
+import {Breadcrumb} from "./views/breadcrumb.js"
 import {MediaSearch} from "./search/controller.js"
 import themeCss from "../../../../../../theme.css.js"
 import aiSearchCss from "./renderers/search/style.css.js"
@@ -185,7 +186,7 @@ export const BrowserTabPanel = shadow((context: EditorContext) => {
 	const renderMediaLibrary = (library: MediaLibrary, drop?: ReturnType<MediaDrag["target"]>) => html`
 		<div class="media-library">
 			<div class="folder-toolbar">
-				<quay-breadcrumb></quay-breadcrumb>
+				${Breadcrumb(library, mediaDrag)}
 				<sl-tooltip class="media-tooltip" content="New folder">
 					<button class="new-folder" type="button" aria-label="New folder" @click=${() => {
 						const folder = library.trail.signal().at(-1) ?? library.config.root
