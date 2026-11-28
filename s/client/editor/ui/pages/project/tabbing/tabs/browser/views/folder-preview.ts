@@ -47,7 +47,7 @@ export const FolderPreview = shadow((library: MediaLibrary, item: MediaItem, dra
 			@dragover=${dropzone.dragover}
 			@dragleave=${dropzone.dragleave}
 			@drop=${dropzone.drop}>
-			<span class="count">${item.children.length}</span>
+			<span class="count">${[...item.crawl()].filter(([child]) => child.isKind("file")).length}</span>
 			${library.config.renderIcon(item, false)}
 		</div>
 	`
